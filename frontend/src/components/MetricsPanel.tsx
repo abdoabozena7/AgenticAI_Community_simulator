@@ -112,7 +112,7 @@ export function MetricsPanel({
   const categories = Object.entries(perCategoryAccepted || {});
 
   return (
-    <div className="glass-panel h-full flex flex-col">
+    <div className="glass-panel h-full min-h-0 flex flex-col">
       <div className="p-4 border-b border-border/50">
         <div className="flex items-center gap-2">
           <Activity className="w-5 h-5 text-primary" />
@@ -125,7 +125,7 @@ export function MetricsPanel({
         </p>
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-4">
+      <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin p-4 space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <MetricCard
             icon={<Users className="w-5 h-5" />}

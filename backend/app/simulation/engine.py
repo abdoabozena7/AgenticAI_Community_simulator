@@ -957,6 +957,12 @@ class SimulationEngine:
         if not idea_label_for_llm:
             idea_label_for_llm = _idea_label_localized() if language == "ar" else _idea_label()
 
+        def _clip_text(value: str, limit: int) -> str:
+            value = re.sub(r"\s+", " ", (value or "").strip())
+            if len(value) <= limit:
+                return value
+            return value[: max(0, limit - 3)].rstrip() + "..."
+
         def _research_insight() -> str:
             if not research_summary:
                 return ""
@@ -1140,6 +1146,17 @@ class SimulationEngine:
         except ValueError:
             reasoning_min_relevance = 0.14
         reasoning_min_relevance = max(0.02, min(0.9, reasoning_min_relevance))
+        autorepair_enabled = str(os.getenv("REASONING_AUTOREPAIR_ENABLED", "1")).strip().lower() in {"1", "true", "yes", "on"}
+        try:
+            autorepair_max_passes = int(os.getenv("REASONING_AUTOREPAIR_MAX_PASSES", "1") or 1)
+        except ValueError:
+            autorepair_max_passes = 1
+        autorepair_max_passes = max(0, min(3, autorepair_max_passes))
+        try:
+            fallback_stall_ratio = float(os.getenv("REASONING_FALLBACK_STALL_RATIO", "0.65") or 0.65)
+        except ValueError:
+            fallback_stall_ratio = 0.65
+        fallback_stall_ratio = max(0.20, min(0.95, fallback_stall_ratio))
         try:
             fallback_alert_threshold = float(os.getenv("REASONING_FALLBACK_ALERT_THRESHOLD", "0.10") or 0.10)
         except ValueError:
@@ -1167,6 +1184,8 @@ class SimulationEngine:
             "fallback_steps": 0,
             "classified_steps": 0,
             "regeneration_attempts": 0,
+            "autorepair_attempts": 0,
+            "autorepair_success": 0,
             "rejections": {},
         }
 
@@ -1780,6 +1799,7 @@ class SimulationEngine:
             ]
             unresolved_fallback_hits = [reason for reason in fallback_reasons if reason in unresolved_fallback_reasons]
             fallback_issue_ratio = len(unresolved_fallback_hits) / total
+            fallback_reason_variety = len(set(unresolved_fallback_hits))
             fallback_counter = Counter(unresolved_fallback_hits)
             dominant_fallback_reason = ""
             dominant_fallback_ratio = 0.0
@@ -1799,7 +1819,8 @@ class SimulationEngine:
             )
             fallback_quality_stall = (
                 neutral_ratio >= 0.35
-                and fallback_issue_ratio >= 0.45
+                and fallback_issue_ratio >= fallback_stall_ratio
+                and fallback_reason_variety >= 2
                 and (top_reason_ratio >= 0.35 or dominant_fallback_ratio >= 0.45)
             )
             if not (
@@ -1871,6 +1892,7 @@ class SimulationEngine:
                 "top_reason_ratio": top_reason_ratio,
                 "focus_ratio": focus_ratio,
                 "fallback_issue_ratio": fallback_issue_ratio,
+                "fallback_reason_variety": fallback_reason_variety,
                 "dominant_fallback_reason": dominant_fallback_reason or None,
                 "dominant_fallback_ratio": dominant_fallback_ratio,
             }
@@ -2340,6 +2362,7 @@ class SimulationEngine:
         def _build_role_evidence(cards: List[str]) -> Dict[str, List[str]]:
             evidence_by_role = {k: [] for k in role_guidance_map.keys()}
             general: List[str] = []
+            idea_tokens = set(_extract_words(f"{idea_label_for_llm} {idea_text}"))
             for card in cards:
                 low = card.lower()
                 matched = False
@@ -2359,9 +2382,27 @@ class SimulationEngine:
                         out.append(item)
                 return out
 
+            def _score_card(card: str) -> Tuple[int, int]:
+                tokens = set(_extract_words(str(card or "")))
+                overlap = len(tokens & idea_tokens)
+                return overlap, len(tokens)
+
             for role in evidence_by_role:
-                combined = evidence_by_role[role] + general
-                evidence_by_role[role] = _dedupe(combined)[:6]
+                combined = _dedupe(evidence_by_role[role] + general)
+                ranked = sorted(combined, key=_score_card, reverse=True)
+                selected = [card for card in ranked if _score_card(card)[0] > 0][:6]
+                if len(selected) < 2:
+                    contextual_card = (
+                        f"ملخص الفكرة: {_clip_text(idea_text, 140)}. نلتزم فقط بالمؤشرات المتاحة ونتجنب أي ادعاء غير مدعوم."
+                        if language == "ar"
+                        else f"Idea summary: {_clip_text(idea_text, 140)}. Stay within available signals and avoid unsupported claims."
+                    )
+                    if contextual_card not in selected:
+                        selected.insert(0, contextual_card)
+                    for card in ranked:
+                        if card not in selected and len(selected) < 6:
+                            selected.append(card)
+                evidence_by_role[role] = selected[:6]
             return evidence_by_role
 
         evidence_by_role = _build_role_evidence(evidence_cards)
@@ -2463,12 +2504,6 @@ class SimulationEngine:
                 "iteration": iteration_value,
                 "total_iterations": effective_total_iterations,
             }
-
-        def _clip_text(value: str, limit: int) -> str:
-            value = re.sub(r"\s+", " ", (value or "").strip())
-            if len(value) <= limit:
-                return value
-            return value[: max(0, limit - 3)].rstrip() + "..."
 
         def _compact_traits(traits: Dict[str, float]) -> str:
             optimism = float(traits.get("optimism", 0.5))
@@ -2649,7 +2684,9 @@ class SimulationEngine:
                 f"Reasoning length mode: {task.get('length_mode')}",
                 "Write 2-4 concise, natural sentences.",
                 "No templates, no bullet lists, no boilerplate.",
+                "The first sentence must explicitly reference the IDEA.",
                 "Ground the reasoning in concrete details from context/evidence.",
+                "Include at least one concrete evidence/signal mention from research or provided hints.",
                 "Never invent precise numbers, addresses, standards, or partner claims unless explicitly present in evidence/context.",
                 "If data is missing, say it is missing and ask for clarification instead of guessing.",
             ]
@@ -2768,6 +2805,300 @@ class SimulationEngine:
                 return False, "low_relevance", relevance_score
             return True, "ok", relevance_score
 
+        repairable_generation_reasons = {
+            "idea_anchor_missing",
+            "safety_anchor_missing",
+            "unsupported_specific_claim",
+            "unsupported_numeric_claim",
+            "unsupported_address_claim",
+            "low_relevance",
+        }
+
+        def _strip_unverified_specifics(text: str) -> str:
+            cleaned = str(text or "")
+            cleaned = re.sub(r"\b\d+(?:[.,]\d+)?%?\b", "", cleaned)
+            cleaned = re.sub(
+                r"(?:\b\d{1,4}\s*/\s*\d{1,4}\b|شارع|st\.?\b|street\b|avenue\b|building\b)",
+                "",
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+            cleaned = re.sub(
+                r"\b(?:tls 1\.3|oauth2|oauth 2\.0|jwt|aes-256|gdpr|eeoc|latency|traceroute|ping|api gateway|kubernetes)\b",
+                "",
+                cleaned,
+                flags=re.IGNORECASE,
+            )
+            cleaned = re.sub(r"\s{2,}", " ", cleaned).strip(" ,.;:،")
+            return cleaned
+
+        def _auto_repair_generated_reasoning(text: str, task: Dict[str, Any], reason: str) -> str:
+            candidate = _clip_text(str(text or "").strip(), full_limit)
+            if not candidate:
+                return ""
+
+            if reason in {"unsupported_specific_claim", "unsupported_numeric_claim", "unsupported_address_claim"}:
+                sanitized = _strip_unverified_specifics(candidate)
+                if sanitized:
+                    candidate = sanitized
+
+            normalized_candidate = _normalized(candidate)
+            idea_anchor = _clip_text(str(idea_label_for_llm or "").strip(), 170)
+            if reason in {"idea_anchor_missing", "low_relevance"} and idea_anchor and _normalized(idea_anchor) not in normalized_candidate:
+                anchor_prefix = (
+                    f'بالنسبة للفكرة "{idea_anchor}"'
+                    if language == "ar"
+                    else f'For the idea "{idea_anchor}"'
+                )
+                candidate = f"{anchor_prefix}, {candidate}".strip()
+                normalized_candidate = _normalized(candidate)
+
+            if hard_unsafe_triggered and reason == "safety_anchor_missing":
+                safety_line = (
+                    "وأولوية التنفيذ هنا هي حماية الخصوصية، الامتثال القانوني، وتقليل أي تمييز."
+                    if language == "ar"
+                    else "Priority here is privacy protection, legal compliance, and reducing discrimination risk."
+                )
+                safety_tokens = {"privacy", "legal", "compliance", "discrimination", "خصوصية", "قانون", "امتثال", "تمييز"}
+                message_tokens = set(_extract_words(candidate))
+                if not (message_tokens & safety_tokens):
+                    candidate = f"{candidate} {safety_line}".strip()
+                    normalized_candidate = _normalized(candidate)
+
+            evidence_hint = _collect_signal_snippet(task)
+            if (
+                evidence_hint
+                and reason in {"low_relevance", "idea_anchor_missing"}
+                and _normalized(evidence_hint[:28]) not in normalized_candidate
+            ):
+                evidence_line = (
+                    f"وبناءً على الإشارة المتاحة: {evidence_hint}."
+                    if language == "ar"
+                    else f"Based on available signal: {evidence_hint}."
+                )
+                candidate = f"{candidate} {evidence_line}".strip()
+
+            return _clip_text(re.sub(r"\s{2,}", " ", candidate).strip(), full_limit)
+
+        def _collect_signal_snippet(task: Dict[str, Any]) -> str:
+            candidates = [
+                str(task.get("evidence_hint") or "").strip(),
+                " ".join(str(item).strip() for item in (task.get("evidence_hints") or []) if str(item).strip()),
+                str(research_summary or "").strip(),
+                str(research_signals or "").strip(),
+                str(task.get("reply_to_message") or "").strip(),
+            ]
+            idea_tokens = set(_extract_words(f"{idea_label_for_llm} {idea_text}"))
+            safety_tokens = {
+                "privacy", "legal", "compliance", "discrimination", "bias", "consent",
+                "خصوصية", "قانون", "امتثال", "تمييز", "تحيز", "موافقة", "مراقبة",
+            }
+            noisy_markers = {
+                "best", "top", "list", "review", "rank", "ranking", "software", "tools", "guide",
+                "الأفضل", "افضل", "قائمة", "دليل", "مراجعة",
+            }
+
+            def _score(item: str) -> float:
+                if not item:
+                    return -1.0
+                tokens = set(_extract_words(item))
+                if not tokens:
+                    return -1.0
+                overlap = len(tokens & idea_tokens)
+                safety_overlap = len(tokens & safety_tokens)
+                normalized_item = _normalized(item)
+                noise_penalty = 0.0
+                if "|" in item:
+                    noise_penalty += 0.35
+                if "..." in item:
+                    noise_penalty += 0.25
+                if any(marker in normalized_item for marker in noisy_markers):
+                    noise_penalty += 0.2
+                if len(item) < 24:
+                    noise_penalty += 0.15
+                return (overlap * 1.0) + (safety_overlap * 0.7) - noise_penalty
+
+            scored = sorted(
+                ((item, _score(item)) for item in candidates if item),
+                key=lambda pair: pair[1],
+                reverse=True,
+            )
+            if not scored:
+                return ""
+            best_item, best_score = scored[0]
+            if best_score <= 0:
+                return ""
+            cleaned = re.sub(r"^\s*\|\s*", "", best_item).strip()
+            cleaned = re.sub(r"\s{2,}", " ", cleaned)
+            return _clip_text(cleaned, 150)
+            return ""
+
+        def _idea_risk_facets() -> List[str]:
+            normalized = str(idea_text or "").lower()
+            if language == "ar":
+                facets: List[str] = []
+                if any(token in normalized for token in ["رسائل خاصة", "مشتريات", "gps", "سياسية", "دينية", "مراقبة", "تتبع"]):
+                    facets.append("جمع بيانات شخصية شديدة الحساسية")
+                if any(token in normalized for token in ["trust score", "درجة ثقة", "نظام نقاط", "تصنيف"]):
+                    facets.append("تحويل التقييم لدرجة ثقة قد تخلق تحيزًا")
+                if any(token in normalized for token in ["حظر", "منع", "خمس سنوات", "5 سنوات", "قائمة سوداء"]):
+                    facets.append("قرارات عقابية واسعة على المتقدمين")
+                return facets or ["غياب حدود تشغيلية واضحة قبل التوسع"]
+            facets_en: List[str] = []
+            if any(token in normalized for token in ["private message", "bank", "gps", "political", "religious", "surveillance", "tracking"]):
+                facets_en.append("intrusive personal data collection")
+            if any(token in normalized for token in ["trust score", "social score", "risk score", "scoring"]):
+                facets_en.append("opaque trust-scoring that can amplify bias")
+            if any(token in normalized for token in ["ban", "blacklist", "five years", "5 years", "block from applying"]):
+                facets_en.append("disproportionate punitive outcomes for applicants")
+            return facets_en or ["unclear operational boundaries before scaling"]
+
+        def _role_followup_need(role_label: str) -> str:
+            role = str(role_label or "").lower()
+            if language == "ar":
+                if any(token in role for token in ["ethic", "policy", "compliance", "guardian", "regulated"]):
+                    return "ما سياسة الامتثال، الشفافية، وحق الاعتراض البشري على القرار؟"
+                if any(token in role for token in ["cost", "finance", "controller"]):
+                    return "ما تكلفة الضوابط القانونية والمراجعة البشرية مقارنة بالعائد؟"
+                if any(token in role for token in ["reliability", "engineer", "developer", "architect"]):
+                    return "ما آلية التدقيق، تتبع القرارات، وخطة التعامل مع الأخطاء؟"
+                return "ما الحدود التشغيلية والضوابط التي تمنع إساءة الاستخدام؟"
+            if any(token in role for token in ["ethic", "policy", "compliance", "guardian", "regulated"]):
+                return "What are the compliance controls, transparency policy, and human appeal path?"
+            if any(token in role for token in ["cost", "finance", "controller"]):
+                return "What is the cost of legal controls and human review versus expected ROI?"
+            if any(token in role for token in ["reliability", "engineer", "developer", "architect"]):
+                return "What are the audit, traceability, and failure-handling mechanisms?"
+            return "What operating boundaries prevent misuse at scale?"
+
+        def _role_action_guardrail(role_label: str) -> str:
+            role = str(role_label or "").lower()
+            if language == "ar":
+                if any(token in role for token in ["ethic", "policy", "compliance", "guardian", "regulated"]):
+                    return "إلزام مراجعة بشرية مع حق استئناف وتوثيق سبب كل قرار."
+                if any(token in role for token in ["cost", "finance", "controller"]):
+                    return "تنفيذ Pilot محدود مع سقف تكلفة واضح قبل أي تعميم."
+                if any(token in role for token in ["reliability", "engineer", "developer", "architect"]):
+                    return "تفعيل سجل تدقيق قابل للمراجعة واختبارات انحياز قبل الإطلاق."
+                return "حصر البيانات المسموح بها ومنع أي استخدام لعقوبات تلقائية واسعة."
+            if any(token in role for token in ["ethic", "policy", "compliance", "guardian", "regulated"]):
+                return "Mandate human review, appeal rights, and auditable decision traces."
+            if any(token in role for token in ["cost", "finance", "controller"]):
+                return "Run a capped pilot with clear cost guardrails before scale."
+            if any(token in role for token in ["reliability", "engineer", "developer", "architect"]):
+                return "Enable auditable logs and bias testing before rollout."
+            return "Limit data scope and block automatic punitive enforcement."
+
+        def _build_recovery_reasoning(task: Dict[str, Any], reason: str) -> str:
+            role_label = str(task.get("role_label") or "Participant")
+            stance_hint = _normalize_stance(task.get("math_opinion")) or "neutral"
+            if hard_unsafe_triggered and stance_hint == "accept":
+                stance_hint = "neutral"
+            agent_token = str(
+                task.get("agent_id")
+                or getattr(task.get("agent"), "agent_id", "")
+                or task.get("reply_to_short")
+                or role_label
+            )
+            variant = int(hashlib.sha256(f"{agent_token}:{role_label}:{reason}".encode("utf-8")).hexdigest()[:8], 16) % 4
+            idea_anchor = _clip_text(str(idea_label_for_llm or idea_text or "").strip(), 170)
+            if not idea_anchor:
+                return ""
+            signal = _collect_signal_snippet(task)
+            facets = _idea_risk_facets()
+            top_facet = facets[0]
+            followup_need = _role_followup_need(role_label)
+            action_guardrail = _role_action_guardrail(role_label)
+
+            if language == "ar":
+                stance_line_map = {
+                    "reject": [
+                        f"من زاوية {role_label} أنا ميال للرفض لأن {top_facet}.",
+                        f"كمسؤول بدور {role_label} صعب أقبل التنفيذ قبل معالجة {top_facet}.",
+                        f"بصفتي {role_label}، المخاطر الحالية في {top_facet} تمنع الموافقة.",
+                        f"كـ {role_label} أرى أن {top_facet} يجعل الإطلاق المباشر مخاطرة عالية.",
+                    ],
+                    "accept": [
+                        f"من زاوية {role_label} ممكن الفكرة تنجح لكن فقط إذا اتعالجت نقطة {top_facet}.",
+                        f"من منظور {role_label} التنفيذ ممكن، بشرط ضوابط صارمة حول {top_facet}.",
+                        f"كـ {role_label} أميل لتجربة محدودة بشرط ضبط {top_facet} أولًا.",
+                        f"من منظور {role_label} القبول ممكن تدريجيًا إذا تمت معالجة {top_facet}.",
+                    ],
+                    "neutral": [
+                        f"من زاوية {role_label} موقفي محايد لأن نقطة {top_facet} لسه غير محسومة.",
+                        f"كـ {role_label} محتاج وضوح أكثر بخصوص {top_facet} قبل الحسم.",
+                        f"من منظور {role_label} لا أقدر أحسم القرار لأن {top_facet} ما زالت ضبابية.",
+                        f"كـ {role_label} التقييم الحالي يظل محايدًا لحين ضبط {top_facet}.",
+                    ],
+                }
+                safety_line = (
+                    "لازم يكون فيه حماية خصوصية واضحة، امتثال قانوني صارم، وضمان عدم التمييز."
+                    if hard_unsafe_triggered
+                    else "لازم الحدود التشغيلية تكون واضحة قبل أي تعميم."
+                )
+                stance_lines = stance_line_map.get(stance_hint, stance_line_map["neutral"])
+                signal_line = f"المؤشر الأقرب من البحث: {signal}." if signal and variant in {0, 2} else ""
+                closing_variants = [
+                    f"شرط الاستمرار الآن: {action_guardrail}",
+                    f"قبل القرار النهائي محتاجين إجابة مباشرة: {followup_need}",
+                    f"الخطوة العملية المقترحة: {action_guardrail}",
+                    f"السؤال الحاسم قبل الإطلاق: {followup_need}",
+                ]
+                message = " ".join(
+                    part for part in [
+                        f'بالنسبة لفكرة "{idea_anchor}"،',
+                        stance_lines[variant % len(stance_lines)],
+                        safety_line,
+                        signal_line,
+                        closing_variants[variant % len(closing_variants)],
+                    ] if part
+                )
+                return _clip_text(message, full_limit)
+
+            stance_line_map_en = {
+                "reject": [
+                    f"From the {role_label} perspective, I lean reject because of {top_facet}.",
+                    f"As {role_label}, I cannot support rollout before resolving {top_facet}.",
+                    f"As {role_label}, the unresolved {top_facet} risk blocks approval.",
+                    f"From the {role_label} lens, {top_facet} makes immediate launch too risky.",
+                ],
+                "accept": [
+                    f"From the {role_label} perspective, this may work only if {top_facet} is addressed first.",
+                    f"As {role_label}, I can support a guarded pilot if {top_facet} is controlled.",
+                    f"As {role_label}, I support only a staged pilot after fixing {top_facet}.",
+                    f"From the {role_label} perspective, acceptance is conditional on controlling {top_facet}.",
+                ],
+                "neutral": [
+                    f"From the {role_label} perspective, I remain neutral because {top_facet} is unresolved.",
+                    f"As {role_label}, I still need clarity around {top_facet} before deciding.",
+                    f"As {role_label}, decision remains neutral until {top_facet} is clarified.",
+                    f"From the {role_label} lens, uncertainty around {top_facet} keeps me neutral.",
+                ],
+            }
+            safety_line_en = (
+                "It needs explicit privacy protection, legal compliance, and anti-discrimination safeguards."
+                if hard_unsafe_triggered
+                else "It needs clear operating boundaries before scaling."
+            )
+            stance_lines_en = stance_line_map_en.get(stance_hint, stance_line_map_en["neutral"])
+            signal_line_en = f"Closest supporting signal: {signal}." if signal and variant in {0, 2} else ""
+            closing_variants_en = [
+                f"Immediate gate before proceeding: {action_guardrail}",
+                f"Before final judgment, answer this directly: {followup_need}",
+                f"Practical next step: {action_guardrail}",
+                f"Critical pre-launch question: {followup_need}",
+            ]
+            message_en = " ".join(
+                part for part in [
+                    f'For the idea "{idea_anchor}",',
+                    stance_lines_en[variant % len(stance_lines_en)],
+                    safety_line_en,
+                    signal_line_en,
+                    closing_variants_en[variant % len(closing_variants_en)],
+                ] if part
+            )
+            return _clip_text(message_en, full_limit)
+
         async def _generate_reasoning_text(task: Dict[str, Any]) -> Tuple[str, int, str, float]:
             try:
                 prompt = _build_reasoning_prompt(task)
@@ -2817,8 +3148,33 @@ class SimulationEngine:
                     if opener:
                         used_openers.add(opener)
                     return text, attempt, "ok", relevance_score
+                if autorepair_enabled and autorepair_max_passes > 0 and reason in repairable_generation_reasons:
+                    repaired_text = text
+                    repaired_reason = reason
+                    repaired_relevance = relevance_score
+                    for _ in range(autorepair_max_passes):
+                        reasoning_stats["autorepair_attempts"] = int(reasoning_stats.get("autorepair_attempts", 0)) + 1
+                        repaired_text = _auto_repair_generated_reasoning(repaired_text, task, repaired_reason)
+                        if not repaired_text:
+                            break
+                        repaired_ok, repaired_reason, repaired_relevance = _validate_generated_reasoning(repaired_text, task)
+                        if repaired_ok:
+                            opener = " ".join(_normalized(repaired_text).split()[:4]).strip()
+                            if opener:
+                                used_openers.add(opener)
+                            reasoning_stats["autorepair_success"] = int(reasoning_stats.get("autorepair_success", 0)) + 1
+                            return repaired_text, attempt, "auto_repair", repaired_relevance
+                    last_relevance = repaired_relevance
+                    reason = repaired_reason
                 last_reason = reason
                 reasoning_stats["rejections"][reason] = int(reasoning_stats["rejections"].get(reason, 0)) + 1
+            recovered_text = _build_recovery_reasoning(task, last_reason)
+            if recovered_text:
+                recovered_ok, recovered_reason, recovered_relevance = _validate_generated_reasoning(recovered_text, task)
+                if recovered_ok:
+                    return recovered_text, reasoning_max_retries, "rule_based_recovery", recovered_relevance
+                last_reason = recovered_reason
+                last_relevance = recovered_relevance
             return "", reasoning_max_retries, last_reason, last_relevance
 
         def _build_single_prompt(task: Dict[str, Any]) -> str:
@@ -2929,69 +3285,42 @@ class SimulationEngine:
                 "source": "llm",
             }
 
-        def _fallback_message(role_label: str, stance: str, evidence_hint: str) -> str:
-            evidence = _clip_text(str(evidence_hint or "").strip(), 180)
+        def _fallback_message(
+            role_label: str,
+            stance: str,
+            evidence_hint: str,
+            task: Optional[Dict[str, Any]] = None,
+        ) -> str:
+            task_payload = dict(task or {})
+            task_payload.setdefault("role_label", role_label)
+            task_payload.setdefault("math_opinion", stance)
+            task_payload.setdefault("evidence_hint", evidence_hint)
+            if evidence_hint and not task_payload.get("evidence_hints"):
+                task_payload["evidence_hints"] = [evidence_hint]
+            recovered = _build_recovery_reasoning(
+                task_payload,
+                "fallback",
+            )
+            if recovered:
+                return recovered
             if language == "ar":
-                openers = {
-                    "reject": [
-                        f"بصراحة من زاوية {role_label}، المخاطر أعلى من الفائدة حالياً.",
-                        f"أنا ميّال للرفض هنا؛ كـ {role_label} شايف فجوات كبيرة في التنفيذ.",
-                    ],
-                    "accept": [
-                        f"أنا مبدئياً موافق كـ {role_label}، لكن التنفيذ لازم يكون محسوب.",
-                        f"من منظور {role_label} الفكرة قابلة للتنفيذ بشرط ضوابط واضحة.",
-                    ],
-                    "neutral": [
-                        f"لسه محتاج نقطة حاسمة قبل القرار كـ {role_label}.",
-                        f"موقفي محايد حالياً؛ في تفاصيل ناقصة بالنسبة لدور {role_label}.",
-                    ],
-                }
-                followups = {
-                    "reject": "الأفضل نوقف ونعالج المخاطر أولاً.",
-                    "accept": "لو اتضبطت المخاطر، ممكن نمشي بخطوة تجريبية.",
-                    "neutral": "وضّح الافتراضات الأساسية والحدود التشغيلية عشان نكمل.",
-                }
-                idx_seed = abs(hash(f"{role_label}:{stance}:{evidence}")) % len(openers.get(stance, openers["neutral"]))
-                base = openers.get(stance, openers["neutral"])[idx_seed]
-                if hard_unsafe_triggered:
-                    base += " عندي قلق واضح بخصوص الخصوصية والامتثال والتمييز."
-                if evidence:
-                    base += f" المعلومة الأقرب المتاحة: {evidence}."
-                base += f" {followups.get(stance, followups['neutral'])}"
-                return _clip_text(base, full_limit)
-            openers_en = {
-                "reject": [
-                    f"From a {role_label} angle, the risk outweighs the upside right now.",
-                    f"I lean reject here; key execution gaps are still unresolved for {role_label}.",
-                ],
-                "accept": [
-                    f"I lean accept as {role_label}, with strict execution controls.",
-                    f"From the {role_label} perspective, this can work if guardrails are explicit.",
-                ],
-                "neutral": [
-                    f"I'm still neutral as {role_label}; one key detail is missing.",
-                    f"I need one concrete clarification before deciding as {role_label}.",
-                ],
-            }
-            followups_en = {
-                "reject": "We should close the risk gaps first.",
-                "accept": "If risks are controlled, a pilot is reasonable.",
-                "neutral": "Clarify assumptions and operating limits so we can proceed.",
-            }
-            idx_seed = abs(hash(f"{role_label}:{stance}:{evidence}")) % len(openers_en.get(stance, openers_en["neutral"]))
-            base = openers_en.get(stance, openers_en["neutral"])[idx_seed]
-            if hard_unsafe_triggered:
-                base += " Main concern: privacy, legal compliance, and discrimination risk."
-            if evidence:
-                base += f" Closest available signal: {evidence}."
-            base += f" {followups_en.get(stance, followups_en['neutral'])}"
-            return _clip_text(base, full_limit)
+                return _clip_text(
+                    f'بالنسبة لفكرة "{_clip_text(str(idea_label_for_llm or idea_text), 140)}"، '
+                    f'من زاوية {role_label} يلزم توضيح حدود الخصوصية والامتثال قبل القرار النهائي.',
+                    full_limit,
+                )
+            return _clip_text(
+                f'For the idea "{_clip_text(str(idea_label_for_llm or idea_text), 140)}", '
+                f"the {role_label} perspective still needs explicit privacy and compliance boundaries before final judgment.",
+                full_limit,
+            )
 
         def _sanitize_reasoning_text(
             raw_text: str,
             role_label: str,
             stance: str,
             evidence_hint: str,
+            task: Optional[Dict[str, Any]] = None,
         ) -> Tuple[str, Optional[str]]:
             text = str(raw_text or "").strip()
             if not text:
@@ -3004,7 +3333,7 @@ class SimulationEngine:
             repaired_guard = detect_mojibake(repaired) if repaired else {"flag": True}
             if repaired and not bool(repaired_guard.get("flag")):
                 return repaired, "repaired"
-            return _fallback_message(role_label, stance, evidence_hint), "fallback"
+            return _fallback_message(role_label, stance, evidence_hint, task=task), "fallback"
 
         async def _infer_stance_from_llm(text: str) -> str | None:
             if stance_classifier is None:
@@ -3528,7 +3857,7 @@ class SimulationEngine:
                                 preferred_value=task["math_opinion"],
                                 previous_value=prev_opinion,
                             )
-                            message = _fallback_message(role_label, stance, task.get("evidence_hint") or "")
+                            message = _fallback_message(role_label, stance, task.get("evidence_hint") or "", task=task)
                             opinion_source = "fallback"
                             confidence = 0.32
                             reasoning_stats["fallback_steps"] = int(reasoning_stats.get("fallback_steps", 0)) + 1
@@ -3563,7 +3892,7 @@ class SimulationEngine:
                             previous_value=prev_opinion,
                         )
                         if not message:
-                            message = _fallback_message(role_label, stance, task.get("evidence_hint") or "")
+                            message = _fallback_message(role_label, stance, task.get("evidence_hint") or "", task=task)
                             opinion_source = "fallback"
                             fallback_reason = "empty_or_invalid_output"
                             reasoning_stats["fallback_steps"] = int(reasoning_stats.get("fallback_steps", 0)) + 1
@@ -3588,6 +3917,7 @@ class SimulationEngine:
                         role_label=role_label,
                         stance=stance,
                         evidence_hint=task.get("evidence_hint") or "",
+                        task=task,
                     )
                     if sanitized_state == "fallback":
                         if opinion_source != "fallback":
@@ -3607,7 +3937,7 @@ class SimulationEngine:
                             res = await stance_classifier.validate(message, role_label, list(recent_messages))
                             if not res.ok:
                                 opinion_source = "fallback"
-                                message = _fallback_message(role_label, stance, task.get("evidence_hint") or "")
+                                message = _fallback_message(role_label, stance, task.get("evidence_hint") or "", task=task)
                                 fallback_reason = "validator_fail"
                                 reasoning_stats["fallback_steps"] = int(reasoning_stats.get("fallback_steps", 0)) + 1
                         except Exception:
@@ -3858,5 +4188,3 @@ class SimulationEngine:
             },
         )
         return final_metrics
-
-

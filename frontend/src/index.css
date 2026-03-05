@@ -295,11 +295,14 @@
 @layer components {
   .messages-container {
     @apply flex-1 overflow-y-auto px-4 py-5 flex flex-col gap-4;
+    min-height: 0;
     --chat-composer-reserve: 6.75rem;
     padding-bottom: calc(var(--chat-composer-reserve) + env(safe-area-inset-bottom, 0px));
     scroll-padding-bottom: calc(var(--chat-composer-reserve) + 1rem + env(safe-area-inset-bottom, 0px));
     overscroll-behavior-y: auto;
     overscroll-behavior-x: none;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
   }
 
   .message {

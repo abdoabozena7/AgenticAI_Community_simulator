@@ -23,6 +23,8 @@ interface ConfigPanelProps {
   missingFields: string[];
   language: 'ar' | 'en';
   isSearching: boolean;
+  isLocked: boolean;
+  lockReason?: string;
   showSocietyBuilder?: boolean;
   onToggleSocietyBuilder?: (open: boolean) => void;
   societyControls?: SocietyControls;
@@ -75,6 +77,8 @@ export function ConfigPanel({
   missingFields,
   language,
   isSearching,
+  isLocked,
+  lockReason,
   showSocietyBuilder = false,
   onToggleSocietyBuilder,
   societyControls,
@@ -90,15 +94,23 @@ export function ConfigPanel({
 
   const missingSet = useMemo(() => new Set(missingFields), [missingFields]);
   const canConfirm = missingFields.length === 0 && value.idea.trim().length > 0;
+  const controlsLocked = isLocked || isSearching;
+  const resolvedLockReason = lockReason || (
+    language === 'ar'
+      ? 'أوقف المحاكاة أو انتظر الإيقاف المؤقت لتعديل الإعدادات.'
+      : 'Pause or stop the simulation to edit settings.'
+  );
 
   useEffect(() => {
+    if (controlsLocked) return;
     if (missingFields.length === 0) return;
     const field = missingFields[0];
     if (field === 'country') countryRef.current?.focus();
     if (field === 'city') cityRef.current?.focus();
-  }, [missingFields]);
+  }, [controlsLocked, missingFields]);
 
   const toggleAudience = (aud: string) => {
+    if (controlsLocked) return;
     const updated = value.targetAudience.includes(aud)
       ? value.targetAudience.filter((item) => item !== aud)
       : [...value.targetAudience, aud];
@@ -106,6 +118,7 @@ export function ConfigPanel({
   };
 
   const toggleGoal = (goal: string) => {
+    if (controlsLocked) return;
     const updated = value.goals.includes(goal)
       ? value.goals.filter((item) => item !== goal)
       : [...value.goals, goal];
@@ -124,9 +137,11 @@ export function ConfigPanel({
             : 'Review the inferred data. You can adjust any field.'}
         </p>
       </div>
-      <div className="space-y-2">
-      
-      </div>
+      {isLocked && (
+        <div className="rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+          {resolvedLockReason}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
@@ -143,6 +158,7 @@ export function ConfigPanel({
               missingSet.has('country') && 'border-destructive/60 focus-visible:ring-destructive/50'
             )}
             dir={language === 'ar' ? 'rtl' : 'ltr'}
+            disabled={controlsLocked}
           />
         </div>
         <div className="space-y-2">
@@ -159,6 +175,7 @@ export function ConfigPanel({
               missingSet.has('city') && 'border-destructive/60 focus-visible:ring-destructive/50'
             )}
             dir={language === 'ar' ? 'rtl' : 'ltr'}
+            disabled={controlsLocked}
           />
         </div>
       </div>
@@ -182,8 +199,9 @@ export function ConfigPanel({
                 key={cat}
                 type="button"
                 onClick={() => onChange({ category: cat.toLowerCase() })}
+                disabled={controlsLocked}
                 className={cn(
-                  'px-3 py-1.5 rounded-full text-xs font-medium border',
+                  'px-3 py-1.5 rounded-full text-xs font-medium border disabled:opacity-50 disabled:cursor-not-allowed',
                   selected
                     ? 'bg-primary text-primary-foreground border-primary'
                     : 'bg-secondary/60 text-muted-foreground border-border/40 hover:bg-secondary'
@@ -215,8 +233,9 @@ export function ConfigPanel({
                 key={aud}
                 type="button"
                 onClick={() => toggleAudience(aud)}
+                disabled={controlsLocked}
                 className={cn(
-                  'px-2.5 py-1 rounded-full text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+                  'px-2.5 py-1 rounded-full text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed',
                   selected
                     ? 'bg-primary/80 text-primary-foreground border-primary'
                     : 'bg-secondary/60 text-muted-foreground border-border/40 hover:bg-secondary'
@@ -251,8 +270,9 @@ export function ConfigPanel({
                 key={level.value}
                 type="button"
                 onClick={() => onChange({ ideaMaturity: level.value as UserInput['ideaMaturity'] })}
+                disabled={controlsLocked}
                 className={cn(
-                  'px-3 py-1.5 rounded-md text-xs font-medium border',
+                  'px-3 py-1.5 rounded-md text-xs font-medium border disabled:opacity-50 disabled:cursor-not-allowed',
                   selected
                     ? 'bg-primary text-primary-foreground border-primary'
                     : 'bg-secondary/60 text-muted-foreground border-border/40 hover:bg-secondary'
@@ -276,6 +296,7 @@ export function ConfigPanel({
           max={100}
           step={1}
           className="w-full"
+          disabled={controlsLocked}
         />
       </div>
 
@@ -298,8 +319,9 @@ export function ConfigPanel({
                 key={goal}
                 type="button"
                 onClick={() => toggleGoal(goal)}
+                disabled={controlsLocked}
                 className={cn(
-                  'px-2.5 py-1 rounded-full text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50',
+                  'px-2.5 py-1 rounded-full text-xs border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed',
                   selected
                     ? 'bg-accent/80 text-accent-foreground border-accent'
                     : 'bg-secondary/60 text-muted-foreground border-border/40 hover:bg-secondary'
@@ -328,6 +350,7 @@ export function ConfigPanel({
             max={500}
             step={1}
             className="w-full"
+            disabled={controlsLocked}
           />
           <div className="w-16 text-right text-sm tabular-nums">
             {value.agentCount ?? 20}
@@ -352,6 +375,7 @@ export function ConfigPanel({
             variant="outline"
             size="sm"
             onClick={() => onOpenStartChoice?.()}
+            disabled={controlsLocked}
           >
             {language === 'ar' ? 'خيارات البدء' : 'Start choices'}
           </Button>
@@ -361,6 +385,7 @@ export function ConfigPanel({
           variant="secondary"
           className="w-full"
           onClick={() => onToggleSocietyBuilder?.(!showSocietyBuilder)}
+          disabled={controlsLocked}
         >
           {showSocietyBuilder
             ? (language === 'ar' ? 'إخفاء بناء المجتمع' : 'Hide society builder')
@@ -385,6 +410,7 @@ export function ConfigPanel({
               max={100}
               step={1}
               className="w-full"
+              disabled={controlsLocked}
             />
           </div>
 
@@ -399,6 +425,7 @@ export function ConfigPanel({
               max={100}
               step={1}
               className="w-full"
+              disabled={controlsLocked}
             />
           </div>
 
@@ -413,6 +440,7 @@ export function ConfigPanel({
               max={100}
               step={1}
               className="w-full"
+              disabled={controlsLocked}
             />
           </div>
 
@@ -422,6 +450,7 @@ export function ConfigPanel({
               variant={societyControls.strictPolicy ? 'default' : 'outline'}
               onClick={() => onSocietyControlsChange({ strictPolicy: !societyControls.strictPolicy })}
               className="w-full"
+              disabled={controlsLocked}
             >
               {language === 'ar' ? 'تدقيق سياسات صارم' : 'Strict policy mode'}
             </Button>
@@ -430,6 +459,7 @@ export function ConfigPanel({
               variant={societyControls.humanDebate ? 'default' : 'outline'}
               onClick={() => onSocietyControlsChange({ humanDebate: !societyControls.humanDebate })}
               className="w-full"
+              disabled={controlsLocked}
             >
               {language === 'ar' ? 'نمط نقاش بشري' : 'Human-like debate'}
             </Button>
@@ -441,6 +471,7 @@ export function ConfigPanel({
             placeholder={language === 'ar' ? 'ملاحظة عن شخصيات المجتمع (اختياري)' : 'Persona note for this society (optional)'}
             dir={language === 'ar' ? 'rtl' : 'ltr'}
             className="bg-secondary/50 border-border/50"
+            disabled={controlsLocked}
           />
 
           <div className="space-y-2 rounded-lg border border-border/40 bg-background/40 p-2.5">
@@ -453,12 +484,13 @@ export function ConfigPanel({
               placeholder={language === 'ar' ? 'اسأل عن أفضل توزيع للشخصيات...' : 'Ask for the best persona distribution...'}
               dir={language === 'ar' ? 'rtl' : 'ltr'}
               className="bg-secondary/50 border-border/50"
+              disabled={controlsLocked}
             />
             <Button
               type="button"
               variant="outline"
               className="w-full"
-              disabled={societyAssistantBusy || !societyAssistantQuestion.trim() || !onAskSocietyAssistant}
+              disabled={controlsLocked || societyAssistantBusy || !societyAssistantQuestion.trim() || !onAskSocietyAssistant}
               onClick={() => onAskSocietyAssistant?.(societyAssistantQuestion.trim())}
             >
               {societyAssistantBusy
@@ -475,7 +507,7 @@ export function ConfigPanel({
       )}
 
       <div className="pt-2 space-y-2">
-        <Button className="w-full" onClick={onSubmit} disabled={!canConfirm || isSearching}>
+        <Button className="w-full" onClick={onSubmit} disabled={!canConfirm || controlsLocked}>
           {language === 'ar' ? 'تأكيد البيانات' : 'Confirm Data'}
         </Button>
         {!canConfirm && (
@@ -499,5 +531,3 @@ export function ConfigPanel({
     </div>
   );
 }
-
-

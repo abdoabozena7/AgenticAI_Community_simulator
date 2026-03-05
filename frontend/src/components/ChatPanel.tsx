@@ -397,12 +397,7 @@ export function ChatPanel({
     && !inputValue.trim()
     && !showRetry
   );
-  const canUseActionTrigger = Boolean(
-    primaryControl
-    && actionChoiceCount >= 3
-    && !inputValue.trim()
-    && !showRetry
-  );
+  const canUseActionTrigger = false;
   const showSingleActionControl = Boolean(
     primaryControl
     && actionChoiceCount === 1
@@ -444,7 +439,7 @@ export function ChatPanel({
       .reverse(),
     [researchSourcesLive]
   );
-  const RESEARCH_AUTO_TIMEOUT_MS = 180000;
+  const RESEARCH_AUTO_TIMEOUT_MS = 60000;
   const [researchClockMs, setResearchClockMs] = useState(() => Date.now());
   const activeResearchStartedAt = useMemo(() => {
     const ordered = [...researchSourcesLive].sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
@@ -483,6 +478,7 @@ export function ChatPanel({
       ? `جاري البحث... بدء المحاكاة تلقائيًا بعد ${mmss} إذا استمر التأخير.`
       : `Research in progress... auto-starting simulation in ${mmss} if delays continue.`;
   }, [researchTimeoutRemainingMs, settings.language]);
+  const showLiveResearchCard = searchState?.status === 'searching';
   const phaseLabel = useMemo(() => {
     const key = phaseState?.currentPhaseKey?.trim();
     if (!key) return null;
@@ -1295,7 +1291,7 @@ export function ChatPanel({
               />
             )}
 
-            {(phaseState?.currentPhaseKey || recentResearchSources.length > 0) && (
+            {(phaseState?.currentPhaseKey || showLiveResearchCard) && (
               <div className="rounded-lg border border-border/50 bg-card/70 p-3 space-y-2">
                 {phaseState?.currentPhaseKey && (
                   <div className="text-xs text-muted-foreground">
@@ -1306,12 +1302,12 @@ export function ChatPanel({
                     )}
                   </div>
                 )}
-                {recentResearchSources.length > 0 && (
+                {showLiveResearchCard && (
                   <div className="space-y-1.5">
                     <div className="text-xs text-muted-foreground">
                       {settings.language === 'ar' ? 'مصادر البحث المباشرة' : 'Live research sources'}
                     </div>
-                    {activeResearchStartedAt && !uiProgressActive && (
+                    {activeResearchStartedAt && (
                       <div className="rounded-md border border-primary/30 bg-primary/10 px-2 py-2 space-y-1">
                         <div className="text-[11px] text-primary inline-flex items-center gap-1.5">
                           <Loader2 className="w-3 h-3 animate-spin" />
@@ -1323,6 +1319,11 @@ export function ChatPanel({
                             style={{ width: `${researchTimeoutProgressPct}%` }}
                           />
                         </div>
+                      </div>
+                    )}
+                    {recentResearchSources.length === 0 && activeResearchStartedAt && (
+                      <div className="text-[11px] text-muted-foreground">
+                        {settings.language === 'ar' ? 'جاري جمع أولى المصادر...' : 'Collecting first sources...'}
                       </div>
                     )}
                     {(() => {
@@ -2088,11 +2089,6 @@ export function ChatPanel({
                                   {settings.language === 'ar' ? `رد على ${replyShort}` : `Reply to ${replyShort}`}
                                 </span>
                               )}
-                              {opinionSource === 'fallback' && msg.fallbackReason && (
-                                <span className="text-[10px] px-2 py-0.5 rounded-full border border-amber-400/40 text-amber-300">
-                                  {msg.fallbackReason}
-                                </span>
-                              )}
                             </div>
                           </div>
 
@@ -2239,9 +2235,17 @@ export function ChatPanel({
                   ? 'اكتب رسالتك...'
                   : 'Type a message...'
               }
-              className="chat-input"
+              className={cn(
+                'chat-input',
+                (showRetry || lockComposerByProgress) && 'opacity-65 cursor-not-allowed bg-muted/45 border-border/80'
+              )}
               data-testid="chat-input"
             />
+            {lockComposerByProgress && (
+              <div className="pointer-events-none absolute -top-5 text-[10px] text-muted-foreground [inset-inline-start:2px]">
+                {settings.language === 'ar' ? 'الإدخال متوقف مؤقتًا حتى اكتمال العملية الجارية' : 'Input is temporarily locked while current process runs'}
+              </div>
+            )}
 
             <div className="control-trigger-stack shrink-0" style={controlTriggerStackStyle}>
               {showClosedHint && (
@@ -2355,5 +2359,3 @@ export function ChatPanel({
     </div>
   );
 }
-
-

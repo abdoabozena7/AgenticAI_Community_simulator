@@ -17,9 +17,11 @@ export default defineConfig(({ mode }) => {
       proxy: {
         "/auth": { target: backendUrl, changeOrigin: true },
         "/simulation": { target: backendUrl, changeOrigin: true },
-        "/research": { target: backendUrl, changeOrigin: true },
-        "/court": { target: backendUrl, changeOrigin: true },
-        "/admin": { target: backendUrl, changeOrigin: true },
+        // Keep frontend routes like /research and /court reachable on hard refresh.
+        // Only proxy backend API subpaths such as /research/run and /court/run.
+        "/research/": { target: backendUrl, changeOrigin: true },
+        "/court/": { target: backendUrl, changeOrigin: true },
+        "/admin/": { target: backendUrl, changeOrigin: true },
         "/health": { target: backendUrl, changeOrigin: true },
         "/search": { target: backendUrl, changeOrigin: true },
         "/llm": { target: backendUrl, changeOrigin: true },

@@ -1,0 +1,261 @@
+{
+  "startedAt": "2026-03-02T21:24:20.125Z",
+  "baseUrl": "http://localhost:8080",
+  "steps": [
+    {
+      "name": "desktop:open-landing",
+      "status": "passed",
+      "details": {},
+      "ts": "2026-03-02T21:24:30.090Z"
+    },
+    {
+      "name": "desktop:landing-anchor-nav",
+      "status": "passed",
+      "details": {},
+      "ts": "2026-03-02T21:24:41.315Z"
+    },
+    {
+      "name": "desktop:open-auth-modal",
+      "status": "passed",
+      "details": {},
+      "ts": "2026-03-02T21:24:48.646Z"
+    },
+    {
+      "name": "desktop:login-admin",
+      "status": "failed",
+      "details": {
+        "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /Sign In|تسجيل الدخول|Please wait|يرجى الانتظار/i }).first()\u001b[22m\n\u001b[2m    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 py-2 relative z-10 rounded-full transition-all duration-300 h-9 px-4 text-sm leading-6 text-neutral-300 hover:text-white hover:bg-white/10\">Sign In</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-background/80 backdrop-blur-sm\"></div> from <div class=\"fixed inset-0 z-50 flex items-center justify-center p-4\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-background/80 backdrop-blur-sm\"></div> from <div class=\"fixed inset-0 z-50 flex items-center justify-center p-4\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    12 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"absolute inset-0 bg-background/80 backdrop-blur-sm\"></div> from <div class=\"fixed inset-0 z-50 flex items-center justify-center p-4\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n"
+      },
+      "ts": "2026-03-02T21:25:21.393Z"
+    },
+    {
+      "name": "desktop:control-center-sanity",
+      "status": "passed",
+      "details": {},
+      "ts": "2026-03-02T21:25:33.413Z"
+    },
+    {
+      "name": "desktop:dashboard-deep-clicks",
+      "status": "passed",
+      "details": {},
+      "ts": "2026-03-02T21:25:41.932Z"
+    },
+    {
+      "name": "desktop:simulate-deep",
+      "status": "failed",
+      "details": {
+        "error": "page.waitForSelector: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"chat-input\"]') to be visible\u001b[22m\n"
+      },
+      "ts": "2026-03-02T21:26:12.145Z"
+    },
+    {
+      "name": "desktop:research-run",
+      "status": "failed",
+      "details": {
+        "error": "Research inputs not found"
+      },
+      "ts": "2026-03-02T21:26:12.270Z"
+    },
+    {
+      "name": "desktop:court-run",
+      "status": "failed",
+      "details": {
+        "error": "locator.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('textarea').first()\u001b[22m\n"
+      },
+      "ts": "2026-03-02T21:26:42.285Z"
+    },
+    {
+      "name": "desktop:settings-check",
+      "status": "failed",
+      "details": {
+        "error": "locator.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input').first()\u001b[22m\n"
+      },
+      "ts": "2026-03-02T21:27:15.316Z"
+    },
+    {
+      "name": "desktop:bonus-check",
+      "status": "passed",
+      "details": {},
+      "ts": "2026-03-02T21:27:27.008Z"
+    },
+    {
+      "name": "mobile:public-landing",
+      "status": "passed",
+      "details": {},
+      "ts": "2026-03-02T21:27:52.490Z"
+    },
+    {
+      "name": "mobile:dashboard-check",
+      "status": "passed",
+      "details": {},
+      "ts": "2026-03-02T21:28:18.853Z"
+    },
+    {
+      "name": "mobile:simulate-tabs",
+      "status": "failed",
+      "details": {
+        "error": "page.waitForSelector: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"chat-input\"]') to be visible\u001b[22m\n"
+      },
+      "ts": "2026-03-02T21:28:49.395Z"
+    },
+    {
+      "name": "mobile:settings-check",
+      "status": "passed",
+      "details": {},
+      "ts": "2026-03-02T21:29:13.998Z"
+    }
+  ],
+  "issues": [
+    {
+      "severity": "major",
+      "title": "Step failed: desktop:login-admin",
+      "details": {
+        "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /Sign In|تسجيل الدخول|Please wait|يرجى الانتظار/i }).first()\u001b[22m\n\u001b[2m    - locator resolved to <button class=\"inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 py-2 relative z-10 rounded-full transition-all duration-300 h-9 px-4 text-sm leading-6 text-neutral-300 hover:text-white hover:bg-white/10\">Sign In</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-background/80 backdrop-blur-sm\"></div> from <div class=\"fixed inset-0 z-50 flex items-center justify-center p-4\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is visible, enabled and stable\u001b[22m\n\u001b[2m      - scrolling into view if needed\u001b[22m\n\u001b[2m      - done scrolling\u001b[22m\n\u001b[2m      - <div class=\"absolute inset-0 bg-background/80 backdrop-blur-sm\"></div> from <div class=\"fixed inset-0 z-50 flex items-center justify-center p-4\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    12 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is visible, enabled and stable\u001b[22m\n\u001b[2m       - scrolling into view if needed\u001b[22m\n\u001b[2m       - done scrolling\u001b[22m\n\u001b[2m       - <div class=\"absolute inset-0 bg-background/80 backdrop-blur-sm\"></div> from <div class=\"fixed inset-0 z-50 flex items-center justify-center p-4\">…</div> subtree intercepts pointer events\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:184:23\n    at async step (D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:40:5)\n    at async D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:168:5"
+      },
+      "step": "desktop:login-admin",
+      "ts": "2026-03-02T21:25:21.393Z"
+    },
+    {
+      "severity": "minor",
+      "title": "Dashboard nav item not found for /Home|الرئيسية/i",
+      "details": {},
+      "step": "desktop:dashboard-deep-clicks",
+      "ts": "2026-03-02T21:25:33.421Z"
+    },
+    {
+      "severity": "minor",
+      "title": "Dashboard nav item not found for /Simulations|المحاكاة/i",
+      "details": {},
+      "step": "desktop:dashboard-deep-clicks",
+      "ts": "2026-03-02T21:25:33.897Z"
+    },
+    {
+      "severity": "minor",
+      "title": "Dashboard nav item not found for /Research|البحث/i",
+      "details": {},
+      "step": "desktop:dashboard-deep-clicks",
+      "ts": "2026-03-02T21:25:34.380Z"
+    },
+    {
+      "severity": "minor",
+      "title": "Dashboard nav item not found for /Idea Court|محكمة/i",
+      "details": {},
+      "step": "desktop:dashboard-deep-clicks",
+      "ts": "2026-03-02T21:25:34.846Z"
+    },
+    {
+      "severity": "minor",
+      "title": "Dashboard nav item not found for /Analytics/i",
+      "details": {},
+      "step": "desktop:dashboard-deep-clicks",
+      "ts": "2026-03-02T21:25:35.315Z"
+    },
+    {
+      "severity": "minor",
+      "title": "Dashboard nav item not found for /Settings|الإعدادات/i",
+      "details": {},
+      "step": "desktop:dashboard-deep-clicks",
+      "ts": "2026-03-02T21:25:35.781Z"
+    },
+    {
+      "severity": "major",
+      "title": "Step failed: desktop:simulate-deep",
+      "details": {
+        "error": "page.waitForSelector: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"chat-input\"]') to be visible\u001b[22m\n\n    at D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:239:25\n    at async step (D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:40:5)\n    at async D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:236:5"
+      },
+      "step": "desktop:simulate-deep",
+      "ts": "2026-03-02T21:26:12.145Z"
+    },
+    {
+      "severity": "major",
+      "title": "Step failed: desktop:research-run",
+      "details": {
+        "error": "Error: Research inputs not found\n    at D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:283:45\n    at async step (D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:40:5)\n    at async D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:279:5"
+      },
+      "step": "desktop:research-run",
+      "ts": "2026-03-02T21:26:12.271Z"
+    },
+    {
+      "severity": "major",
+      "title": "Step failed: desktop:court-run",
+      "details": {
+        "error": "locator.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('textarea').first()\u001b[22m\n\n    at D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:297:16\n    at async step (D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:40:5)\n    at async D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:293:5"
+      },
+      "step": "desktop:court-run",
+      "ts": "2026-03-02T21:26:42.285Z"
+    },
+    {
+      "severity": "major",
+      "title": "Step failed: desktop:settings-check",
+      "details": {
+        "error": "locator.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input').first()\u001b[22m\n\n    at D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:308:36\n    at async step (D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:40:5)\n    at async D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:303:5"
+      },
+      "step": "desktop:settings-check",
+      "ts": "2026-03-02T21:27:15.316Z"
+    },
+    {
+      "severity": "minor",
+      "title": "Bonus page title not found",
+      "details": {},
+      "step": "desktop:bonus-check",
+      "ts": "2026-03-02T21:27:18.581Z"
+    },
+    {
+      "severity": "major",
+      "title": "Step failed: mobile:simulate-tabs",
+      "details": {
+        "error": "page.waitForSelector: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"chat-input\"]') to be visible\u001b[22m\n\n    at D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:397:28\n    at async step (D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:40:5)\n    at async D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_smoke_run.js:394:5"
+      },
+      "step": "mobile:simulate-tabs",
+      "ts": "2026-03-02T21:28:49.395Z"
+    }
+  ],
+  "consoleErrors": [
+    {
+      "step": "desktop:research-run",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "location": {
+        "url": "http://localhost:8080/research",
+        "lineNumber": 0,
+        "columnNumber": 0
+      },
+      "ts": "2026-03-02T21:26:12.258Z"
+    },
+    {
+      "step": "desktop:court-run",
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "location": {
+        "url": "http://localhost:8080/court",
+        "lineNumber": 0,
+        "columnNumber": 0
+      },
+      "ts": "2026-03-02T21:26:12.281Z"
+    }
+  ],
+  "failedRequests": [],
+  "screenshots": [
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright-smoke-2026-03-02T21-24-20-124Z\\screenshots\\01-desktop-landing.png",
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright-smoke-2026-03-02T21-24-20-124Z\\screenshots\\02-desktop-landing-anchors.png",
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright-smoke-2026-03-02T21-24-20-124Z\\screenshots\\03-desktop-auth-modal.png",
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright-smoke-2026-03-02T21-24-20-124Z\\screenshots\\04-desktop-dashboard.png",
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright-smoke-2026-03-02T21-24-20-124Z\\screenshots\\05-desktop-dashboard-interactions.png",
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright-smoke-2026-03-02T21-24-20-124Z\\screenshots\\06-desktop-bonus.png",
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright-smoke-2026-03-02T21-24-20-124Z\\screenshots\\07-mobile-landing.png",
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright-smoke-2026-03-02T21-24-20-124Z\\screenshots\\08-mobile-auth-modal.png",
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright-smoke-2026-03-02T21-24-20-124Z\\screenshots\\09-mobile-dashboard.png",
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright-smoke-2026-03-02T21-24-20-124Z\\screenshots\\10-mobile-settings.png"
+  ],
+  "pass": false,
+  "finishedAt": "2026-03-02T21:29:14.003Z",
+  "summary": {
+    "totalSteps": 15,
+    "passedSteps": 9,
+    "failedSteps": 6,
+    "critical": 0,
+    "major": 6,
+    "minor": 7,
+    "consoleErrors": 2,
+    "failedRequests": 0,
+    "screenshots": 10
+  }
+}

@@ -36,7 +36,7 @@ const AgentNode = ({ agent, onClick }: AgentNodeProps) => {
     <group position={agent.position}>
       {/* Glow effect for non-neutral agents */}
       {agent.status !== 'neutral' && (
-        <Sphere ref={glowRef} args={[0.25, 16, 16]}>
+        <Sphere ref={glowRef} args={[0.32, 16, 16]}>
           <meshBasicMaterial
             color={color}
             transparent
@@ -48,7 +48,7 @@ const AgentNode = ({ agent, onClick }: AgentNodeProps) => {
       {/* Main node */}
       <Sphere
         ref={meshRef}
-        args={[0.15, 32, 32]}
+        args={[0.2, 32, 32]}
         onClick={() => onClick?.(agent)}
       >
         <meshStandardMaterial
@@ -239,7 +239,7 @@ export const SimulationArena = ({ agents, activePulses, language = 'en' }: Simul
   return (
     <div className="w-full h-full relative">
       {/* Legend */}
-      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2 p-3 rounded-lg bg-card/80 backdrop-blur-sm border border-border">
+      <div className="absolute top-4 left-4 z-10 flex flex-col gap-2.5 p-4 rounded-xl bg-card/85 backdrop-blur-sm border border-border">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-[#22c55e]" />
           <span className="text-xs text-muted-foreground">{language === 'ar' ? 'مقبول' : 'Accepted'}</span>
@@ -256,7 +256,7 @@ export const SimulationArena = ({ agents, activePulses, language = 'en' }: Simul
       
       {/* Stats overlay */}
       <div
-        className="absolute top-4 right-4 z-10 flex items-center gap-2 p-2 rounded-lg bg-card/80 backdrop-blur-sm border border-border"
+        className="absolute top-4 right-4 z-10 flex items-center gap-2.5 p-3 rounded-xl bg-card/85 backdrop-blur-sm border border-border"
         dir={language === 'ar' ? 'rtl' : 'ltr'}
       >
         <div className="px-2 py-1 rounded-md bg-secondary/60 text-xs text-muted-foreground">
@@ -268,11 +268,11 @@ export const SimulationArena = ({ agents, activePulses, language = 'en' }: Simul
       </div>
       
       <Canvas key={canvasKey} onCreated={bindGlLifecycle}>
-        <PerspectiveCamera makeDefault position={[0, 0, 12]} fov={60} />
+        <PerspectiveCamera makeDefault position={[0, 0, 9]} fov={55} />
         <OrbitControls 
           enablePan={false}
-          minDistance={5}
-          maxDistance={20}
+          minDistance={4}
+          maxDistance={18}
           autoRotate={false}
         />
         

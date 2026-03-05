@@ -99,22 +99,22 @@ export function IterationTimeline({
     : (language === 'ar' ? 'غير محدد' : 'Unknown');
 
   return (
-    <div className="glass-panel p-4">
-      <div className="flex items-center justify-between mb-3">
+    <div className="glass-panel p-5 lg:p-6">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          <span className="text-sm font-medium text-foreground">
+          <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
+          <span className="text-base font-semibold text-foreground">
             {language === 'ar' ? 'خط التقدم' : 'Progress Timeline'}
           </span>
         </div>
         <div className="flex items-center gap-2" dir="ltr">
-          <span className="text-2xl font-mono font-bold text-primary">{currentIteration}</span>
+          <span className="text-3xl font-mono font-bold text-primary leading-none">{currentIteration}</span>
           <span className="text-muted-foreground">/</span>
-          <span className="text-sm font-mono text-muted-foreground">{totalIterations || '-'}</span>
+          <span className="text-base font-mono text-muted-foreground">{totalIterations || '-'}</span>
         </div>
       </div>
 
-      <div className="relative h-3 bg-secondary rounded-full overflow-hidden">
+      <div className="relative h-3.5 bg-secondary rounded-full overflow-hidden">
         <div
           className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500 ease-out"
           style={{ width: `${Math.min(progress, 100)}%` }}
@@ -125,7 +125,7 @@ export function IterationTimeline({
 
       {normalizedPhase && (
         <div className="mt-3 space-y-2">
-          <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
               {language === 'ar' ? 'المرحلة الحالية' : 'Current phase'}
             </span>
@@ -142,7 +142,7 @@ export function IterationTimeline({
                 <div
                   key={phase}
                   className={cn(
-                    'rounded-md border px-1.5 py-1 text-center text-[10px] truncate',
+                    'rounded-md border px-2 py-1.5 text-center text-xs truncate',
                     passed && 'border-primary/40 bg-primary/10 text-primary',
                     active && 'border-accent/50 bg-accent/15 text-foreground',
                     !passed && !active && 'border-border/40 bg-secondary/30 text-muted-foreground'
@@ -178,22 +178,22 @@ export function IterationTimeline({
         </div>
       )}
 
-      <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/50">
+      <div className="flex items-center justify-between mt-5 pt-3 border-t border-border/50">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <div className={cn('w-2 h-2 rounded-full', progress > 0 ? 'bg-success' : 'bg-muted-foreground/30')} />
-            <span className="text-xs text-muted-foreground">{language === 'ar' ? 'بداية' : 'Started'}</span>
+            <span className="text-sm text-muted-foreground">{language === 'ar' ? 'بداية' : 'Started'}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className={cn('w-2 h-2 rounded-full', progress >= 50 ? 'bg-warning' : 'bg-muted-foreground/30')} />
-            <span className="text-xs text-muted-foreground">{language === 'ar' ? 'منتصف' : 'Midpoint'}</span>
+            <span className="text-sm text-muted-foreground">{language === 'ar' ? 'منتصف' : 'Midpoint'}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className={cn('w-2 h-2 rounded-full', progress >= 100 ? 'bg-primary' : 'bg-muted-foreground/30')} />
-            <span className="text-xs text-muted-foreground">{language === 'ar' ? 'اكتمال' : 'Complete'}</span>
+            <span className="text-sm text-muted-foreground">{language === 'ar' ? 'اكتمال' : 'Complete'}</span>
           </div>
         </div>
-        <span className="text-xs text-muted-foreground" dir="ltr">
+        <span className="text-sm text-muted-foreground" dir="ltr">
           {language === 'ar' ? `اكتمل ${progress.toFixed(0)}%` : `${progress.toFixed(0)}% complete`}
         </span>
       </div>

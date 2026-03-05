@@ -96,9 +96,9 @@ const DEFAULT_CATEGORY = 'technology';
 const DEFAULT_AUDIENCE = ['Consumers'];
 const DEFAULT_GOALS = ['Market Validation'];
 const MAX_CHAT_MESSAGES = 40;
-const SEARCH_TIMEOUT_BASE_MS = 10000;
-const SEARCH_TIMEOUT_STEP_MS = 7000;
-const SEARCH_TIMEOUT_MAX_MS = 30000;
+const SEARCH_TIMEOUT_BASE_MS = 60000;
+const SEARCH_TIMEOUT_STEP_MS = 30000;
+const SEARCH_TIMEOUT_MAX_MS = 120000;
 
 type UiBusyStage =
   | 'extracting_schema'
@@ -253,6 +253,7 @@ const Index = () => {
   const searchAttemptRef = useRef(0);
   const searchRequestSeqRef = useRef(0);
   const searchAbortRef = useRef<AbortController | null>(null);
+  const searchAbortReasonRef = useRef<'superseded' | 'timeout' | null>(null);
   const runSearchRef = useRef<null | ((
     query: string,
     timeoutMs: number,
@@ -334,6 +335,10 @@ const Index = () => {
   const [creditNotice, setCreditNotice] = useState<string | null>(null);
   const [meSnapshot, setMeSnapshot] = useState<UserMe | null>(null);
   const reasoningTimerRef = useRef<number | null>(null);
+  const autoReasoningSwitchedRef = useRef(false);
+  const userOverrodeAutoRef = useRef(false);
+  const configLockHintAtRef = useRef(0);
+  const actionGuardHintAtRef = useRef(0);
   const sessionRedirectingRef = useRef(false);
   const uiBusyTokenRef = useRef(0);
   const [uiBusyStage, setUiBusyStage] = useState<UiBusyStage | null>(null);
@@ -1574,7 +1579,59 @@ const Index = () => {
     return false;
   }, [addOptionsMessage, addSystemMessage, askLocationChoice, getAssistantMessage, requestCityIfNeeded, settings.language]);
 
+  const hasRunProgress = simulation.metrics.currentIteration > 0
+    || simulation.metrics.totalAgents > 0
+    || simulation.reasoningFeed.length > 0;
+  const isRunActive = simulation.status === 'running';
+  const isRunStarting = uiBusyStage === 'starting_simulation' || (isRunActive && !hasRunProgress);
+  const isPrestartSearchActive = searchState.status === 'searching' || isConfigSearching;
+  const isConfigLocked = isPrestartSearchActive || isRunStarting || isRunActive;
+  const configLockReason = settings.language === 'ar'
+    ? 'أوقف المحاكاة أو انتظر الإيقاف المؤقت لتعديل الإعدادات.'
+    : 'Pause or stop the simulation to edit settings.';
+
+  const notifyConfigLocked = useCallback(() => {
+    const now = Date.now();
+    if (now - configLockHintAtRef.current < 2000) return;
+    configLockHintAtRef.current = now;
+    addSystemMessage(configLockReason);
+  }, [addSystemMessage, configLockReason]);
+
+  const notifyActionBlocked = useCallback(() => {
+    const now = Date.now();
+    if (now - actionGuardHintAtRef.current < 1800) return;
+    actionGuardHintAtRef.current = now;
+    if (isPrestartSearchActive) {
+      addSystemMessage(
+        settings.language === 'ar'
+          ? 'جاري تحليل المصادر بالفعل. انتظر اكتمال البحث قبل محاولة جديدة.'
+          : 'Research is already running. Wait for it to finish before triggering a new action.'
+      );
+      return;
+    }
+    addSystemMessage(
+      settings.language === 'ar'
+        ? 'المحاكاة تعمل الآن. أوقفها أو انتظر الإيقاف المؤقت قبل تنفيذ إجراء جديد.'
+        : 'Simulation is currently running. Pause it first before starting another flow.'
+    );
+  }, [addSystemMessage, isPrestartSearchActive, settings.language]);
+
+  const requestConfigPanel = useCallback((options?: { silent?: boolean }) => {
+    if (isConfigLocked) {
+      if (!options?.silent) {
+        notifyConfigLocked();
+      }
+      return false;
+    }
+    setActivePanel('config');
+    return true;
+  }, [isConfigLocked, notifyConfigLocked]);
+
   const handleStart = useCallback(async () => {
+    if (isPrestartSearchActive || isRunStarting || isRunActive) {
+      notifyActionBlocked();
+      return;
+    }
     const missing = getMissingForStart(userInput);
     const asked = await promptForMissing(missing);
     if (asked) return;
@@ -1640,7 +1697,10 @@ const Index = () => {
 
     if (startChoiceResolvedKeyRef.current !== startChoiceKey) {
       setStartChoiceModalOpen(true);
-      setActivePanel('config');
+      if (!requestConfigPanel({ silent: true })) {
+        notifyConfigLocked();
+        return;
+      }
       addSystemMessage(
         settings.language === 'ar'
           ? 'اختر طريقة التشغيل: استعراض المجتمع الحالي، بناء مجتمعك، أو البدء بالمجتمع الافتراضي.'
@@ -1770,7 +1830,12 @@ const Index = () => {
     handleSessionExpired,
     isAuthError,
     isCreditsBlocked,
+    isPrestartSearchActive,
+    isRunActive,
+    isRunStarting,
     meSnapshot,
+    notifyActionBlocked,
+    notifyConfigLocked,
     pendingIdeaConfirmation,
     pendingPreflightQuestion,
     pendingResearchReview,
@@ -1782,6 +1847,7 @@ const Index = () => {
     researchGateKey,
     researchIdea,
     runPreflightGate,
+    requestConfigPanel,
     searchState.status,
     selectedStartPath,
     settings.language,
@@ -1924,21 +1990,22 @@ const Index = () => {
   }, [addSystemMessage, handleStart, preflightContextKey, settings.language]);
 
   const handleOpenStartChoice = useCallback(() => {
+    if (!requestConfigPanel()) return;
     setStartChoiceModalOpen(true);
-    setActivePanel('config');
-  }, []);
+  }, [requestConfigPanel]);
 
   const handleSelectStartPath = useCallback((path: 'inspect_default' | 'build_custom' | 'start_default') => {
     if (path === 'inspect_default') {
       setStartChoiceModalOpen(false);
       setShowSocietyBuilder(false);
       setSelectedStartPath(null);
-      setActivePanel('config');
-      addSystemMessage(
-        settings.language === 'ar'
-          ? 'يمكنك الآن استعراض المجتمع الافتراضي. عندما تصبح جاهزًا، اختر طريقة التشغيل.'
-          : 'You can inspect the default society now. Choose the run path when ready.'
-      );
+      if (requestConfigPanel()) {
+        addSystemMessage(
+          settings.language === 'ar'
+            ? 'يمكنك الآن استعراض المجتمع الافتراضي. عندما تصبح جاهزًا، اختر طريقة التشغيل.'
+            : 'You can inspect the default society now. Choose the run path when ready.'
+        );
+      }
       return;
     }
 
@@ -1947,12 +2014,13 @@ const Index = () => {
       setStartChoiceModalOpen(false);
       setShowSocietyBuilder(true);
       setSelectedStartPath('custom_build');
-      setActivePanel('config');
-      addSystemMessage(
-        settings.language === 'ar'
-          ? 'فعّلت وضع بناء المجتمع المخصص. عدّل الإعدادات ثم ابدأ المحاكاة.'
-          : 'Custom society builder enabled. Adjust settings, then start simulation.'
-      );
+      if (requestConfigPanel()) {
+        addSystemMessage(
+          settings.language === 'ar'
+            ? 'فعّلت وضع بناء المجتمع المخصص. عدّل الإعدادات ثم ابدأ المحاكاة.'
+            : 'Custom society builder enabled. Adjust settings, then start simulation.'
+        );
+      }
       return;
     }
 
@@ -1967,7 +2035,7 @@ const Index = () => {
         : 'Default society start selected.'
     );
     void handleStart();
-  }, [addSystemMessage, handleStart, settings.language, startChoiceKey]);
+  }, [addSystemMessage, handleStart, requestConfigPanel, settings.language, startChoiceKey]);
 
   const handleAskSocietyAssistant = useCallback(async (question: string) => {
     if (!question.trim() || societyAssistantBusy) return;
@@ -2520,9 +2588,13 @@ Required sections:
     const promptOnTimeout = options?.promptOnTimeout ?? true;
     const requestSeq = searchRequestSeqRef.current + 1;
     searchRequestSeqRef.current = requestSeq;
-    searchAbortRef.current?.abort();
+    if (searchAbortRef.current && !searchAbortRef.current.signal.aborted) {
+      searchAbortReasonRef.current = 'superseded';
+      searchAbortRef.current.abort('superseded');
+    }
     const controller = new AbortController();
     searchAbortRef.current = controller;
+    searchAbortReasonRef.current = null;
     let timeoutId: number | null = null;
 
     searchAttemptRef.current += 1;
@@ -2541,9 +2613,17 @@ Required sections:
     });
     setIsConfigSearching(true);
     const locationLabel = getSearchLocationLabel();
+    addSystemMessage(
+      settings.language === 'ar'
+        ? 'بدء تحليل المصادر قبل التشغيل...'
+        : 'Starting live pre-run research...'
+    );
 
     try {
-      timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+      timeoutId = window.setTimeout(() => {
+        searchAbortReasonRef.current = 'timeout';
+        controller.abort('timeout');
+      }, timeoutMs);
       const searchData = await apiService.runPrestartResearch(
         {
           idea: trimmedQuery,
@@ -2624,8 +2704,43 @@ Required sections:
       searchPromptedRef.current = false;
       return { status: 'complete' as const };
     } catch (err: unknown) {
-      if (requestSeq !== searchRequestSeqRef.current || controller.signal.aborted) {
+      const abortReason = String(
+        (controller.signal as AbortSignal & { reason?: unknown }).reason
+        ?? searchAbortReasonRef.current
+        ?? ''
+      );
+      const isAbortError = Boolean(
+        controller.signal.aborted
+        || (err instanceof DOMException && err.name === 'AbortError')
+      );
+      if (requestSeq !== searchRequestSeqRef.current || abortReason === 'superseded') {
         return { status: 'aborted' as const };
+      }
+      if (isAbortError && abortReason !== 'timeout') {
+        setSearchState({
+          status: 'timeout',
+          stage: 'prestart_research',
+          query: trimmedQuery,
+          answer: '',
+          provider: 'none',
+          isLive: false,
+          results: [],
+          timeoutMs,
+          attempts: attempt,
+          startedAt,
+          elapsedMs: Date.now() - startedAt,
+        });
+        setResearchContext({ summary: '', sources: [], structured: undefined });
+        if (promptOnTimeout && !searchPromptedRef.current) {
+          addSystemMessage(getSearchTimeoutPrompt({
+            locationLabel,
+            query: trimmedQuery,
+            timeoutMs,
+            attempts: attempt,
+          }));
+          searchPromptedRef.current = true;
+        }
+        return { status: 'timeout' as const };
       }
       if (isAuthError(err)) {
         handleSessionExpired();
@@ -2666,6 +2781,9 @@ Required sections:
       if (searchAbortRef.current === controller) {
         searchAbortRef.current = null;
       }
+      if (searchAbortReasonRef.current !== 'superseded') {
+        searchAbortReasonRef.current = null;
+      }
     }
   }, [
     addSystemMessage,
@@ -2676,6 +2794,7 @@ Required sections:
     userInput.category,
     userInput.city,
     userInput.country,
+    searchAbortReasonRef,
     handleSessionExpired,
     isAuthError,
   ]);
@@ -2683,6 +2802,10 @@ Required sections:
 
 
   const handleConfigSubmit = useCallback(async () => {
+    if (isPrestartSearchActive || isRunStarting || isRunActive) {
+      notifyActionBlocked();
+      return;
+    }
     const missing = getMissingForStart(userInput);
     const visibleMissing = missing.filter((field) => field !== 'location_choice');
     setMissingFields(visibleMissing);
@@ -2707,7 +2830,7 @@ Required sections:
     setUnderstandingAnswers([]);
     setActivePanel('chat');
     await handleStart();
-  }, [getMissingForStart, handleStart, promptForMissing, userInput, setPendingConfigReview, setActivePanel]);
+  }, [getMissingForStart, handleStart, isPrestartSearchActive, isRunActive, isRunStarting, notifyActionBlocked, promptForMissing, userInput, setPendingConfigReview, setActivePanel]);
 
   const handleSearchRetry = useCallback(async () => {
     if (searchState.status !== 'timeout') return;
@@ -2782,10 +2905,11 @@ Required sections:
               return;
             }
             if (edit.includes(lower)) {
-              setActivePanel('config');
-              addSystemMessage(settings.language === 'ar'
-                ? 'عدّل الإعدادات ثم اضغط تأكيد البيانات.'
-                : 'Update the configuration, then confirm.');
+              if (requestConfigPanel()) {
+                addSystemMessage(settings.language === 'ar'
+                  ? 'عدّل الإعدادات ثم اضغط تأكيد البيانات.'
+                  : 'Update the configuration, then confirm.');
+              }
               return;
             }
           }
@@ -2849,11 +2973,12 @@ Required sections:
               const asked = await promptForMissing(missing);
               if (asked) return;
               setPendingConfigReview(true);
-              setActivePanel('config');
               setMissingFields([]);
-              addSystemMessage(settings.language === 'ar'
-                ? 'راجع الإعدادات ثم اضغط تأكيد البيانات للمتابعة.'
-                : 'Review the configuration, then confirm to continue.');
+              if (requestConfigPanel()) {
+                addSystemMessage(settings.language === 'ar'
+                  ? 'راجع الإعدادات ثم اضغط تأكيد البيانات للمتابعة.'
+                  : 'Review the configuration, then confirm to continue.');
+              }
               return;
             }
             addSystemMessage(settings.language === 'ar'
@@ -2910,11 +3035,12 @@ Required sections:
             if (asked) return;
 
             setPendingConfigReview(true);
-            setActivePanel('config');
             setMissingFields([]);
-            addSystemMessage(settings.language === 'ar'
-              ? 'راجع الإعدادات ثم اضغط تأكيد البيانات للمتابعة.'
-              : 'Review the configuration, then confirm to continue.');
+            if (requestConfigPanel()) {
+              addSystemMessage(settings.language === 'ar'
+                ? 'راجع الإعدادات ثم اضغط تأكيد البيانات للمتابعة.'
+                : 'Review the configuration, then confirm to continue.');
+            }
             return;
           }
 
@@ -3054,11 +3180,12 @@ If rejection is about competition or location, suggest searching for a better lo
           if (asked) return;
 
           setPendingConfigReview(true);
-          setActivePanel('config');
           setMissingFields([]);
-          addSystemMessage(settings.language === 'ar'
-            ? 'راجع الإعدادات ثم اضغط تأكيد البيانات للمتابعة.'
-            : 'Review the configuration, then confirm to continue.');
+          if (requestConfigPanel()) {
+            addSystemMessage(settings.language === 'ar'
+              ? 'راجع الإعدادات ثم اضغط تأكيد البيانات للمتابعة.'
+              : 'Review the configuration, then confirm to continue.');
+          }
         } catch (err: unknown) {
           if (isAuthError(err)) {
             handleSessionExpired();
@@ -3086,6 +3213,7 @@ If rejection is about competition or location, suggest searching for a better lo
         pendingConfigReview,
         pendingUpdate,
         promptForMissing,
+        requestConfigPanel,
         researchContext,
         settings.language,
         simulation,
@@ -3147,6 +3275,10 @@ If rejection is about competition or location, suggest searching for a better lo
         });
         return;
       }
+      if (isConfigLocked) {
+        notifyConfigLocked();
+        return;
+      }
       if (field === 'location_choice') {
         const nextChoice = value === 'yes' ? 'yes' : 'no';
         if (locationChoice === nextChoice && !isWaitingForLocationChoice) {
@@ -3171,11 +3303,12 @@ If rejection is about competition or location, suggest searching for a better lo
           const asked = await promptForMissing(missing);
           if (asked) return;
           setPendingConfigReview(true);
-          setActivePanel('config');
           setMissingFields([]);
-          addSystemMessage(settings.language === 'ar'
-            ? 'راجع الإعدادات ثم اضغط تأكيد البيانات للمتابعة.'
-            : 'Review the configuration, then confirm to continue.');
+          if (requestConfigPanel()) {
+            addSystemMessage(settings.language === 'ar'
+              ? 'راجع الإعدادات ثم اضغط تأكيد البيانات للمتابعة.'
+              : 'Review the configuration, then confirm to continue.');
+          }
         }
         return;
       }
@@ -3222,8 +3355,10 @@ If rejection is about competition or location, suggest searching for a better lo
       isWaitingForLocationChoice,
       locationChoice,
       promptForMissing,
+      requestConfigPanel,
+      isConfigLocked,
+      notifyConfigLocked,
       simulation.pendingClarification,
-      setActivePanel,
       setPendingConfigReview,
       setMissingFields,
       settings.language,
@@ -3247,6 +3382,47 @@ If rejection is about competition or location, suggest searching for a better lo
     await apiService.logout();
     navigate('/');
   }, [navigate]);
+
+  const handleManualPanelSwitch = useCallback((panel: 'chat' | 'reasoning' | 'config') => {
+    if (autoReasoningSwitchedRef.current && panel !== 'reasoning') {
+      userOverrodeAutoRef.current = true;
+    }
+    if (panel === 'config') {
+      requestConfigPanel();
+      return;
+    }
+    setActivePanel(panel);
+  }, [requestConfigPanel]);
+
+  useEffect(() => {
+    if (simulation.status === 'running') return;
+    autoReasoningSwitchedRef.current = false;
+    userOverrodeAutoRef.current = false;
+  }, [simulation.status]);
+
+  useEffect(() => {
+    if (simulation.status !== 'running' || !reasoningActive) return;
+    if (activePanel !== 'chat') return;
+    if (autoReasoningSwitchedRef.current) return;
+    autoReasoningSwitchedRef.current = true;
+    userOverrodeAutoRef.current = false;
+    setActivePanel('reasoning');
+  }, [activePanel, reasoningActive, simulation.status]);
+
+  useEffect(() => {
+    if (simulation.status !== 'running' || reasoningActive) return;
+    if (!autoReasoningSwitchedRef.current) return;
+    if (userOverrodeAutoRef.current) {
+      autoReasoningSwitchedRef.current = false;
+      userOverrodeAutoRef.current = false;
+      return;
+    }
+    if (activePanel === 'reasoning') {
+      setActivePanel('chat');
+    }
+    autoReasoningSwitchedRef.current = false;
+    userOverrodeAutoRef.current = false;
+  }, [activePanel, reasoningActive, simulation.status]);
 
   useEffect(() => {
     if (
@@ -3292,10 +3468,8 @@ If rejection is about competition or location, suggest searching for a better lo
     setCreditNotice(message);
   }, [settings.language, simulation.status, simulation.statusReason]);
 
-  const hasProgress = simulation.metrics.currentIteration > 0 || simulation.reasoningFeed.length > 0;
-  const simulationActuallyStarted = simulation.metrics.currentIteration > 0
-    || simulation.metrics.totalAgents > 0
-    || simulation.reasoningFeed.length > 0;
+  const hasProgress = hasRunProgress;
+  const simulationActuallyStarted = hasRunProgress;
   const isSummarizing = simulation.status === 'running'
     && hasProgress
     && !simulation.summary
@@ -3351,7 +3525,7 @@ If rejection is about competition or location, suggest searching for a better lo
   const primaryControl = useMemo(() => {
     const hasIdea = Boolean(userInput.idea.trim());
 
-    if (simulation.status === 'running' && simulationActuallyStarted) {
+    if (isRunActive && simulationActuallyStarted) {
       return {
         key: 'pause_reasoning',
         label: settings.language === 'ar' ? 'إيقاف التفكير مؤقتًا' : 'Pause reasoning',
@@ -3364,7 +3538,7 @@ If rejection is about competition or location, suggest searching for a better lo
       };
     }
 
-    if (simulation.status === 'running' && !simulationActuallyStarted) {
+    if (isRunStarting) {
       return {
         key: 'starting',
         label: settings.language === 'ar' ? 'جاري تجهيز المحاكاة...' : 'Preparing simulation...',
@@ -3420,7 +3594,37 @@ If rejection is about competition or location, suggest searching for a better lo
       };
     }
 
-    if (searchState.status === 'searching' || isConfigSearching || isChatThinking) {
+    if (pendingPreflightQuestion) {
+      return {
+        key: 'preflight_required',
+        label: settings.language === 'ar' ? 'مطلوب توضيح للاستكمال' : 'Clarification needed to continue',
+        description: settings.language === 'ar'
+          ? 'أجب على سؤال التوضيح داخل الدردشة قبل بدء البحث.'
+          : 'Answer the clarification card in chat before running research.',
+        disabled: false,
+        busy: preflightBusy,
+        tone: 'warning' as const,
+        icon: 'reasoning' as const,
+        onClick: () => { setActivePanel('chat'); },
+      };
+    }
+
+    if (pendingIdeaConfirmation) {
+      return {
+        key: 'idea_confirmation_required',
+        label: settings.language === 'ar' ? 'مراجعة وصف الفكرة أولًا' : 'Review idea description first',
+        description: settings.language === 'ar'
+          ? 'أكد وصف الفكرة من الدردشة قبل تشغيل البحث.'
+          : 'Confirm the idea description in chat before running research.',
+        disabled: false,
+        busy: false,
+        tone: 'warning' as const,
+        icon: 'reasoning' as const,
+        onClick: () => { setActivePanel('chat'); },
+      };
+    }
+
+    if (isPrestartSearchActive) {
       return {
         key: 'searching',
         label: settings.language === 'ar' ? 'جاري البحث...' : 'Searching...',
@@ -3456,14 +3660,14 @@ If rejection is about competition or location, suggest searching for a better lo
         key: 'confirm_start',
         label: settings.language === 'ar' ? 'ابدأ البحث' : 'Run research',
         description: settings.language === 'ar' ? 'سيتم تنفيذ البحث أولًا ثم ستظهر لك خطوة بدء المحاكاة' : 'Research runs first, then start simulation appears',
-        disabled: isConfigSearching,
-        busy: isConfigSearching,
+        disabled: isPrestartSearchActive,
+        busy: isPrestartSearchActive,
         tone: 'primary' as const,
         icon: 'sparkles' as const,
         onClick: () => { void handleConfigSubmit(); },
         secondary: {
           label: settings.language === 'ar' ? 'تعديل' : 'Edit',
-          onClick: () => { setActivePanel('config'); },
+          onClick: () => { requestConfigPanel(); },
         },
       };
     }
@@ -3509,10 +3713,12 @@ If rejection is about competition or location, suggest searching for a better lo
     handleRetryPrestartResearch,
     handleSearchRetry,
     isClarificationPause,
+    isPrestartSearchActive,
     isResearchReviewPause,
-    isChatThinking,
-    isConfigSearching,
+    isRunActive,
+    isRunStarting,
     pauseBusy,
+    preflightBusy,
     pendingConfigReview,
     pendingResearchReview,
     researchReviewBusy,
@@ -3522,10 +3728,11 @@ If rejection is about competition or location, suggest searching for a better lo
     selectedStartPath,
     settings.language,
     showResumeAction,
+    pendingIdeaConfirmation,
+    pendingPreflightQuestion,
+    requestConfigPanel,
     simulation.simulationId,
-    simulation.status,
     simulation.statusReason,
-    setActivePanel,
     simulationActuallyStarted,
     userInput.idea,
   ]);
@@ -3551,6 +3758,10 @@ If rejection is about competition or location, suggest searching for a better lo
   }, [searchState.elapsedMs, searchState.stage, searchState.status, searchState.timeoutMs, uiBusyElapsedMs, uiBusyStage]);
 
   const handleConfigChange = useCallback((updates: Partial<UserInput>) => {
+    if (isConfigLocked) {
+      notifyConfigLocked();
+      return;
+    }
     setUserInput((prev) => {
       const next = { ...prev, ...updates };
       const hasLocation = Boolean(next.city.trim() || next.country.trim());
@@ -3562,15 +3773,15 @@ If rejection is about competition or location, suggest searching for a better lo
       setMissingFields(missing.filter((field) => field !== 'location_choice'));
       return next;
     });
-  }, [getMissingForStart]);
+  }, [getMissingForStart, isConfigLocked, notifyConfigLocked]);
 
   const sidePanel = (
-    <div className="min-h-0 rounded-2xl border border-border/50 bg-card/20 overflow-hidden flex flex-col">
+    <div className="h-full min-h-0 rounded-2xl border border-border/50 bg-card/20 overflow-hidden flex flex-col">
       <div className="flex items-center justify-between px-4 py-3 border-b border-border/40 bg-background/50 backdrop-blur">
         <div className="flex gap-2 flex-wrap">
           <button
             type="button"
-            onClick={() => setActivePanel('chat')}
+            onClick={() => handleManualPanelSwitch('chat')}
             className={cn(
               'px-3 py-1.5 rounded-full text-xs font-medium transition',
               activePanel === 'chat'
@@ -3582,7 +3793,7 @@ If rejection is about competition or location, suggest searching for a better lo
           </button>
           <button
             type="button"
-            onClick={() => setActivePanel('reasoning')}
+            onClick={() => handleManualPanelSwitch('reasoning')}
             className={cn(
               'px-3 py-1.5 rounded-full text-xs font-medium transition',
               activePanel === 'reasoning'
@@ -3594,9 +3805,11 @@ If rejection is about competition or location, suggest searching for a better lo
           </button>
           <button
             type="button"
-            onClick={() => setActivePanel('config')}
+            onClick={() => handleManualPanelSwitch('config')}
+            disabled={isConfigLocked}
+            title={isConfigLocked ? configLockReason : undefined}
             className={cn(
-              'px-3 py-1.5 rounded-full text-xs font-medium transition',
+              'px-3 py-1.5 rounded-full text-xs font-medium transition disabled:opacity-50 disabled:cursor-not-allowed',
               activePanel === 'config'
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-secondary/60 text-muted-foreground hover:text-foreground',
@@ -3615,6 +3828,8 @@ If rejection is about competition or location, suggest searching for a better lo
             missingFields={missingFields}
             language={settings.language}
             isSearching={isConfigSearching}
+            isLocked={isConfigLocked}
+            lockReason={configLockReason}
             showSocietyBuilder={showSocietyBuilder}
             onToggleSocietyBuilder={setShowSocietyBuilder}
             societyControls={societyControls}
@@ -3681,26 +3896,28 @@ If rejection is about competition or location, suggest searching for a better lo
   );
 
   const arenaPanel = (
-    <div className="min-h-0 grid grid-rows-[minmax(0,1fr)_auto] gap-4">
-      <div className="min-h-0 rounded-2xl border border-border/50 overflow-hidden">
+    <div className="min-h-0 grid grid-rows-[minmax(380px,1fr)_minmax(0,220px)] xl:grid-rows-[minmax(460px,1fr)_minmax(0,240px)] gap-4">
+      <div className="min-h-[380px] xl:min-h-[460px] rounded-2xl border border-border/50 overflow-hidden">
         <SimulationArena
           agents={Array.from(simulation.agents.values())}
           activePulses={simulation.activePulses}
           language={settings.language}
         />
       </div>
-      <IterationTimeline
-        currentIteration={simulation.metrics.currentIteration}
-        totalIterations={simulation.metrics.totalIterations}
-        language={settings.language}
-        currentPhaseKey={simulation.currentPhaseKey}
-        phaseProgressPct={simulation.phaseProgressPct}
-      />
+      <div className="min-h-0 overflow-y-auto scrollbar-thin">
+        <IterationTimeline
+          currentIteration={simulation.metrics.currentIteration}
+          totalIterations={simulation.metrics.totalIterations}
+          language={settings.language}
+          currentPhaseKey={simulation.currentPhaseKey}
+          phaseProgressPct={simulation.phaseProgressPct}
+        />
+      </div>
     </div>
   );
 
   const metricsPane = (
-    <div className="min-h-0">
+    <div className="min-h-0 h-full">
       <MetricsPanel
         metrics={simulation.metrics}
         language={settings.language}
@@ -3713,7 +3930,7 @@ If rejection is about competition or location, suggest searching for a better lo
   );
 
   return (
-    <div className="h-[100dvh] min-h-[100dvh] w-screen bg-background flex flex-col overflow-hidden">
+    <div className="h-[100dvh] min-h-[100dvh] w-full bg-background flex flex-col overflow-hidden">
       {/* Header */}
       <Header
         simulationStatus={simulation.status}
@@ -3827,16 +4044,16 @@ If rejection is about competition or location, suggest searching for a better lo
         </div>
       )}
       <div className="flex-1 min-h-0 overflow-y-auto xl:overflow-hidden p-3 md:p-4">
-        <div className="min-h-full xl:h-full grid grid-cols-1 xl:grid-cols-[minmax(280px,26%)_minmax(0,1fr)_minmax(320px,30%)] gap-4 min-h-0">
-          <div className={cn('min-h-0', isArabic ? 'xl:order-3' : 'xl:order-1')}>
+        <div className="min-h-full xl:h-full grid grid-cols-1 xl:grid-cols-[minmax(260px,22%)_minmax(0,1fr)_minmax(320px,28%)] gap-4 min-h-0">
+          <div className={cn('min-h-0 h-[84dvh] xl:h-full', isArabic ? 'xl:order-3' : 'xl:order-1')}>
             {metricsPane}
           </div>
 
-          <div className="min-h-0 xl:order-2">
+          <div className="min-h-0 h-[88dvh] xl:h-full xl:order-2">
             {arenaPanel}
           </div>
 
-          <div className={cn('min-h-0', isArabic ? 'xl:order-1' : 'xl:order-3')}>
+          <div className={cn('min-h-0 h-[84dvh] xl:h-full', isArabic ? 'xl:order-1' : 'xl:order-3')}>
             {sidePanel}
           </div>
         </div>
@@ -3846,7 +4063,3 @@ If rejection is about competition or location, suggest searching for a better lo
 };
 
 export default Index;
-
-
-
-
