@@ -1,10 +1,22 @@
-import { useMemo, useState } from 'react';
-import { ArrowRight, Bot, Clock3, Eye, Pause, Play, ShieldCheck, Sparkles, TimerReset } from 'lucide-react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { ArrowRight, Eye, Pause, Play, ShieldCheck, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { CoachIntervention, GuidedWorkflowDraftContext, GuidedWorkflowState, SimulationStatus } from '@/types/simulation';
+import type {
+  CoachIntervention,
+  GuidedWorkflowDraftContext,
+  GuidedWorkflowState,
+  SimulationStatus,
+} from '@/types/simulation';
+import {
+  ChatActionRow,
+  ChatBubble,
+  ChatShell,
+  ChatTopProgress,
+  type ChatProgressStep,
+} from '@/components/simulation/ChatPrimitives';
 
 export const GUIDED_SIMULATION_PANEL_CUSTOM_X_PX = 0;
 export const GUIDED_SIMULATION_PANEL_CUSTOM_Y_PX = 0;
@@ -41,48 +53,65 @@ interface GuidedSimulationPanelProps {
 
 const STAGE_LABELS: Record<string, { ar: string; en: string }> = {
   context_scope: { ar: 'نوع السياق', en: 'Context scope' },
-  schema_intake: { ar: 'تجميع الـschema', en: 'Schema intake' },
+  schema_intake: { ar: 'تجميع البيانات', en: 'Schema intake' },
   clarification: { ar: 'توضيح ذكي', en: 'Smart clarification' },
   idea_research: { ar: 'بحث الفكرة', en: 'Idea research' },
   location_research: { ar: 'بحث المكان', en: 'Location research' },
   persona_synthesis: { ar: 'بناء الشخصيات', en: 'Persona synthesis' },
-  review: { ar: 'مراجعة التشغيل', en: 'Launch review' },
-  ready_to_start: { ar: 'جاهز للبدء', en: 'Ready to start' },
+  review: { ar: 'المراجعة', en: 'Review' },
+  ready_to_start: { ar: 'جاهز للتشغيل', en: 'Ready to start' },
 };
 
-const DEFAULT_STAGE_ORDER = ['context_scope', 'schema_intake', 'clarification', 'idea_research', 'location_research', 'persona_synthesis', 'review', 'ready_to_start'];
+const DEFAULT_STAGE_ORDER = [
+  'context_scope',
+  'schema_intake',
+  'clarification',
+  'idea_research',
+  'location_research',
+  'persona_synthesis',
+  'review',
+  'ready_to_start',
+];
+
+const TARGET_AUDIENCE_OPTIONS = ['Consumers', 'Students', 'Professionals', 'SMBs', 'Enterprises', 'Developers'];
+const GOAL_OPTIONS = ['Market Validation', 'Product-Market Fit', 'Growth Strategy', 'Competitive Analysis'];
 
 const formatEta = (seconds?: number, language: 'ar' | 'en' = 'en') => {
-  const safe = Math.max(0, Math.round(seconds || 0));
-  const minutes = Math.max(1, Math.ceil(safe / 60));
+  const minutes = Math.max(1, Math.ceil(Math.max(0, Math.round(seconds || 0)) / 60));
   return language === 'ar' ? `${minutes} دقيقة تقريبًا` : `~${minutes} min`;
 };
 
 const stageLabel = (stage: string, language: 'ar' | 'en') =>
   STAGE_LABELS[stage]?.[language] || stage.replace(/_/g, ' ');
 
-function ToggleChip({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
+function ToggleChip({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        'max-w-full rounded-full border px-3 py-1.5 text-xs font-medium transition',
-        active
-          ? 'border-sky-400/70 bg-sky-500/15 text-sky-100'
-          : 'border-border/60 bg-background/40 text-muted-foreground hover:border-sky-500/40 hover:text-foreground'
-      )}
-    >
+    <button type="button" onClick={onClick} className={cn('guided-chat-toggle-chip', active && 'is-selected')}>
       {label}
     </button>
+  );
+}
+
+function GuideBubble({
+  children,
+  kicker,
+  tone = 'default',
+  wide = false,
+}: {
+  children: ReactNode;
+  kicker?: string | null;
+  tone?: 'default' | 'interactive' | 'success' | 'warning' | 'muted';
+  wide?: boolean;
+}) {
+  return (
+    <ChatBubble
+      className={cn('guided-chat-message', wide && 'guided-chat-message-wide')}
+      tone={tone}
+      bubbleClassName="guided-chat-bubble"
+      kicker={kicker === undefined ? null : kicker}
+    >
+      {children}
+    </ChatBubble>
   );
 }
 
@@ -118,32 +147,231 @@ export function GuidedSimulationPanel({
   const [clarificationAnswers, setClarificationAnswers] = useState<Record<string, string>>({});
   const [correctionText, setCorrectionText] = useState('');
   const [coachCustomFixText, setCoachCustomFixText] = useState('');
+  const [schemaStepIndex, setSchemaStepIndex] = useState(0);
+  const [clarificationStepIndex, setClarificationStepIndex] = useState(0);
+  const [showCorrectionComposer, setShowCorrectionComposer] = useState(false);
 
-  const guideMessages = workflow?.guide_messages ?? [];
   const currentStage = workflow?.current_stage ?? 'context_scope';
   const stageHistory = workflow?.stage_history ?? [];
-  const clarificationQuestions = workflow?.clarification_questions ?? [];
-  const activeClarificationQuestions = clarificationQuestions.filter(
-    (question) => !(workflow?.clarification_answers || {})[question.id]
+  const guideMessages = useMemo(() => {
+    const recent = (workflow?.guide_messages ?? []).slice(-6);
+    const compact: typeof recent = [];
+    for (const message of recent) {
+      if (compact.at(-1)?.content === message.content) continue;
+      compact.push(message);
+    }
+    return compact.slice(-2);
+  }, [workflow?.guide_messages]);
+
+  const activeClarificationQuestions = (workflow?.clarification_questions ?? []).filter(
+    (item) => !(workflow?.clarification_answers || {})[item.id],
   );
-  const totalEta = workflow?.estimated_total_seconds ?? 0;
-  const stageEta = workflow?.stage_eta_seconds ?? 0;
-  const canResume = workflow?.status === 'paused';
   const lastCorrection = workflow?.last_correction ?? null;
+  const canResume = workflow?.status === 'paused';
   const coachEvidenceMessageIds = (coachIntervention?.agentCitations || [])
     .map((item) => item.messageId)
-    .filter((item): item is string => Boolean(item));
+    .filter(Boolean) as string[];
 
-  const stageRail = useMemo(() => {
-    const byStage = new Map(stageHistory.map((item) => [item.stage, item]));
-    return DEFAULT_STAGE_ORDER
-      .filter((stage) => stage !== 'location_research' || draftInput.contextScope === 'specific_place')
-      .map((stage) => ({
-        stage,
-        status: byStage.get(stage)?.status ?? (stage === currentStage ? workflow?.current_stage_status : 'pending'),
-        summary: byStage.get(stage)?.summary,
-      }));
-  }, [currentStage, draftInput.contextScope, stageHistory, workflow?.current_stage_status]);
+  const progressSteps = useMemo<ChatProgressStep[]>(() => {
+    const byStage = new Map(stageHistory.map((item) => [item.stage, item.status]));
+    return DEFAULT_STAGE_ORDER.filter(
+      (stage) => stage !== 'location_research' || draftInput.contextScope === 'specific_place',
+    ).map((stage) => ({
+      key: stage,
+      label: stageLabel(stage, language),
+      state:
+        byStage.get(stage) === 'completed' || byStage.get(stage) === 'ready'
+          ? 'completed'
+          : currentStage === stage
+            ? 'current'
+            : 'upcoming',
+    }));
+  }, [currentStage, draftInput.contextScope, language, stageHistory]);
+
+  const schemaSteps = useMemo(() => {
+    const steps: Array<{
+      key: string;
+      title: string;
+      hint?: string;
+      ready: boolean;
+      render: () => ReactNode;
+    }> = [];
+
+    const needs = new Set(
+      workflow?.required_fields?.length
+        ? workflow.required_fields
+        : ['idea', 'category', 'targetAudience', 'goals'],
+    );
+
+    if (needs.has('idea')) {
+      steps.push({
+        key: 'idea',
+        title: language === 'ar' ? 'ما الفكرة الأساسية؟' : 'What is the core idea?',
+        hint:
+          language === 'ar'
+            ? 'اكتبها في جملة واحدة واضحة.'
+            : 'Describe it in one clear sentence.',
+        ready: draftInput.idea.trim().length > 0,
+        render: () => (
+          <Textarea
+            value={draftInput.idea}
+            onChange={(event) => onDraftChange({ idea: event.target.value })}
+            className="min-h-[96px]"
+            placeholder={
+              language === 'ar'
+                ? 'مثال: مطعم كريب سريع يخدم العاملين وقت الزحمة.'
+                : 'Example: A fast crepe shop for busy commuters.'
+            }
+          />
+        ),
+      });
+    }
+
+    if (needs.has('category')) {
+      steps.push({
+        key: 'category',
+        title: language === 'ar' ? 'ما الفئة الأنسب للفكرة؟' : 'What category fits the idea?',
+        ready: draftInput.category.trim().length > 0,
+        render: () => (
+          <Input
+            value={draftInput.category}
+            onChange={(event) => onDraftChange({ category: event.target.value })}
+            placeholder={
+              language === 'ar' ? 'مثال: Food, E-commerce, SaaS' : 'Example: Food, E-commerce, SaaS'
+            }
+          />
+        ),
+      });
+    }
+
+    if (draftInput.contextScope === 'specific_place') {
+      if (needs.has('city') || needs.has('placeName')) {
+        steps.push({
+          key: 'place',
+          title:
+            language === 'ar'
+              ? 'ما المدينة أو المكان المستهدف؟'
+              : 'What city or place are you targeting?',
+          ready: Boolean((draftInput.city || draftInput.placeName || '').trim()),
+          render: () => (
+            <Input
+              value={draftInput.city || draftInput.placeName}
+              onChange={(event) =>
+                onDraftChange({ city: event.target.value, placeName: event.target.value })
+              }
+              placeholder={language === 'ar' ? 'مثال: Alexandria' : 'Example: Alexandria'}
+            />
+          ),
+        });
+      }
+
+      if (needs.has('country')) {
+        steps.push({
+          key: 'country',
+          title: language === 'ar' ? 'ما الدولة؟' : 'What country is this in?',
+          ready: draftInput.country.trim().length > 0,
+          render: () => (
+            <Input
+              value={draftInput.country}
+              onChange={(event) => onDraftChange({ country: event.target.value })}
+              placeholder={language === 'ar' ? 'مثال: Egypt' : 'Example: Egypt'}
+            />
+          ),
+        });
+      }
+    }
+
+    if (needs.has('targetAudience')) {
+      steps.push({
+        key: 'targetAudience',
+        title:
+          language === 'ar'
+            ? 'من الجمهور المستهدف أولًا؟'
+            : 'Who is the primary target audience?',
+        hint: language === 'ar' ? 'اختر شريحة أو أكثر.' : 'Choose one or more segments.',
+        ready: draftInput.targetAudience.length > 0,
+        render: () => (
+          <div className="guided-chat-toggle-row">
+            {TARGET_AUDIENCE_OPTIONS.map((item) => (
+              <ToggleChip
+                key={item}
+                label={item}
+                active={draftInput.targetAudience.includes(item)}
+                onClick={() =>
+                  onDraftChange({
+                    targetAudience: draftInput.targetAudience.includes(item)
+                      ? draftInput.targetAudience.filter((entry) => entry !== item)
+                      : [...draftInput.targetAudience, item],
+                  })
+                }
+              />
+            ))}
+          </div>
+        ),
+      });
+    }
+
+    if (needs.has('goals')) {
+      steps.push({
+        key: 'goals',
+        title:
+          language === 'ar'
+            ? 'ما هدفك من هذه المحاكاة؟'
+            : 'What do you want from this simulation?',
+        hint:
+          language === 'ar'
+            ? 'اختر ما تريد أن تركز عليه.'
+            : 'Pick what you want to optimize for.',
+        ready: draftInput.goals.length > 0,
+        render: () => (
+          <div className="guided-chat-toggle-row">
+            {GOAL_OPTIONS.map((goal) => (
+              <ToggleChip
+                key={goal}
+                label={goal}
+                active={draftInput.goals.includes(goal)}
+                onClick={() =>
+                  onDraftChange({
+                    goals: draftInput.goals.includes(goal)
+                      ? draftInput.goals.filter((entry) => entry !== goal)
+                      : [...draftInput.goals, goal],
+                  })
+                }
+              />
+            ))}
+          </div>
+        ),
+      });
+    }
+
+    return steps;
+  }, [
+    draftInput.category,
+    draftInput.city,
+    draftInput.contextScope,
+    draftInput.country,
+    draftInput.goals,
+    draftInput.idea,
+    draftInput.placeName,
+    draftInput.targetAudience,
+    language,
+    onDraftChange,
+    workflow?.required_fields,
+  ]);
+
+  const activeSchemaStep = schemaSteps[Math.min(schemaStepIndex, Math.max(schemaSteps.length - 1, 0))];
+  const activeClarificationQuestion =
+    activeClarificationQuestions[
+      Math.min(clarificationStepIndex, Math.max(activeClarificationQuestions.length - 1, 0))
+    ];
+
+  useEffect(() => {
+    setSchemaStepIndex(0);
+  }, [currentStage, workflow?.required_fields?.join('|'), draftInput.contextScope]);
+
+  useEffect(() => {
+    setClarificationStepIndex(0);
+  }, [currentStage, activeClarificationQuestions.length]);
 
   const submitClarifications = () => {
     const answers = activeClarificationQuestions
@@ -152,8 +380,10 @@ export function GuidedSimulationPanel({
         answer: clarificationAnswers[question.id]?.trim() || '',
       }))
       .filter((item) => item.answer);
-    if (!answers.length) return;
-    onSubmitClarifications(answers);
+
+    if (answers.length) {
+      onSubmitClarifications(answers);
+    }
   };
 
   const submitCorrection = () => {
@@ -161,6 +391,7 @@ export function GuidedSimulationPanel({
     if (!text) return;
     onSubmitCorrection(text);
     setCorrectionText('');
+    setShowCorrectionComposer(false);
   };
 
   const submitCoachCustomFix = () => {
@@ -171,646 +402,666 @@ export function GuidedSimulationPanel({
   };
 
   return (
-    <div className="h-full min-h-0 overflow-y-auto overflow-x-hidden px-3 py-3">
-      <div className="flex min-w-0 flex-col gap-3">
-        <div className="overflow-hidden rounded-[28px] border border-sky-400/20 bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.16),transparent_35%),linear-gradient(145deg,rgba(15,23,42,0.95),rgba(12,18,31,0.92))] p-4 text-slate-50 shadow-[0_24px_60px_rgba(2,6,23,0.28)]">
-          <div className="flex min-w-0 flex-col gap-4">
-            <div className="space-y-3">
-              <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[9px] font-semibold uppercase tracking-[0.1em] text-sky-100/80">
-                <Bot className="h-3.5 w-3.5" />
-                Guided Simulation Workflow
-              </div>
-              <div className="min-w-0">
-                <h2 className="text-[1.7rem] font-semibold tracking-tight sm:text-[1.9rem]">
-                  {stageLabel(currentStage, language)}
-                </h2>
-                <p className="mt-1 text-sm leading-6 text-slate-300/85">
-                  {guideMessages.at(-1)?.content || (language === 'ar' ? 'ابدأ من نوع السياق ثم دع الـagents يكملوا بقية الخطوات.' : 'Start with the context scope, then let the agents handle the rest.')}
-                </p>
-              </div>
-            </div>
+    <ChatShell className="guided-chat-shell">
+      <ChatTopProgress
+        steps={progressSteps}
+        headline={
+          language === 'ar'
+            ? `نحن الآن في: ${stageLabel(currentStage, language)}`
+            : `Now in: ${stageLabel(currentStage, language)}`
+        }
+        detail={`${language === 'ar' ? 'المرحلة الحالية' : 'Current'}: ${stageLabel(currentStage, language)} • ${language === 'ar' ? 'المتبقي' : 'ETA'}: ${formatEta(workflow?.estimated_total_seconds, language)}`}
+      />
 
-            <div className="grid gap-2">
-              <div className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3">
-                <div className="text-[11px] uppercase tracking-[0.14em] text-slate-400">
-                  {language === 'ar' ? 'المرحلة الحالية' : 'Current stage'}
-                </div>
-                <div className="mt-2 flex items-center gap-2 text-sm font-medium">
-                  <Clock3 className="h-4 w-4 text-sky-300" />
-                  {formatEta(stageEta, language)}
-                </div>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3">
-                <div className="text-[11px] uppercase tracking-[0.14em] text-slate-400">
-                  {language === 'ar' ? 'الإجمالي المتبقي' : 'Remaining total'}
-                </div>
-                <div className="mt-2 flex items-center gap-2 text-sm font-medium">
-                  <TimerReset className="h-4 w-4 text-emerald-300" />
-                  {formatEta(totalEta, language)}
-                </div>
-              </div>
-            </div>
+      <div className="messages-container guided-chat-thread">
+        {workflow?.verification ? (
+          <div className="guided-chat-inline-note">
+            <ShieldCheck className="h-3.5 w-3.5" />
+            {workflow.verification.ok
+              ? language === 'ar'
+                ? 'التحقق ناجح'
+                : 'Verification passed'
+              : language === 'ar'
+                ? 'يحتاج مراجعة'
+                : 'Needs review'}
           </div>
+        ) : null}
 
-          <div className="mt-4 grid min-w-0 gap-3">
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
-              <div className="mb-3 text-xs font-medium uppercase tracking-[0.14em] text-slate-400">
-                {language === 'ar' ? 'المراحل' : 'Stages'}
-              </div>
-              <div className="space-y-2">
-                {stageRail.map((item, index) => (
-                  <div
-                    key={item.stage}
-                    className={cn(
-                      'rounded-2xl border px-3 py-2.5 transition',
-                      item.stage === currentStage
-                        ? 'border-sky-400/40 bg-sky-400/10'
-                        : item.status === 'completed' || item.status === 'ready'
-                        ? 'border-emerald-400/20 bg-emerald-400/10'
-                        : 'border-white/10 bg-white/[0.04]'
-                    )}
-                  >
-                    <div className="flex flex-col items-start gap-2">
-                      <div className="min-w-0">
-                        <div className="text-sm font-medium text-slate-100">
-                          {index + 1}. {stageLabel(item.stage, language)}
-                        </div>
-                        {item.summary && (
-                          <div className="mt-1 break-words text-xs text-slate-400">{item.summary}</div>
-                        )}
-                      </div>
-                      <span
-                        className={cn(
-                          'rounded-full px-2 py-0.5 text-[10px] uppercase tracking-[0.12em]',
-                          item.status === 'completed' || item.status === 'ready'
-                            ? 'bg-emerald-400/15 text-emerald-200'
-                            : item.stage === currentStage
-                            ? 'bg-sky-400/15 text-sky-100'
-                            : 'bg-white/10 text-slate-300'
-                        )}
-                      >
-                        {item.status === 'completed'
-                          ? 'done'
-                          : item.stage === currentStage
-                          ? 'live'
-                          : 'next'}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid min-w-0 gap-3">
-              {coachIntervention && (
-                <div className="rounded-3xl border border-cyan-400/30 bg-cyan-500/10 p-4 text-cyan-50">
-                  <div className="flex flex-col gap-4">
-                    <div className="rounded-2xl border border-cyan-300/20 bg-black/20 p-3">
-                      <div className="text-[11px] uppercase tracking-[0.16em] text-cyan-200/80">
-                        {language === 'ar' ? 'Real-time coach' : 'Real-time coach'}
-                      </div>
-                      <h3 className="mt-2 text-lg font-semibold text-white">
-                        {coachIntervention.blockerSummary}
-                      </h3>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {(coachIntervention.history || []).slice(-5).map((item, index) => (
-                          <span key={`${item.type}-${index}`} className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.14em] text-cyan-100">
-                            {item.label || item.type.replace(/_/g, ' ')}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                        <div className="rounded-2xl border border-cyan-300/20 bg-background/20 px-3 py-2 text-sm">
-                          <div className="text-[11px] uppercase tracking-[0.12em] text-cyan-200/80">
-                            {language === 'ar' ? 'Severity' : 'Severity'}
-                          </div>
-                          <div className="mt-1 font-medium text-white">{coachIntervention.severity}</div>
-                        </div>
-                        <div className="rounded-2xl border border-cyan-300/20 bg-background/20 px-3 py-2 text-sm">
-                          <div className="text-[11px] uppercase tracking-[0.12em] text-cyan-200/80">
-                            {language === 'ar' ? 'Decision axis' : 'Decision axis'}
-                          </div>
-                          <div className="mt-1 break-words font-medium text-white">{coachIntervention.decisionAxis || '-'}</div>
-                        </div>
-                      </div>
-                      {coachIntervention.guideMessage && (
-                        <p className="mt-3 text-sm leading-6 text-cyan-100/90">{coachIntervention.guideMessage}</p>
-                      )}
-                    </div>
-
-                    <div className="rounded-2xl border border-cyan-300/20 bg-black/20 p-3">
-                      <div className="mb-2 text-[11px] uppercase tracking-[0.16em] text-cyan-200/80">
-                        {language === 'ar' ? 'Evidence' : 'Evidence'}
-                      </div>
-                      <div className="space-y-2">
-                        {coachIntervention.agentCitations.slice(0, 3).map((item) => (
-                          <div key={item.id} className="rounded-2xl border border-cyan-300/15 bg-background/20 px-3 py-2">
-                            <div className="text-[11px] uppercase tracking-[0.12em] text-cyan-200/80">
-                              {item.agentLabel || (language === 'ar' ? 'وكيل' : 'Agent')}
-                            </div>
-                            <div className="mt-1 break-words text-sm text-white">{item.quote}</div>
-                          </div>
-                        ))}
-                        {coachIntervention.researchEvidence.slice(0, 3).map((item) => (
-                          <div key={item.id} className="rounded-2xl border border-white/10 bg-background/10 px-3 py-2">
-                            <div className="text-[11px] uppercase tracking-[0.12em] text-cyan-200/80">
-                              {item.label || (language === 'ar' ? 'بحث' : 'Research')}
-                            </div>
-                            <div className="mt-1 break-words text-sm text-cyan-50/90">{item.quote}</div>
-                          </div>
-                        ))}
-                      </div>
-                      {!!coachEvidenceMessageIds.length && onOpenCoachEvidence && (
-                        <Button type="button" variant="outline" onClick={() => onOpenCoachEvidence(coachEvidenceMessageIds)} className="mt-3 w-full">
-                          <Eye className="mr-2 h-4 w-4" />
-                          {language === 'ar' ? 'شاهد الرسائل المرتبطة' : 'View linked messages'}
-                        </Button>
-                      )}
-                    </div>
-
-                    <div className="rounded-2xl border border-cyan-300/20 bg-black/20 p-3">
-                      <div className="mb-3 flex items-center justify-between gap-2">
-                        <div className="text-[11px] uppercase tracking-[0.16em] text-cyan-200/80">
-                          {language === 'ar' ? '5 fixes ready' : '5 fixes ready'}
-                        </div>
-                        {onCoachRequestMoreIdeas && (
-                          <Button type="button" variant="ghost" size="sm" onClick={onCoachRequestMoreIdeas} disabled={coachBusy}>
-                            {language === 'ar' ? 'اقتراحات أخرى' : 'More ideas'}
-                          </Button>
-                        )}
-                      </div>
-                      <div className="space-y-2">
-                        {coachIntervention.suggestions.slice(0, 5).map((suggestion) => (
-                          <div key={suggestion.suggestionId} className="rounded-2xl border border-cyan-300/15 bg-background/15 p-3">
-                            <div className="text-sm font-semibold text-white">{suggestion.title}</div>
-                            <div className="mt-1 break-words text-sm text-cyan-50/90">{suggestion.oneLiner}</div>
-                            <div className="mt-2 break-words text-xs text-cyan-100/75">{suggestion.rationale}</div>
-                            {suggestion.tradeoff && (
-                              <div className="mt-2 break-words text-[11px] text-cyan-100/65">
-                                {language === 'ar' ? 'Tradeoff:' : 'Tradeoff:'} {suggestion.tradeoff}
-                              </div>
-                            )}
-                            {onCoachApplySuggestion && (
-                              <Button
-                                type="button"
-                                onClick={() => onCoachApplySuggestion(suggestion.suggestionId)}
-                                disabled={coachBusy}
-                                className="mt-3 w-full bg-cyan-200 text-cyan-950 hover:bg-cyan-100"
-                              >
-                                {suggestion.ctaLabel || (language === 'ar' ? 'اعتمد وأعد التشغيل' : 'Apply and rerun')}
-                              </Button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-cyan-300/20 bg-black/20 p-3">
-                      <div className="mb-2 text-[11px] uppercase tracking-[0.16em] text-cyan-200/80">
-                        {language === 'ar' ? 'Custom fix' : 'Custom fix'}
-                      </div>
-                      <Textarea
-                        value={coachCustomFixText}
-                        onChange={(event) => setCoachCustomFixText(event.target.value)}
-                        className="min-h-[96px] bg-background/20"
-                        placeholder={language === 'ar' ? 'أضف تعديلًا واقعيًا محددًا وسيتم تحويله إلى patch محايد.' : 'Add a factual fix and it will be converted into a neutral patch.'}
-                      />
-                      <div className="mt-3 grid gap-2">
-                        {onCoachCustomFix && (
-                          <Button type="button" onClick={submitCoachCustomFix} disabled={coachBusy || !coachCustomFixText.trim()} className="w-full">
-                            {language === 'ar' ? 'فلتر وأنشئ patch' : 'Filter and build patch'}
-                          </Button>
-                        )}
-                        {onCoachContinueWithoutChange && (
-                          <Button type="button" variant="outline" onClick={onCoachContinueWithoutChange} disabled={coachBusy} className="w-full">
-                            {language === 'ar' ? 'كمل بدون تعديل' : 'Continue without change'}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-
-                    {coachIntervention.patchPreview && (
-                      <div className="rounded-2xl border border-emerald-400/25 bg-emerald-500/10 p-3">
-                        <div className="text-[11px] uppercase tracking-[0.16em] text-emerald-200/80">
-                          {language === 'ar' ? 'Context diff preview' : 'Context diff preview'}
-                        </div>
-                        <div className="mt-2 space-y-2">
-                          {Object.entries(coachIntervention.patchPreview.contextPatch || {}).map(([key, value]) => (
-                            <div key={key} className="rounded-xl border border-white/10 bg-background/20 px-3 py-2 text-sm">
-                              <div className="text-[11px] uppercase tracking-[0.12em] text-emerald-200/80">{key}</div>
-                              <div className="mt-1 break-words text-white">
-                                {Array.isArray(value) ? value.join(', ') : String(value)}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="mt-3 text-xs text-emerald-100/80">
-                          {language === 'ar' ? 'سيُعاد البناء من:' : 'Will rerun from:'} {coachIntervention.patchPreview.rerunFromStage}
-                        </div>
-                        <div className="mt-1 text-xs text-emerald-100/80">
-                          {coachIntervention.patchPreview.guideMessage}
-                        </div>
-                        {coachIntervention.patchPreview.notes?.length ? (
-                          <div className="mt-2 space-y-1 text-xs text-emerald-100/70">
-                            {coachIntervention.patchPreview.notes.map((note) => (
-                              <div key={note} className="break-words">{note}</div>
-                            ))}
-                          </div>
-                        ) : null}
-                        {onCoachConfirmRerun && (
-                          <Button type="button" onClick={onCoachConfirmRerun} disabled={coachBusy} className="mt-3 w-full bg-emerald-200 text-emerald-950 hover:bg-emerald-100">
-                            <Play className="mr-2 h-4 w-4" />
-                            {language === 'ar' ? 'اعتمد وأعد التشغيل' : 'Confirm and rerun'}
-                          </Button>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {debateReady && (
-                <div className="rounded-3xl border border-amber-400/30 bg-amber-400/10 p-4 text-amber-50">
-                  <div className="flex flex-col gap-3">
-                    <div>
-                      <div className="text-xs uppercase tracking-[0.14em] text-amber-200/80">
-                        {language === 'ar' ? 'نقاش الـAgents' : 'Agent debate'}
-                      </div>
-                      <div className="mt-1 text-sm">
-                        {workflow?.simulation?.debate_session?.message || (language === 'ar' ? 'الـagents بدأوا يناقشوا بعض. هل تريد المشاهدة؟' : 'Agents have started debating. Do you want to watch?')}
-                      </div>
-                    </div>
-                    <Button type="button" onClick={onOpenReasoning} className="w-full bg-amber-200 text-amber-950 hover:bg-amber-100">
-                      <Eye className="mr-2 h-4 w-4" />
-                      {language === 'ar' ? 'شاهد النقاش' : 'Watch debate'}
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              <div className="grid min-w-0 gap-3">
-                <div className="space-y-3">
-                  <div className="rounded-3xl border border-border/60 bg-card/70 p-3 backdrop-blur">
-                    <div className="mb-3 flex flex-col gap-3">
-                      <div className="min-w-0">
-                        <div className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                          Guide timeline
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {language === 'ar' ? 'الـGuideAgent يشرح ما يحدث وما المطلوب منك.' : 'The GuideAgent explains each step and what it needs from you.'}
-                        </div>
-                      </div>
-                      {workflow?.verification && (
-                        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs text-emerald-100">
-                          <ShieldCheck className="h-3.5 w-3.5" />
-                          {workflow.verification.ok ? 'Verified' : 'Check'}
-                        </div>
-                      )}
-                    </div>
-                    <div className="space-y-3">
-                      {guideMessages.slice(-6).map((message) => (
-                        <div key={message.id} className="min-w-0 rounded-2xl border border-border/50 bg-background/60 p-3">
-                          <div className="mb-1 text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-                            {stageLabel(message.stage || currentStage, language)}
-                          </div>
-                          <div className="break-words text-sm leading-6 text-foreground">{message.content}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {currentStage === 'context_scope' && (
-                    <div className="rounded-3xl border border-border/60 bg-card/70 p-4">
-                      <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-foreground">
-                          {language === 'ar' ? 'حدد نوع السياق أولًا' : 'Choose the context scope first'}
-                        </h3>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {language === 'ar' ? 'هذه الخطوة إجبارية لأن نوع الشخصيات والبحث يعتمد عليها.' : 'This step is required because research and persona generation depend on it.'}
-                        </p>
-                      </div>
-                      <div className="grid gap-3">
-                        {(workflow?.context_options ?? []).map((option) => (
-                          <button
-                            key={option.id}
-                            type="button"
-                            onClick={() => onChooseScope(option.id)}
-                            className={cn(
-                              'rounded-3xl border p-4 text-left transition',
-                              draftInput.contextScope === option.id
-                                ? 'border-sky-400/50 bg-sky-500/10 shadow-[0_20px_50px_rgba(14,165,233,0.12)]'
-                                : 'border-border/50 bg-background/40 hover:border-sky-500/30 hover:bg-sky-500/5'
-                            )}
-                          >
-                            <div className="text-sm font-semibold text-foreground">{option.label}</div>
-                            <div className="mt-2 text-sm text-muted-foreground">{option.description}</div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {currentStage === 'schema_intake' && (
-                    <div className="rounded-3xl border border-border/60 bg-card/70 p-4">
-                      <div className="mb-4 flex flex-col gap-3">
-                        <div className="min-w-0">
-                          <h3 className="text-lg font-semibold text-foreground">
-                            {language === 'ar' ? 'اجمع فقط الحقول الناقصة' : 'Collect only the missing fields'}
-                          </h3>
-                          <p className="mt-1 text-sm text-muted-foreground">
-                            {language === 'ar' ? 'لن نعيد سؤال أي حقل موجود بالفعل، لكن يمكنك تعديله هنا إذا لزم.' : 'Known schema fields stay prefilled; edit them only if you need to correct something.'}
-                          </p>
-                        </div>
-                        {onOpenConfig && (
-                          <Button type="button" variant="outline" onClick={onOpenConfig} className="w-full">
-                            {language === 'ar' ? 'افتح الإعدادات' : 'Open config'}
-                          </Button>
-                        )}
-                      </div>
-
-                      <div className="grid gap-3">
-                        <div className="grid gap-4">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground">{language === 'ar' ? 'الفكرة' : 'Idea'}</label>
-                            <Textarea
-                              value={draftInput.idea}
-                              onChange={(event) => onDraftChange({ idea: event.target.value })}
-                              className="min-h-[120px]"
-                              placeholder={language === 'ar' ? 'صف الفكرة بجملة واضحة ومحددة.' : 'Describe the idea in one clear, concrete sentence.'}
-                            />
-                          </div>
-                          <div className="space-y-4">
-                            <div className="space-y-2">
-                              <label className="text-sm font-medium text-foreground">{language === 'ar' ? 'الفئة' : 'Category'}</label>
-                              <Input
-                                value={draftInput.category}
-                                onChange={(event) => onDraftChange({ category: event.target.value })}
-                                placeholder={language === 'ar' ? 'مثال: Fintech, Health, Education' : 'Example: Fintech, Health, Education'}
-                              />
-                            </div>
-                            {draftInput.contextScope === 'specific_place' && (
-                              <div className="grid gap-4">
-                                <div className="space-y-2">
-                                  <label className="text-sm font-medium text-foreground">{language === 'ar' ? 'المدينة / المكان' : 'City / place'}</label>
-                                  <Input
-                                    value={draftInput.city || draftInput.placeName}
-                                    onChange={(event) => onDraftChange({ city: event.target.value, placeName: event.target.value })}
-                                    placeholder={language === 'ar' ? 'مثال: Alexandria' : 'Example: Alexandria'}
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <label className="text-sm font-medium text-foreground">{language === 'ar' ? 'الدولة' : 'Country'}</label>
-                                  <Input
-                                    value={draftInput.country}
-                                    onChange={(event) => onDraftChange({ country: event.target.value })}
-                                    placeholder={language === 'ar' ? 'مثال: Egypt' : 'Example: Egypt'}
-                                  />
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-foreground">{language === 'ar' ? 'الجمهور المستهدف' : 'Target audience'}</label>
-                          <div className="flex flex-wrap gap-2">
-                            {['Consumers', 'Students', 'Professionals', 'SMBs', 'Enterprises', 'Developers'].map((item) => (
-                              <ToggleChip
-                                key={item}
-                                label={item}
-                                active={draftInput.targetAudience.includes(item)}
-                                onClick={() => {
-                                  const next = draftInput.targetAudience.includes(item)
-                                    ? draftInput.targetAudience.filter((entry) => entry !== item)
-                                    : [...draftInput.targetAudience, item];
-                                  onDraftChange({ targetAudience: next });
-                                }}
-                              />
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <label className="text-sm font-medium text-foreground">{language === 'ar' ? 'أهداف التشغيل' : 'Simulation goals'}</label>
-                          <div className="flex flex-wrap gap-2">
-                            {['Market Validation', 'Product-Market Fit', 'Growth Strategy', 'Competitive Analysis'].map((goal) => (
-                              <ToggleChip
-                                key={goal}
-                                label={goal}
-                                active={draftInput.goals.includes(goal)}
-                                onClick={() => {
-                                  const next = draftInput.goals.includes(goal)
-                                    ? draftInput.goals.filter((entry) => entry !== goal)
-                                    : [...draftInput.goals, goal];
-                                  onDraftChange({ goals: next });
-                                }}
-                              />
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="rounded-2xl border border-border/60 bg-background/40 px-4 py-3">
-                          <div className="break-words text-sm text-muted-foreground">
-                            {workflow?.required_fields?.length
-                              ? `${language === 'ar' ? 'الحقول المطلوبة الآن:' : 'Required now:'} ${workflow.required_fields.join(', ')}`
-                              : (language === 'ar' ? 'كل الحقول المطلوبة جاهزة.' : 'All required fields are ready.')}
-                          </div>
-                          <Button type="button" onClick={onSubmitSchema} disabled={loading} className="mt-3 w-full">
-                            <ArrowRight className="mr-2 h-4 w-4" />
-                            {language === 'ar' ? 'تابع للمرحلة التالية' : 'Continue to next stage'}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {currentStage === 'clarification' && (
-                    <div className="rounded-3xl border border-border/60 bg-card/70 p-4">
-                      <div className="mb-4">
-                        <h3 className="text-lg font-semibold text-foreground">
-                          {language === 'ar' ? 'توضيح ذكي فقط عند الغموض' : 'Smart clarification only where needed'}
-                        </h3>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {language === 'ar' ? 'هذه الأسئلة لا تعيد الـschema، بل تغلق الغموض الذي يؤثر على جودة الشخصيات والمحاكاة.' : 'These questions do not repeat the schema. They only close ambiguity that affects persona quality.'}
-                        </p>
-                      </div>
-
-                      <div className="space-y-4">
-                        {activeClarificationQuestions.map((question) => (
-                          <div key={question.id} className="rounded-2xl border border-border/60 bg-background/40 p-4">
-                            <div className="text-sm font-medium text-foreground">{question.prompt}</div>
-                            {question.reason && (
-                              <div className="mt-1 text-xs text-muted-foreground">{question.reason}</div>
-                            )}
-                            <Textarea
-                              className="mt-3 min-h-[88px]"
-                              value={clarificationAnswers[question.id] || ''}
-                              onChange={(event) => setClarificationAnswers((prev) => ({ ...prev, [question.id]: event.target.value }))}
-                            />
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="mt-4">
-                        <Button type="button" onClick={submitClarifications} disabled={loading} className="w-full">
-                          <Sparkles className="mr-2 h-4 w-4" />
-                          {language === 'ar' ? 'استكمل التحليل' : 'Continue analysis'}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
-                  {(currentStage === 'review' || currentStage === 'ready_to_start') && workflow?.review && (
-                    <div className="rounded-3xl border border-emerald-400/20 bg-emerald-500/5 p-4">
-                      <div className="mb-4 flex flex-col gap-3">
-                        <div className="min-w-0">
-                          <div className="text-xs uppercase tracking-[0.14em] text-emerald-300/80">
-                            {language === 'ar' ? 'Ready review' : 'Ready review'}
-                          </div>
-                          <h3 className="mt-1 text-lg font-semibold text-foreground">
-                            {workflow.review.title || (language === 'ar' ? 'ملخص التشغيل' : 'Launch summary')}
-                          </h3>
-                          <p className="mt-2 break-words text-sm text-muted-foreground">
-                            {workflow.review.summary}
-                          </p>
-                        </div>
-                        <div className="rounded-2xl border border-emerald-400/20 bg-background/40 px-4 py-3 text-sm">
-                          <div className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                            {language === 'ar' ? 'Estimated run time' : 'Estimated run time'}
-                          </div>
-                          <div className="mt-1 font-medium text-foreground">
-                            {formatEta(workflow.review.estimated_runtime_seconds, language)}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="grid gap-4">
-                        <div className="rounded-2xl border border-border/60 bg-background/40 p-4">
-                          <div className="mb-2 text-sm font-medium text-foreground">
-                            {language === 'ar' ? 'Research summary' : 'Research summary'}
-                          </div>
-                          <div className="space-y-2 text-sm text-muted-foreground">
-                            {(workflow.review.research_highlights || []).map((item) => (
-                              <div key={item} className="rounded-xl border border-border/40 bg-background/30 px-3 py-2 break-words">
-                                {item}
-                              </div>
-                            ))}
-                            {workflow.review.location_summary && (
-                              <div className="rounded-xl border border-border/40 bg-background/30 px-3 py-2 break-words">
-                                {workflow.review.location_summary}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="rounded-2xl border border-border/60 bg-background/40 p-4">
-                          <div className="mb-2 text-sm font-medium text-foreground">
-                            {workflow.persona_snapshot?.title || (language === 'ar' ? 'Generated personas' : 'Generated personas')}
-                          </div>
-                          <div className="space-y-2">
-                            {(workflow.persona_snapshot?.personas || []).slice(0, 4).map((persona) => (
-                              <div key={persona.id} className="rounded-xl border border-border/40 bg-background/30 px-3 py-2">
-                                <div className="text-sm font-medium text-foreground">{persona.label}</div>
-                                <div className="mt-1 break-words text-xs text-muted-foreground">{persona.summary}</div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 grid gap-2">
-                        {currentStage === 'review' && (
-                          <Button type="button" variant="outline" onClick={onApproveReview} disabled={loading} className="w-full">
-                            {language === 'ar' ? 'اعتمد المراجعة' : 'Approve review'}
-                          </Button>
-                        )}
-                        {currentStage === 'ready_to_start' && (
-                          <Button type="button" onClick={onStartSimulation} disabled={loading || simulationStatus === 'running'} className="w-full">
-                            <Play className="mr-2 h-4 w-4" />
-                            {language === 'ar' ? 'ابدأ المحاكاة' : 'Start simulation'}
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="space-y-3">
-                  <div className="rounded-3xl border border-border/60 bg-card/70 p-4">
-                    <div className="mb-3">
-                      <div className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                        {language === 'ar' ? 'Operator actions' : 'Operator actions'}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {language === 'ar' ? 'تستطيع الإيقاف والمتابعة في أي وقت.' : 'You can pause or resume at any point.'}
-                      </div>
-                    </div>
-                    <div className="grid gap-2">
-                      <Button type="button" variant="outline" onClick={canResume ? onResumeWorkflow : onPauseWorkflow} disabled={loading} className="w-full justify-center">
-                        {canResume ? <Play className="mr-2 h-4 w-4" /> : <Pause className="mr-2 h-4 w-4" />}
-                        {canResume
-                          ? (language === 'ar' ? 'استكمل الـworkflow' : 'Resume workflow')
-                          : (language === 'ar' ? 'أوقف الـworkflow' : 'Pause workflow')}
-                      </Button>
-                      <Button type="button" variant="outline" onClick={onOpenReasoning} className="w-full justify-center">
-                        <Eye className="mr-2 h-4 w-4" />
-                        {language === 'ar' ? `افتح الـreasoning (${reasoningCount})` : `Open reasoning (${reasoningCount})`}
-                      </Button>
-                    </div>
-                    {workflow?.pause_reason && (
-                      <div className="mt-3 rounded-2xl border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-sm text-amber-100">
-                        {workflow.pause_reason}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="rounded-3xl border border-border/60 bg-card/70 p-4">
-                    <div className="mb-3">
-                      <div className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                        {language === 'ar' ? 'Bias firewall' : 'Bias firewall'}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {language === 'ar' ? 'أرسل correction factual وسيتم تحويله إلى صياغة محايدة قبل التطبيق.' : 'Send a factual correction and it will be neutralized before application.'}
-                      </div>
-                    </div>
-                    <Textarea
-                      value={correctionText}
-                      onChange={(event) => setCorrectionText(event.target.value)}
-                      className="min-h-[120px]"
-                      placeholder={language === 'ar' ? 'مثال: city is Alexandria, target audience is SMBs' : 'Example: city is Alexandria, target audience is SMBs'}
-                    />
-                    <div className="mt-3 grid gap-2">
-                      <Button type="button" onClick={submitCorrection} disabled={loading || !correctionText.trim()} className="w-full">
-                        {language === 'ar' ? 'فلتر وطبّق التصحيح' : 'Filter and apply correction'}
-                      </Button>
-                      {onApplyCorrectionToSimulation && lastCorrection?.apply_mode === 'factual_update' && simulationStatus !== 'idle' && (
-                        <Button type="button" variant="outline" onClick={onApplyCorrectionToSimulation} className="w-full">
-                          {language === 'ar' ? 'أعد التشغيل بالتصحيح' : 'Rerun with correction'}
-                        </Button>
-                      )}
-                    </div>
-                    {lastCorrection && (
-                      <div className="mt-3 rounded-2xl border border-border/60 bg-background/40 p-3">
-                        <div className="text-xs uppercase tracking-[0.12em] text-muted-foreground">
-                          {language === 'ar' ? 'Neutralized correction' : 'Neutralized correction'}
-                        </div>
-                        <div className="mt-2 break-words text-sm text-foreground">{lastCorrection.neutralized_text}</div>
-                        {lastCorrection.notes?.length ? (
-                          <div className="mt-2 space-y-1 text-xs text-muted-foreground">
-                            {lastCorrection.notes.map((note) => (
-                              <div key={note} className="break-words">{note}</div>
-                            ))}
-                          </div>
-                        ) : null}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+        <div className="guided-chat-identity">
+          <div className="guided-chat-avatar" aria-hidden="true">
+            <span className="guided-chat-avatar-face">
+              <span className="guided-chat-avatar-eye" />
+              <span className="guided-chat-avatar-eye" />
+            </span>
+          </div>
+          <div className="guided-chat-identity-copy">
+            <div className="guided-chat-identity-title">GuideAgent</div>
+            <div className="guided-chat-identity-subtitle">
+              {language === 'ar' ? 'دليل المحاكاة' : 'Simulation guide'}
             </div>
           </div>
         </div>
+
+        {guideMessages.map((message) => (
+          <GuideBubble key={message.id} kicker={null}>
+            <div className="guided-chat-secondary-copy">{message.content}</div>
+          </GuideBubble>
+        ))}
+
+        {coachIntervention ? (
+          <>
+            <GuideBubble tone="warning" kicker={language === 'ar' ? 'المدرب الفوري' : 'Coach'}>
+              <div className="space-y-2">
+                <div className="guided-chat-message-title">{coachIntervention.blockerSummary}</div>
+                {coachIntervention.guideMessage ? (
+                  <div className="guided-chat-secondary-copy">{coachIntervention.guideMessage}</div>
+                ) : null}
+                <div className="guided-chat-meta-row">
+                  <span className="guided-chat-mini-chip">
+                    {language === 'ar' ? 'الحدة' : 'Severity'}: {coachIntervention.severity}
+                  </span>
+                  {coachIntervention.decisionAxis ? (
+                    <span className="guided-chat-mini-chip">
+                      {coachIntervention.decisionAxis}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+            </GuideBubble>
+
+            {coachIntervention.agentCitations.slice(0, 2).map((item) => (
+              <GuideBubble
+                key={item.id}
+                tone="muted"
+                kicker={item.agentLabel || (language === 'ar' ? 'وكيل' : 'Agent')}
+              >
+                <div className="guided-chat-secondary-copy">{item.quote}</div>
+              </GuideBubble>
+            ))}
+
+            {coachIntervention.researchEvidence.slice(0, 1).map((item) => (
+              <GuideBubble
+                key={item.id}
+                tone="muted"
+                kicker={item.label || (language === 'ar' ? 'بحث' : 'Research')}
+              >
+                <div className="guided-chat-secondary-copy">{item.quote}</div>
+              </GuideBubble>
+            ))}
+
+            {coachEvidenceMessageIds.length && onOpenCoachEvidence ? (
+              <GuideBubble tone="muted" kicker={null}>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onOpenCoachEvidence(coachEvidenceMessageIds)}
+                  className="guided-chat-button"
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  {language === 'ar' ? 'افتح تبويب التفكير' : 'Open reasoning tab'}
+                </Button>
+              </GuideBubble>
+            ) : null}
+
+            {coachIntervention.suggestions.slice(0, 5).map((suggestion) => (
+              <GuideBubble key={suggestion.suggestionId} tone="interactive">
+                <div className="space-y-2">
+                  <div className="guided-chat-message-title">{suggestion.title}</div>
+                  <div className="guided-chat-secondary-copy">{suggestion.oneLiner}</div>
+                  {suggestion.tradeoff ? (
+                    <div className="guided-chat-tertiary-copy">
+                      {language === 'ar' ? 'المقابل:' : 'Tradeoff:'} {suggestion.tradeoff}
+                    </div>
+                  ) : null}
+                  {onCoachApplySuggestion ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => onCoachApplySuggestion(suggestion.suggestionId)}
+                      disabled={coachBusy}
+                      className="guided-chat-button guided-chat-button-primary"
+                    >
+                      {suggestion.ctaLabel ||
+                        (language === 'ar' ? 'اعتمد وأعد التشغيل' : 'Apply')}
+                    </Button>
+                  ) : null}
+                </div>
+              </GuideBubble>
+            ))}
+
+            {onCoachRequestMoreIdeas || onCoachContinueWithoutChange ? (
+              <GuideBubble tone="muted" kicker={null}>
+                <ChatActionRow className="guided-chat-actions">
+                  {onCoachRequestMoreIdeas ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={onCoachRequestMoreIdeas}
+                      disabled={coachBusy}
+                      className="guided-chat-button"
+                    >
+                      {language === 'ar' ? 'أفكار أخرى' : 'More ideas'}
+                    </Button>
+                  ) : null}
+                  {onCoachContinueWithoutChange ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={onCoachContinueWithoutChange}
+                      disabled={coachBusy}
+                      className="guided-chat-button"
+                    >
+                      {language === 'ar' ? 'كمّل' : 'Continue'}
+                    </Button>
+                  ) : null}
+                </ChatActionRow>
+              </GuideBubble>
+            ) : null}
+
+            {onCoachCustomFix ? (
+              <GuideBubble tone="muted" wide kicker={null}>
+                <div className="space-y-3">
+                  <div className="guided-chat-secondary-copy">
+                    {language === 'ar'
+                      ? 'لو عندك تعديل واقعي محدد اكتبه هنا.'
+                      : 'If you have a concrete factual fix, write it here.'}
+                  </div>
+                  <Textarea
+                    value={coachCustomFixText}
+                    onChange={(event) => setCoachCustomFixText(event.target.value)}
+                    className="min-h-[84px] bg-background/20"
+                  />
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={submitCoachCustomFix}
+                    disabled={coachBusy || !coachCustomFixText.trim()}
+                    className="guided-chat-button"
+                  >
+                    {language === 'ar' ? 'فلتره' : 'Filter it'}
+                  </Button>
+                </div>
+              </GuideBubble>
+            ) : null}
+
+            {coachIntervention.patchPreview ? (
+              <GuideBubble tone="success" wide kicker={null}>
+                <div className="space-y-3">
+                  <div className="guided-chat-secondary-copy">
+                    {coachIntervention.patchPreview.guideMessage}
+                  </div>
+                  <div className="guided-chat-mini-chip">
+                    {language === 'ar' ? 'الإعادة من' : 'Rerun from'}:{' '}
+                    {coachIntervention.patchPreview.rerunFromStage}
+                  </div>
+                  {Object.entries(coachIntervention.patchPreview.contextPatch || {}).map(
+                    ([key, value]) => (
+                      <div key={key} className="guided-chat-patch-row">
+                        <div className="guided-chat-quote-label">{key}</div>
+                        <div className="guided-chat-quote-body">
+                          {Array.isArray(value) ? value.join(', ') : String(value)}
+                        </div>
+                      </div>
+                    ),
+                  )}
+                  {onCoachConfirmRerun ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={onCoachConfirmRerun}
+                      disabled={coachBusy}
+                      className="guided-chat-button guided-chat-button-primary"
+                    >
+                      <Play className="mr-2 h-4 w-4" />
+                      {language === 'ar' ? 'اعتمد وأعد التشغيل' : 'Confirm rerun'}
+                    </Button>
+                  ) : null}
+                </div>
+              </GuideBubble>
+            ) : null}
+          </>
+        ) : null}
+
+        {debateReady ? (
+          <GuideBubble tone="warning" kicker={null}>
+            <div className="space-y-2">
+              <div className="guided-chat-secondary-copy">
+                {workflow?.simulation?.debate_session?.message ||
+                  (language === 'ar'
+                    ? 'الوكلاء بدأوا يتناقشوا. افتح تبويب التفكير إذا أردت المتابعة.'
+                    : 'Agents started debating. Open the reasoning tab if you want to watch.')}
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                onClick={onOpenReasoning}
+                className="guided-chat-button guided-chat-button-primary"
+              >
+                <Eye className="mr-2 h-4 w-4" />
+                {language === 'ar' ? 'افتح التفكير' : 'Open reasoning'}
+              </Button>
+            </div>
+          </GuideBubble>
+        ) : null}
+
+        {currentStage === 'context_scope' ? (
+          <>
+            <GuideBubble kicker={null}>
+              <div className="guided-chat-message-title">
+                {language === 'ar' ? 'اختر نوع السياق أولًا' : 'Choose the context scope first'}
+              </div>
+            </GuideBubble>
+            <GuideBubble tone="interactive" wide kicker={null}>
+              <div className="guided-chat-choice-list">
+                {(workflow?.context_options ?? []).map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => onChooseScope(option.id)}
+                    className={cn(
+                      'guided-chat-choice-button',
+                      draftInput.contextScope === option.id && 'is-selected',
+                    )}
+                  >
+                    <span className="font-semibold">{option.label}</span>
+                    <span className="guided-chat-choice-copy">{option.description}</span>
+                  </button>
+                ))}
+              </div>
+            </GuideBubble>
+          </>
+        ) : null}
+
+        {currentStage === 'schema_intake' ? (
+          <>
+            <GuideBubble kicker={null}>
+              <div className="guided-chat-message-title">
+                {language === 'ar' ? 'اجمع فقط الحقول الناقصة' : 'Collect only missing fields'}
+              </div>
+              <div className="guided-chat-secondary-copy">
+                {language === 'ar'
+                  ? 'لن نكرر ما هو موجود بالفعل.'
+                  : 'We will not repeat what is already known.'}
+              </div>
+            </GuideBubble>
+
+            <GuideBubble tone="interactive" wide kicker={null}>
+              <div className="guided-chat-form">
+                {schemaSteps.length > 0 && activeSchemaStep ? (
+                  <>
+                    <div className="guided-chat-step-indicator">
+                      {language === 'ar' ? 'سؤال' : 'Step'}{' '}
+                      {Math.min(schemaStepIndex + 1, schemaSteps.length)} / {schemaSteps.length}
+                    </div>
+                    <div className="guided-chat-field">
+                      <label className="guided-chat-field-label">{activeSchemaStep.title}</label>
+                      {activeSchemaStep.hint ? (
+                        <div className="guided-chat-tertiary-copy">{activeSchemaStep.hint}</div>
+                      ) : null}
+                      {activeSchemaStep.render()}
+                    </div>
+                    <div className="guided-chat-tertiary-copy">
+                      {workflow?.required_fields?.length
+                        ? `${language === 'ar' ? 'المطلوب الآن:' : 'Required now:'} ${workflow.required_fields.join(', ')}`
+                        : language === 'ar'
+                          ? 'كل الحقول المطلوبة جاهزة.'
+                          : 'All required fields are ready.'}
+                    </div>
+                    <ChatActionRow className="guided-chat-actions">
+                      {schemaStepIndex > 0 ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSchemaStepIndex((current) => Math.max(0, current - 1))}
+                          className="guided-chat-button"
+                        >
+                          {language === 'ar' ? 'السابق' : 'Previous'}
+                        </Button>
+                      ) : null}
+
+                      {schemaStepIndex < schemaSteps.length - 1 ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={() =>
+                            setSchemaStepIndex((current) =>
+                              Math.min(schemaSteps.length - 1, current + 1),
+                            )
+                          }
+                          disabled={!activeSchemaStep.ready}
+                          className="guided-chat-button guided-chat-button-primary"
+                        >
+                          <ArrowRight className="mr-2 h-4 w-4" />
+                          {language === 'ar' ? 'التالي' : 'Next'}
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={onSubmitSchema}
+                          disabled={loading || !activeSchemaStep.ready}
+                          className="guided-chat-button guided-chat-button-primary"
+                        >
+                          <ArrowRight className="mr-2 h-4 w-4" />
+                          {language === 'ar' ? 'أرسل الحقول' : 'Submit fields'}
+                        </Button>
+                      )}
+
+                      {onOpenConfig ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={onOpenConfig}
+                          className="guided-chat-button"
+                        >
+                          {language === 'ar' ? 'افتح الإعدادات' : 'Open config'}
+                        </Button>
+                      ) : null}
+                    </ChatActionRow>
+                  </>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="guided-chat-secondary-copy">
+                      {language === 'ar'
+                        ? 'لا توجد حقول ناقصة الآن. يمكنك المتابعة أو فتح الإعدادات للمراجعة.'
+                        : 'No missing fields right now. You can continue or open config to review.'}
+                    </div>
+                    <ChatActionRow className="guided-chat-actions">
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={onSubmitSchema}
+                        disabled={loading}
+                        className="guided-chat-button guided-chat-button-primary"
+                      >
+                        <ArrowRight className="mr-2 h-4 w-4" />
+                        {language === 'ar' ? 'تابع' : 'Continue'}
+                      </Button>
+                      {onOpenConfig ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={onOpenConfig}
+                          className="guided-chat-button"
+                        >
+                          {language === 'ar' ? 'افتح الإعدادات' : 'Open config'}
+                        </Button>
+                      ) : null}
+                    </ChatActionRow>
+                  </div>
+                )}
+              </div>
+            </GuideBubble>
+          </>
+        ) : null}
+
+        {currentStage === 'clarification' ? (
+          <>
+            <GuideBubble kicker={null}>
+              <div className="guided-chat-message-title">
+                {language === 'ar' ? 'نحتاج توضيحًا صغيرًا' : 'A small clarification is needed'}
+              </div>
+              <div className="guided-chat-secondary-copy">
+                {language === 'ar'
+                  ? 'أجب فقط على ما هو غير واضح.'
+                  : 'Answer only what is still ambiguous.'}
+              </div>
+            </GuideBubble>
+
+            {activeClarificationQuestion ? (
+              <>
+                <GuideBubble tone="interactive" wide kicker={null}>
+                  <div className="space-y-3">
+                    <div className="guided-chat-step-indicator">
+                      {language === 'ar' ? 'سؤال' : 'Question'}{' '}
+                      {Math.min(clarificationStepIndex + 1, activeClarificationQuestions.length)} /{' '}
+                      {activeClarificationQuestions.length}
+                    </div>
+                    <div className="guided-chat-secondary-copy text-foreground">
+                      {activeClarificationQuestion.prompt}
+                    </div>
+                    {activeClarificationQuestion.reason ? (
+                      <div className="guided-chat-tertiary-copy">
+                        {activeClarificationQuestion.reason}
+                      </div>
+                    ) : null}
+                    <Textarea
+                      className="min-h-[84px]"
+                      value={clarificationAnswers[activeClarificationQuestion.id] || ''}
+                      onChange={(event) =>
+                        setClarificationAnswers((prev) => ({
+                          ...prev,
+                          [activeClarificationQuestion.id]: event.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                </GuideBubble>
+
+                <GuideBubble tone="muted" kicker={null}>
+                  <ChatActionRow className="guided-chat-actions">
+                    {clarificationStepIndex > 0 ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          setClarificationStepIndex((current) => Math.max(0, current - 1))
+                        }
+                        className="guided-chat-button"
+                      >
+                        {language === 'ar' ? 'السابق' : 'Previous'}
+                      </Button>
+                    ) : null}
+
+                    {clarificationStepIndex < activeClarificationQuestions.length - 1 ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() =>
+                          setClarificationStepIndex((current) =>
+                            Math.min(activeClarificationQuestions.length - 1, current + 1),
+                          )
+                        }
+                        disabled={!(clarificationAnswers[activeClarificationQuestion.id] || '').trim()}
+                        className="guided-chat-button guided-chat-button-primary"
+                      >
+                        <ArrowRight className="mr-2 h-4 w-4" />
+                        {language === 'ar' ? 'التالي' : 'Next'}
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={submitClarifications}
+                        disabled={
+                          loading || !(clarificationAnswers[activeClarificationQuestion.id] || '').trim()
+                        }
+                        className="guided-chat-button guided-chat-button-primary"
+                      >
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        {language === 'ar' ? 'أرسل الإجابات' : 'Send answers'}
+                      </Button>
+                    )}
+                  </ChatActionRow>
+                </GuideBubble>
+              </>
+            ) : null}
+          </>
+        ) : null}
+
+        {(currentStage === 'review' || currentStage === 'ready_to_start') && workflow?.review ? (
+          <>
+            <GuideBubble kicker={null}>
+              <div className="guided-chat-message-title">
+                {workflow.review.title ||
+                  (language === 'ar' ? 'مراجعة قبل البدء' : 'Review before launch')}
+              </div>
+              <div className="guided-chat-secondary-copy">{workflow.review.summary}</div>
+            </GuideBubble>
+
+            <GuideBubble tone="success" wide kicker={null}>
+              <div className="space-y-3">
+                <div className="guided-chat-mini-chip">
+                  {language === 'ar' ? 'الوقت المتوقع' : 'Estimated runtime'}:{' '}
+                  {formatEta(workflow.review.estimated_runtime_seconds, language)}
+                </div>
+                {(workflow.review.research_highlights || []).slice(0, 3).map((item) => (
+                  <div key={item} className="guided-chat-quote guided-chat-quote-muted">
+                    <div className="guided-chat-quote-body">{item}</div>
+                  </div>
+                ))}
+                {workflow.review.location_summary ? (
+                  <div className="guided-chat-quote guided-chat-quote-muted">
+                    <div className="guided-chat-quote-body">{workflow.review.location_summary}</div>
+                  </div>
+                ) : null}
+                {(workflow.persona_snapshot?.personas || []).slice(0, 2).map((persona) => (
+                  <div key={persona.id} className="guided-chat-quote">
+                    <div className="guided-chat-quote-label">{persona.label}</div>
+                    <div className="guided-chat-quote-body">{persona.summary}</div>
+                  </div>
+                ))}
+                <ChatActionRow className="guided-chat-actions">
+                  {currentStage === 'review' ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={onApproveReview}
+                      disabled={loading}
+                      className="guided-chat-button"
+                    >
+                      {language === 'ar' ? 'اعتمد المراجعة' : 'Approve review'}
+                    </Button>
+                  ) : null}
+                  {currentStage === 'ready_to_start' ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={onStartSimulation}
+                      disabled={loading || simulationStatus === 'running'}
+                      className="guided-chat-button guided-chat-button-primary"
+                    >
+                      <Play className="mr-2 h-4 w-4" />
+                      {language === 'ar' ? 'ابدأ المحاكاة' : 'Start simulation'}
+                    </Button>
+                  ) : null}
+                </ChatActionRow>
+              </div>
+            </GuideBubble>
+          </>
+        ) : null}
       </div>
-    </div>
+
+      <div className="guided-chat-footer">
+        <ChatActionRow className="guided-chat-actions">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={canResume ? onResumeWorkflow : onPauseWorkflow}
+            disabled={loading}
+            className="guided-chat-button"
+          >
+            {canResume ? <Play className="mr-2 h-4 w-4" /> : <Pause className="mr-2 h-4 w-4" />}
+            {canResume ? (language === 'ar' ? 'استكمل' : 'Resume') : language === 'ar' ? 'أوقف' : 'Pause'}
+          </Button>
+
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={onOpenReasoning}
+            className="guided-chat-button"
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            {language === 'ar' ? `التفكير (${reasoningCount})` : `Reasoning (${reasoningCount})`}
+          </Button>
+
+          <Button
+            type="button"
+            size="sm"
+            variant={showCorrectionComposer ? 'default' : 'outline'}
+            onClick={() => setShowCorrectionComposer((current) => !current)}
+            className={cn('guided-chat-button', showCorrectionComposer && 'guided-chat-button-primary')}
+          >
+            {language === 'ar' ? 'تصحيح' : 'Correction'}
+          </Button>
+
+          {onApplyCorrectionToSimulation &&
+          lastCorrection?.apply_mode === 'factual_update' &&
+          simulationStatus !== 'idle' ? (
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={onApplyCorrectionToSimulation}
+              className="guided-chat-button"
+            >
+              {language === 'ar' ? 'أعد التشغيل' : 'Rerun'}
+            </Button>
+          ) : null}
+        </ChatActionRow>
+
+        {workflow?.pause_reason || lastCorrection?.neutralized_text ? (
+          <div className="guided-footer-note">
+            {workflow?.pause_reason ? <div>{workflow.pause_reason}</div> : null}
+            {lastCorrection?.neutralized_text ? (
+              <div className="guided-chat-tertiary-copy">
+                <span className="font-semibold">
+                  {language === 'ar' ? 'آخر تصحيح:' : 'Last correction:'}
+                </span>{' '}
+                {lastCorrection.neutralized_text}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {showCorrectionComposer ? (
+          <div className="guided-footer-composer">
+            <Textarea
+              value={correctionText}
+              onChange={(event) => setCorrectionText(event.target.value)}
+              className="min-h-[88px]"
+              placeholder={
+                language === 'ar'
+                  ? 'مثال: city is Alexandria, target audience is SMBs'
+                  : 'Example: city is Alexandria, target audience is SMBs'
+              }
+            />
+            <ChatActionRow className="guided-chat-actions">
+              <Button
+                type="button"
+                size="sm"
+                onClick={submitCorrection}
+                disabled={loading || !correctionText.trim()}
+                className="guided-chat-button guided-chat-button-primary"
+              >
+                {language === 'ar' ? 'طبّق التصحيح' : 'Apply correction'}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setShowCorrectionComposer(false);
+                  setCorrectionText('');
+                }}
+                className="guided-chat-button"
+              >
+                {language === 'ar' ? 'إلغاء' : 'Cancel'}
+              </Button>
+            </ChatActionRow>
+          </div>
+        ) : null}
+      </div>
+    </ChatShell>
   );
 }

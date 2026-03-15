@@ -1,4 +1,4 @@
-import { startTransition, useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { startTransition, useState, useCallback, useEffect, useMemo, useRef, type CSSProperties } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import {
@@ -4794,7 +4794,11 @@ If rejection is about competition or location, suggest searching for a better lo
       )}
       <div className="flex-1 min-h-0 overflow-y-auto xl:overflow-hidden p-3 md:p-4">
           <div
-            className={`min-h-full xl:h-full grid grid-cols-1 xl:grid-cols-[minmax(${CHAT_PANEL_DESKTOP_MIN_WIDTH_PX}px,22%)_minmax(0,1fr)_minmax(${METRICS_PANEL_DESKTOP_MIN_WIDTH_PX}px,28%)] gap-4 min-h-0`}
+            className="min-h-full xl:h-full grid grid-cols-1 xl:grid-cols-[minmax(var(--chat-panel-min-width),22%)_minmax(0,1fr)_minmax(var(--metrics-panel-min-width),28%)] gap-4 min-h-0"
+            style={{
+              '--chat-panel-min-width': `${CHAT_PANEL_DESKTOP_MIN_WIDTH_PX}px`,
+              '--metrics-panel-min-width': `${METRICS_PANEL_DESKTOP_MIN_WIDTH_PX}px`,
+            } as CSSProperties}
           >
           <div className={cn('min-h-0 h-[84dvh] xl:h-full', isArabic ? 'xl:order-3' : 'xl:order-1')}>
             {metricsPane}

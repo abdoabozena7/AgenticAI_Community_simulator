@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChatMessage, PendingClarification, PendingIdeaConfirmation, PendingResearchReview, PreflightQuestion, ReasoningMessage, SimulationStatus } from '@/types/simulation';
 import { cn } from '@/lib/utils';
+import { ChatTopProgress, type ChatProgressStep } from '@/components/simulation/ChatPrimitives';
 
 type BusyStage =
   | 'extracting_schema'
@@ -24,6 +25,8 @@ type BusyStage =
   | 'prestart_research'
   | 'starting_simulation'
   | 'checking_session';
+
+type ProgressStripKey = 'intake' | 'research' | 'reasoning' | 'discussion' | 'convergence' | 'summary';
 
 /* ------------------------------------------------------------------
    PROP-TYPES
@@ -1011,6 +1014,15 @@ export function ChatPanel({
     ? [thinkingSteps[thinkingStepIndex] || thinkingSteps[0]]
     : [];
 
+  const progressStepLabels = useMemo<Record<ProgressStripKey, string>>(() => ({
+    intake: settings.language === 'ar' ? 'التهيئة' : 'Intake',
+    research: settings.language === 'ar' ? 'البحث' : 'Research',
+    reasoning: settings.language === 'ar' ? 'التفكير' : 'Reasoning',
+    discussion: settings.language === 'ar' ? 'النقاش' : 'Discussion',
+    convergence: settings.language === 'ar' ? 'التقارب' : 'Convergence',
+    summary: settings.language === 'ar' ? 'الخلاصة' : 'Summary',
+  }), [settings.language]);
+
   const phaseFallbackLabel = settings.language === 'ar' ? 'مرحلة جارية' : 'In-progress phase';
   const phaseLabelMap = useMemo(() => ({
     'Information Shock': settings.language === 'ar' ? 'الآراء الفردية' : 'Individual Opinions',
@@ -1041,6 +1053,69 @@ export function ChatPanel({
   const reasoningIndex = useMemo(() => {
     return new Map(reasoningFeed.map((msg, index) => [msg.id, index]));
   }, [reasoningFeed]);
+
+  const progressCurrentKey = useMemo<ProgressStripKey>(() => {
+    const normalizedPhase = String(phaseState?.currentPhaseKey || '').trim().toLowerCase();
+    if (simulationStatus === 'completed' || simulationStatus === 'error' || isSummarizing || ['summary', 'resolution', 'verdict', 'completed'].includes(normalizedPhase)) {
+      return 'summary';
+    }
+    if (normalizedPhase === 'convergence') return 'convergence';
+    if (normalizedPhase === 'debate' || normalizedPhase === 'deliberation') return 'discussion';
+    if (reasoningActive || reasoningFeed.length > 0 || normalizedPhase === 'agent_init') return 'reasoning';
+    if (showLiveResearchCard || activeBusyStage === 'prestart_research' || searchState?.status === 'complete') return 'research';
+    return 'intake';
+  }, [
+    activeBusyStage,
+    isSummarizing,
+    phaseState?.currentPhaseKey,
+    reasoningActive,
+    reasoningFeed.length,
+    searchState?.status,
+    showLiveResearchCard,
+    simulationStatus,
+  ]);
+
+  const progressSteps = useMemo<ChatProgressStep[]>(() => {
+    const order: ProgressStripKey[] = ['intake', 'research', 'reasoning', 'discussion', 'convergence', 'summary'];
+    const currentIndex = order.indexOf(progressCurrentKey);
+    return order.map((key, index) => ({
+      key,
+      label: progressStepLabels[key],
+      state: index < currentIndex ? 'completed' : index === currentIndex ? 'current' : 'upcoming',
+    }));
+  }, [progressCurrentKey, progressStepLabels]);
+
+  const progressHeadline = useMemo(() => {
+    if (showBusyStageBar) return busyStageLabel;
+    if (statusLabel) return statusLabel;
+    if (phaseLabel) return phaseLabel;
+    if (showLiveResearchCard) {
+      return settings.language === 'ar' ? 'يجمع النظام إشارات بحث مباشرة' : 'Live research is gathering signals';
+    }
+    return progressStepLabels[progressCurrentKey];
+  }, [busyStageLabel, phaseLabel, progressCurrentKey, progressStepLabels, settings.language, showBusyStageBar, showLiveResearchCard, statusLabel]);
+
+  const progressDetail = useMemo(() => {
+    if (showBusyStageBar) {
+      return [busyElapsedLabel, busyTimeoutContextLabel].filter(Boolean).join(' • ');
+    }
+    if (showLiveResearchCard) return researchTimeoutLabel;
+    if (typeof phaseState?.progressPct === 'number' && phaseLabel) {
+      return `${phaseLabel} • ${Math.round(phaseState.progressPct)}%`;
+    }
+    if (simulationError) return simulationError;
+    return settings.language === 'ar' ? 'كل التحديثات المؤقتة تظهر داخل المحادثة' : 'Transient updates appear inside the thread';
+  }, [
+    busyElapsedLabel,
+    busyTimeoutContextLabel,
+    phaseLabel,
+    phaseState?.progressPct,
+    researchTimeoutLabel,
+    settings.language,
+    showBusyStageBar,
+    showLiveResearchCard,
+    simulationError,
+  ]);
 
   const handleThinkingClick = () => {
     setThinkingOpen((p) => !p);
@@ -1210,10 +1285,15 @@ export function ChatPanel({
   const safePreviewUrl = useMemo(() => toSafeHttpUrl(previewUrl), [previewUrl, toSafeHttpUrl]);
 
   return (
-    <div className="glass-panel flex h-full min-h-0 flex-col overflow-hidden">
+    <div className="glass-panel chat-shell flex h-full min-h-0 flex-col overflow-hidden">
+      <ChatTopProgress
+        steps={progressSteps}
+        headline={progressHeadline}
+        detail={progressDetail}
+      />
       {/* -------------------- MESSAGE LIST -------------------- */}
       <div
-        className="messages-container scrollbar-thin overflow-x-hidden"
+        className="messages-container scrollbar-thin overflow-x-hidden chat-thread"
         ref={scrollRef}
         data-testid={isReasoningView ? 'reasoning-messages' : 'chat-messages'}
         onScroll={() => {
@@ -1310,7 +1390,7 @@ export function ChatPanel({
             )}
 
             {(phaseState?.currentPhaseKey || showLiveResearchCard) && (
-              <div className="rounded-lg border border-border/50 bg-card/70 p-3 space-y-2">
+              <div className="chat-ephemeral-card chat-research-activity rounded-lg border border-border/50 bg-card/70 p-3 space-y-2">
                 {phaseState?.currentPhaseKey && (
                   <div className="text-xs text-muted-foreground">
                     {settings.language === 'ar' ? 'المرحلة الحالية:' : 'Current phase:'}{' '}
@@ -1499,7 +1579,7 @@ export function ChatPanel({
             )}
 
             {hasPendingResearchReview && pendingResearchReview && (
-              <div className="rounded-xl border border-cyan-400/30 bg-cyan-500/10 p-3 space-y-3">
+              <div className="chat-ephemeral-card rounded-xl border border-cyan-400/30 bg-cyan-500/10 p-3 space-y-3">
                 <div className="text-sm font-semibold text-cyan-100">
                   {settings.language === 'ar'
                     ? 'مراجعة نتائج البحث قبل المتابعة'
@@ -1661,7 +1741,7 @@ export function ChatPanel({
             {statusLabel && !uiProgressActive && <div className="status-chip">{statusLabel}</div>}
 
             {hasPendingPreflight && pendingPreflightQuestion && (
-              <div className="rounded-xl border border-cyan-400/30 bg-cyan-500/10 p-3 space-y-3">
+              <div className="chat-ephemeral-card rounded-xl border border-cyan-400/30 bg-cyan-500/10 p-3 space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <div className="text-sm font-semibold text-cyan-100">
                     {settings.language === 'ar'
@@ -1739,7 +1819,7 @@ export function ChatPanel({
             )}
 
             {!hasPendingPreflight && hasPendingIdeaConfirmation && pendingIdeaConfirmation && (
-              <div className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 p-3 space-y-3">
+              <div className="chat-ephemeral-card rounded-xl border border-emerald-400/30 bg-emerald-500/10 p-3 space-y-3">
                 <div className="text-sm font-semibold text-emerald-100">
                   {settings.language === 'ar'
                     ? 'الوصف المقترح لفكرتك قبل البدء'
@@ -1785,7 +1865,7 @@ export function ChatPanel({
             )}
 
             {hasPendingClarification && pendingClarification && (
-              <div className="rounded-xl border border-cyan-400/30 bg-cyan-500/10 p-3 space-y-3">
+              <div className="chat-ephemeral-card rounded-xl border border-cyan-400/30 bg-cyan-500/10 p-3 space-y-3">
                 <div className="text-sm font-semibold text-cyan-100">
                   {settings.language === 'ar'
                     ? 'الوكلاء محتاجين توضيح قبل استكمال التفكير'
@@ -1879,7 +1959,7 @@ export function ChatPanel({
             )}
 
             {postActionsEnabled && (
-              <div className="rounded-xl border border-border/50 bg-card/70 p-3 space-y-3">
+              <div className="chat-ephemeral-card rounded-xl border border-border/50 bg-card/70 p-3 space-y-3">
                 <div className="text-sm font-semibold text-foreground">
                   {settings.language === 'ar'
                     ? 'الخطوات التالية بعد انتهاء المحاكاة'
@@ -1907,7 +1987,7 @@ export function ChatPanel({
                 </Button>
 
                 {postActionResult && (
-                  <div className="rounded-lg border border-border/50 bg-background/40 p-3 space-y-2">
+                  <div className="chat-ephemeral-card rounded-lg border border-border/50 bg-background/40 p-3 space-y-2">
                     <div className="text-sm font-semibold text-foreground">{postActionResult.title}</div>
                     <ReadMoreText
                       text={postActionResult.summary}
@@ -2160,7 +2240,7 @@ export function ChatPanel({
             {progressLiveAnnouncement}
           </div>
           {showBusyStageBar && (
-            <div className="mb-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2.5 space-y-1.5" role="status">
+            <div className="chat-ephemeral-card mb-2 rounded-lg border border-primary/30 bg-primary/10 px-3 py-2.5 space-y-1.5" role="status">
               <div className="flex items-center justify-between gap-3 text-sm">
                 <span className="inline-flex items-center gap-1.5 text-primary font-medium">
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
