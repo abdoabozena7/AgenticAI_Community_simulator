@@ -74,6 +74,36 @@ export interface SimulationMetrics {
   perCategoryAccepted: Record<string, number>;
 }
 
+export type TopBarStepState = 'completed' | 'current' | 'upcoming';
+
+export interface TopBarStep {
+  key: string;
+  label: string;
+  state: TopBarStepState;
+  subtleStatus?: string;
+}
+
+export interface SimulationUiState {
+  screenTitle: string;
+  stageLabel: string;
+  currentStatusLabel: string;
+  currentStatusTone: 'idle' | 'info' | 'success' | 'warning' | 'error';
+  steps: TopBarStep[];
+  currentStepLoading: boolean;
+  graphTitle: string;
+  graphDescription: string;
+  graphLegend: Array<{
+    key: string;
+    label: string;
+    color: string;
+  }>;
+  graphEmptyTitle: string;
+  graphEmptyDescription: string;
+  metricsHeadline: string;
+  metricsDescription: string;
+  metricsEmptyLabel: string;
+}
+
 export interface ChatMessage {
   id: string;
   type: 'user' | 'system' | 'agent';

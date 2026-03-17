@@ -1,4 +1,4 @@
-import { Brain, LayoutPanelTop, MessageSquareMore, MoonStar, Sparkles, SunMedium } from 'lucide-react';
+import { Brain, MessageSquareMore, MoonStar, Sparkles, SunMedium } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export const CATEGORY_OPTIONS = [
@@ -26,112 +26,105 @@ export const GOAL_OPTIONS = [
 interface TopBarProps {
   language: 'ar' | 'en';
   theme?: string;
-  selectedCategory?: string;
-  selectedAudiences?: string[];
-  selectedGoals?: string[];
-  riskLevel?: number;
-  maturity?: string;
   activePanel?: 'config' | 'chat' | 'reasoning';
   reasoningCount?: number;
-  currentPhaseLabel?: string;
-  searchLabel?: string;
+  screenTitle: string;
+  stageLabel: string;
+  currentStatusLabel: string;
+  currentStatusTone?: 'idle' | 'info' | 'success' | 'warning' | 'error';
+  currentStepLoading?: boolean;
   onPanelChange?: (panel: 'config' | 'chat' | 'reasoning') => void;
+  configDisabled?: boolean;
+  configDisabledReason?: string;
 }
 
-const translations: Record<string, string> = {
-  Technology: 'تكنولوجيا',
-  Healthcare: 'رعاية صحية',
-  Finance: 'تمويل',
-  Education: 'تعليم',
-  'E-commerce': 'تجارة إلكترونية',
-  Entertainment: 'ترفيه',
-  Social: 'مجتمعات',
-  'B2B SaaS': 'برمجيات أعمال',
-  'Consumer Apps': 'تطبيقات مستهلكين',
-  Hardware: 'أجهزة',
+const toneClasses: Record<NonNullable<TopBarProps['currentStatusTone']>, string> = {
+  idle: 'border-border/60 bg-background/65 text-muted-foreground',
+  info: 'border-sky-400/30 bg-sky-500/10 text-sky-100',
+  success: 'border-emerald-400/30 bg-emerald-500/10 text-emerald-100',
+  warning: 'border-amber-400/35 bg-amber-500/10 text-amber-100',
+  error: 'border-rose-400/35 bg-rose-500/10 text-rose-100',
 };
 
 export function TopBar({
   language,
   theme = 'dark',
-  selectedCategory,
-  selectedAudiences = [],
-  selectedGoals = [],
-  riskLevel = 50,
-  maturity = 'concept',
   activePanel = 'chat',
   reasoningCount = 0,
-  currentPhaseLabel,
-  searchLabel,
+  screenTitle,
+  stageLabel,
+  currentStatusLabel,
+  currentStatusTone = 'idle',
+  currentStepLoading = false,
   onPanelChange,
+  configDisabled = false,
+  configDisabledReason,
 }: TopBarProps) {
-  const audienceLabel = selectedAudiences.length
-    ? selectedAudiences.slice(0, 2).join(language === 'ar' ? '، ' : ', ')
-    : (language === 'ar' ? 'غير محدد' : 'Not set');
-  const goalLabel = selectedGoals.length
-    ? selectedGoals.slice(0, 2).join(language === 'ar' ? '، ' : ', ')
-    : (language === 'ar' ? 'بدون هدف واضح' : 'No explicit goal');
+  const panelItems = [
+    { key: 'chat' as const, label: language === 'ar' ? 'الدردشة' : 'Chat', icon: MessageSquareMore },
+    { key: 'reasoning' as const, label: language === 'ar' ? 'النقاش' : 'Reasoning', icon: Brain },
+    { key: 'config' as const, label: language === 'ar' ? 'الإعدادات' : 'Config', icon: Sparkles },
+  ];
 
   return (
-    <div className="mx-4 mt-3 rounded-[28px] border border-border/60 bg-card/70 px-4 py-3 backdrop-blur-xl">
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary">
-            <LayoutPanelTop className="h-4 w-4" />
-            <span>{currentPhaseLabel || (language === 'ar' ? 'مساحة العمل' : 'Workspace')}</span>
-          </div>
-          <div className="rounded-full border border-border/60 bg-background/60 px-3 py-1.5 text-sm text-muted-foreground">
-            {searchLabel || (language === 'ar' ? 'جاهز للبحث' : 'Ready for search')}
-          </div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1.5 text-sm text-muted-foreground">
-            {theme === 'dark' ? <MoonStar className="h-4 w-4" /> : <SunMedium className="h-4 w-4" />}
-            <span>{language === 'ar' ? (theme === 'dark' ? 'الوضع الداكن' : 'الوضع الأبيض') : (theme === 'dark' ? 'Dark mode' : 'White mode')}</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-2 xl:w-[360px]">
-          {[
-            { key: 'chat', label: language === 'ar' ? 'الدردشة' : 'Chat', icon: MessageSquareMore },
-            { key: 'reasoning', label: language === 'ar' ? 'النقاش' : 'Reasoning', icon: Brain },
-            { key: 'config', label: language === 'ar' ? 'الإعدادات' : 'Config', icon: Sparkles },
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => onPanelChange?.(item.key as 'config' | 'chat' | 'reasoning')}
+    <div className="mx-4 mt-3 rounded-[30px] border border-border/60 bg-card/75 px-4 py-4 shadow-[0_18px_48px_-32px_rgba(0,0,0,0.78)] backdrop-blur-xl">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-lg font-semibold text-foreground sm:text-xl">{screenTitle}</h1>
+              <span className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                {stageLabel}
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-xs text-muted-foreground">
+                {theme === 'dark' ? <MoonStar className="h-3.5 w-3.5" /> : <SunMedium className="h-3.5 w-3.5" />}
+                <span>{language === 'ar' ? (theme === 'dark' ? 'الوضع الداكن' : 'الوضع الفاتح') : (theme === 'dark' ? 'Dark mode' : 'Light mode')}</span>
+              </span>
+            </div>
+            <div className={cn('mt-3 inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-1.5 text-sm', toneClasses[currentStatusTone])}>
+              <span
                 className={cn(
-                  'flex h-11 items-center justify-center gap-2 rounded-full border text-sm font-semibold transition',
-                  activePanel === item.key
-                    ? 'border-primary bg-primary text-primary-foreground'
-                    : 'border-border/60 bg-background/60 text-muted-foreground hover:text-foreground',
+                  'h-2.5 w-2.5 rounded-full',
+                  currentStatusTone === 'success' && 'bg-emerald-300',
+                  currentStatusTone === 'warning' && 'bg-amber-300',
+                  currentStatusTone === 'error' && 'bg-rose-300',
+                  (currentStatusTone === 'idle' || currentStatusTone === 'info') && 'bg-white/80',
+                  currentStepLoading && 'animate-pulse',
                 )}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{item.key === 'reasoning' && reasoningCount > 0 ? `${item.label} (${reasoningCount})` : item.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+                aria-hidden="true"
+              />
+              <span className="truncate">{currentStatusLabel}</span>
+            </div>
+          </div>
 
-      <div className="mt-3 grid gap-2 xl:grid-cols-4">
-        <div className="rounded-[22px] border border-border/55 bg-background/45 px-3 py-2">
-          <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">{language === 'ar' ? 'الفئة' : 'Category'}</div>
-          <div className="mt-1 text-sm font-semibold text-foreground">{language === 'ar' ? translations[selectedCategory || ''] || selectedCategory || 'غير محددة' : selectedCategory || 'Not set'}</div>
-        </div>
-        <div className="rounded-[22px] border border-border/55 bg-background/45 px-3 py-2">
-          <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">{language === 'ar' ? 'الجمهور' : 'Audience'}</div>
-          <div className="mt-1 text-sm font-semibold text-foreground">{audienceLabel}</div>
-        </div>
-        <div className="rounded-[22px] border border-border/55 bg-background/45 px-3 py-2">
-          <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">{language === 'ar' ? 'الأهداف' : 'Goals'}</div>
-          <div className="mt-1 text-sm font-semibold text-foreground">{goalLabel}</div>
-        </div>
-        <div className="rounded-[22px] border border-border/55 bg-background/45 px-3 py-2">
-          <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">{language === 'ar' ? 'المخاطرة / المرحلة' : 'Risk / stage'}</div>
-          <div className="mt-1 text-sm font-semibold text-foreground">{riskLevel}% · {maturity}</div>
+          <div className="grid grid-cols-3 gap-2 xl:min-w-[360px]">
+            {panelItems.map((item) => {
+              const Icon = item.icon;
+              const disabled = item.key === 'config' && configDisabled;
+              const label = item.key === 'reasoning' && reasoningCount > 0
+                ? `${item.label} (${reasoningCount})`
+                : item.label;
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => !disabled && onPanelChange?.(item.key)}
+                  disabled={disabled}
+                  title={disabled ? configDisabledReason : undefined}
+                  className={cn(
+                    'flex h-11 items-center justify-center gap-2 rounded-full border text-sm font-semibold transition-all duration-200',
+                    activePanel === item.key
+                      ? 'border-primary bg-primary text-primary-foreground shadow-[0_10px_20px_-16px_rgba(255,255,255,0.9)]'
+                      : 'border-border/60 bg-background/65 text-muted-foreground hover:border-primary/30 hover:text-foreground',
+                    disabled && 'cursor-not-allowed opacity-50',
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>

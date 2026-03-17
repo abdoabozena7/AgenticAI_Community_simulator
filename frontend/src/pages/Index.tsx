@@ -19,6 +19,7 @@ import { useGuidedWorkflow } from '@/hooks/useGuidedWorkflow';
 import { ChatMessage, GuidedWorkflowDraftContext, PendingIdeaConfirmation, PreflightQuestion, UserInput } from '@/types/simulation';
 import { websocketService } from '@/services/websocket';
 import { apiService, clearAuthTokens, SearchResponse, SimulationConfig, SimulationPreflightNextResponse, SocietyCatalogResponse, UserMe } from '@/services/api';
+import { buildSimulationUiState } from '@/lib/simulationUi';
 import { cn } from '@/lib/utils';
 import { addIdeaLogEntry, updateIdeaLogEntry } from '@/lib/ideaLog';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -4631,6 +4632,15 @@ If rejection is about competition or location, suggest searching for a better lo
     });
   }, [getMissingForStart, isConfigLocked, notifyConfigLocked]);
 
+  const simulationUiState = useMemo(() => buildSimulationUiState({
+    language: settings.language,
+    phaseKey: simulation.currentPhaseKey,
+    simulationStatus: simulation.status,
+    simulationError: simulation.error,
+    searchState,
+    uiProgress,
+  }), [settings.language, searchState, simulation.currentPhaseKey, simulation.error, simulation.status, uiProgress]);
+
   const sharedChatPanelProps = {
     messages: chatMessages,
     reasoningFeed: simulation.reasoningFeed,
@@ -4652,10 +4662,6 @@ If rejection is about competition or location, suggest searching for a better lo
     simulationError: simulation.error,
     reasoningActive,
     isSummarizing,
-    phaseState: {
-      currentPhaseKey: simulation.currentPhaseKey,
-      progressPct: simulation.phaseProgressPct,
-    },
     researchSourcesLive: simulation.researchSources,
     quickReplies: quickReplies || undefined,
     onQuickReply: handleQuickReply,
@@ -4690,7 +4696,8 @@ If rejection is about competition or location, suggest searching for a better lo
 
   const sidePanel = (
     <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[34px] border border-border/60 bg-card/35 shadow-[0_18px_60px_-42px_rgba(0,0,0,0.72)] backdrop-blur-xl">
-      <div className="border-b border-border/40 px-5 py-4">
+      {false ? (
+      <div className="hidden">
         <div className="grid grid-cols-3 gap-2">
           <button
             type="button"
@@ -4717,7 +4724,8 @@ If rejection is about competition or location, suggest searching for a better lo
           </button>
         </div>
       </div>
-      <div className="min-h-0 flex-1 overflow-hidden px-2 pb-2 pt-1">
+      ) : null}
+      <div className="min-h-0 flex-1 overflow-hidden p-2">
         {activePanel === 'config' ? (
           <ConfigPanel
             value={userInput}
@@ -4738,7 +4746,11 @@ If rejection is about competition or location, suggest searching for a better lo
             onAskSocietyAssistant={handleAskSocietyAssistant}
           />
         ) : activePanel === 'reasoning' ? (
-          <ChatPanel {...sharedChatPanelProps} viewMode="reasoning" />
+          <div className="flex h-full min-h-0 items-center justify-center rounded-[28px] border border-dashed border-border/55 bg-background/25 px-6 text-center text-sm text-muted-foreground">
+            {settings.language === 'ar'
+              ? 'النقاش مفتوح الآن في المساحة الرئيسية بالمنتصف.'
+              : 'Reasoning is now open in the main middle area.'}
+          </div>
         ) : (
           <ChatPanel {...sharedChatPanelProps} viewMode="chat" />
         )}
@@ -4747,31 +4759,45 @@ If rejection is about competition or location, suggest searching for a better lo
   );
 
   const arenaPanel = (
-    <div className="grid min-h-0 gap-4 xl:grid-rows-[minmax(460px,1fr)_minmax(0,240px)]">
-      <div className="min-h-[380px] overflow-hidden rounded-[32px]">
-        <SimulationArena
-          agents={Array.from(simulation.agents.values())}
-          activePulses={simulation.activePulses}
-          language={settings.language}
-          reasoningActive={reasoningActive}
-          debateReady={debateInviteVisible}
-          reasoningFeed={simulation.reasoningFeed}
-          onOpenReasoning={() => {
-            setDebateInviteVisible(false);
-            handleManualPanelSwitch('reasoning');
-          }}
-        />
+    activePanel === 'reasoning' ? (
+      <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[32px] border border-border/60 bg-card/35 p-3">
+        <div className="min-h-0 flex-1 overflow-y-auto scrollbar-thin">
+          <ChatPanel {...sharedChatPanelProps} viewMode="reasoning" />
+        </div>
       </div>
-      <div className="min-h-0 overflow-y-auto rounded-[32px] border border-border/60 bg-card/35 p-3 scrollbar-thin">
-        <IterationTimeline
-          currentIteration={simulation.metrics.currentIteration}
-          totalIterations={simulation.metrics.totalIterations}
-          language={settings.language}
-          currentPhaseKey={simulation.currentPhaseKey}
-          phaseProgressPct={simulation.phaseProgressPct}
-        />
+    ) : (
+      <div className="grid min-h-0 gap-4 xl:grid-rows-[minmax(460px,1fr)_minmax(0,240px)]">
+        <div className="min-h-[380px] overflow-hidden rounded-[32px]">
+          <SimulationArena
+            agents={Array.from(simulation.agents.values())}
+            activePulses={simulation.activePulses}
+            language={settings.language}
+            reasoningActive={reasoningActive}
+            debateReady={debateInviteVisible}
+            reasoningFeed={simulation.reasoningFeed}
+            graphTitle={simulationUiState.graphTitle}
+            graphDescription={simulationUiState.graphDescription}
+            graphLegend={simulationUiState.graphLegend}
+            emptyTitle={simulationUiState.graphEmptyTitle}
+            emptyDescription={simulationUiState.graphEmptyDescription}
+            onOpenReasoning={() => {
+              setDebateInviteVisible(false);
+              handleManualPanelSwitch('reasoning');
+            }}
+          />
+        </div>
+        <div className="min-h-0 overflow-y-auto rounded-[32px] border border-border/60 bg-card/35 p-3 scrollbar-thin">
+          <IterationTimeline
+            currentIteration={simulation.metrics.currentIteration}
+            totalIterations={simulation.metrics.totalIterations}
+            language={settings.language}
+            currentPhaseKey={simulation.currentPhaseKey}
+            phaseProgressPct={simulation.phaseProgressPct}
+            steps={simulationUiState.steps}
+          />
+        </div>
       </div>
-    </div>
+    )
   );
 
   const metricsPane = (
@@ -4779,6 +4805,9 @@ If rejection is about competition or location, suggest searching for a better lo
       <MetricsPanel
         metrics={simulation.metrics}
         language={settings.language}
+        headline={simulationUiState.metricsHeadline}
+        description={simulationUiState.metricsDescription}
+        emptyLabel={simulationUiState.metricsEmptyLabel}
         onSelectStance={handleSelectStanceFilter}
         selectedStance={selectedStanceFilter}
         filteredAgents={filteredAgents}
@@ -4814,15 +4843,15 @@ If rejection is about competition or location, suggest searching for a better lo
       <TopBar
         language={settings.language}
         theme={settings.theme}
-        selectedCategory={userInput.category}
-        selectedAudiences={userInput.targetAudience}
-        selectedGoals={userInput.goals}
-        riskLevel={userInput.riskAppetite}
-        maturity={userInput.ideaMaturity}
         activePanel={activePanel}
         reasoningCount={simulation.reasoningFeed.length}
-        currentPhaseLabel={topBarPhaseLabel}
-        searchLabel={topBarSearchLabel}
+        screenTitle={simulationUiState.screenTitle}
+        stageLabel={simulationUiState.stageLabel}
+        currentStatusLabel={simulationUiState.currentStatusLabel}
+        currentStatusTone={simulationUiState.currentStatusTone}
+        currentStepLoading={simulationUiState.currentStepLoading}
+        configDisabled={isConfigLocked}
+        configDisabledReason={configLockReason}
         onPanelChange={handleManualPanelSwitch}
       />
       {creditNotice && (
@@ -4925,22 +4954,22 @@ If rejection is about competition or location, suggest searching for a better lo
       )}
       <div className="min-h-0 flex-1 overflow-y-auto p-3 md:p-4 xl:overflow-hidden">
         <div className="flex min-h-full flex-col gap-4 xl:hidden">
-          <div className="h-[74dvh] min-h-[420px]">{arenaPanel}</div>
           <div className="h-[68dvh] min-h-[420px]">{sidePanel}</div>
+          <div className="h-[74dvh] min-h-[420px]">{arenaPanel}</div>
           <div className="h-[62dvh] min-h-[360px]">{metricsPane}</div>
         </div>
 
         <div className="hidden h-full min-h-0 xl:block">
           <ResizablePanelGroup direction="horizontal" className="gap-0 rounded-[36px] border border-border/60 bg-card/20 p-3">
-            <ResizablePanel defaultSize={32} minSize={24}>
-              <div className="h-full min-h-0 pe-3">{sidePanel}</div>
+            <ResizablePanel defaultSize={34} minSize={24}>
+              <div className="h-full min-h-0 pe-3">{arenaPanel}</div>
             </ResizablePanel>
             <ResizableHandle withHandle className="mx-1.5 rounded-full bg-border/70" />
-            <ResizablePanel defaultSize={43} minSize={30}>
-              <div className="h-full min-h-0 px-3">{arenaPanel}</div>
+            <ResizablePanel defaultSize={42} minSize={30}>
+              <div className="h-full min-h-0 px-3">{sidePanel}</div>
             </ResizablePanel>
             <ResizableHandle withHandle className="mx-1.5 rounded-full bg-border/70" />
-            <ResizablePanel defaultSize={25} minSize={18}>
+            <ResizablePanel defaultSize={24} minSize={18}>
               <div className="h-full min-h-0 ps-3">{metricsPane}</div>
             </ResizablePanel>
           </ResizablePanelGroup>

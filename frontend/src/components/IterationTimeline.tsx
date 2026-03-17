@@ -1,4 +1,5 @@
-﻿import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import type { TopBarStep } from '@/types/simulation';
 
 interface IterationTimelineProps {
   currentIteration: number;
@@ -7,6 +8,7 @@ interface IterationTimelineProps {
   language: 'ar' | 'en';
   currentPhaseKey?: string | null;
   phaseProgressPct?: number | null;
+  steps?: TopBarStep[];
 }
 
 type CanonicalPhaseKey =
@@ -71,6 +73,7 @@ export function IterationTimeline({
   language,
   currentPhaseKey,
   phaseProgressPct,
+  steps = [],
 }: IterationTimelineProps) {
   const normalizedPhase = normalizePhase(currentPhaseKey);
   const phaseIndex = normalizedPhase ? PHASE_ORDER.indexOf(normalizedPhase) : -1;
@@ -100,41 +103,95 @@ export function IterationTimeline({
 
   return (
     <div className="glass-panel p-5 lg:p-6">
-      <div className="flex items-center justify-between mb-4">
+      {steps.length ? (
+        <div className="mb-5 overflow-x-auto scrollbar-thin">
+          <div className="flex min-w-max items-center gap-2 pb-1" dir="rtl">
+            {steps.map((step, index) => (
+              <div key={step.key} className="flex items-center gap-2">
+                <div
+                  className={cn(
+                    'group flex min-w-[132px] items-center gap-2 rounded-full border px-3 py-2 text-sm transition-all duration-300',
+                    step.state === 'completed' && 'border-emerald-400/40 bg-emerald-500/12 text-emerald-100',
+                    step.state === 'current' && 'border-white/35 bg-white text-slate-950 shadow-[0_14px_28px_-20px_rgba(255,255,255,0.9)]',
+                    step.state === 'upcoming' && 'border-amber-400/40 bg-amber-500/12 text-amber-100',
+                  )}
+                >
+                  <span
+                    className={cn(
+                      'flex h-6 w-6 items-center justify-center rounded-full transition-all duration-300',
+                      step.state === 'completed' && 'bg-emerald-400 text-slate-950',
+                      step.state === 'current' && 'bg-slate-950 text-white',
+                      step.state === 'upcoming' && 'bg-amber-300 text-slate-950',
+                    )}
+                  >
+                    {step.state === 'current' ? (
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/70 opacity-75" />
+                        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white" />
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-bold">{index + 1}</span>
+                    )}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="truncate font-semibold">{step.label}</div>
+                    {step.subtleStatus ? (
+                      <div className={cn('truncate text-[11px]', step.state === 'current' ? 'text-slate-700' : 'text-current/70')}>
+                        {step.subtleStatus}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+                {index < steps.length - 1 ? (
+                  <div
+                    className={cn(
+                      'h-px w-6 shrink-0 transition-colors duration-300',
+                      step.state === 'completed' ? 'bg-emerald-400/60' : 'bg-border/70',
+                    )}
+                    aria-hidden="true"
+                  />
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
+          <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-primary" />
           <span className="text-base font-semibold text-foreground">
             {language === 'ar' ? 'خط التقدم' : 'Progress Timeline'}
           </span>
         </div>
         <div className="flex items-center gap-2" dir="ltr">
-          <span className="text-3xl font-mono font-bold text-primary leading-none">{currentIteration}</span>
+          <span className="text-3xl font-mono font-bold leading-none text-primary">{currentIteration}</span>
           <span className="text-muted-foreground">/</span>
           <span className="text-base font-mono text-muted-foreground">{totalIterations || '-'}</span>
         </div>
       </div>
 
-      <div className="relative h-3.5 bg-secondary rounded-full overflow-hidden">
+      <div className="relative h-3.5 overflow-hidden rounded-full bg-secondary">
         <div
-          className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-500 ease-out"
+          className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-500 ease-out"
           style={{ width: `${Math.min(progress, 100)}%` }}
         >
           <div className="absolute inset-0 bg-primary/30 blur-sm" />
         </div>
       </div>
 
-      {normalizedPhase && (
+      {normalizedPhase ? (
         <div className="mt-3 space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">
               {language === 'ar' ? 'المرحلة الحالية' : 'Current phase'}
             </span>
-            <span className="text-foreground font-medium">
+            <span className="font-medium text-foreground">
               {currentPhaseLabel}
               {typeof phaseProgressPct === 'number' && ` - ${Math.round(safePct(phaseProgressPct))}%`}
             </span>
           </div>
-          <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
+          <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-8">
             {PHASE_ORDER.map((phase, index) => {
               const passed = phaseIndex > index;
               const active = phaseIndex === index;
@@ -142,10 +199,10 @@ export function IterationTimeline({
                 <div
                   key={phase}
                   className={cn(
-                    'rounded-md border px-2 py-1.5 text-center text-xs truncate',
+                    'truncate rounded-md border px-2 py-1.5 text-center text-xs',
                     passed && 'border-primary/40 bg-primary/10 text-primary',
                     active && 'border-accent/50 bg-accent/15 text-foreground',
-                    !passed && !active && 'border-border/40 bg-secondary/30 text-muted-foreground'
+                    !passed && !active && 'border-border/40 bg-secondary/30 text-muted-foreground',
                   )}
                   title={phaseLabel(phase, language)}
                 >
@@ -155,9 +212,9 @@ export function IterationTimeline({
             })}
           </div>
         </div>
-      )}
+      ) : null}
 
-      {!normalizedPhase && totalIterations > 0 && (
+      {!normalizedPhase && totalIterations > 0 ? (
         <div className="relative mt-2 h-5" dir="ltr">
           {allMilestones.map((milestone) => {
             const position = (milestone / totalIterations) * 100;
@@ -166,8 +223,8 @@ export function IterationTimeline({
               <span
                 key={milestone}
                 className={cn(
-                  'absolute text-xs font-mono -translate-x-1/2 transition-colors duration-300',
-                  isPassed ? 'text-primary' : 'text-muted-foreground'
+                  'absolute -translate-x-1/2 text-xs font-mono transition-colors duration-300',
+                  isPassed ? 'text-primary' : 'text-muted-foreground',
                 )}
                 style={{ left: `${position}%` }}
               >
@@ -176,20 +233,20 @@ export function IterationTimeline({
             );
           })}
         </div>
-      )}
+      ) : null}
 
-      <div className="flex items-center justify-between mt-5 pt-3 border-t border-border/50">
+      <div className="mt-5 flex items-center justify-between border-t border-border/50 pt-3">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
-            <div className={cn('w-2 h-2 rounded-full', progress > 0 ? 'bg-success' : 'bg-muted-foreground/30')} />
+            <div className={cn('h-2 w-2 rounded-full', progress > 0 ? 'bg-success' : 'bg-muted-foreground/30')} />
             <span className="text-sm text-muted-foreground">{language === 'ar' ? 'بداية' : 'Started'}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className={cn('w-2 h-2 rounded-full', progress >= 50 ? 'bg-warning' : 'bg-muted-foreground/30')} />
+            <div className={cn('h-2 w-2 rounded-full', progress >= 50 ? 'bg-warning' : 'bg-muted-foreground/30')} />
             <span className="text-sm text-muted-foreground">{language === 'ar' ? 'منتصف' : 'Midpoint'}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className={cn('w-2 h-2 rounded-full', progress >= 100 ? 'bg-primary' : 'bg-muted-foreground/30')} />
+            <div className={cn('h-2 w-2 rounded-full', progress >= 100 ? 'bg-primary' : 'bg-muted-foreground/30')} />
             <span className="text-sm text-muted-foreground">{language === 'ar' ? 'اكتمال' : 'Complete'}</span>
           </div>
         </div>
