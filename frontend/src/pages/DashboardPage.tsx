@@ -60,16 +60,108 @@ type PersonaSelection = {
   persona_source_mode: 'saved_place_personas';
   persona_set_key: string;
   persona_set_label?: string;
+  country?: string;
   city?: string;
+  placeName?: string;
 };
 
 type SimulationLaunchDraft = {
   idea: string;
   category?: string;
   location?: string;
+  country?: string;
+  city?: string;
+  placeName?: string;
+};
+
+type DashboardSchemaExtraction = {
+  city?: string;
+  country?: string;
+  place_name?: string;
+  location?: string;
+  category?: string;
 };
 
 const CHART_COLORS = ['#22d3ee', '#f472b6', '#facc15', '#4ade80', '#a78bfa', '#f97316'];
+
+const DASHBOARD_PLACE_CONTEXT: Record<string, { city: string; country: string }> = {
+  'الهرم': { city: 'Giza', country: 'Egypt' },
+  haram: { city: 'Giza', country: 'Egypt' },
+  'فيصل': { city: 'Giza', country: 'Egypt' },
+  faisal: { city: 'Giza', country: 'Egypt' },
+  'المهندسين': { city: 'Giza', country: 'Egypt' },
+  mohandessin: { city: 'Giza', country: 'Egypt' },
+  'الدقي': { city: 'Giza', country: 'Egypt' },
+  dokki: { city: 'Giza', country: 'Egypt' },
+  'مدينة نصر': { city: 'Cairo', country: 'Egypt' },
+  'nasr city': { city: 'Cairo', country: 'Egypt' },
+  'التجمع الخامس': { city: 'Cairo', country: 'Egypt' },
+  'new cairo': { city: 'Cairo', country: 'Egypt' },
+  'المعادي': { city: 'Cairo', country: 'Egypt' },
+  maadi: { city: 'Cairo', country: 'Egypt' },
+};
+
+const readTrimmedDashboardValue = (...values: Array<string | undefined | null>) => {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim()) {
+      return value.trim();
+    }
+  }
+  return '';
+};
+
+const inferDashboardPlaceContext = (...values: Array<string | undefined | null>) => {
+  for (const rawValue of values) {
+    const value = typeof rawValue === 'string' ? rawValue.trim() : '';
+    if (!value) continue;
+    const normalized = value.toLowerCase();
+    for (const [needle, mapped] of Object.entries(DASHBOARD_PLACE_CONTEXT)) {
+      if (normalized.includes(needle.toLowerCase())) {
+        return {
+          placeName: value,
+          city: mapped.city,
+          country: mapped.country,
+        };
+      }
+    }
+  }
+  return null;
+};
+
+const readDashboardLocation = (extraction?: DashboardSchemaExtraction | null) => {
+  const rawPlaceName = readTrimmedDashboardValue(extraction?.place_name, extraction?.location);
+  let city = readTrimmedDashboardValue(extraction?.city);
+  let country = readTrimmedDashboardValue(extraction?.country);
+  let placeName = rawPlaceName;
+
+  const inferredPlaceContext = inferDashboardPlaceContext(placeName, city, extraction?.location);
+  if (inferredPlaceContext) {
+    placeName = placeName || inferredPlaceContext.placeName;
+    city = city && city === inferredPlaceContext.placeName ? inferredPlaceContext.city : (city || inferredPlaceContext.city);
+    country = country || inferredPlaceContext.country;
+  }
+
+  if (placeName && !city && !country) {
+    const fallbackPlaceContext = inferDashboardPlaceContext(placeName);
+    if (fallbackPlaceContext) {
+      city = fallbackPlaceContext.city;
+      country = fallbackPlaceContext.country;
+    }
+  }
+
+  const location = readTrimmedDashboardValue(
+    placeName,
+    [city, country].filter(Boolean).join(', '),
+  );
+
+  return {
+    location,
+    country,
+    city,
+    placeName,
+    hasLocation: Boolean(location),
+  };
+};
 
 const formatRelativeTime = (dateString?: string, rtl = false) => {
   if (!dateString) return '';
@@ -368,10 +460,22 @@ export default function DashboardPage() {
   };
 
   const handleStartResearch = async (payload: { idea: string; location?: string; category?: string }) => {
+    let resolvedLocation = payload.location?.trim() || '';
+    if (!resolvedLocation && payload.idea.trim()) {
+      try {
+        const extraction = await apiService.extractSchema(payload.idea.trim(), {
+          idea: payload.idea.trim(),
+          category: payload.category || '',
+        });
+        resolvedLocation = readDashboardLocation(extraction).location;
+      } catch {
+        resolvedLocation = '';
+      }
+    }
     setActiveNav('research');
     setResearchState({ loading: true, result: null, error: null, query: payload.idea });
     try {
-      const res = await apiService.runResearch(payload.idea, payload.location, payload.category, language);
+      const res = await apiService.runResearch(payload.idea, resolvedLocation || payload.location, payload.category, language);
       setResearchState({ loading: false, result: res, error: null, query: payload.idea });
     } catch (err: any) {
       setResearchState({ loading: false, result: null, error: err?.message || 'Research failed', query: payload.idea });
@@ -400,16 +504,23 @@ export default function DashboardPage() {
     persona_source_mode?: 'default_audience_only' | 'generate_new_from_place' | 'saved_place_personas';
     persona_set_key?: string;
     persona_set_label?: string;
+    country?: string;
     city?: string;
+    placeName?: string;
   }) => {
     const trimmedIdea = draft.idea.trim();
     if (!trimmedIdea) return;
+    const resolvedCountry = options?.country || draft.country || '';
+    const resolvedCity = options?.city || draft.city || '';
+    const resolvedPlaceName = options?.placeName || draft.placeName || draft.location || '';
     const pendingDraft = {
       idea: trimmedIdea,
       autoStart: true,
       category: draft.category || '',
-      city: options?.city || draft.location || '',
-      persona_source_mode: options?.persona_source_mode || (draft.location ? 'generate_new_from_place' : 'default_audience_only'),
+      country: resolvedCountry,
+      city: resolvedCity,
+      placeName: resolvedPlaceName,
+      persona_source_mode: options?.persona_source_mode || (Boolean(resolvedPlaceName || resolvedCity || resolvedCountry) ? 'generate_new_from_place' : 'default_audience_only'),
       persona_set_key: options?.persona_set_key || '',
       persona_set_label: options?.persona_set_label || '',
     };
@@ -430,34 +541,81 @@ export default function DashboardPage() {
   }, [navigate]);
 
   const handleOpenPersonaChoice = useCallback((draft: SimulationLaunchDraft) => {
-    setPersonaLaunchDraft(draft);
-    setSelectedSavedPersonaSetKey(defaultPersonaSelection?.draft.idea === draft.idea ? defaultPersonaSelection.selection.persona_set_key : '');
-    setPersonaSourceDialogOpen(true);
-    void loadSavedPersonaSets(draft.location || savedPersonaSearch);
+    void (async () => {
+      let nextDraft = draft;
+      if (!draft.location && !draft.city && !draft.country && !draft.placeName && draft.idea.trim()) {
+        try {
+          const extraction = await apiService.extractSchema(draft.idea.trim(), {
+            idea: draft.idea.trim(),
+            category: draft.category || '',
+          });
+          const inferredLocation = readDashboardLocation(extraction);
+          if (inferredLocation.hasLocation) {
+            nextDraft = {
+              ...draft,
+              location: inferredLocation.location,
+              country: inferredLocation.country,
+              city: inferredLocation.city,
+              placeName: inferredLocation.placeName,
+            };
+          }
+        } catch {
+          nextDraft = draft;
+        }
+      }
+      setPersonaLaunchDraft(nextDraft);
+      setSelectedSavedPersonaSetKey(defaultPersonaSelection?.draft.idea === nextDraft.idea ? defaultPersonaSelection.selection.persona_set_key : '');
+      setPersonaSourceDialogOpen(true);
+      void loadSavedPersonaSets(nextDraft.placeName || nextDraft.location || savedPersonaSearch);
+    })();
   }, [defaultPersonaSelection, loadSavedPersonaSets, savedPersonaSearch]);
 
   const handleStartSimulation = useCallback((payload: { idea: string; location?: string; category?: string; forceChoice?: boolean }) => {
-    const draft = {
-      idea: payload.idea.trim(),
-      location: payload.location?.trim() || '',
-      category: payload.category?.trim() || '',
-    };
-    if (!draft.idea) return;
-    const matchingDefault = defaultPersonaSelection && defaultPersonaSelection.draft.idea === draft.idea
-      ? defaultPersonaSelection.selection
-      : null;
-    if (matchingDefault) {
-      continueToSimulation(draft, matchingDefault);
-      return;
-    }
-    if (draft.location && !payload.forceChoice) {
-      continueToSimulation(draft, {
-        persona_source_mode: 'generate_new_from_place',
-        city: draft.location,
-      });
-      return;
-    }
-    handleOpenPersonaChoice(draft);
+    void (async () => {
+      let draft = {
+        idea: payload.idea.trim(),
+        location: payload.location?.trim() || '',
+        category: payload.category?.trim() || '',
+      };
+      if (!draft.idea) return;
+      if (!draft.location && !draft.city && !draft.country && !draft.placeName) {
+        try {
+          const extraction = await apiService.extractSchema(draft.idea, {
+            idea: draft.idea,
+            category: draft.category || '',
+          });
+          const inferredLocation = readDashboardLocation(extraction);
+          if (inferredLocation.hasLocation) {
+            draft = {
+              ...draft,
+              location: inferredLocation.location,
+              country: inferredLocation.country,
+              city: inferredLocation.city,
+              placeName: inferredLocation.placeName,
+            };
+          }
+        } catch {
+          draft = draft;
+        }
+      }
+      const matchingDefault = defaultPersonaSelection && defaultPersonaSelection.draft.idea === draft.idea
+        ? defaultPersonaSelection.selection
+        : null;
+      if (matchingDefault) {
+        continueToSimulation(draft, matchingDefault);
+        return;
+      }
+      if ((draft.location || draft.city || draft.country || draft.placeName) && !payload.forceChoice) {
+        continueToSimulation(draft, {
+          persona_source_mode: 'generate_new_from_place',
+          country: draft.country,
+          city: draft.city,
+          placeName: draft.placeName || draft.location,
+        });
+        return;
+      }
+      handleOpenPersonaChoice(draft);
+    })();
   }, [continueToSimulation, defaultPersonaSelection, handleOpenPersonaChoice]);
 
   const mapAuditToNotification = (log: NotificationLogItem): NotificationItem => {
@@ -1249,18 +1407,20 @@ export default function DashboardPage() {
               <button
                 type="button"
                 onClick={() => {
-                  if (!personaLaunchDraft?.location) return;
-                  setPersonaSourceDialogOpen(false);
-                  continueToSimulation(personaLaunchDraft, {
-                    persona_source_mode: 'generate_new_from_place',
-                    city: personaLaunchDraft.location,
-                  });
-                }}
-                disabled={!personaLaunchDraft?.location}
-                className="rounded-2xl border border-border/50 bg-background/60 p-4 text-left hover:bg-white/5 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    if (!personaLaunchDraft?.location && !personaLaunchDraft?.city && !personaLaunchDraft?.country && !personaLaunchDraft?.placeName) return;
+                    setPersonaSourceDialogOpen(false);
+                    continueToSimulation(personaLaunchDraft, {
+                      persona_source_mode: 'generate_new_from_place',
+                      country: personaLaunchDraft.country,
+                      city: personaLaunchDraft.city,
+                      placeName: personaLaunchDraft.placeName || personaLaunchDraft.location,
+                    });
+                  }}
+                  disabled={!personaLaunchDraft?.location && !personaLaunchDraft?.city && !personaLaunchDraft?.country && !personaLaunchDraft?.placeName}
+                  className="rounded-2xl border border-border/50 bg-background/60 p-4 text-left hover:bg-white/5 transition disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <div className="font-medium">{isRTL ? 'ولّد شخصيات من هذا المكان' : 'Generate personas from this place'}</div>
-                <div className="text-sm text-muted-foreground mt-2">{personaLaunchDraft?.location || (isRTL ? 'هذا الخيار يحتاج إلى مكان.' : 'This option requires a place.')}</div>
+                <div className="text-sm text-muted-foreground mt-2">{personaLaunchDraft?.placeName || personaLaunchDraft?.location || [personaLaunchDraft?.city, personaLaunchDraft?.country].filter(Boolean).join(', ') || (isRTL ? 'هذا الخيار يحتاج إلى مكان.' : 'This option requires a place.')}</div>
               </button>
             </div>
 
@@ -1308,7 +1468,9 @@ export default function DashboardPage() {
                       persona_source_mode: 'saved_place_personas',
                       persona_set_key: selectedSavedPersonaSetKey,
                       persona_set_label: selectedSavedPersonaSet?.place_label || undefined,
-                      city: selectedSavedPersonaSet?.place_label || undefined,
+                      country: personaLaunchDraft.country,
+                      city: personaLaunchDraft.city,
+                      placeName: selectedSavedPersonaSet?.place_label || personaLaunchDraft.placeName || personaLaunchDraft.location,
                     });
                   }}
                 >

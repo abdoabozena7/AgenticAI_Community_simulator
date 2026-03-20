@@ -77,6 +77,8 @@ class ExtractResponse(BaseModel):
     idea: Optional[str] = None
     country: Optional[str] = None
     city: Optional[str] = None
+    place_name: Optional[str] = None
+    location_scope: Optional[str] = None
     category: Optional[str] = None
     target_audience: list[str] = Field(default_factory=list)
     goals: list[str] = Field(default_factory=list)
@@ -88,13 +90,14 @@ class ExtractResponse(BaseModel):
 
 PROMPT_TEMPLATE = """You extract structured fields from chat messages.
 
-Required fields: idea, country, city, category, target_audience, goals.
+Required fields: idea, country, city, place_name, location_scope, category, target_audience, goals.
 
 Allowed options (choose the closest match):
 - category: technology, healthcare, finance, education, e-commerce, entertainment, social, b2b saas, consumer apps, hardware
 - target_audience: Gen Z (18-24), Millennials (25-40), Gen X (41-56), Boomers (57-75), Developers, Enterprises, SMBs, Consumers, Students, Professionals
 - goals: Market Validation, Funding Readiness, User Acquisition, Product-Market Fit, Competitive Analysis, Growth Strategy
 - idea_maturity: concept, prototype, mvp, launched
+- location_scope: city_country, place_only, none
 
 Hard requirements:
 - If all required fields are present/confident, missing MUST be [] and question MUST be null.
@@ -102,7 +105,10 @@ Hard requirements:
 - If category/target_audience/goals are not explicit, infer the best-fit options from the idea and choose from the list above.
 - If a required field is missing or unclear, include its name in "missing" and provide a brief, human, context-rich follow-up in "question" (Arabic allowed).
 - Use the current schema to keep known values unless the user clearly changes them.
-- If multiple fields are missing, ask ONLY the single most critical question (priority: country/city, then idea).
+- If a specific place, neighborhood, district, or venue is mentioned, store it in "place_name" and use location_scope="place_only" when city/country cannot be inferred confidently.
+- If city/country are both known, use location_scope="city_country".
+- If no location signal exists, use location_scope="none".
+- If multiple fields are missing, ask ONLY the single most critical question (priority: location, then idea).
 - If the message includes a known city, infer the country (e.g., Cairo/New Cairo -> Egypt).
 - Prefer proper names (e.g., "Egypt", "Cairo", "Giza"). Handle "City, Country" patterns.
 - Return JSON only, no prose.
@@ -126,7 +132,7 @@ Current schema (may be partial):
 User message:
 {message}
 
-Return JSON with keys: idea, country, city, category, target_audience, goals, risk_appetite, idea_maturity, missing (array), question (string or null)."""
+Return JSON with keys: idea, country, city, place_name, location_scope, category, target_audience, goals, risk_appetite, idea_maturity, missing (array), question (string or null)."""
 
 
 COUNTRY_ALIASES = {
@@ -153,6 +159,21 @@ CITY_ALIASES = {
 }
 
 
+PLACE_ALIASES = {
+    "الهرم": "الهرم",
+    "giza pyramid": "الهرم",
+    "the pyramids": "الهرم",
+    "المهندسين": "المهندسين",
+    "مدينة نصر": "مدينة نصر",
+    "nasr city": "مدينة نصر",
+    "new cairo": "New Cairo",
+    "التجمع الخامس": "التجمع الخامس",
+    "المعادي": "المعادي",
+    "maadi": "المعادي",
+    "الدقي": "الدقي",
+}
+
+
 def _norm_text(value: Optional[str]) -> Optional[str]:
     if not isinstance(value, str):
         return None
@@ -174,6 +195,46 @@ def _normalize_city(value: Optional[str]) -> Optional[str]:
         return None
     key = v.lower()
     return CITY_ALIASES.get(key, v.title())
+
+
+def _normalize_place_name(value: Optional[str]) -> Optional[str]:
+    v = _norm_text(value)
+    if not v:
+        return None
+    key = v.lower()
+    return PLACE_ALIASES.get(key, v)
+
+
+def _normalize_location_scope(
+    value: Optional[str],
+    *,
+    city: Optional[str] = None,
+    country: Optional[str] = None,
+    place_name: Optional[str] = None,
+) -> str:
+    v = _norm_text(value)
+    if v:
+        key = v.lower().replace("-", "_").replace(" ", "_")
+        aliases = {
+            "city": "city_country",
+            "city_country": "city_country",
+            "citycountry": "city_country",
+            "place": "place_only",
+            "place_only": "place_only",
+            "specific_place": "place_only",
+            "neighborhood": "place_only",
+            "district": "place_only",
+            "none": "none",
+            "general": "none",
+        }
+        normalized = aliases.get(key, key)
+        if normalized in {"city_country", "place_only", "none"}:
+            return normalized
+    if place_name and not (city or country):
+        return "place_only"
+    if city or country:
+        return "city_country"
+    return "none"
 
 
 def _safe_json_loads(raw: str) -> Dict[str, Any]:
@@ -209,6 +270,11 @@ def _heuristic_extract(message: str, schema: Dict[str, Any]) -> Dict[str, Any]:
             result["country"] = country
             break
 
+    for key, place_name in PLACE_ALIASES.items():
+        if key in lower or key in text:
+            result["place_name"] = place_name
+            break
+
     # Idea: prefer existing schema; otherwise use the message itself (trimmed)
     idea = _norm_text(schema.get("idea")) if isinstance(schema, dict) else None
     if not idea and text:
@@ -221,6 +287,13 @@ def _heuristic_extract(message: str, schema: Dict[str, Any]) -> Dict[str, Any]:
         if isinstance(schema, dict) and schema.get(key) is not None:
             result[key] = schema.get(key)
 
+    result["location_scope"] = _normalize_location_scope(
+        result.get("location_scope"),
+        city=result.get("city"),
+        country=result.get("country"),
+        place_name=result.get("place_name"),
+    )
+
     return result
 
 
@@ -228,9 +301,10 @@ async def _extract_location_only(message: str, schema: Dict[str, Any]) -> Dict[s
     from json import dumps
     lang_hint = "Arabic" if _contains_arabic(message) else "English"
     prompt = (
-        "Extract ONLY city and country from the user message. "
+        "Extract ONLY location fields from the user message. "
+        "Capture any specific place, neighborhood, district, or venue in place_name. "
         "If a known city is mentioned, infer the country. "
-        f"Message language: {lang_hint}. Return JSON only with keys: city, country.\n"
+        f"Message language: {lang_hint}. Return JSON only with keys: city, country, place_name, location_scope.\n"
         f"Current schema: {dumps(schema, ensure_ascii=False)}\n"
         f"Message: {message}"
     )
@@ -277,6 +351,13 @@ async def extract_schema(payload: ExtractRequest, authorization: str = Header(No
     idea = _norm_text(data.get("idea"))
     country = _normalize_country(data.get("country"))
     city = _normalize_city(data.get("city"))
+    place_name = _normalize_place_name(data.get("place_name") or data.get("placeName") or data.get("place"))
+    location_scope = _normalize_location_scope(
+        data.get("location_scope") or data.get("locationScope"),
+        city=city,
+        country=country,
+        place_name=place_name,
+    )
     category = _norm_text(data.get("category"))
     idea_maturity = _norm_text(data.get("idea_maturity"))
     question = _norm_text(data.get("question"))
@@ -284,6 +365,13 @@ async def extract_schema(payload: ExtractRequest, authorization: str = Header(No
     schema_idea = _norm_text(schema.get("idea"))
     schema_country = _normalize_country(schema.get("country"))
     schema_city = _normalize_city(schema.get("city"))
+    schema_place_name = _normalize_place_name(schema.get("place_name") or schema.get("placeName") or schema.get("place"))
+    schema_location_scope = _normalize_location_scope(
+        schema.get("location_scope") or schema.get("locationScope"),
+        city=schema_city,
+        country=schema_country,
+        place_name=schema_place_name,
+    )
     schema_category = _norm_text(schema.get("category"))
     schema_maturity = _norm_text(schema.get("idea_maturity"))
     # Lists
@@ -303,6 +391,10 @@ async def extract_schema(payload: ExtractRequest, authorization: str = Header(No
         country = schema_country
     if not city:
         city = schema_city
+    if not place_name:
+        place_name = schema_place_name
+    if location_scope == "none":
+        location_scope = schema_location_scope
     if not category:
         category = schema_category
     if not target_audience and isinstance(schema.get("target_audience"), list):
@@ -315,23 +407,37 @@ async def extract_schema(payload: ExtractRequest, authorization: str = Header(No
         idea_maturity = schema_maturity
 
     # If still missing, run a focused LLM pass for location only
-    if (not country or not city) and payload.message:
+    if (not country or not city or not place_name) and payload.message:
         location_data = await _extract_location_only(payload.message, payload.schema)
         country = country or _normalize_country(location_data.get("country"))
         city = city or _normalize_city(location_data.get("city"))
+        place_name = place_name or _normalize_place_name(location_data.get("place_name") or location_data.get("place"))
+        location_scope = _normalize_location_scope(
+            location_data.get("location_scope") or location_scope,
+            city=city,
+            country=country,
+            place_name=place_name,
+        )
 
     # If city is Egyptian and country missing, infer Egypt
     if city and not country:
         if city in {"Cairo", "Giza", "Alexandria"}:
             country = "Egypt"
+    if place_name and location_scope == "none":
+        location_scope = "place_only"
+    if not place_name and (city or country):
+        location_scope = "city_country"
+    if not location_scope:
+        location_scope = "none"
 
     missing: list[str] = []
     if not idea:
         missing.append("idea")
-    if not country:
-        missing.append("country")
-    if not city:
-        missing.append("city")
+    if location_scope != "place_only":
+        if not country:
+            missing.append("country")
+        if not city:
+            missing.append("city")
     if not category:
         missing.append("category")
     if not target_audience:
@@ -340,14 +446,14 @@ async def extract_schema(payload: ExtractRequest, authorization: str = Header(No
         missing.append("goals")
 
     # Enforce a single critical follow-up question
-    if "country" in missing and "city" in missing:
-        question = "ما هي الدولة والمدينة المستهدفة؟"
-    elif "city" in missing:
-        question = "ما هي المدينة المستهدفة؟"
-    elif "country" in missing:
-        question = "ما هي الدولة المستهدفة؟"
+    if location_scope == "none" and "country" in missing and "city" in missing:
+        question = "\u0645\u0627 \u0647\u064a \u0627\u0644\u062f\u0648\u0644\u0629 \u0648\u0627\u0644\u0645\u062f\u064a\u0646\u0629 \u0627\u0644\u0645\u0633\u062a\u0647\u062f\u0641\u0629\u061f"
+    elif location_scope == "none" and "city" in missing:
+        question = "\u0645\u0627 \u0647\u064a \u0627\u0644\u0645\u062f\u064a\u0646\u0629 \u0627\u0644\u0645\u0633\u062a\u0647\u062f\u0641\u0629\u061f"
+    elif location_scope == "none" and "country" in missing:
+        question = "\u0645\u0627 \u0647\u064a \u0627\u0644\u062f\u0648\u0644\u0629 \u0627\u0644\u0645\u0633\u062a\u0647\u062f\u0641\u0629\u061f"
     elif "idea" in missing:
-        question = "ما هي الفكرة التي تريد إطلاقها؟"
+        question = "\u0645\u0627 \u0647\u064a \u0627\u0644\u0641\u0643\u0631\u0629 \u0627\u0644\u062a\u064a \u062a\u0631\u064a\u062f \u0625\u0637\u0644\u0627\u0642\u0647\u0627\u061f"
     else:
         question = None
 
@@ -355,6 +461,8 @@ async def extract_schema(payload: ExtractRequest, authorization: str = Header(No
         idea=idea,
         country=country,
         city=city,
+        place_name=place_name,
+        location_scope=location_scope,
         category=category,
         target_audience=target_audience,
         goals=goals,
@@ -427,3 +535,4 @@ async def detect_message_mode(payload: MessageModeRequest, authorization: str = 
         return MessageModeResponse(mode=mode, reason=data.get("reason"))
     except Exception:
         return MessageModeResponse(mode="discuss", reason=None)
+

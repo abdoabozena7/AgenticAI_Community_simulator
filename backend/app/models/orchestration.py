@@ -137,12 +137,24 @@ def normalize_context(context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     persona_source_mode = _normalize_persona_source_mode(
         payload.get("personaSourceMode") or payload.get("persona_source_mode")
     )
+    place_name = str(
+        payload.get("place_name")
+        or payload.get("placeName")
+        or payload.get("place")
+        or ""
+    ).strip()
+    location = str(payload.get("location") or "").strip()
+    if not location and place_name:
+        location = place_name
+    if not place_name and location:
+        place_name = location
     return {
         "idea": str(payload.get("idea") or "").strip(),
         "category": str(payload.get("category") or "").strip().lower(),
         "country": str(payload.get("country") or "").strip(),
         "city": str(payload.get("city") or "").strip(),
-        "location": str(payload.get("location") or "").strip(),
+        "location": location,
+        "place_name": place_name,
         "personaSetKey": str(payload.get("personaSetKey") or payload.get("persona_set_key") or "").strip(),
         "personaSetLabel": str(payload.get("personaSetLabel") or payload.get("persona_set_label") or "").strip(),
         "targetAudience": [str(item).strip() for item in target_audience if str(item).strip()],
@@ -154,6 +166,7 @@ def normalize_context(context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         "datasetHint": str(payload.get("datasetHint") or payload.get("dataset_hint") or "").strip(),
         "notes": str(payload.get("notes") or "").strip(),
         "agentCount": max(5, min(500, agent_count)),
+        "minimumPersonaThreshold": payload.get("minimumPersonaThreshold") or payload.get("minimum_persona_threshold") or None,
         "language": "ar" if str(payload.get("language") or "en").lower().startswith("ar") else "en",
         "personaSourceMode": persona_source_mode or "",
     }
@@ -162,6 +175,7 @@ def normalize_context(context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
 def context_location_label(context: Dict[str, Any]) -> str:
     parts = [
         str(context.get("location") or "").strip(),
+        str(context.get("place_name") or "").strip(),
         str(context.get("city") or "").strip(),
         str(context.get("country") or "").strip(),
     ]
@@ -722,6 +736,14 @@ class OrchestrationState:
             blockers.append("persona_source_unresolved")
         if self.persona_validation_errors:
             blockers.append("persona_validation_failed")
+        validation = (self.persona_generation_debug or {}).get("validation") if isinstance(self.persona_generation_debug, dict) else {}
+        if isinstance(validation, dict):
+            if int(validation.get("actual_count") or 0) <= 0:
+                blockers.append("persona_count_zero")
+            for item in validation.get("simulation_blockers") or []:
+                text = str(item).strip()
+                if text:
+                    blockers.append(text)
         return blockers
 
     def validate_pipeline_ready_for_simulation(self) -> List[str]:

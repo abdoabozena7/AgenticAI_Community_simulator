@@ -119,6 +119,30 @@ class SimulationOrchestrator:
         state = await self.get_state(simulation_id)
         if state is None:
             return None
+        if state.pending_input_kind == "research_review":
+            answer_text = " ".join(
+                str(item.get("answer") or item.get("text") or "").strip()
+                for item in answers
+                if str(item.get("answer") or item.get("text") or "").strip()
+            ).strip().lower()
+            use_ai = any(token in answer_text for token in ["ai", "estimation", "estimate", "use_ai_estimation", "ذكاء", "تقدير"])
+            retry = any(token in answer_text for token in ["retry", "again", "re-search", "إعادة", "اعادة", "retry_search"])
+            state.pending_input = False
+            state.pending_input_kind = None
+            state.pending_resume_phase = None
+            state.clarification_questions = []
+            state.error = None
+            if use_ai and not retry:
+                state.user_context["researchEstimationMode"] = "ai_estimation"
+                state.schema["research_estimation_mode"] = "ai_estimation"
+                state.continue_from_phase(SimulationPhase.INTERNET_RESEARCH, reason="research_ai_estimation")
+            else:
+                state.user_context["researchEstimationMode"] = ""
+                state.schema["research_estimation_mode"] = "retry"
+                state.continue_from_phase(SimulationPhase.INTERNET_RESEARCH, reason="research_retry")
+            await self.repository.save_state(state)
+            self._schedule(simulation_id, state.current_phase, force=True)
+            return state
         if state.pending_input_kind == "insight_followup":
             await self.simulation_agent.handle_insight_response(state, answers)
             if not state.pending_input:
@@ -128,6 +152,20 @@ class SimulationOrchestrator:
                 self._schedule(simulation_id, state.current_phase, force=True)
             else:
                 await self.repository.save_state(state)
+            return state
+        if state.pending_input_kind in {"orchestrator_intervention", "orchestrator_apply_suggestions"}:
+            await self.simulation_agent.handle_orchestrator_intervention_response(state, answers)
+            if not state.pending_input:
+                resume_phase = SimulationPhase(str(state.pending_resume_phase or SimulationPhase.AGENT_DELIBERATION.value))
+                state.continue_from_phase(resume_phase, reason=str(state.status_reason or "coach_intervention_resolved"))
+                await self.repository.save_state(state)
+                self._schedule(simulation_id, state.current_phase, force=True)
+            else:
+                await self.repository.save_state(state)
+            return state
+        if state.pending_input_kind == "execution_followup":
+            await self.simulation_agent.handle_execution_followup_response(state, answers)
+            await self.repository.save_state(state)
             return state
         questions_by_id = {question.question_id: question for question in state.clarification_questions}
         for answer in answers:
@@ -299,7 +337,7 @@ class SimulationOrchestrator:
             return await self._run_context_classification(state)
         if phase == SimulationPhase.INTERNET_RESEARCH:
             await self.search_agent.run(state)
-            return False
+            return state.pending_input
         if phase == SimulationPhase.PERSONA_GENERATION:
             await self.persona_agent.run(state)
             await self.event_bus.publish(
@@ -380,6 +418,7 @@ class SimulationOrchestrator:
                 "monetization": state.user_context.get("monetization"),
                 "riskBoundary": state.user_context.get("riskBoundary"),
                 "persona_source_requested": state.user_context.get("personaSourceMode"),
+                "minimum_persona_threshold": state.user_context.get("minimumPersonaThreshold"),
             }
         )
         if not missing:

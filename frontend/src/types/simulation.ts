@@ -382,6 +382,7 @@ export interface UserInput {
   targetAudience: string[];
   country: string;
   city: string;
+  placeName?: string;
   riskAppetite: number;
   ideaMaturity: 'concept' | 'prototype' | 'mvp' | 'launched';
   goals: string[];

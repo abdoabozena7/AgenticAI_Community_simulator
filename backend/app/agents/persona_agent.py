@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import math
+import os
 import random
 import uuid
 from typing import Any, Dict, List, Optional, Sequence, Tuple
@@ -192,44 +193,58 @@ class PersonaAgent(BaseAgent):
             target_count=requested_count,
             strict_target=self._has_enough_data(state),
         )
-        state.persona_validation_errors = list(validation["errors"])
+        state.persona_validation_errors = list(validation.get("simulation_blockers") or [])
         report["validation"] = validation
         report["social_sentiment"] = signal_plan.get("social_sentiment") or {}
         report["evidence_signals"] = signal_plan.get("evidence_signals") or []
+        report["structured_signal_catalog"] = signal_plan.get("signal_catalog") or []
         report["target_count"] = requested_count
         report["actual_count"] = len(personas)
         report["source_mode"] = state.persona_source_mode
+        report["source_type"] = self._dataset_source_type(state)
         state.persona_generation_debug = report
         state.schema["persona_generation_report"] = report
         state.schema["persona_count_actual"] = len(personas)
         state.schema["persona_source"] = state.persona_source_mode
+        state.schema["minimum_persona_threshold"] = self._minimum_persona_threshold(state)
 
-        if validation["errors"]:
+        if validation.get("fatal_errors"):
             await self._publish_persona_event(
                 state,
                 action="persona_validation_failed",
                 status="failed",
                 title="Persona validation failed",
-                snippet=" | ".join(validation["errors"])[:320],
+                snippet=" | ".join(validation.get("fatal_errors") or [])[:320],
                 progress_pct=86,
                 meta=validation,
             )
-            raise RuntimeError(f"Persona validation failed: {', '.join(validation['errors'])}")
+            raise RuntimeError(f"Persona validation failed: {', '.join(validation.get('fatal_errors') or [])}")
 
         state.personas = personas
         state.persona_generation_completed = True
         state.set_pipeline_step("generating_personas", "completed", detail=report.get("message") or f"Generated {len(personas)} personas.")
+        validation_action = "persona_validation_passed"
+        validation_status = "ok"
+        validation_title = "Persona validation passed"
+        validation_snippet = report.get("message") or f"Generated {len(personas)} simulation-ready personas."
+        if validation.get("simulation_blockers"):
+            validation_action = "persona_validation_blocked_for_simulation"
+            validation_status = "warning"
+            validation_title = "Persona set saved with simulation blockers"
+            validation_snippet = " | ".join(validation.get("simulation_blockers") or [])[:320]
         await self._publish_persona_event(
             state,
-            action="persona_validation_passed",
-            status="ok",
-            title="Persona validation passed",
-            snippet=report.get("message") or f"Generated {len(personas)} simulation-ready personas.",
+            action=validation_action,
+            status=validation_status,
+            title=validation_title,
+            snippet=validation_snippet,
             progress_pct=90,
             meta={
                 "duplicate_rejection_count": report.get("duplicate_rejection_count", 0),
                 "final_persona_count": len(personas),
                 "diversity": validation.get("diversity"),
+                "diversity_score": validation.get("diversity_score"),
+                "simulation_blockers": validation.get("simulation_blockers") or [],
             },
         )
         return state
@@ -239,8 +254,10 @@ class PersonaAgent(BaseAgent):
             raise RuntimeError("Persona source is unresolved")
         if not state.persona_generation_completed or not state.personas:
             raise RuntimeError("Persona generation must finish before persistence")
-        if state.persona_validation_errors:
-            raise RuntimeError(f"Persona persistence blocked by validation errors: {', '.join(state.persona_validation_errors)}")
+        validation_meta = dict((state.persona_generation_debug or {}).get("validation") or {})
+        fatal_errors = [str(item).strip() for item in validation_meta.get("fatal_errors") or [] if str(item).strip()]
+        if fatal_errors:
+            raise RuntimeError(f"Persona persistence blocked by validation errors: {', '.join(fatal_errors)}")
 
         place_label = context_location_label(state.user_context)
         library_label = self._library_label(state, place_label)
@@ -248,6 +265,9 @@ class PersonaAgent(BaseAgent):
         audience_filters = self._normalized_audiences(state)
         fingerprint = self._fingerprint(state)
         generation_report = dict(state.persona_generation_debug or {})
+        source_type = self._dataset_source_type(state)
+        place_name = place_label or None
+        audience_type = ", ".join(audience_filters) if audience_filters else None
 
         state.set_pipeline_step("saving_personas", "running", detail="Persisting persona records and the shared persona set.")
         await self._publish_persona_event(
@@ -270,6 +290,10 @@ class PersonaAgent(BaseAgent):
                 source_summary=str(generation_report.get("source_summary") or ""),
                 evidence_summary={
                     "signals": generation_report.get("evidence_signals") or [],
+                    "user_types": generation_report.get("user_types") or [],
+                    "complaints": generation_report.get("complaints") or [],
+                    "behaviors": generation_report.get("behaviors") or [],
+                    "competition_reactions": generation_report.get("competition_reactions") or [],
                     "social_sentiment": generation_report.get("social_sentiment") or {},
                     "research_summary": str((state.research.summary if state.research else "") or ""),
                 },
@@ -280,6 +304,11 @@ class PersonaAgent(BaseAgent):
                     "batch_count": generation_report.get("batch_count"),
                     "context_type": state.idea_context_type,
                     "source_mode": state.persona_source_mode,
+                    "source_type": source_type,
+                    "place_name": place_name,
+                    "audience_type": audience_type,
+                    "minimum_persona_threshold": self._minimum_persona_threshold(state),
+                    "reusable": True,
                 },
                 quality_score=float(generation_report.get("quality_score") or 0.0),
                 confidence_score=float(generation_report.get("confidence_score") or 0.0),
@@ -302,9 +331,16 @@ class PersonaAgent(BaseAgent):
                         "category": state.user_context.get("category"),
                         "context_type": state.idea_context_type,
                         "audience_filters": audience_filters,
+                        "source_type": source_type,
+                        "place_name": place_name,
+                        "audience_type": audience_type,
                         "source_summary": generation_report.get("source_summary"),
                         "evidence_summary": {
                             "signals": generation_report.get("evidence_signals") or [],
+                            "user_types": generation_report.get("user_types") or [],
+                            "complaints": generation_report.get("complaints") or [],
+                            "behaviors": generation_report.get("behaviors") or [],
+                            "competition_reactions": generation_report.get("competition_reactions") or [],
                             "social_sentiment": generation_report.get("social_sentiment") or {},
                         },
                         "generation_config": {
@@ -312,12 +348,15 @@ class PersonaAgent(BaseAgent):
                             "actual_count": generation_report.get("actual_count"),
                             "batch_size": generation_report.get("batch_size"),
                             "batch_count": generation_report.get("batch_count"),
+                            "minimum_persona_threshold": self._minimum_persona_threshold(state),
+                            "reusable": True,
                         },
                         "quality_score": generation_report.get("quality_score"),
                         "confidence_score": generation_report.get("confidence_score"),
                         "quality_meta": generation_report.get("quality_meta") or {},
                         "validation_meta": generation_report.get("validation") or {},
                         "reusable_dataset_ref": fingerprint,
+                        "reusable": True,
                     },
                 },
             )
@@ -341,6 +380,10 @@ class PersonaAgent(BaseAgent):
             "confidence_score": (record or {}).get("confidence_score") or generation_report.get("confidence_score"),
             "reusable_dataset_ref": (record or {}).get("reusable_dataset_ref") or fingerprint,
             "source_summary": (record or {}).get("source_summary") or generation_report.get("source_summary"),
+            "source_type": source_type,
+            "place_name": place_name,
+            "audience_type": audience_type,
+            "reusable": True,
         }
 
         await self.runtime.repository.persist_personas(
@@ -349,12 +392,14 @@ class PersonaAgent(BaseAgent):
         )
         state.persona_persistence_completed = True
         blockers = state.validate_pipeline_ready_for_simulation()
-        if blockers:
-            raise RuntimeError(f"Simulation blocked until pipeline completes: {', '.join(blockers)}")
         state.set_pipeline_step(
             "saving_personas",
             "completed",
-            detail=f"Saved {len(state.personas)} personas and shared persona set metadata.",
+            detail=(
+                f"Saved {len(state.personas)} personas and shared persona set metadata."
+                if not blockers
+                else f"Saved {len(state.personas)} personas, but simulation is blocked: {', '.join(blockers)}"
+            ),
         )
         await self._publish_persona_event(
             state,
@@ -406,6 +451,9 @@ class PersonaAgent(BaseAgent):
             "quality_meta": dict((record or {}).get("quality_meta") or {}),
             "message": f"Loaded {len(personas)} saved shared personas for {str((record or {}).get('place_label') or place_label)}.",
             "source_summary": str((record or {}).get("source_summary") or ""),
+            "source_type": str((((record or {}).get("payload") or {}).get("meta") or {}).get("source_type") or self._dataset_source_type(state)),
+            "place_name": str((((record or {}).get("payload") or {}).get("meta") or {}).get("place_name") or str((record or {}).get("place_label") or place_label)),
+            "audience_type": str((((record or {}).get("payload") or {}).get("meta") or {}).get("audience_type") or ", ".join(self._normalized_audiences(state))),
         }
         return personas, report
 
@@ -508,7 +556,7 @@ class PersonaAgent(BaseAgent):
         if enough_data and actual_count < self.TARGET_MIN_PERSONAS:
             message = f"Only {actual_count} personas passed validation despite sufficient research. Validation will block simulation."
         elif actual_count < self.TARGET_MIN_PERSONAS:
-            message = f"Data was limited, so generated the maximum reliable set of {actual_count} personas."
+            message = f"insufficient data for full diversity; generated the maximum reliable set of {actual_count} personas."
         else:
             message = f"Generated {actual_count} diverse personas grounded in research signals."
         return personas, {
@@ -526,17 +574,27 @@ class PersonaAgent(BaseAgent):
             },
             "message": message,
             "source_summary": self._source_summary(signal_plan),
+            "user_types": list(signal_plan.get("user_types") or []),
+            "complaints": list(signal_plan.get("complaints") or []),
+            "behaviors": list(signal_plan.get("behaviors") or []),
+            "competition_reactions": list(signal_plan.get("competition_reactions") or []),
         }
 
     async def _build_signal_plan(self, *, state: OrchestrationState, place_label: str) -> Dict[str, Any]:
-        evidence_signals = self._evidence_signals(state)
-        audience_clusters = self._audience_clusters(state)
-        social_sentiment = self._social_sentiment(state)
+        structured_inputs = self._structured_persona_inputs(state)
+        evidence_signals = list(structured_inputs.get("evidence_signals") or [])
+        audience_clusters = list(structured_inputs.get("audience_clusters") or [])
+        social_sentiment = dict(structured_inputs.get("social_sentiment") or {})
         fallback = {
             "evidence_signals": evidence_signals[:12],
+            "user_types": list(structured_inputs.get("user_types") or [])[:8],
+            "complaints": list(structured_inputs.get("complaints") or [])[:8],
+            "behaviors": list(structured_inputs.get("behaviors") or [])[:8],
+            "competition_reactions": list(structured_inputs.get("competition_reactions") or [])[:8],
             "social_sentiment": social_sentiment,
             "audience_clusters": audience_clusters,
             "archetype_hypotheses": [cluster["cluster"] for cluster in audience_clusters[:6]],
+            "signal_catalog": list(structured_inputs.get("signal_catalog") or [])[:24],
             "confidence_score": 0.45 if self._has_enough_data(state) else 0.32,
         }
         prompt = (
@@ -546,20 +604,28 @@ class PersonaAgent(BaseAgent):
             f"Persona source mode: {state.persona_source_mode}\n"
             f"Target audiences: {', '.join(self._normalized_audiences(state)) or 'none'}\n"
             f"Research summary: {str((state.research.summary if state.research else '') or '')[:900]}\n"
-            f"Research findings: {' | '.join((state.research.findings if state.research else [])[:8])}\n"
+            f"Research user types: {' | '.join(list(structured_inputs.get('user_types') or [])[:8])}\n"
+            f"Research complaints: {' | '.join(list(structured_inputs.get('complaints') or [])[:8])}\n"
+            f"Research behaviors: {' | '.join(list(structured_inputs.get('behaviors') or [])[:8])}\n"
+            f"Competition reactions: {' | '.join(list(structured_inputs.get('competition_reactions') or [])[:8])}\n"
             f"Evidence signals: {' | '.join(evidence_signals[:12])}\n"
-            f"Default audience families: {', '.join(cluster['cluster'] for cluster in audience_clusters[:8])}\n\n"
-            "Transform these signals into a persona fitting plan. Return JSON only with:\n"
+            f"Audience fallback families: {', '.join(cluster['cluster'] for cluster in audience_clusters[:8])}\n\n"
+            "Transform these signals into a persona fitting plan. Every cluster must be grounded in research signals or the explicit audience fallback. Return JSON only with:\n"
             '{"evidence_signals":[""],'
+            '"user_types":[""],'
+            '"complaints":[""],'
+            '"behaviors":[""],'
+            '"competition_reactions":[""],'
             '"social_sentiment":{"overall":"positive|mixed|negative","price_sensitivity":"low|medium|high","trust":"low|medium|high","notable_themes":[""]},'
-            '"audience_clusters":[{"cluster":"","source_kind":"place_derived|audience_default|hybrid","rationale":"","roles":[""],"motivations":[""],"concerns":[""],"speaking_styles":[""],"age_bands":[""],"life_stages":[""]}],'
+            '"audience_clusters":[{"cluster":"","source_kind":"research_signal|audience_fallback|hybrid","rationale":"","signal_refs":[""],"roles":[""],"motivations":[""],"concerns":[""],"speaking_styles":[""],"age_bands":[""],"life_stages":[""]}],'
             '"archetype_hypotheses":[""],'
+            '"signal_catalog":[{"id":"","type":"","text":"","source_kind":"research_signal|audience_fallback","source_ref":""}],'
             '"confidence_score":0.0}'
         )
         system = (
             "You are a persona-systems fitting engine. "
-            "Infer realistic audience clusters from research, place context, target audience, and default audience families. "
-            "Do not invent unsupported demographics."
+            "Infer realistic audience clusters from research, place context, target audience, and explicit audience fallback families. "
+            "Do not invent unsupported demographics, complaints, or behaviors."
         )
         raw = await self.runtime.llm.generate_json(
             prompt=prompt,
@@ -571,9 +637,14 @@ class PersonaAgent(BaseAgent):
             return fallback
         return {
             "evidence_signals": self._string_list(raw.get("evidence_signals"), fallback=evidence_signals[:12], limit=12),
+            "user_types": self._string_list(raw.get("user_types"), fallback=list(structured_inputs.get("user_types") or []), limit=10),
+            "complaints": self._string_list(raw.get("complaints"), fallback=list(structured_inputs.get("complaints") or []), limit=10),
+            "behaviors": self._string_list(raw.get("behaviors"), fallback=list(structured_inputs.get("behaviors") or []), limit=10),
+            "competition_reactions": self._string_list(raw.get("competition_reactions"), fallback=list(structured_inputs.get("competition_reactions") or []), limit=10),
             "social_sentiment": raw.get("social_sentiment") if isinstance(raw.get("social_sentiment"), dict) else social_sentiment,
             "audience_clusters": raw.get("audience_clusters") if isinstance(raw.get("audience_clusters"), list) and raw.get("audience_clusters") else audience_clusters,
             "archetype_hypotheses": self._string_list(raw.get("archetype_hypotheses"), fallback=[cluster["cluster"] for cluster in audience_clusters], limit=10),
+            "signal_catalog": raw.get("signal_catalog") if isinstance(raw.get("signal_catalog"), list) and raw.get("signal_catalog") else list(structured_inputs.get("signal_catalog") or []),
             "confidence_score": self._clamp(raw.get("confidence_score"), 0.2, 0.95, fallback=float(fallback["confidence_score"])),
         }
 
@@ -589,6 +660,7 @@ class PersonaAgent(BaseAgent):
     ) -> Dict[str, Any]:
         evidence_lines = "\n".join(f"- {item}" for item in (signal_plan.get("evidence_signals") or [])[:12])
         clusters = signal_plan.get("audience_clusters") if isinstance(signal_plan.get("audience_clusters"), list) else []
+        signal_catalog = signal_plan.get("signal_catalog") if isinstance(signal_plan.get("signal_catalog"), list) else []
         prompt = (
             f"Idea: {state.user_context.get('idea')}\n"
             f"Context type: {state.idea_context_type or IdeaContextType.GENERAL_NON_LOCATION.value}\n"
@@ -597,22 +669,30 @@ class PersonaAgent(BaseAgent):
             f"Need up to {batch_goal} personas for this batch.\n"
             f"Existing names to avoid: {', '.join(existing_names) or 'none'}\n"
             f"Social sentiment: {signal_plan.get('social_sentiment')}\n"
+            f"User types: {signal_plan.get('user_types')}\n"
+            f"Complaints: {signal_plan.get('complaints')}\n"
+            f"Behaviors: {signal_plan.get('behaviors')}\n"
+            f"Competition reactions: {signal_plan.get('competition_reactions')}\n"
             f"Audience clusters: {clusters}\n"
+            f"Signal catalog: {signal_catalog}\n"
             f"Evidence signals:\n{evidence_lines}\n\n"
             "Return JSON only with a personas array. Each persona must include display_name, source_mode, "
             "target_audience_cluster, location_context, age_band, life_stage, profession_role, attitude_baseline, "
             "skepticism_level, conformity_level, stubbornness_level, innovation_openness, financial_sensitivity, "
-            "style_of_speaking, main_concerns, probable_motivations, influence_weight, tags, stance, summary, and evidence_signals."
+            "style_of_speaking, main_concerns, probable_motivations, influence_weight, tags, stance, summary, evidence_signals, "
+            "and source_attribution. source_attribution must include kind, signal_refs, and source_ref. "
+            "Fit from the provided signals only. Do not invent unsupported personas."
         )
         system = (
             "You are generating simulation-ready human personas from research evidence. "
-            "Avoid clones. Vary age band, profession, speaking style, money sensitivity, skepticism, and motivations."
+            "Avoid clones. Vary age band, profession, speaking style, money sensitivity, skepticism, and motivations, "
+            "but keep each persona tightly grounded in the provided signal catalog."
         )
         return await self.runtime.llm.generate_json(
             prompt=prompt,
             system=system,
             temperature=0.35,
-            fallback_json={"personas": self._fallback_blueprints(state, signal_plan, batch_goal)},
+            fallback_json={"personas": self._signal_fitted_blueprints(state, signal_plan, batch_goal)},
         )
 
     def _materialize_personas(
@@ -631,9 +711,10 @@ class PersonaAgent(BaseAgent):
         template_pool = list(self.runtime.dataset.templates_by_category.get(category) or self.runtime.dataset.templates)
         if not template_pool:
             return [], {"duplicate": 0, "weak": requested_count}
+        approved_signals = self._approved_signal_texts(signal_plan)
         source_rows = blueprint.get("personas") if isinstance(blueprint.get("personas"), list) else []
         if not source_rows:
-            source_rows = self._fallback_blueprints(state, signal_plan, requested_count)
+            source_rows = self._signal_fitted_blueprints(state, signal_plan, requested_count)
 
         rng = random.Random(f"{state.simulation_id}:{seed_offset}:{place_label}:{requested_count}")
         personas: List[PersonaProfile] = []
@@ -652,16 +733,36 @@ class PersonaAgent(BaseAgent):
             attitude_baseline = str(item.get("attitude_baseline") or "").strip()
             speaking_style = str(item.get("style_of_speaking") or item.get("speaking_style") or "").strip()
             cluster = str(item.get("target_audience_cluster") or "").strip()
-            concerns = self._string_list(item.get("main_concerns") or item.get("concerns"), fallback=self._fallback_concerns(signal_plan, cluster), limit=4)
-            motivations = self._string_list(item.get("probable_motivations") or item.get("motivations"), fallback=self._fallback_motivations(signal_plan, cluster), limit=4)
+            concerns = self._string_list(
+                item.get("main_concerns") or item.get("concerns"),
+                fallback=self._cluster_values(signal_plan, cluster, "concerns"),
+                limit=4,
+            )
+            motivations = self._string_list(
+                item.get("probable_motivations") or item.get("motivations"),
+                fallback=self._cluster_values(signal_plan, cluster, "motivations"),
+                limit=4,
+            )
             tags = self._string_list(item.get("tags"), fallback=self._fallback_tags(cluster, state), limit=5)
             evidence_signals = self._string_list(item.get("evidence_signals"), fallback=list(signal_plan.get("evidence_signals") or [])[:3], limit=4)
+            source_attribution = dict(item.get("source_attribution") or {})
             if not all([display_name, age_band, life_stage, profession_role, attitude_baseline, speaking_style, cluster]):
                 weak_rejected += 1
                 continue
             if len(concerns) < 2 or len(motivations) < 2 or len(tags) < 2 or len(evidence_signals) < 1:
                 weak_rejected += 1
                 continue
+            if not self._signals_are_traceable(evidence_signals, approved_signals):
+                weak_rejected += 1
+                continue
+            if not source_attribution:
+                source_attribution = self._build_source_attribution(
+                    state=state,
+                    signal_plan=signal_plan,
+                    cluster=cluster,
+                    evidence_signals=evidence_signals,
+                    raw_kind=item.get("source_mode"),
+                )
 
             signature = "|".join([cluster.lower(), age_band.lower(), profession_role.lower(), attitude_baseline.lower(), speaking_style.lower(), ",".join(sorted(text.lower() for text in concerns[:2]))])
             lowered_name = display_name.lower()
@@ -712,7 +813,7 @@ class PersonaAgent(BaseAgent):
                     financial_sensitivity=financial,
                     speaking_style=speaking_style,
                     tags=tags,
-                    source_attribution={"kind": source_kind, "place_label": place_label or "", "audience_cluster": cluster, "evidence_signals": evidence_signals},
+                    source_attribution=source_attribution,
                     evidence_signals=evidence_signals,
                     category_id=template.category_id,
                     template_id=template.template_id,
@@ -740,78 +841,304 @@ class PersonaAgent(BaseAgent):
         target_count: int,
         strict_target: bool,
     ) -> Dict[str, Any]:
-        errors: List[str] = []
+        fatal_errors: List[str] = []
+        simulation_blockers: List[str] = []
+        warnings: List[str] = []
         if not personas:
-            errors.append("persona_count_zero")
+            fatal_errors.append("persona_count_zero")
         required_missing = 0
         names: set[str] = set()
         persona_ids: set[str] = set()
         attribution_missing = 0
+        trace_missing = 0
+        approved_signals = self._approved_signal_texts(signal_plan)
         for persona in personas:
             if not all([persona.persona_id, persona.name, persona.source_mode, persona.target_audience_cluster, persona.age_band, persona.profession_role, persona.attitude_baseline, persona.speaking_style, persona.tags, persona.concerns, persona.motivations]):
                 required_missing += 1
             lowered_name = persona.name.lower()
             if lowered_name in names:
-                errors.append("duplicate_display_name")
+                fatal_errors.append("duplicate_display_name")
                 break
             names.add(lowered_name)
             if persona.persona_id in persona_ids:
-                errors.append("duplicate_persona_id")
+                fatal_errors.append("duplicate_persona_id")
                 break
             persona_ids.add(persona.persona_id)
             if not persona.source_attribution or not persona.source_attribution.get("kind"):
                 attribution_missing += 1
+            elif not self._signals_are_traceable(persona.evidence_signals, approved_signals):
+                trace_missing += 1
         if required_missing:
-            errors.append("schema_incomplete")
+            fatal_errors.append("schema_incomplete")
         if attribution_missing:
-            errors.append("source_attribution_missing")
+            fatal_errors.append("source_attribution_missing")
+        if trace_missing:
+            fatal_errors.append("persona_signal_trace_invalid")
 
         clusters = {persona.target_audience_cluster for persona in personas if persona.target_audience_cluster}
         roles = {persona.profession_role for persona in personas if persona.profession_role}
         ages = {persona.age_band for persona in personas if persona.age_band}
         speaking_styles = {persona.speaking_style for persona in personas if persona.speaking_style}
         source_kinds = {persona.source_mode for persona in personas if persona.source_mode}
+        cluster_floor = max(1.0, min(5.0, len(personas) / 6))
+        role_floor = max(2.0, min(8.0, len(personas) / 2.5))
+        age_floor = 3.0
+        speaking_floor = 3.0
+        diversity_score = round(
+            min(
+                1.0,
+                (
+                    min(1.0, len(clusters) / cluster_floor)
+                    + min(1.0, len(roles) / role_floor)
+                    + min(1.0, len(ages) / age_floor)
+                    + min(1.0, len(speaking_styles) / speaking_floor)
+                    + min(1.0, len(source_kinds) / 2.0)
+                ) / 5.0,
+            ),
+            3,
+        )
         diversity = {
             "cluster_count": len(clusters),
             "role_count": len(roles),
             "age_band_count": len(ages),
             "speaking_style_count": len(speaking_styles),
             "source_kind_count": len(source_kinds),
+            "score": diversity_score,
         }
-        if len(personas) >= 12 and len(clusters) < 3:
-            errors.append("diversity_cluster_too_low")
-        if len(personas) >= 12 and len(roles) < 6:
-            errors.append("diversity_role_too_low")
-        if len(personas) >= 12 and len(ages) < 3:
-            errors.append("diversity_age_too_low")
-        if len(personas) >= 12 and len(speaking_styles) < 3:
-            errors.append("diversity_speaking_style_too_low")
+        minimum_persona_threshold = self._minimum_persona_threshold(state)
+        diversity_threshold = self._minimum_diversity_score(state)
+        if len(personas) < minimum_persona_threshold:
+            simulation_blockers.append("persona_count_below_simulation_minimum")
+        if diversity_score < diversity_threshold:
+            simulation_blockers.append("diversity_score_below_threshold")
         allow_lower_target = bool(state.schema.get("allow_lower_persona_target"))
         if strict_target and len(personas) < self.TARGET_MIN_PERSONAS and not (allow_lower_target and target_count < self.TARGET_MIN_PERSONAS):
-            errors.append("persona_count_below_required_minimum")
+            simulation_blockers.append("persona_count_below_required_minimum")
+        if len(signal_plan.get("evidence_signals") or []) < self.TARGET_MIN_PERSONAS and not strict_target:
+            warnings.append("insufficient_data_for_full_diversity")
 
         return {
-            "errors": list(dict.fromkeys(errors)),
+            "errors": list(dict.fromkeys(fatal_errors + simulation_blockers)),
+            "fatal_errors": list(dict.fromkeys(fatal_errors)),
+            "simulation_blockers": list(dict.fromkeys(simulation_blockers)),
+            "warnings": list(dict.fromkeys(warnings)),
             "diversity": diversity,
+            "diversity_score": diversity_score,
             "target_count": target_count,
             "actual_count": len(personas),
             "strict_target": strict_target,
             "signal_count": len(signal_plan.get("evidence_signals") or []),
+            "minimum_persona_threshold": minimum_persona_threshold,
+            "minimum_diversity_score": diversity_threshold,
+            "persistence_allowed": not bool(fatal_errors),
         }
 
     def _target_persona_count(self, state: OrchestrationState) -> int:
         explicit_requested = state.schema.get("persona_count_requested")
         requested = int(explicit_requested if explicit_requested is not None else (state.user_context.get("agentCount") or 24))
-        minimum_allowed = 10 if bool(state.schema.get("allow_lower_persona_target")) else 12
+        minimum_allowed = 8 if bool(state.schema.get("allow_lower_persona_target")) else 10
         requested = max(minimum_allowed, min(self.HARD_MAX_PERSONAS, requested))
         if explicit_requested is not None:
             return requested
-        return max(self.TARGET_MIN_PERSONAS, requested) if self._has_enough_data(state) else min(24, requested)
+        if self._has_enough_data(state):
+            return max(self.TARGET_MIN_PERSONAS, requested)
+        return min(requested, self._reliable_persona_cap(state))
 
     def _has_enough_data(self, state: OrchestrationState) -> bool:
+        structured = state.research.structured_schema if state.research else {}
         evidence_count = len((state.research.evidence if state.research else []) or [])
-        findings_count = len((state.research.findings if state.research else []) or [])
-        return evidence_count >= 6 or findings_count >= 6
+        research_signal_count = len(self._research_signal_texts(state))
+        user_type_count = len([item for item in structured.get("user_types") or [] if str(item).strip()])
+        complaint_count = len([item for item in structured.get("complaints") or [] if str(item).strip()])
+        behavior_count = len([item for item in structured.get("behaviors") or [] if str(item).strip()])
+        reaction_count = len([item for item in structured.get("competition_reactions") or [] if str(item).strip()])
+        return (
+            evidence_count >= 6
+            and research_signal_count >= 10
+            and user_type_count >= 3
+            and (complaint_count + behavior_count + reaction_count) >= 8
+        )
+
+    def _minimum_persona_threshold(self, state: OrchestrationState) -> int:
+        raw = state.schema.get("minimum_persona_threshold")
+        if raw is None:
+            raw = state.user_context.get("minimumPersonaThreshold")
+        if raw is None:
+            raw = os.getenv("PERSONA_MIN_THRESHOLD", "15")
+        try:
+            value = int(raw)
+        except (TypeError, ValueError):
+            value = 15
+        return max(5, min(50, value))
+
+    def _minimum_diversity_score(self, state: OrchestrationState) -> float:
+        raw = state.schema.get("minimum_diversity_score")
+        if raw is None:
+            raw = os.getenv("PERSONA_MIN_DIVERSITY_SCORE", "0.55")
+        try:
+            value = float(raw)
+        except (TypeError, ValueError):
+            value = 0.55
+        return round(max(0.2, min(0.95, value)), 3)
+
+    def _reliable_persona_cap(self, state: OrchestrationState) -> int:
+        structured = state.research.structured_schema if state.research else {}
+        signal_count = len(self._research_signal_texts(state))
+        user_types = len([item for item in structured.get("user_types") or [] if str(item).strip()])
+        complaints = len([item for item in structured.get("complaints") or [] if str(item).strip()])
+        behaviors = len([item for item in structured.get("behaviors") or [] if str(item).strip()])
+        reactions = len([item for item in structured.get("competition_reactions") or [] if str(item).strip()])
+        audience_clusters = len(self._audience_clusters(state))
+        reliable = max(
+            8,
+            min(
+                self.TARGET_MIN_PERSONAS - 1,
+                6 + signal_count + (user_types * 2) + complaints + behaviors + reactions + audience_clusters,
+            ),
+        )
+        return min(self.HARD_MAX_PERSONAS, reliable)
+
+    def _research_signal_texts(self, state: OrchestrationState) -> List[str]:
+        structured = state.research.structured_schema if state.research else {}
+        values: List[str] = []
+        for key in ("signals", "user_types", "complaints", "behaviors", "competition_reactions"):
+            for item in structured.get(key) or []:
+                text = str(item).strip()
+                if text and text not in values:
+                    values.append(text)
+        for item in (state.research.findings if state.research else [])[:12]:
+            text = str(item).strip()
+            if text and text not in values:
+                values.append(text)
+        return values[:24]
+
+    def _structured_persona_inputs(self, state: OrchestrationState) -> Dict[str, Any]:
+        structured = state.research.structured_schema if state.research else {}
+        signal_catalog = self._signal_catalog_from_state(state)
+        audience_clusters = self._audience_clusters(state)
+        return {
+            "signal_catalog": signal_catalog,
+            "evidence_signals": [item["text"] for item in signal_catalog if item.get("source_kind") == "research_signal"][:18]
+            or [item["text"] for item in signal_catalog][:18],
+            "user_types": self._string_list(structured.get("user_types"), fallback=[], limit=10),
+            "complaints": self._string_list(structured.get("complaints"), fallback=[], limit=10),
+            "behaviors": self._string_list(structured.get("behaviors"), fallback=[], limit=10),
+            "competition_reactions": self._string_list(structured.get("competition_reactions"), fallback=[], limit=10),
+            "social_sentiment": self._social_sentiment(state),
+            "audience_clusters": audience_clusters,
+        }
+
+    def _signal_catalog_from_state(self, state: OrchestrationState) -> List[Dict[str, str]]:
+        structured = state.research.structured_schema if state.research else {}
+        signal_catalog: List[Dict[str, str]] = []
+        seen: set[str] = set()
+        evidence_urls = [item.url for item in (state.research.evidence if state.research else [])[:6] if item.url]
+
+        def _add_signal(signal_type: str, value: Any, source_kind: str, source_ref: str) -> None:
+            text = str(value or "").strip()
+            if not text:
+                return
+            key = f"{signal_type}:{text.lower()}"
+            if key in seen:
+                return
+            seen.add(key)
+            signal_catalog.append(
+                {
+                    "id": self._slug(key)[:64],
+                    "type": signal_type,
+                    "text": text,
+                    "source_kind": source_kind,
+                    "source_ref": source_ref,
+                }
+            )
+
+        for signal_type in ("signals", "user_types", "complaints", "behaviors", "competition_reactions"):
+            for value in structured.get(signal_type) or []:
+                _add_signal(signal_type, value, "research_signal", evidence_urls[0] if evidence_urls else "research")
+        for cluster in self._audience_clusters(state):
+            cluster_name = str(cluster.get("cluster") or "").strip()
+            source_ref = cluster_name or "audience_fallback"
+            for role in cluster.get("roles") or []:
+                _add_signal("user_types", role, "audience_fallback", source_ref)
+            for concern in cluster.get("concerns") or []:
+                _add_signal("complaints", concern, "audience_fallback", source_ref)
+            for behavior in list(cluster.get("speaking_styles") or []) + list(cluster.get("motivations") or []):
+                _add_signal("behaviors", behavior, "audience_fallback", source_ref)
+        return signal_catalog[:32]
+
+    def _approved_signal_texts(self, signal_plan: Dict[str, Any]) -> set[str]:
+        approved: set[str] = set()
+        for item in signal_plan.get("signal_catalog") or []:
+            if not isinstance(item, dict):
+                continue
+            text = str(item.get("text") or "").strip().lower()
+            if text:
+                approved.add(text)
+        for key in ("evidence_signals", "user_types", "complaints", "behaviors", "competition_reactions"):
+            for value in signal_plan.get(key) or []:
+                text = str(value).strip().lower()
+                if text:
+                    approved.add(text)
+        return approved
+
+    def _signals_are_traceable(self, evidence_signals: Sequence[str], approved_signals: set[str]) -> bool:
+        if not evidence_signals:
+            return False
+        for value in evidence_signals:
+            text = str(value or "").strip().lower()
+            if text and text in approved_signals:
+                return True
+        return False
+
+    def _cluster_values(self, signal_plan: Dict[str, Any], cluster: str, field_name: str) -> List[str]:
+        for item in signal_plan.get("audience_clusters") or []:
+            if not isinstance(item, dict):
+                continue
+            if str(item.get("cluster") or "").strip().lower() != str(cluster or "").strip().lower():
+                continue
+            return self._string_list(item.get(field_name), fallback=[], limit=4)
+        return []
+
+    def _build_source_attribution(
+        self,
+        *,
+        state: OrchestrationState,
+        signal_plan: Dict[str, Any],
+        cluster: str,
+        evidence_signals: Sequence[str],
+        raw_kind: Any,
+    ) -> Dict[str, Any]:
+        approved_catalog = signal_plan.get("signal_catalog") if isinstance(signal_plan.get("signal_catalog"), list) else []
+        signal_refs = []
+        source_refs = []
+        for signal in approved_catalog:
+            if not isinstance(signal, dict):
+                continue
+            text = str(signal.get("text") or "").strip().lower()
+            if text not in {str(item).strip().lower() for item in evidence_signals if str(item).strip()}:
+                continue
+            signal_refs.append(str(signal.get("id") or "").strip())
+            source_ref = str(signal.get("source_ref") or "").strip()
+            if source_ref:
+                source_refs.append(source_ref)
+        kind = self._normalize_source_kind(raw_kind, state, context_location_label(state.user_context))
+        return {
+            "kind": kind,
+            "place_label": context_location_label(state.user_context),
+            "audience_cluster": cluster,
+            "signal_refs": list(dict.fromkeys(ref for ref in signal_refs if ref)),
+            "source_ref": list(dict.fromkeys(ref for ref in source_refs if ref))[:3],
+            "evidence_signals": list(evidence_signals)[:4],
+        }
+
+    def _dataset_source_type(self, state: OrchestrationState) -> str:
+        if state.persona_source_mode == PersonaSourceMode.DEFAULT_AUDIENCE_ONLY.value:
+            return "audience"
+        if context_location_label(state.user_context) and self._normalized_audiences(state):
+            return "hybrid"
+        if context_location_label(state.user_context):
+            return "place"
+        return "audience"
 
     def _pattern_summary(self, signal_plan: Dict[str, Any]) -> str:
         signals = self._string_list(signal_plan.get("evidence_signals"), fallback=[], limit=4)
@@ -852,6 +1179,7 @@ class PersonaAgent(BaseAgent):
                 "cluster": family["cluster"],
                 "source_kind": self._normalize_source_kind(None, state, place_label),
                 "rationale": f"Derived from target audience '{key}'.",
+                "signal_refs": [self._slug(f"{family['cluster']}-{key}")[:64]],
                 "roles": list(family["roles"]),
                 "motivations": list(family["motivations"]),
                 "concerns": list(family["concerns"]),
@@ -895,44 +1223,63 @@ class PersonaAgent(BaseAgent):
                 signals.append(fragment)
         return signals[:12]
 
-    def _fallback_blueprints(self, state: OrchestrationState, signal_plan: Dict[str, Any], count: int) -> List[Dict[str, Any]]:
+    def _signal_fitted_blueprints(self, state: OrchestrationState, signal_plan: Dict[str, Any], count: int) -> List[Dict[str, Any]]:
         clusters = signal_plan.get("audience_clusters") if isinstance(signal_plan.get("audience_clusters"), list) and signal_plan.get("audience_clusters") else self._audience_clusters(state)
-        signals = list(signal_plan.get("evidence_signals") or self._evidence_signals(state))
+        signals = list(signal_plan.get("evidence_signals") or [])
         place_label = context_location_label(state.user_context) or "Global"
+        if not clusters or not signals:
+            return []
         rows: List[Dict[str, Any]] = []
         for index in range(max(0, count)):
-            cluster = clusters[index % len(clusters)] if clusters else {"cluster": "Audience", "roles": ["buyer"], "age_bands": ["25-34"], "life_stages": ["adult"], "motivations": ["clear value"], "concerns": ["weak differentiation"], "speaking_styles": ["direct"], "source_kind": self._normalize_source_kind(None, state, place_label)}
-            roles = cluster.get("roles") if isinstance(cluster, dict) else []
-            age_bands = cluster.get("age_bands") if isinstance(cluster, dict) else []
-            life_stages = cluster.get("life_stages") if isinstance(cluster, dict) else []
-            styles = cluster.get("speaking_styles") if isinstance(cluster, dict) else []
-            motivations = cluster.get("motivations") if isinstance(cluster, dict) else []
-            concerns = cluster.get("concerns") if isinstance(cluster, dict) else []
-            role = str((roles[index % len(roles)] if roles else "buyer") or "buyer")
-            cluster_name = str((cluster.get("cluster") if isinstance(cluster, dict) else "Audience") or "Audience")
-            rows.append({
-                "display_name": f"{place_label.split(',')[0]} {role.title()} {index + 1}",
-                "source_mode": cluster.get("source_kind") if isinstance(cluster, dict) else self._normalize_source_kind(None, state, place_label),
-                "target_audience_cluster": cluster_name,
-                "location_context": place_label,
-                "age_band": str((age_bands[index % len(age_bands)] if age_bands else "25-34") or "25-34"),
-                "life_stage": str((life_stages[index % len(life_stages)] if life_stages else "adult") or "adult"),
-                "profession_role": role,
-                "attitude_baseline": "curious but cautious",
-                "skepticism_level": round(0.35 + ((index % 5) * 0.1), 2),
-                "conformity_level": round(0.3 + ((index % 4) * 0.12), 2),
-                "stubbornness_level": round(0.28 + ((index % 6) * 0.09), 2),
-                "innovation_openness": round(0.32 + ((index % 5) * 0.11), 2),
-                "financial_sensitivity": round(0.4 + ((index % 5) * 0.1), 2),
-                "style_of_speaking": str((styles[index % len(styles)] if styles else "direct and practical") or "direct and practical"),
-                "main_concerns": list(concerns[:3] or ["weak differentiation", "unclear value"]),
-                "probable_motivations": list(motivations[:3] or ["clear value", "credible execution"]),
-                "influence_weight": round(0.85 + ((index % 5) * 0.12), 2),
-                "tags": self._fallback_tags(cluster_name, state),
-                "stance": ["accept", "neutral", "reject"][index % 3],
-                "summary": self._persona_summary(cluster_name, role, list(concerns[:2]), list(motivations[:2]), place_label),
-                "evidence_signals": signals[index % max(1, len(signals)): index % max(1, len(signals)) + 2] or signals[:2],
-            })
+            cluster = clusters[index % len(clusters)]
+            if not isinstance(cluster, dict):
+                continue
+            roles = [str(item).strip() for item in cluster.get("roles") or [] if str(item).strip()]
+            age_bands = [str(item).strip() for item in cluster.get("age_bands") or [] if str(item).strip()]
+            life_stages = [str(item).strip() for item in cluster.get("life_stages") or [] if str(item).strip()]
+            styles = [str(item).strip() for item in cluster.get("speaking_styles") or [] if str(item).strip()]
+            motivations = [str(item).strip() for item in cluster.get("motivations") or [] if str(item).strip()]
+            concerns = [str(item).strip() for item in cluster.get("concerns") or [] if str(item).strip()]
+            signal_refs = [str(item).strip() for item in cluster.get("signal_refs") or [] if str(item).strip()]
+            role = str((roles[index % len(roles)] if roles else "") or "").strip()
+            cluster_name = str(cluster.get("cluster") or "").strip()
+            if not all([role, cluster_name, age_bands, life_stages, styles, motivations, concerns]):
+                continue
+            persona_signals = signals[index % len(signals): index % len(signals) + 2] or signals[:2]
+            source_kind = str(cluster.get("source_kind") or self._normalize_source_kind(None, state, place_label)).strip()
+            rows.append(
+                {
+                    "display_name": f"{place_label.split(',')[0]} {role.title()} {index + 1}",
+                    "source_mode": source_kind,
+                    "target_audience_cluster": cluster_name,
+                    "location_context": place_label,
+                    "age_band": age_bands[index % len(age_bands)],
+                    "life_stage": life_stages[index % len(life_stages)],
+                    "profession_role": role,
+                    "attitude_baseline": f"reacts through {persona_signals[0][:48]}".strip(),
+                    "skepticism_level": round(0.28 + ((index % 5) * 0.11), 2),
+                    "conformity_level": round(0.22 + ((index % 4) * 0.13), 2),
+                    "stubbornness_level": round(0.24 + ((index % 6) * 0.09), 2),
+                    "innovation_openness": round(0.34 + ((index % 5) * 0.1), 2),
+                    "financial_sensitivity": round(0.45 + ((index % 4) * 0.11), 2),
+                    "style_of_speaking": styles[index % len(styles)],
+                    "main_concerns": concerns[:3],
+                    "probable_motivations": motivations[:3],
+                    "influence_weight": round(0.85 + ((index % 5) * 0.12), 2),
+                    "tags": self._fallback_tags(cluster_name, state),
+                    "stance": ["accept", "neutral", "reject"][index % 3],
+                    "summary": self._persona_summary(cluster_name, role, concerns[:2], motivations[:2], place_label),
+                    "evidence_signals": persona_signals[:2],
+                    "source_attribution": {
+                        "kind": source_kind,
+                        "place_label": place_label,
+                        "audience_cluster": cluster_name,
+                        "signal_refs": signal_refs[:3],
+                        "source_ref": signal_refs[:3],
+                        "evidence_signals": persona_signals[:2],
+                    },
+                }
+            )
         return rows
 
     def _merge_traits(
@@ -974,15 +1321,15 @@ class PersonaAgent(BaseAgent):
 
     def _normalize_source_kind(self, raw: Any, state: OrchestrationState, place_label: str) -> str:
         value = str(raw or "").strip().lower()
-        if value in {"place_derived", "audience_default", "hybrid"}:
+        if value in {"place_derived", "audience_default", "hybrid", "research_signal", "audience_fallback"}:
             return value
         if state.persona_source_mode == PersonaSourceMode.DEFAULT_AUDIENCE_ONLY.value:
-            return "audience_default"
+            return "audience_fallback"
         if place_label and self._normalized_audiences(state):
             return "hybrid"
         if place_label:
-            return "place_derived"
-        return "audience_default"
+            return "research_signal"
+        return "audience_fallback"
 
     def _string_list(self, value: Any, *, fallback: Sequence[str], limit: int) -> List[str]:
         if isinstance(value, list):
@@ -990,18 +1337,6 @@ class PersonaAgent(BaseAgent):
             if items:
                 return items[:limit]
         return [str(item).strip() for item in fallback if str(item).strip()][:limit]
-
-    def _fallback_motivations(self, signal_plan: Dict[str, Any], cluster: str) -> List[str]:
-        for item in signal_plan.get("audience_clusters") or []:
-            if isinstance(item, dict) and str(item.get("cluster") or "").strip().lower() == cluster.strip().lower():
-                return self._string_list(item.get("motivations"), fallback=["clear value", "credible execution"], limit=4)
-        return ["clear value", "credible execution", "low friction"]
-
-    def _fallback_concerns(self, signal_plan: Dict[str, Any], cluster: str) -> List[str]:
-        for item in signal_plan.get("audience_clusters") or []:
-            if isinstance(item, dict) and str(item.get("cluster") or "").strip().lower() == cluster.strip().lower():
-                return self._string_list(item.get("concerns"), fallback=["weak differentiation", "unclear demand"], limit=4)
-        return ["weak differentiation", "unclear demand", "execution risk"]
 
     def _fallback_tags(self, cluster: str, state: OrchestrationState) -> List[str]:
         tags = [self._slug(cluster) or "audience"]
@@ -1014,8 +1349,8 @@ class PersonaAgent(BaseAgent):
 
     def _persona_summary(self, cluster: str, role: str, concerns: Sequence[str], motivations: Sequence[str], place_label: str) -> str:
         place = place_label or "the market"
-        concern_text = ", ".join(concerns[:2]) or "execution risk"
-        motivation_text = ", ".join(motivations[:2]) or "clear value"
+        concern_text = ", ".join(concerns[:2]) or "documented concerns"
+        motivation_text = ", ".join(motivations[:2]) or "documented motivations"
         return f"{cluster} persona in {place}, working as {role}, motivated by {motivation_text} but worried about {concern_text}."
 
     def _library_label(self, state: OrchestrationState, place_label: str) -> str:
@@ -1031,11 +1366,17 @@ class PersonaAgent(BaseAgent):
         sentiment = signal_plan.get("social_sentiment") if isinstance(signal_plan.get("social_sentiment"), dict) else {}
         themes = self._string_list(sentiment.get("notable_themes") if isinstance(sentiment, dict) else None, fallback=[], limit=3)
         signals = self._string_list(signal_plan.get("evidence_signals"), fallback=[], limit=3)
+        user_types = self._string_list(signal_plan.get("user_types"), fallback=[], limit=2)
+        complaints = self._string_list(signal_plan.get("complaints"), fallback=[], limit=2)
         parts = []
         if themes:
             parts.append("Themes: " + " | ".join(themes))
         if signals:
             parts.append("Signals: " + " | ".join(signals))
+        if user_types:
+            parts.append("User types: " + " | ".join(user_types))
+        if complaints:
+            parts.append("Complaints: " + " | ".join(complaints))
         return " | ".join(parts)[:320]
 
     def _quality_score(self, *, actual_count: int, requested_count: int, duplicates: int, weak: int, enough_data: bool) -> float:

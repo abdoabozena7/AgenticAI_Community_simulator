@@ -1,6 +1,12 @@
-import type { PendingResearchReview } from '@/types/simulation';
-import type { SimulationPipeline } from '@/types/simulation';
 import type { SearchResponse } from '@/services/api';
+import type {
+  CoachIntervention,
+  PendingClarification,
+  PendingResearchReview,
+  ReasoningMessage,
+  SimulationChatEvent,
+  SimulationPipeline,
+} from '@/types/simulation';
 
 export type SearchLiveEvent = {
   eventSeq?: number;
@@ -29,6 +35,13 @@ export type SearchPanelStage =
   | 'completed_empty'
   | 'failed'
   | 'hidden';
+
+export interface SearchPanelPipelineStep {
+  key: string;
+  label: string;
+  detail?: string | null;
+  status: 'pending' | 'running' | 'completed' | 'blocked';
+}
 
 export type SearchPanelItem =
   | {
@@ -63,6 +76,16 @@ export type SearchPanelItem =
       title: string;
       badgeLabel: string;
       content: string;
+    }
+  | {
+      kind: 'note';
+      id: string;
+      title: string;
+      badgeLabel: string;
+      content: string;
+      tone?: 'info' | 'success' | 'warning';
+      bullets?: string[];
+      cta?: string;
     };
 
 export interface SearchPanelModel {
@@ -73,6 +96,7 @@ export interface SearchPanelModel {
   description: string;
   statusLabel: string;
   isBusy: boolean;
+  pipelineSteps: SearchPanelPipelineStep[];
   items: SearchPanelItem[];
   emptyTitle: string;
   emptyDescription: string;
@@ -92,42 +116,57 @@ type ResearchContext = {
 };
 
 const ACTION_LABELS: Record<string, { ar: string; en: string; progress: number }> = {
-  research_started: { ar: 'جاري البحث...', en: 'Searching...', progress: 10 },
-  query_started: { ar: 'بدء الاستعلام', en: 'Starting query...', progress: 14 },
-  query_planned: { ar: 'تخطيط الاستعلام', en: 'Planning query...', progress: 18 },
-  search_results_found: { ar: 'تم العثور على النتائج', en: 'Found results...', progress: 28 },
-  search_results_ready: { ar: 'نتائج البحث جاهزة', en: 'Search results ready', progress: 34 },
-  query_result: { ar: 'تم جلب النتائج', en: 'Received results', progress: 38 },
-  page_opened: { ar: 'فتح الصفحة', en: 'Opening page...', progress: 52 },
-  page_opening: { ar: 'فتح الصفحة', en: 'Opening page...', progress: 52 },
-  url_opened: { ar: 'فتح الرابط', en: 'Opening URL...', progress: 52 },
-  fetch_started: { ar: 'بدء استخراج الصفحة', en: 'Fetching page...', progress: 58 },
-  page_scraped: { ar: 'استخراج البيانات', en: 'Extracting data...', progress: 78 },
-  url_extracted: { ar: 'اكتمل استخراج الرابط', en: 'URL extracted', progress: 82 },
+  research_started: { ar: 'بدء البحث', en: 'Research started', progress: 10 },
+  query_started: { ar: 'تشغيل الاستعلام', en: 'Query started', progress: 14 },
+  query_planned: { ar: 'تخطيط البحث', en: 'Query planned', progress: 18 },
+  search_results_found: { ar: 'لقينا نتائج', en: 'Results found', progress: 28 },
+  search_results_ready: { ar: 'النتائج جاهزة', en: 'Results ready', progress: 34 },
+  query_result: { ar: 'استلام نتائج', en: 'Received results', progress: 38 },
+  page_opened: { ar: 'فتح صفحة', en: 'Opened page', progress: 52 },
+  page_opening: { ar: 'فتح صفحة', en: 'Opening page', progress: 52 },
+  url_opened: { ar: 'فتح رابط', en: 'Opened URL', progress: 52 },
+  fetch_started: { ar: 'سحب المحتوى', en: 'Fetching page', progress: 58 },
+  page_scraped: { ar: 'استخراج إشارات', en: 'Extracting signals', progress: 78 },
+  url_extracted: { ar: 'تم استخراج الرابط', en: 'URL extracted', progress: 82 },
   fetch_done: { ar: 'اكتمل جلب الصفحة', en: 'Fetch complete', progress: 84 },
-  evidence_extracted: { ar: 'بناء الأدلة', en: 'Building evidence...', progress: 88 },
+  evidence_extracted: { ar: 'بناء الأدلة', en: 'Building evidence', progress: 88 },
   summary_ready: { ar: 'الملخص جاهز', en: 'Summary ready', progress: 92 },
   evidence_cards_ready: { ar: 'بطاقات الأدلة جاهزة', en: 'Evidence cards ready', progress: 94 },
-  gaps_ready: { ar: 'الفجوات التحليلية جاهزة', en: 'Gaps identified', progress: 96 },
-  review_required: { ar: 'مراجعة النتائج مطلوبة', en: 'Review required', progress: 97 },
-  research_completed: { ar: 'اكتمل البحث', en: 'Search completed', progress: 100 },
-  research_done: { ar: 'اكتمل البحث', en: 'Search completed', progress: 100 },
-  search_completed: { ar: 'اكتمل البحث', en: 'Search completed', progress: 100 },
-  search_failed: { ar: 'تعذر البحث', en: 'Search failed', progress: 100 },
-  url_failed: { ar: 'تعذر استخراج الرابط', en: 'URL extraction failed', progress: 100 },
-  persona_signal_extraction_started: { ar: 'استخراج إشارات الشخصيات', en: 'Extracting persona signals...', progress: 18 },
-  persona_signal_extraction_completed: { ar: 'اكتمل تحليل إشارات الشخصيات', en: 'Persona signals ready', progress: 24 },
-  persona_batch_started: { ar: 'جارٍ توليد دفعة شخصيات', en: 'Generating persona batch...', progress: 58 },
-  persona_batch_completed: { ar: 'اكتملت دفعة شخصيات', en: 'Persona batch complete', progress: 78 },
-  persona_duplicates_rejected: { ar: 'تم رفض شخصيات مكررة', en: 'Rejected duplicate personas', progress: 80 },
-  persona_validation_passed: { ar: 'تم اعتماد جودة الشخصيات', en: 'Persona validation passed', progress: 90 },
-  persona_validation_failed: { ar: 'فشل التحقق من الشخصيات', en: 'Persona validation failed', progress: 100 },
-  persona_persistence_started: { ar: 'جارٍ حفظ الشخصيات', en: 'Saving persona asset...', progress: 92 },
-  persona_persistence_completed: { ar: 'تم حفظ أصل الشخصيات', en: 'Persona asset saved', progress: 100 },
+  gaps_ready: { ar: 'الفجوات واضحة', en: 'Gaps identified', progress: 96 },
+  review_required: { ar: 'مراجعة مطلوبة', en: 'Review required', progress: 97 },
+  research_completed: { ar: 'اكتمل البحث', en: 'Research complete', progress: 100 },
+  research_done: { ar: 'اكتمل البحث', en: 'Research complete', progress: 100 },
+  search_completed: { ar: 'اكتمل البحث', en: 'Search complete', progress: 100 },
+  search_failed: { ar: 'البحث فشل', en: 'Search failed', progress: 100 },
+  url_failed: { ar: 'فشل فتح الرابط', en: 'URL failed', progress: 100 },
+  persona_signal_extraction_started: { ar: 'استخراج إشارات الشخصيات', en: 'Extracting persona signals', progress: 22 },
+  persona_signal_extraction_completed: { ar: 'إشارات الشخصيات جاهزة', en: 'Persona signals ready', progress: 28 },
+  persona_batch_started: { ar: 'توليد دفعة شخصيات', en: 'Generating personas', progress: 58 },
+  persona_batch_completed: { ar: 'دفعة الشخصيات اكتملت', en: 'Persona batch complete', progress: 78 },
+  persona_duplicates_rejected: { ar: 'استبعاد شخصيات مكررة', en: 'Duplicate personas removed', progress: 80 },
+  persona_validation_passed: { ar: 'تحقق الجودة نجح', en: 'Validation passed', progress: 90 },
+  persona_validation_failed: { ar: 'تحقق الجودة فشل', en: 'Validation failed', progress: 100 },
+  persona_persistence_started: { ar: 'حفظ مجموعة الشخصيات', en: 'Saving persona set', progress: 92 },
+  persona_persistence_completed: { ar: 'تم حفظ مجموعة الشخصيات', en: 'Persona set saved', progress: 100 },
+};
+
+const PHASE_LABELS: Record<string, { ar: string; en: string }> = {
+  idea_intake: { ar: 'استقبال الفكرة', en: 'Idea intake' },
+  context_classification: { ar: 'فهم السياق', en: 'Context classification' },
+  internet_research: { ar: 'البحث والإشارات', en: 'Research and signals' },
+  persona_generation: { ar: 'توليد الشخصيات', en: 'Persona generation' },
+  persona_persistence: { ar: 'حفظ المجموعة', en: 'Persona persistence' },
+  clarification_questions: { ar: 'توضيح من المستخدم', en: 'User clarification' },
+  simulation_initialization: { ar: 'تهيئة المجتمع', en: 'Simulation setup' },
+  agent_deliberation: { ar: 'نقاش المجتمع', en: 'Agent deliberation' },
+  convergence: { ar: 'استخلاص القرار', en: 'Convergence' },
+  summary: { ar: 'الملخص النهائي', en: 'Final summary' },
 };
 
 const FALLBACK_FAVICON = (domain: string) =>
   `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
+
+const trimText = (value?: string | null) => String(value || '').trim();
 
 const toHost = (value?: string | null) => {
   if (!value) return '';
@@ -138,7 +177,45 @@ const toHost = (value?: string | null) => {
   }
 };
 
-const trimText = (value?: string | null) => String(value || '').trim();
+const toRecord = (value: unknown): Record<string, unknown> | null =>
+  value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+
+const toStringList = (value: unknown, limit = 4): string[] =>
+  Array.isArray(value)
+    ? value.map((item) => String(item || '').trim()).filter(Boolean).slice(0, limit)
+    : [];
+
+const titleForPhase = (language: Language, phaseKey?: string | null) => {
+  const key = trimText(phaseKey).toLowerCase();
+  const label = PHASE_LABELS[key];
+  return label ? label[language] : (language === 'ar' ? 'خطوات التنفيذ' : 'Execution activity');
+};
+
+const buildPipelineSteps = (
+  language: Language,
+  pipeline: SimulationPipeline | null | undefined,
+  currentPhaseKey?: string | null,
+): SearchPanelPipelineStep[] => {
+  if (pipeline?.steps?.length) {
+    return pipeline.steps.map((step) => ({
+      key: step.key,
+      label: step.label?.[language] || step.label?.en || step.key,
+      detail: step.detail || null,
+      status: step.status,
+    }));
+  }
+
+  const phase = trimText(currentPhaseKey).toLowerCase();
+  if (!phase) return [];
+  return [{
+    key: phase,
+    label: titleForPhase(language, phase),
+    detail: null,
+    status: 'running',
+  }];
+};
 
 const buildLiveItems = (language: Language, liveEvents: SearchLiveEvent[]): SearchPanelItem[] => {
   const ordered = [...liveEvents]
@@ -161,9 +238,9 @@ const buildLiveItems = (language: Language, liveEvents: SearchLiveEvent[]): Sear
       url: event.url ?? null,
       domain: domain || null,
       faviconUrl: event.faviconUrl || (domain ? FALLBACK_FAVICON(domain) : null),
-      badgeLabel: language === 'ar' ? mapping.ar : mapping.en,
+      badgeLabel: mapping[language],
       progress,
-      preview: trimText(event.snippet) || trimText(event.error) || (language === 'ar' ? 'سيظهر الملخص هنا بعد الاستخراج.' : 'Summary preview will appear here once extracted.'),
+      preview: trimText(event.snippet) || trimText(event.error) || (language === 'ar' ? 'هيظهر هنا ملخص الخطوة دي.' : 'This step summary will appear here.'),
       httpStatus: typeof event.httpStatus === 'number' ? event.httpStatus : null,
       contentChars: typeof event.contentChars === 'number' ? event.contentChars : null,
       relevanceScore: typeof event.relevanceScore === 'number' ? event.relevanceScore : null,
@@ -177,23 +254,23 @@ const buildResultItems = (
   results: SearchResponse['results'] | undefined,
   review: PendingResearchReview | null | undefined,
 ): SearchPanelItem[] => {
-  const reviewItems = Array.isArray(review?.candidateUrls) ? review!.candidateUrls : [];
+  const reviewItems = Array.isArray(review?.candidateUrls) ? review.candidateUrls : [];
   if (reviewItems.length > 0) {
-    return reviewItems.slice(0, 8).map((item, index) => ({
+    return reviewItems.slice(0, 6).map((item, index) => ({
       kind: 'result',
       id: item.id || `review-${index + 1}`,
       title: trimText(item.title) || trimText(item.domain) || item.url,
       url: item.url,
       domain: trimText(item.domain) || toHost(item.url) || null,
       faviconUrl: item.faviconUrl || (trimText(item.domain) ? FALLBACK_FAVICON(trimText(item.domain)) : null),
-      badgeLabel: language === 'ar' ? 'نتيجة للمراجعة' : 'Review candidate',
-      preview: trimText(item.snippet) || (language === 'ar' ? 'مرشح للاستخراج أو التوسيع.' : 'Candidate source for extraction or follow-up.'),
+      badgeLabel: language === 'ar' ? 'رابط للمراجعة' : 'Review candidate',
+      preview: trimText(item.snippet) || (language === 'ar' ? 'مصدر مرشح للاستخراج أو توسيع البحث.' : 'Candidate source for extraction or search expansion.'),
       relevanceScore: typeof item.score === 'number' ? item.score : null,
     }));
   }
 
   const sourceResults = Array.isArray(results) ? results : [];
-  return sourceResults.slice(0, 8).map((item, index) => ({
+  return sourceResults.slice(0, 6).map((item, index) => ({
     kind: 'result',
     id: `${item.url}-${index}`,
     title: trimText(item.title) || trimText(item.domain) || item.url,
@@ -201,62 +278,237 @@ const buildResultItems = (
     domain: trimText(item.domain) || toHost(item.url) || null,
     faviconUrl: trimText(item.domain) ? FALLBACK_FAVICON(trimText(item.domain)) : null,
     badgeLabel: language === 'ar' ? 'نتيجة بحث' : 'Search result',
-    preview: trimText(item.snippet) || trimText(item.reason) || (language === 'ar' ? 'لا يوجد ملخص متاح لهذا المصدر بعد.' : 'No preview is available for this source yet.'),
+    preview: trimText(item.snippet) || trimText(item.reason) || (language === 'ar' ? 'المصدر ظهر لكن لسه مفيش ملخص كفاية.' : 'Source found without a detailed preview yet.'),
     relevanceScore: typeof item.score === 'number' ? item.score : null,
   }));
 };
 
-const buildSummaryItem = (language: Language, summaryText?: string | null): SearchPanelItem[] => {
-  const summary = trimText(summaryText);
-  if (!summary) return [];
+const buildSummaryItems = (
+  language: Language,
+  researchSummary?: string | null,
+  finalSummary?: string | null,
+): SearchPanelItem[] => {
+  const items: SearchPanelItem[] = [];
+  if (trimText(researchSummary)) {
+    items.push({
+      kind: 'summary',
+      id: 'research-summary',
+      title: language === 'ar' ? 'ملخص الإشارات والبحث' : 'Research summary',
+      badgeLabel: language === 'ar' ? 'بحث' : 'Research',
+      content: trimText(researchSummary),
+    });
+  }
+  if (trimText(finalSummary) && trimText(finalSummary) !== trimText(researchSummary)) {
+    items.push({
+      kind: 'summary',
+      id: 'final-summary',
+      title: language === 'ar' ? 'النتيجة الحالية' : 'Current outcome',
+      badgeLabel: language === 'ar' ? 'ملخص' : 'Summary',
+      content: trimText(finalSummary),
+    });
+  }
+  return items;
+};
+
+const buildReasoningNote = (language: Language, reasoningFeed: ReasoningMessage[]): SearchPanelItem[] => {
+  const latest = [...reasoningFeed]
+    .filter((item) => trimText(item.message))
+    .slice(-4)
+    .reverse();
+  if (!latest.length) return [];
+
   return [{
-    kind: 'summary',
-    id: 'search-summary',
-    title: language === 'ar' ? 'ملخص البحث' : 'Research summary',
-    badgeLabel: language === 'ar' ? 'ملخص' : 'Summary',
-    content: summary,
+    kind: 'note',
+    id: 'reasoning-latest',
+    title: language === 'ar' ? 'آخر ردود المجتمع' : 'Latest community reactions',
+    badgeLabel: language === 'ar' ? 'نقاش' : 'Debate',
+    content: language === 'ar'
+      ? 'دي آخر الرسائل اللي طلع بها المجتمع أثناء النقاش.'
+      : 'These are the latest agent reactions from the ongoing discussion.',
+    tone: 'info',
+    bullets: latest.map((item) => {
+      const label = item.agentLabel || item.agentShortId || item.agentId;
+      return `@${label}: ${item.message}`;
+    }),
   }];
+};
+
+const buildChatEventNote = (language: Language, chatEvents: SimulationChatEvent[]): SearchPanelItem[] => {
+  const latest = [...chatEvents]
+    .filter((item) => item.role !== 'user' && trimText(item.content))
+    .slice(-3);
+  if (!latest.length) return [];
+
+  return [{
+    kind: 'note',
+    id: 'system-updates',
+    title: language === 'ar' ? 'تحديثات مباشرة من النظام' : 'Live system updates',
+    badgeLabel: language === 'ar' ? 'تحديث' : 'Update',
+    content: language === 'ar'
+      ? 'التحديثات دي بتتسجل لحظة بلحظة أثناء التشغيل.'
+      : 'These updates are captured live as the run progresses.',
+    tone: 'info',
+    bullets: latest.map((item) => item.content),
+  }];
+};
+
+const buildClarificationNote = (
+  language: Language,
+  pendingClarification: PendingClarification | null | undefined,
+): SearchPanelItem[] => {
+  if (!pendingClarification?.questionId) return [];
+  return [{
+    kind: 'note',
+    id: 'clarification-needed',
+    title: language === 'ar' ? 'فيه توضيح مطلوب قبل ما النظام يكمل' : 'A clarification is needed before continuing',
+    badgeLabel: language === 'ar' ? 'توضيح' : 'Clarification',
+    content: pendingClarification.question,
+    tone: 'warning',
+    bullets: pendingClarification.supportingSnippets?.slice(0, 2),
+  }];
+};
+
+const buildResearchReviewNote = (
+  language: Language,
+  pendingResearchReview: PendingResearchReview | null | undefined,
+): SearchPanelItem[] => {
+  if (!pendingResearchReview?.cycleId) return [];
+  return [{
+    kind: 'note',
+    id: 'research-review',
+    title: language === 'ar' ? 'البحث محتاج مراجعة قبل المتابعة' : 'Research review is required',
+    badgeLabel: language === 'ar' ? 'مراجعة' : 'Review',
+    content: pendingResearchReview.gapSummary || (language === 'ar' ? 'اختار الروابط الأنسب أو وسّع البحث قبل ما نكمل.' : 'Select the strongest URLs or expand the search before continuing.'),
+    tone: 'warning',
+    bullets: pendingResearchReview.candidateUrls.slice(0, 3).map((item) => item.title || item.domain || item.url),
+  }];
+};
+
+const buildCoachNote = (
+  language: Language,
+  coachIntervention: CoachIntervention | null | undefined,
+): SearchPanelItem[] => {
+  if (!coachIntervention?.interventionId) return [];
+  return [{
+    kind: 'note',
+    id: 'coach-intervention',
+    title: language === 'ar' ? 'تدخل ذكي في منتصف المحاكاة' : 'Live orchestration intervention',
+    badgeLabel: language === 'ar' ? 'مشكلة مهمة' : 'Critical issue',
+    content: coachIntervention.blockerSummary,
+    tone: 'warning',
+    bullets: coachIntervention.suggestions.slice(0, 3).map((item) => item.title),
+    cta: coachIntervention.guideMessage || undefined,
+  }];
+};
+
+const buildImprovementNote = (language: Language, schema: Record<string, unknown>): SearchPanelItem[] => {
+  const evaluation = toRecord(schema.idea_improvement_evaluation);
+  if (!evaluation) return [];
+  const acceptanceBefore = Number(evaluation.acceptance_before ?? 0);
+  const acceptanceAfter = Number(evaluation.acceptance_after ?? 0);
+  const rejectionBefore = Number(evaluation.rejection_before ?? 0);
+  const rejectionAfter = Number(evaluation.rejection_after ?? 0);
+  const keyImprovements = toStringList(evaluation.key_improvements, 3);
+  const remainingProblems = toStringList(evaluation.remaining_problems, 2);
+
+  return [{
+    kind: 'note',
+    id: 'improvement-evaluation',
+    title: language === 'ar' ? 'قياس التعديل قبل وبعد' : 'Before/after improvement check',
+    badgeLabel: language === 'ar' ? 'مقارنة' : 'Comparison',
+    content: language === 'ar'
+      ? `القبول اتحرك من ${acceptanceBefore} إلى ${acceptanceAfter}، والرفض من ${rejectionBefore} إلى ${rejectionAfter}.`
+      : `Acceptance moved from ${acceptanceBefore} to ${acceptanceAfter}, and rejection from ${rejectionBefore} to ${rejectionAfter}.`,
+    tone: acceptanceAfter > acceptanceBefore ? 'success' : 'warning',
+    bullets: [...keyImprovements, ...remainingProblems],
+  }];
+};
+
+const buildExecutionNotes = (language: Language, schema: Record<string, unknown>): SearchPanelItem[] => {
+  const items: SearchPanelItem[] = [];
+  const executionSteps = toRecord(schema.execution_steps);
+  if (executionSteps) {
+    items.push({
+      kind: 'note',
+      id: 'execution-steps',
+      title: language === 'ar' ? 'خطوات التنفيذ اللي طلعنا بها' : 'Execution steps derived from the simulation',
+      badgeLabel: language === 'ar' ? 'تنفيذ' : 'Execution',
+      content: String(executionSteps.intro || (language === 'ar' ? 'دي أول خطوات عملية نقدر ننفذها فورًا.' : 'These are the next practical steps to test immediately.')),
+      tone: 'success',
+      bullets: toStringList(executionSteps.steps, 5),
+      cta: typeof executionSteps.cta === 'string' ? executionSteps.cta : undefined,
+    });
+  }
+
+  const latestFollowup = toRecord(schema.latest_execution_followup);
+  if (latestFollowup) {
+    items.push({
+      kind: 'note',
+      id: 'execution-followup',
+      title: language === 'ar' ? 'آخر متابعة تنفيذ' : 'Latest execution follow-up',
+      badgeLabel: language === 'ar' ? 'متابعة' : 'Follow-up',
+      content: String(latestFollowup.learning || (language === 'ar' ? 'تم تسجيل نتيجة جديدة من التجربة.' : 'A new execution signal was recorded.')),
+      tone: latestFollowup.classification === 'positive_signal' || latestFollowup.classification === 'weak_positive_signal'
+        ? 'success'
+        : 'warning',
+      bullets: [String(latestFollowup.next_step || '').trim()].filter(Boolean),
+    });
+  }
+
+  const roadmap = toRecord(schema.execution_roadmap);
+  if (roadmap) {
+    items.push({
+      kind: 'note',
+      id: 'execution-roadmap',
+      title: language === 'ar' ? 'الخطة العملية الحالية' : 'Current execution roadmap',
+      badgeLabel: language === 'ar' ? 'خارطة طريق' : 'Roadmap',
+      content: String(roadmap.best_first_version || (language === 'ar' ? 'تم بناء نسخة أولى عملية قابلة للتجربة.' : 'A practical first version is ready for testing.')),
+      tone: 'success',
+      bullets: toStringList(roadmap.first_five_steps, 4),
+      cta: typeof roadmap.final_cta === 'string' ? roadmap.final_cta : undefined,
+    });
+  }
+
+  return items;
 };
 
 const getStageCopy = (language: Language, stage: Exclude<SearchPanelStage, 'hidden'>, hasItems: boolean) => {
   const copy = {
     ready: {
-      subtitle: language === 'ar' ? 'لوحة البحث جاهزة وستبدأ بعد تشغيل الخطوة' : 'The search panel is ready and will start after you trigger the flow',
+      subtitle: language === 'ar' ? 'اللوحة جاهزة وهتبدأ تعرض كل مرحلة أول ما التشغيل يبدأ.' : 'The panel is ready and will show each stage once the run starts.',
       statusLabel: language === 'ar' ? 'جاهز للبدء' : 'Ready to start',
-      emptyTitle: language === 'ar' ? 'البحث لم يبدأ بعد' : 'Search has not started yet',
-      emptyDescription: language === 'ar' ? 'عندما يبدأ البحث فعليًا ستظهر هنا المواقع وخطوات الاستخراج.' : 'When search actually starts, opened pages and extraction progress will appear here.',
+      emptyTitle: language === 'ar' ? 'لسه مفيش نشاط ظاهر' : 'No activity yet',
+      emptyDescription: language === 'ar' ? 'أول ما التشغيل يبدأ، هتشوف البحث، بناء الشخصيات، النقاش، والتنفيذ خطوة بخطوة.' : 'Once the run starts, you will see research, persona building, debate, and execution step by step.',
     },
     running: {
-      subtitle: language === 'ar' ? 'يجمع النظام المصادر ويفتح الصفحات الآن.' : 'The system is collecting sources and opening pages now.',
-      statusLabel: language === 'ar' ? 'يعمل الآن' : 'Running now',
-      emptyTitle: language === 'ar' ? 'البحث جارٍ' : 'Search is running',
-      emptyDescription: language === 'ar' ? 'سيظهر التقدم هنا بمجرد وصول أول مصدر أو خطوة استخراج.' : 'Progress will appear here as soon as the first source or extraction step arrives.',
+      subtitle: language === 'ar' ? 'النظام شغال دلوقتي وبيحدّث اللوحة لحظة بلحظة.' : 'The system is active and updating this panel live.',
+      statusLabel: language === 'ar' ? 'شغال الآن' : 'Running live',
+      emptyTitle: language === 'ar' ? 'فيه تشغيل جاري' : 'A run is in progress',
+      emptyDescription: language === 'ar' ? 'بمجرد وصول أول حدث، هيتعرض هنا مباشرة.' : 'The first activity card will appear here as soon as it arrives.',
     },
     review: {
-      subtitle: language === 'ar' ? 'نتائج البحث جاهزة وتحتاج مراجعة قبل المتابعة.' : 'Search results are ready and need review before continuing.',
-      statusLabel: language === 'ar' ? 'بانتظار المراجعة' : 'Waiting for review',
-      emptyTitle: language === 'ar' ? 'المراجعة مطلوبة' : 'Review required',
-      emptyDescription: language === 'ar' ? 'لا توجد عناصر قابلة للعرض بعد، لكن النظام يطلب مراجعة قرار البحث الحالي.' : 'No renderable items are available yet, but the system requires a review decision.',
+      subtitle: language === 'ar' ? 'فيه خطوة محتاجة قرار منك قبل ما باقي الخطوات تكمل.' : 'A decision from you is needed before the flow can continue.',
+      statusLabel: language === 'ar' ? 'بانتظار قرارك' : 'Waiting for your input',
+      emptyTitle: language === 'ar' ? 'المحاكاة واقفة على مراجعة' : 'The run is paused for review',
+      emptyDescription: language === 'ar' ? 'راجع المطلوب من اللوحة أو من الشات وبعدها كمل.' : 'Review the required action from the panel or chat, then continue.',
     },
     completed_with_content: {
-      subtitle: language === 'ar'
-        ? (hasItems ? 'اكتملت النتائج وأصبحت قابلة للعرض.' : 'اكتمل البحث.')
-        : (hasItems ? 'Results are complete and ready to inspect.' : 'Search completed.'),
-      statusLabel: language === 'ar' ? 'اكتملت الجولة' : 'Run complete',
-      emptyTitle: language === 'ar' ? 'اكتمل البحث' : 'Search completed',
-      emptyDescription: language === 'ar' ? 'تم الانتهاء من البحث.' : 'Search finished successfully.',
+      subtitle: language === 'ar' ? (hasItems ? 'الرحلة مكتملة وكل المخرجات موجودة قدامك.' : 'التشغيل اكتمل.') : (hasItems ? 'The run finished and the output is available.' : 'Run completed.'),
+      statusLabel: language === 'ar' ? 'اكتمل' : 'Completed',
+      emptyTitle: language === 'ar' ? 'التشغيل اكتمل' : 'Run completed',
+      emptyDescription: language === 'ar' ? 'اكتملت الخطوات ونتيجتها متاحة.' : 'The flow is complete and the output is available.',
     },
     completed_empty: {
-      subtitle: language === 'ar' ? 'اكتمل البحث لكن لم يصل أي محتوى قابل للعرض.' : 'Search completed but there is no renderable content.',
+      subtitle: language === 'ar' ? 'التشغيل خلص لكن مفيش عناصر كفاية تتعرض.' : 'The run finished without enough content to render.',
       statusLabel: language === 'ar' ? 'اكتمل بدون محتوى' : 'Completed without content',
-      emptyTitle: language === 'ar' ? 'لا توجد نتائج قابلة للعرض' : 'No renderable results',
-      emptyDescription: language === 'ar' ? 'انتهى البحث بدون مصادر أو ملخص صالحين للعرض في الواجهة.' : 'The search finished without sources or a summary that can be rendered in the panel.',
+      emptyTitle: language === 'ar' ? 'مفيش عناصر معروضة' : 'No renderable items',
+      emptyDescription: language === 'ar' ? 'الخطوات خلصت لكن ماوصلناش لمحتوى مناسب للعرض هنا.' : 'The flow completed but did not produce enough panel-ready content.',
     },
     failed: {
-      subtitle: language === 'ar' ? 'توقف البحث قبل اكتماله.' : 'Search stopped before completion.',
-      statusLabel: language === 'ar' ? 'فشل البحث' : 'Search failed',
-      emptyTitle: language === 'ar' ? 'تعذر إكمال البحث' : 'Could not complete search',
-      emptyDescription: language === 'ar' ? 'أعد المحاولة أو استخدم المسار البديل إذا كان متاحًا.' : 'Retry the search or use the fallback path if available.',
+      subtitle: language === 'ar' ? 'فيه مشكلة أوقفت المسار الحالي.' : 'An issue stopped the current flow.',
+      statusLabel: language === 'ar' ? 'فيه مشكلة' : 'Needs attention',
+      emptyTitle: language === 'ar' ? 'التشغيل اتعطل' : 'The run was interrupted',
+      emptyDescription: language === 'ar' ? 'راجع الرسائل أو أعد المحاولة من جديد.' : 'Review the messages or retry the run.',
     },
   } as const;
 
@@ -271,10 +523,16 @@ export const buildSearchPanelModel = ({
   liveEvents,
   reviewRequired,
   pendingResearchReview,
+  pendingClarification,
+  coachIntervention,
+  chatEvents,
+  reasoningFeed,
+  summary,
+  schema,
+  pendingInputKind,
   isRunStarting,
   isRunActive,
   simulationActuallyStarted,
-  reasoningPanelAvailable,
   currentPhaseKey,
   pipeline,
 }: {
@@ -285,6 +543,13 @@ export const buildSearchPanelModel = ({
   liveEvents: SearchLiveEvent[];
   reviewRequired: boolean;
   pendingResearchReview?: PendingResearchReview | null;
+  pendingClarification?: PendingClarification | null;
+  coachIntervention?: CoachIntervention | null;
+  chatEvents?: SimulationChatEvent[];
+  reasoningFeed?: ReasoningMessage[];
+  summary?: string | null;
+  schema?: Record<string, unknown>;
+  pendingInputKind?: string | null;
   isRunStarting: boolean;
   isRunActive: boolean;
   simulationActuallyStarted: boolean;
@@ -292,80 +557,93 @@ export const buildSearchPanelModel = ({
   currentPhaseKey?: string | null;
   pipeline?: SimulationPipeline | null;
 }): SearchPanelModel => {
-  const phaseKey = String(currentPhaseKey || '').trim().toLowerCase();
-  const pipelineActive = Boolean(
-    pipeline
-    && !pipeline.ready_for_simulation
-    && pipeline.steps.some((step) => step.status === 'running' || step.status === 'completed')
-  );
-  const researchPhases = ['context_classification', 'internet_research', 'persona_generation', 'persona_persistence'];
-  const visible = activePanel === 'chat'
-    && !reasoningPanelAvailable
-    && (
-      pipelineActive
-      || searchState.status !== 'idle'
-      || reviewRequired
-      || (!simulationActuallyStarted && !isRunStarting && !isRunActive)
-      || researchPhases.includes(phaseKey)
-    );
+  void activePanel;
 
-  if (!visible) {
-    return {
-      stage: 'hidden',
-      visible: false,
-      title: language === 'ar' ? 'البحث المباشر' : 'Live search',
-      subtitle: '',
-      description: '',
-      statusLabel: '',
-      isBusy: false,
-      items: [],
-      emptyTitle: '',
-      emptyDescription: '',
-    };
-  }
-
+  const safeSchema = schema && typeof schema === 'object' ? schema : {};
+  const pipelineSteps = buildPipelineSteps(language, pipeline, currentPhaseKey);
   const liveItems = buildLiveItems(language, liveEvents);
   const resultItems = buildResultItems(
     language,
     searchState.results?.length ? searchState.results : researchContext.sources,
     pendingResearchReview,
   );
-  const summaryItems = buildSummaryItem(
+  const summaryItems = buildSummaryItems(
     language,
     reviewRequired ? pendingResearchReview?.gapSummary || researchContext.summary || searchState.answer : researchContext.summary || searchState.answer,
+    summary,
+  );
+  const noteItems: SearchPanelItem[] = [
+    ...buildResearchReviewNote(language, pendingResearchReview),
+    ...buildClarificationNote(language, pendingClarification),
+    ...buildCoachNote(language, coachIntervention),
+    ...buildImprovementNote(language, safeSchema),
+    ...buildExecutionNotes(language, safeSchema),
+    ...buildReasoningNote(language, reasoningFeed || []),
+    ...buildChatEventNote(language, chatEvents || []),
+  ];
+
+  const hasActivity = Boolean(
+    pipelineSteps.length
+    || liveItems.length
+    || resultItems.length
+    || noteItems.length
+    || summaryItems.length
+    || searchState.status !== 'idle'
+    || simulationActuallyStarted
+    || isRunStarting
+    || isRunActive
+    || pendingInputKind
   );
 
-  const contentItems = liveItems.length
-    ? liveItems
-    : resultItems.length
-      ? resultItems
-      : summaryItems;
-
-  let stage: Exclude<SearchPanelStage, 'hidden'> = 'ready';
-  if (reviewRequired) {
-    stage = 'review';
-  } else if (searchState.status === 'searching') {
-    stage = 'running';
-  } else if (searchState.status === 'timeout' || searchState.status === 'error') {
-    stage = 'failed';
-  } else if (searchState.status === 'complete') {
-    stage = contentItems.length > 0 ? 'completed_with_content' : 'completed_empty';
+  if (!hasActivity && activePanel === 'config') {
+    return {
+      stage: 'hidden',
+      visible: false,
+      title: language === 'ar' ? 'المراحل المباشرة' : 'Live activity',
+      subtitle: '',
+      description: '',
+      statusLabel: '',
+      isBusy: false,
+      pipelineSteps: [],
+      items: [],
+      emptyTitle: '',
+      emptyDescription: '',
+    };
   }
 
-  const copy = getStageCopy(language, stage, contentItems.length > 0);
+  let stage: Exclude<SearchPanelStage, 'hidden'> = 'ready';
+  if (reviewRequired || pendingClarification?.questionId || coachIntervention?.interventionId || pendingInputKind === 'execution_followup') {
+    stage = 'review';
+  } else if (searchState.status === 'searching' || isRunStarting || isRunActive || pipelineSteps.some((item) => item.status === 'running')) {
+    stage = 'running';
+  } else if (searchState.status === 'timeout' || searchState.status === 'error' || pipelineSteps.some((item) => item.status === 'blocked')) {
+    stage = 'failed';
+  } else if (simulationActuallyStarted || summaryItems.length || noteItems.length || liveItems.length || resultItems.length) {
+    stage = (summaryItems.length || noteItems.length || liveItems.length || resultItems.length) ? 'completed_with_content' : 'completed_empty';
+  }
+
+  const copy = getStageCopy(language, stage, Boolean(liveItems.length || resultItems.length || noteItems.length || summaryItems.length));
+  const currentRunningStep = pipelineSteps.find((item) => item.status === 'running');
   const latestLive = liveItems.at(-1);
+  const items = [
+    ...noteItems.slice(0, 5),
+    ...liveItems,
+    ...(liveItems.length ? [] : resultItems),
+    ...summaryItems,
+  ].slice(0, 12);
 
   return {
     stage,
     visible: true,
-    title: language === 'ar' ? 'البحث المباشر' : 'Live search',
-    subtitle: latestLive?.badgeLabel || copy.subtitle,
+    title: language === 'ar' ? 'المراحل المباشرة' : 'Live activity',
+    subtitle: currentRunningStep?.detail || currentRunningStep?.label || latestLive?.badgeLabel || titleForPhase(language, currentPhaseKey) || copy.subtitle,
     description: language === 'ar'
-      ? 'يمكنك متابعة الصفحات التي يفتحها النظام خطوة بخطوة.'
-      : 'Watch each source as it is opened and processed.',
+      ? 'تابع كل اللي بيحصل في البحث، الشخصيات، النقاش، والتنفيذ لحظة بلحظة.'
+      : 'Track research, personas, debate, and execution as they happen.',
     statusLabel: copy.statusLabel,
     isBusy: stage === 'running',
-    items: stage === 'ready' ? [] : contentItems,
+    pipelineSteps,
+    items: stage === 'ready' ? [] : items,
     emptyTitle: copy.emptyTitle,
     emptyDescription: copy.emptyDescription,
   };

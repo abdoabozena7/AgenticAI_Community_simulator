@@ -7,6 +7,7 @@ import type { SearchLiveEvent } from '@/lib/searchPanelModel';
 interface SimulationState {
   status: SimulationStatus;
   statusReason: 'running' | 'interrupted' | 'paused_manual' | 'paused_search_failed' | 'paused_research_review' | 'paused_credits_exhausted' | 'paused_clarification_needed' | 'paused_coach_intervention' | 'error' | 'completed' | null;
+  pendingInputKind: string | null;
   policyMode: 'normal' | 'safety_guard_hard';
   policyReason: string | null;
   searchQuality: {
@@ -44,12 +45,14 @@ interface SimulationState {
   ideaContextType: 'location_based' | 'general_non_location' | 'hybrid' | null;
   personaSource: SimulationPersonaSource | null;
   pipeline: SimulationPipeline | null;
+  schema: Record<string, unknown>;
   activePulses: { from: string; to: string; active: boolean; pulseProgress: number }[];
 }
 
 type SimulationAction =
   | { type: 'SET_STATUS'; payload: SimulationStatus }
   | { type: 'SET_STATUS_REASON'; payload: SimulationState['statusReason'] }
+  | { type: 'SET_RUNTIME_STATE'; payload: { pendingInputKind: string | null; schema: Record<string, unknown> } }
   | { type: 'SET_POLICY'; payload: { policyMode: SimulationState['policyMode']; policyReason: string | null; searchQuality: SimulationState['searchQuality'] } }
   | { type: 'SET_SIMULATION_ID'; payload: string }
   | { type: 'SET_PHASE'; payload: { currentPhaseKey: string | null; phaseProgressPct: number } }
@@ -90,6 +93,7 @@ const initialMetrics: SimulationMetrics = {
 const initialState: SimulationState = {
   status: 'idle',
   statusReason: null,
+  pendingInputKind: null,
   policyMode: 'normal',
   policyReason: null,
   searchQuality: null,
@@ -117,6 +121,7 @@ const initialState: SimulationState = {
   ideaContextType: null,
   personaSource: null,
   pipeline: null,
+  schema: {},
   activePulses: [],
 };
 
@@ -332,6 +337,13 @@ function simulationReducer(state: SimulationState, action: SimulationAction): Si
     case 'SET_STATUS_REASON':
       return { ...state, statusReason: action.payload };
 
+    case 'SET_RUNTIME_STATE':
+      return {
+        ...state,
+        pendingInputKind: action.payload.pendingInputKind,
+        schema: action.payload.schema,
+      };
+
     case 'SET_POLICY':
       return {
         ...state,
@@ -363,6 +375,8 @@ function simulationReducer(state: SimulationState, action: SimulationAction): Si
         ideaContextType: null,
         personaSource: null,
         pipeline: null,
+        pendingInputKind: null,
+        schema: {},
         activePulses: [],
       };
 
@@ -1157,6 +1171,17 @@ export function useSimulation(options?: UseSimulationOptions) {
         ideaContextType: stateResponse.idea_context_type ?? null,
         personaSource: mappedPersonaSource,
         pipeline: mappedPipeline,
+      },
+    });
+    dispatch({
+      type: 'SET_RUNTIME_STATE',
+      payload: {
+        pendingInputKind: typeof stateResponse.pending_input_kind === 'string'
+          ? stateResponse.pending_input_kind
+          : null,
+        schema: stateResponse.schema && typeof stateResponse.schema === 'object'
+          ? stateResponse.schema
+          : {},
       },
     });
     dispatch({

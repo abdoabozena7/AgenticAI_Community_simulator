@@ -222,6 +222,7 @@ def _normalize_config(payload: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "source_mode": source_mode,
         "desired_count": desired_count,
+        "minimum_persona_threshold": _clamp_int(payload.get("minimum_persona_threshold"), minimum=5, maximum=50, fallback=15),
         "target_audience_family": audience_family,
         "place": place,
         "saved_set_key": saved_set_key,
@@ -261,30 +262,117 @@ def _persona_set_name(config: Dict[str, Any]) -> str:
     return "Persona Lab set"
 
 
+def _unique_strings(values: List[Any], *, limit: int) -> List[str]:
+    items: List[str] = []
+    seen: set[str] = set()
+    for value in values:
+        text = str(value or "").strip()
+        if not text:
+            continue
+        lowered = text.lower()
+        if lowered in seen:
+            continue
+        seen.add(lowered)
+        items.append(text)
+        if len(items) >= limit:
+            break
+    return items
+
+
+def _persona_source_type(config: Dict[str, Any]) -> str:
+    source_mode = str(config.get("source_mode") or "")
+    if source_mode == "hybrid":
+        return "hybrid"
+    if source_mode == "audience_only":
+        return "audience"
+    return "place"
+
+
+def _audience_structured_schema(config: Dict[str, Any]) -> Dict[str, Any]:
+    family_key = config.get("target_audience_family") or "consumers"
+    family = DEFAULT_AUDIENCE_FAMILIES.get(family_key) or DEFAULT_AUDIENCE_FAMILIES["consumers"]
+    motivations = [str(item).strip() for item in family.get("motivations") or [] if str(item).strip()]
+    concerns = [str(item).strip() for item in family.get("concerns") or [] if str(item).strip()]
+    roles = [str(item).strip() for item in family.get("roles") or [] if str(item).strip()]
+    speaking_styles = [str(item).strip() for item in family.get("speaking_styles") or [] if str(item).strip()]
+    tags = [str(item).strip() for item in family.get("tags") or [] if str(item).strip()]
+    signals = _unique_strings(motivations + concerns + roles + speaking_styles + tags, limit=18)
+    return {
+        "signals": signals,
+        "user_types": roles[:8],
+        "complaints": concerns[:8],
+        "behaviors": _unique_strings(tags + speaking_styles, limit=8),
+        "competition_reactions": [],
+        "price_sensitivity": "high" if any("budget" in item.lower() or "price" in item.lower() for item in concerns + tags) else "medium",
+        "competition_level": "",
+        "demand_level": "",
+        "regulatory_risk": "",
+        "place_context": "",
+        "target_audiences": [family_key],
+        "sources": [],
+        "default_audience_dataset_used": True,
+        "source_mode": "audience_fallback",
+    }
+
+
+def _merge_structured_signals(current: Dict[str, Any], incoming: Dict[str, Any]) -> Dict[str, Any]:
+    merged = dict(current or {})
+    for key in (
+        "signals",
+        "user_types",
+        "complaints",
+        "behaviors",
+        "competition_reactions",
+        "target_audiences",
+        "notable_locations",
+        "gaps",
+    ):
+        merged[key] = _unique_strings(
+            list(merged.get(key) or []) + list(incoming.get(key) or []),
+            limit=24,
+        )
+    for key in ("summary", "price_sensitivity", "competition_level", "demand_level", "regulatory_risk", "place_context"):
+        if not str(merged.get(key) or "").strip() and str(incoming.get(key) or "").strip():
+            merged[key] = str(incoming.get(key) or "").strip()
+    existing_sources = merged.get("sources") if isinstance(merged.get("sources"), list) else []
+    seen_urls = {str(item.get("url") or "").strip() for item in existing_sources if isinstance(item, dict)}
+    for source in incoming.get("sources") or []:
+        if not isinstance(source, dict):
+            continue
+        url = str(source.get("url") or "").strip()
+        if not url or url in seen_urls:
+            continue
+        seen_urls.add(url)
+        existing_sources.append(
+            {
+                "title": str(source.get("title") or "").strip(),
+                "url": url,
+                "domain": str(source.get("domain") or "").strip(),
+            }
+        )
+    merged["sources"] = existing_sources[:12]
+    return merged
+
+
 def _audience_dataset_report(config: Dict[str, Any]) -> ResearchReport:
     family_key = config.get("target_audience_family") or "consumers"
     family = DEFAULT_AUDIENCE_FAMILIES.get(family_key) or DEFAULT_AUDIENCE_FAMILIES["consumers"]
-    findings = []
-    findings.extend(family.get("motivations") or [])
-    findings.extend(family.get("concerns") or [])
-    findings.extend(family.get("roles") or [])
-    findings.extend(family.get("speaking_styles") or [])
-    unique_findings = [item for item in dict.fromkeys(str(entry).strip() for entry in findings if str(entry).strip())]
-    summary = f"Default audience dataset for {family.get('cluster')} with motivations, concerns, roles, and speaking styles."
+    schema = _audience_structured_schema(config)
+    summary = f"Audience fallback dataset for {family.get('cluster')} with explicit user types, concerns, behaviors, and motivations."
     return ResearchReport(
         query_plan=[],
         evidence=[],
         summary=summary,
-        findings=unique_findings[:12],
+        findings=_unique_strings(
+            list(schema.get("signals") or [])
+            + list(schema.get("user_types") or [])
+            + list(schema.get("complaints") or [])
+            + list(schema.get("behaviors") or []),
+            limit=16,
+        ),
         gaps=[],
         quality={"provider": "default_audience_dataset", "usable_sources": 0, "domains": 0, "extraction_success_rate": 1.0},
-        structured_schema={
-            "signals": unique_findings[:12],
-            "place_context": "",
-            "target_audiences": [family_key],
-            "default_audience_dataset_used": True,
-            "source_mode": "audience_default",
-        },
+        structured_schema=schema,
     )
 
 
@@ -320,6 +408,22 @@ async def _run_research(config: Dict[str, Any], state: Dict[str, Any]) -> Resear
     max_results = 8 if config.get("generation_depth") == "deep" else 5
     raw_rows: List[Dict[str, Any]] = []
     summaries: List[str] = []
+    structured_schema: Dict[str, Any] = {
+        "summary": "",
+        "signals": [],
+        "user_types": [],
+        "complaints": [],
+        "behaviors": [],
+        "competition_reactions": [],
+        "price_sensitivity": "",
+        "competition_level": "",
+        "demand_level": "",
+        "regulatory_risk": "",
+        "place_context": _normalize_text(config.get("place")),
+        "target_audiences": [_normalize_text(config.get("target_audience_family"))] if _normalize_text(config.get("target_audience_family")) else [],
+        "sources": [],
+        "default_audience_dataset_used": False,
+    }
     seen_urls: set[str] = set()
     _set_stage(state, "searching_sources", "running", detail="Running persona-lab search queries.")
     await _persist_job_state(state)
@@ -330,6 +434,8 @@ async def _run_research(config: Dict[str, Any], state: Dict[str, Any]) -> Resear
             language="en",
             strict_web_only=True,
         )
+        structured = result.get("structured") if isinstance(result.get("structured"), dict) else {}
+        structured_schema = _merge_structured_signals(structured_schema, structured)
         summaries.append(_normalize_text((result.get("structured") or {}).get("summary")) or _normalize_text(result.get("answer")))
         rows = result.get("results") if isinstance(result.get("results"), list) else []
         for row in rows:
@@ -366,6 +472,19 @@ async def _run_research(config: Dict[str, Any], state: Dict[str, Any]) -> Resear
         snippet = _normalize_text(row.get("snippet") or row.get("title"))
         if snippet and snippet not in findings:
             findings.append(snippet[:220])
+        structured_schema = _merge_structured_signals(
+            structured_schema,
+            {
+                "signals": [snippet] if snippet else [],
+                "sources": [
+                    {
+                        "title": _normalize_text(row.get("title")),
+                        "url": _normalize_text(row.get("url")),
+                        "domain": _normalize_text(row.get("domain")),
+                    }
+                ],
+            },
+        )
     state["developer"]["evidence_signals_found"] = len(findings)
     _set_stage(
         state,
@@ -377,19 +496,20 @@ async def _run_research(config: Dict[str, Any], state: Dict[str, Any]) -> Resear
             else "No live sources were available to read for this persona-lab request."
         ),
     )
-    audience_family = _normalize_text(config.get("target_audience_family"))
-    place = _normalize_text(config.get("place"))
-    schema = {
-        "signals": findings[:12],
-        "place_context": place,
-        "target_audiences": [audience_family] if audience_family else [],
-        "default_audience_dataset_used": False,
-    }
+    structured_schema["summary"] = _normalize_text(structured_schema.get("summary")) or " | ".join(part for part in summaries if part)[:1000]
     return ResearchReport(
         query_plan=[ResearchQuery(query=query, reason="persona lab research") for query in queries],
         evidence=evidence,
-        summary=" | ".join(part for part in summaries if part)[:1000],
-        findings=findings[:16],
+        summary=str(structured_schema.get("summary") or "")[:1000],
+        findings=_unique_strings(
+            findings
+            + list(structured_schema.get("signals") or [])
+            + list(structured_schema.get("user_types") or [])
+            + list(structured_schema.get("complaints") or [])
+            + list(structured_schema.get("behaviors") or [])
+            + list(structured_schema.get("competition_reactions") or []),
+            limit=20,
+        ),
         gaps=[] if evidence else ["No live sources were found for the requested persona-lab configuration."],
         quality={
             "provider": "web",
@@ -397,7 +517,7 @@ async def _run_research(config: Dict[str, Any], state: Dict[str, Any]) -> Resear
             "domains": len({item.domain for item in evidence if item.domain}),
             "extraction_success_rate": 1.0 if evidence else 0.0,
         },
-        structured_schema=schema,
+        structured_schema=structured_schema,
     )
 
 
@@ -440,6 +560,13 @@ class _PersonaLabEventBus:
             if self.job_state["stages"][5]["status"] == "pending":
                 _set_stage(self.job_state, "removing_duplicates", "completed", detail="Duplicate filtering completed during fitting.")
             _set_stage(self.job_state, "validating", "running", detail="Validating schema completeness, uniqueness, diversity, and attribution.")
+            self.job_state["developer"]["final_persona_count"] = int(meta.get("final_persona_count") or self.job_state["partial_results"].get("current_persona_count") or 0)
+            _set_stage(self.job_state, "validating", "completed", detail=str(payload.get("snippet") or "").strip() or None)
+        elif action == "persona_validation_blocked_for_simulation":
+            _set_stage(self.job_state, "fitting_personas", "completed", detail="Persona fitting completed with simulation blockers.")
+            if self.job_state["stages"][5]["status"] == "pending":
+                _set_stage(self.job_state, "removing_duplicates", "completed", detail="Duplicate filtering completed during fitting.")
+            self.job_state["validation_errors"] = list(meta.get("simulation_blockers") or [])
             self.job_state["developer"]["final_persona_count"] = int(meta.get("final_persona_count") or self.job_state["partial_results"].get("current_persona_count") or 0)
             _set_stage(self.job_state, "validating", "completed", detail=str(payload.get("snippet") or "").strip() or None)
         elif action == "persona_validation_failed":
@@ -514,6 +641,7 @@ def _build_orchestration_state(job_state: Dict[str, Any], research: ResearchRepo
     orchestration_state.search_completed = True
     orchestration_state.schema["persona_count_requested"] = int(config.get("desired_count") or 30)
     orchestration_state.schema["allow_lower_persona_target"] = bool(int(config.get("desired_count") or 30) < 30)
+    orchestration_state.schema["minimum_persona_threshold"] = int(config.get("minimum_persona_threshold") or 15)
     return orchestration_state
 
 
@@ -537,6 +665,7 @@ async def _complete_saved_reuse(job_state: Dict[str, Any]) -> None:
 
     name = _normalize_text((record.get("payload") or {}).get("title")) or _normalize_text(record.get("place_label")) or "Saved persona set"
     personas = (record.get("payload") or {}).get("personas") if isinstance((record.get("payload") or {}).get("personas"), list) else []
+    validation_meta = dict(record.get("validation_meta") or {})
     _set_stage(job_state, "preparing_request", "completed", detail="Validated the saved persona-set request.")
     _set_stage(job_state, "searching_sources", "completed", detail="Reused a saved persona set; no new search was required.")
     _set_stage(job_state, "reading_sources", "completed", detail="Reused the saved set metadata and evidence summary.")
@@ -555,6 +684,7 @@ async def _complete_saved_reuse(job_state: Dict[str, Any]) -> None:
     job_state["developer"]["final_persona_count"] = int(record.get("persona_count") or len(personas))
     job_state["developer"]["persistence_status"] = "completed"
     job_state["final_saved_set_id"] = record.get("id")
+    job_state["validation_errors"] = list(validation_meta.get("simulation_blockers") or [])
     await _persist_job_state(job_state)
 
 
@@ -637,13 +767,15 @@ async def list_persona_sets(
     user_id: Optional[int],
     place_query: Optional[str] = None,
     audience: Optional[str] = None,
+    source_type: Optional[str] = None,
+    reusable_only: bool = False,
     date_from: Optional[str] = None,
     date_to: Optional[str] = None,
     min_count: Optional[int] = None,
     max_count: Optional[int] = None,
     limit: int = 20,
 ) -> List[Dict[str, Any]]:
-    return await db_core.list_persona_library_records(
+    items = await db_core.list_persona_library_records(
         user_id=user_id,
         place_query=place_query,
         audience=audience,
@@ -653,6 +785,12 @@ async def list_persona_sets(
         max_count=max_count,
         limit=limit,
     )
+    normalized_source_type = _normalize_text(source_type).lower()
+    if normalized_source_type:
+        items = [item for item in items if str(item.get("source_type") or "").strip().lower() == normalized_source_type]
+    if reusable_only:
+        items = [item for item in items if bool(item.get("reusable"))]
+    return items
 
 
 async def get_persona_set(*, user_id: Optional[int], set_key: str) -> Optional[Dict[str, Any]]:

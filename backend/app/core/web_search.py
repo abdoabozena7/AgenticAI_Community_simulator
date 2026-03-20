@@ -430,12 +430,178 @@ async def _llm_fallback(query: str) -> Dict[str, Any]:
 def _validate_structured(data: Dict[str, Any]) -> Dict[str, Any]:
     if not isinstance(data, dict):
         return {}
-    required = ["summary", "signals", "competition_level", "demand_level", "regulatory_risk"]
+    required = [
+        "summary",
+        "market_presence",
+        "price_range",
+        "signals",
+        "user_types",
+        "complaints",
+        "behaviors",
+        "competition_reactions",
+        "user_sentiment",
+        "behavior_patterns",
+        "gaps_in_market",
+        "confidence_score",
+        "competition_level",
+        "demand_level",
+        "regulatory_risk",
+        "price_sensitivity",
+    ]
     if not all(key in data for key in required):
         return {}
-    if not isinstance(data.get("signals"), list):
+    list_fields = [
+        "signals",
+        "user_types",
+        "complaints",
+        "behaviors",
+        "competition_reactions",
+        "behavior_patterns",
+        "notable_locations",
+        "gaps",
+        "gaps_in_market",
+        "visible_insights",
+        "expandable_reasoning",
+    ]
+    if any(not isinstance(data.get(field), list) for field in list_fields):
         return {}
+    sentiment = data.get("user_sentiment")
+    if not isinstance(sentiment, dict):
+        return {}
+    for key in ("positive", "negative", "neutral"):
+        if not isinstance(sentiment.get(key), list):
+            return {}
     return data
+
+
+def _normalize_structured(data: Dict[str, Any], results: List[Dict[str, Any]], language: str) -> Dict[str, Any]:
+    normalized = dict(data or {})
+    for key in (
+        "signals",
+        "user_types",
+        "complaints",
+        "behaviors",
+        "competition_reactions",
+        "behavior_patterns",
+        "gaps",
+        "gaps_in_market",
+        "notable_locations",
+        "visible_insights",
+        "expandable_reasoning",
+    ):
+        values = normalized.get(key) if isinstance(normalized.get(key), list) else []
+        cleaned: List[str] = []
+        for value in values:
+            text = str(value).strip()
+            if text and text not in cleaned:
+                cleaned.append(text)
+        normalized[key] = cleaned[:10]
+    sentiment = normalized.get("user_sentiment") if isinstance(normalized.get("user_sentiment"), dict) else {}
+    normalized["user_sentiment"] = {
+        key: [
+            str(value).strip()
+            for value in (sentiment.get(key) if isinstance(sentiment.get(key), list) else [])
+            if str(value).strip()
+        ][:8]
+        for key in ("positive", "negative", "neutral")
+    }
+    for key in ("summary", "market_presence", "price_range"):
+        normalized[key] = str(normalized.get(key) or "").strip()
+    for key in ("competition_level", "demand_level", "regulatory_risk", "price_sensitivity"):
+        value = str(normalized.get(key) or "").strip().lower()
+        normalized[key] = value if value in {"low", "medium", "high", "rare", "emerging", "common"} else ("medium" if key != "market_presence" else "")
+    try:
+        score = float(normalized.get("confidence_score") or 0.0)
+    except (TypeError, ValueError):
+        score = 0.0
+    normalized["confidence_score"] = round(max(0.0, min(1.0, score)), 3)
+    sources = normalized.get("sources") if isinstance(normalized.get("sources"), list) else []
+    cleaned_sources = []
+    seen_urls: set[str] = set()
+    for source in list(sources) + [
+        {"title": item.get("title"), "url": item.get("url"), "domain": item.get("domain")}
+        for item in results[:5]
+    ]:
+        if not isinstance(source, dict):
+            continue
+        url = str(source.get("url") or "").strip()
+        if not url or url in seen_urls:
+            continue
+        seen_urls.add(url)
+        cleaned_sources.append(
+            {
+                "title": str(source.get("title") or "").strip(),
+                "url": url,
+                "domain": str(source.get("domain") or "").strip(),
+            }
+        )
+    normalized["sources"] = cleaned_sources[:8]
+    if not normalized["visible_insights"]:
+        normalized["visible_insights"] = _default_visible_insights(normalized, language)
+    if not normalized["expandable_reasoning"]:
+        normalized["expandable_reasoning"] = _default_expandable_reasoning(normalized, language)
+    if not normalized["summary"]:
+        normalized["summary"] = " | ".join(normalized["visible_insights"][:3])
+    return normalized
+
+
+def _default_visible_insights(structured: Dict[str, Any], language: str) -> List[str]:
+    insights: List[str] = []
+    market_presence = str(structured.get("market_presence") or "").strip().lower()
+    competition = str(structured.get("competition_level") or "").strip().lower()
+    price_range = str(structured.get("price_range") or "").strip()
+    negative = [str(item).strip() for item in (structured.get("user_sentiment") or {}).get("negative", []) if str(item).strip()]
+    positive = [str(item).strip() for item in (structured.get("user_sentiment") or {}).get("positive", []) if str(item).strip()]
+    gaps = [str(item).strip() for item in structured.get("gaps_in_market") or [] if str(item).strip()]
+    if competition == "high":
+        insights.append("المنافسة عالية في المنطقة")
+    if market_presence in {"common", "منتشر"}:
+        insights.append("الفكرة موجودة أصلًا في السوق بشكل واضح")
+    if price_range:
+        insights.append(f"السعر المتداول شكله حوالين: {price_range}")
+    if negative:
+        insights.append(negative[0])
+    if positive:
+        insights.append(positive[0])
+    if gaps:
+        insights.append(gaps[0])
+    deduped: List[str] = []
+    for item in insights:
+        if item and item not in deduped:
+            deduped.append(item)
+    return deduped[:4]
+
+
+def _default_expandable_reasoning(structured: Dict[str, Any], language: str) -> List[str]:
+    lines: List[str] = []
+    for key in ("behavior_patterns", "complaints", "competition_reactions", "gaps_in_market"):
+        values = [str(item).strip() for item in structured.get(key) or [] if str(item).strip()]
+        lines.extend(values[:2])
+    summary = str(structured.get("summary") or "").strip()
+    if summary:
+        lines.append(summary)
+    deduped: List[str] = []
+    for item in lines:
+        if item and item not in deduped:
+            deduped.append(item)
+    return deduped[:6]
+
+
+def _structured_confidence_score(structured: Dict[str, Any], quality: Dict[str, Any]) -> float:
+    usable = int(quality.get("usable_sources") or 0)
+    domains = int(quality.get("domains") or 0)
+    extraction = float(quality.get("extraction_success_rate") or 0.0)
+    signal_count = sum(
+        len([str(item).strip() for item in structured.get(key) or [] if str(item).strip()])
+        for key in ("signals", "complaints", "behaviors", "behavior_patterns", "gaps_in_market")
+    )
+    sentiment_count = sum(
+        len([str(item).strip() for item in (structured.get("user_sentiment") or {}).get(key, []) if str(item).strip()])
+        for key in ("positive", "negative", "neutral")
+    )
+    score = 0.18 + min(0.22, usable * 0.07) + min(0.14, domains * 0.05) + min(0.22, extraction * 0.22)
+    score += min(0.14, signal_count * 0.02) + min(0.10, sentiment_count * 0.025)
+    return round(max(0.0, min(1.0, score)), 3)
 
 
 def _build_evidence_cards(structured: Dict[str, Any], language: str) -> List[str]:
@@ -447,6 +613,10 @@ def _build_evidence_cards(structured: Dict[str, Any], language: str) -> List[str
     signals = structured.get("signals") or []
     if isinstance(signals, list):
         cards.extend(str(s).strip() for s in signals[:4] if str(s).strip())
+    for key in ("user_types", "complaints", "behaviors", "competition_reactions"):
+        values = structured.get(key) or []
+        if isinstance(values, list):
+            cards.extend(str(value).strip() for value in values[:2] if str(value).strip())
 
     def _level_label(key: str, value: str) -> Optional[str]:
         if not value:
@@ -497,12 +667,21 @@ async def _extract_structured(query: str, answer: str, results: List[Dict[str, A
         f"- {r.get('title','')}: {r.get('snippet','')}" for r in results[:5]
     )
     prompt = (
-        "You turn web search results into a structured market signal summary. "
-        "Return JSON only with keys: summary (string), signals (array of short bullets), "
-        "competition_level (low/medium/high), demand_level (low/medium/high), "
+        "You turn web search results into real human market signals. "
+        "Do NOT return search-result summaries. Extract what people seem to like, hate, complain about, ask for, and how they behave. "
+        "If direct social evidence is thin, infer cautiously from the snippets and known market logic without inventing statistics. "
+        "Return JSON only with keys: "
+        "summary (string), market_presence (rare/emerging/common), competition_level (low/medium/high), "
+        "price_range (string), user_sentiment ({positive:[], negative:[], neutral:[]}), "
+        "signals (array), user_types (array), complaints (array), behaviors (array), competition_reactions (array), "
+        "behavior_patterns (array), gaps_in_market (array), demand_level (low/medium/high), "
         "regulatory_risk (low/medium/high), price_sensitivity (low/medium/high), "
-        "notable_locations (array), gaps (array of missing info), sources (array of {title,url,domain}). "
-        "Use the query and snippets; do not invent specific facts. "
+        "notable_locations (array), gaps (array of missing info), visible_insights (array of short UI insights), "
+        "expandable_reasoning (array of deeper reasoning lines), confidence_score (0..1), "
+        "sources (array of {title,url,domain}). "
+        "Use only the query and snippets. Do not invent exact figures, fake reviews, or unsupported demographics. "
+        "Prefer concrete human-style signals like 'people complain about delivery fees' over vague claims like 'many users like it'. "
+        "If a dimension is unclear, leave arrays empty or use a cautious string like '' instead of guessing hard facts. "
         f"Language: {language}. "
         f"Query: {query}\n"
         f"Answer: {answer}\n"
@@ -619,13 +798,25 @@ async def search_web(
     if not structured:
         structured = {
             "summary": (result.get("answer") or "").strip(),
+            "market_presence": "",
+            "price_range": "",
+            "user_sentiment": {"positive": [], "negative": [], "neutral": []},
             "signals": [],
+            "user_types": [],
+            "complaints": [],
+            "behaviors": [],
+            "competition_reactions": [],
+            "behavior_patterns": [],
+            "gaps_in_market": [],
             "competition_level": "medium",
             "demand_level": "medium",
             "regulatory_risk": "medium",
             "price_sensitivity": "medium",
             "notable_locations": [],
             "gaps": [],
+            "visible_insights": [],
+            "expandable_reasoning": [],
+            "confidence_score": 0.0,
             "sources": [
                 {"title": r.get("title"), "url": r.get("url"), "domain": r.get("domain")}
                 for r in result.get("results", [])[:5]
@@ -633,8 +824,13 @@ async def search_web(
         }
     if not str(structured.get("summary") or "").strip():
         structured["summary"] = _fallback_summary_from_results(result.get("results") or [], language or "en")
-    structured["evidence_cards"] = _build_evidence_cards(structured, language or "en")
     quality = _compute_search_quality(result.get("results") or [])
+    structured = _normalize_structured(structured, result.get("results") or [], language or "en")
+    structured["confidence_score"] = max(
+        float(structured.get("confidence_score") or 0.0),
+        _structured_confidence_score(structured, quality),
+    )
+    structured["evidence_cards"] = _build_evidence_cards(structured, language or "en")
     result["structured"] = structured
     result["strict_mode"] = strict_mode
     result["quality"] = quality

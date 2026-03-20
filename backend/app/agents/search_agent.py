@@ -6,11 +6,14 @@ from typing import Any, Dict, List, Tuple
 from ..core.page_fetch import fetch_page
 from ..core.web_search import search_web
 from ..models.orchestration import (
+    ClarificationQuestion,
     EvidenceItem,
     IdeaContextType,
     OrchestrationState,
     ResearchQuery,
     ResearchReport,
+    SimulationPhase,
+    SimulationStatus,
     classify_idea_context,
     context_location_label,
 )
@@ -25,6 +28,7 @@ class SearchAgent(BaseAgent):
         context_type = state.idea_context_type or classify_idea_context(context).value
         query_plan = self._build_query_plan(context=context, context_type=context_type)
         report = ResearchReport(query_plan=query_plan)
+        structured_accumulator = self._empty_structured_schema(context=context, context_type=context_type)
         state.set_pipeline_step(
             "building_search_queries",
             "running",
@@ -80,7 +84,7 @@ class SearchAgent(BaseAgent):
                 query=planned_query.query,
                 max_results=5,
                 language=context.get("language") or "en",
-                strict_web_only=True,
+                strict_web_only=not self._allow_ai_estimation(state),
             )
             top_results = result.get("results") if isinstance(result.get("results"), list) else []
             await self.runtime.event_bus.publish(
@@ -104,11 +108,8 @@ class SearchAgent(BaseAgent):
             )
             report.quality = dict(result.get("quality") or report.quality)
             structured = result.get("structured") or {}
-            if isinstance(structured, dict) and not report.summary:
-                report.summary = str(structured.get("summary") or "").strip()
-                report.findings = [str(item) for item in structured.get("signals") or [] if str(item).strip()][:8]
-                report.gaps = [str(item) for item in structured.get("gaps") or [] if str(item).strip()][:5]
-                report.structured_schema = structured
+            if isinstance(structured, dict):
+                structured_accumulator = self._merge_structured_schema(structured_accumulator, structured)
 
             for item in top_results[:3]:
                 url = str(item.get("url") or "").strip()
@@ -199,25 +200,39 @@ class SearchAgent(BaseAgent):
             )
 
         report.evidence = sorted(report.evidence, key=lambda item: item.relevance_score, reverse=True)[:10]
+        structured_accumulator = self._merge_evidence_into_structured(structured_accumulator, report.evidence)
+        for key in ("competition_level", "demand_level", "regulatory_risk", "price_sensitivity"):
+            if not str(structured_accumulator.get(key) or "").strip():
+                structured_accumulator[key] = "medium"
+        if not isinstance(structured_accumulator.get("user_sentiment"), dict):
+            structured_accumulator["user_sentiment"] = {"positive": [], "negative": [], "neutral": []}
+        structured_accumulator["quality"] = dict(report.quality or {})
+        report.structured_schema = structured_accumulator
         if not report.summary:
-            report.summary = self._fallback_summary(report)
+            report.summary = str(structured_accumulator.get("summary") or "").strip() or self._fallback_summary(report)
         if not report.findings:
-            report.findings = self._fallback_findings(report)
+            report.findings = self._structured_findings(structured_accumulator) or self._fallback_findings(report)
         if not report.gaps:
-            report.gaps = self._fallback_gaps(state)
-        report.structured_schema = {
-            "idea": context.get("idea"),
-            "category": context.get("category"),
-            "location": context_location_label(context),
-            "context_type": context_type,
-            "summary": report.summary,
-            "findings": report.findings,
-            "gaps": report.gaps,
-            "evidence_count": len(report.evidence),
-            "quality": report.quality,
-        }
+            report.gaps = [str(item) for item in structured_accumulator.get("gaps") or [] if str(item).strip()] or self._fallback_gaps(state)
+
+        if self._allow_ai_estimation(state) and self._research_is_insufficient(report):
+            estimated = await self._estimate_human_signals(state, report)
+            structured_accumulator = self._merge_structured_schema(structured_accumulator, estimated)
+            structured_accumulator["estimation_mode"] = "ai_estimation"
+            structured_accumulator["confidence_score"] = min(
+                0.64,
+                max(
+                    float(structured_accumulator.get("confidence_score") or 0.0),
+                    float(estimated.get("confidence_score") or 0.0),
+                ),
+            )
+            report.structured_schema = structured_accumulator
+            report.summary = str(structured_accumulator.get("summary") or "").strip() or report.summary
+            report.findings = self._structured_findings(structured_accumulator) or report.findings
+            report.gaps = [str(item) for item in structured_accumulator.get("gaps") or [] if str(item).strip()] or report.gaps
+
         state.research = report
-        state.search_completed = True
+        state.search_completed = not self._research_is_insufficient(report)
         state.schema.update(
             {
                 "idea": context.get("idea"),
@@ -227,6 +242,9 @@ class SearchAgent(BaseAgent):
                 "research_summary": report.summary,
                 "research_findings": list(report.findings),
                 "research_gaps": list(report.gaps),
+                "research_visible_insights": list(report.structured_schema.get("visible_insights") or []),
+                "research_expandable_reasoning": list(report.structured_schema.get("expandable_reasoning") or []),
+                "research_confidence_score": float(report.structured_schema.get("confidence_score") or 0.0),
             }
         )
         state.set_pipeline_step(
@@ -251,6 +269,8 @@ class SearchAgent(BaseAgent):
             },
             persist_research=True,
         )
+        if self._research_is_insufficient(report) and not self._allow_ai_estimation(state):
+            await self._pause_for_research_review(state, report)
         return state
 
     def _build_query_plan(self, *, context: Dict[str, Any], context_type: str) -> List[ResearchQuery]:
@@ -323,3 +343,244 @@ class SearchAgent(BaseAgent):
         if not state.user_context.get("riskBoundary"):
             gaps.append("Risk boundary needs an explicit decision.")
         return gaps[:3]
+
+    def _empty_structured_schema(self, *, context: Dict[str, Any], context_type: str) -> Dict[str, Any]:
+        return {
+            "idea": context.get("idea"),
+            "category": context.get("category"),
+            "location": context_location_label(context),
+            "context_type": context_type,
+            "summary": "",
+            "market_presence": "",
+            "price_range": "",
+            "signals": [],
+            "user_types": [],
+            "complaints": [],
+            "behaviors": [],
+            "competition_reactions": [],
+            "user_sentiment": {"positive": [], "negative": [], "neutral": []},
+            "behavior_patterns": [],
+            "gaps_in_market": [],
+            "competition_level": "",
+            "demand_level": "",
+            "regulatory_risk": "",
+            "price_sensitivity": "",
+            "notable_locations": [],
+            "gaps": [],
+            "visible_insights": [],
+            "expandable_reasoning": [],
+            "confidence_score": 0.0,
+            "sources": [],
+            "evidence_count": 0,
+            "quality": {},
+        }
+
+    def _merge_structured_schema(self, current: Dict[str, Any], incoming: Dict[str, Any]) -> Dict[str, Any]:
+        merged = dict(current or {})
+        for key in (
+            "signals",
+            "user_types",
+            "complaints",
+            "behaviors",
+            "competition_reactions",
+            "behavior_patterns",
+            "gaps_in_market",
+            "notable_locations",
+            "gaps",
+            "visible_insights",
+            "expandable_reasoning",
+        ):
+            existing = [str(item).strip() for item in merged.get(key) or [] if str(item).strip()]
+            additions = [str(item).strip() for item in incoming.get(key) or [] if str(item).strip()]
+            merged[key] = list(dict.fromkeys(existing + additions))[:18]
+        sentiment = merged.get("user_sentiment") if isinstance(merged.get("user_sentiment"), dict) else {}
+        incoming_sentiment = incoming.get("user_sentiment") if isinstance(incoming.get("user_sentiment"), dict) else {}
+        merged["user_sentiment"] = {
+            label: list(
+                dict.fromkeys(
+                    [str(item).strip() for item in sentiment.get(label) or [] if str(item).strip()]
+                    + [str(item).strip() for item in incoming_sentiment.get(label) or [] if str(item).strip()]
+                )
+            )[:12]
+            for label in ("positive", "negative", "neutral")
+        }
+        for key in ("summary", "market_presence", "price_range", "competition_level", "demand_level", "regulatory_risk", "price_sensitivity"):
+            if not str(merged.get(key) or "").strip():
+                merged[key] = incoming.get(key)
+            elif key == "summary" and str(incoming.get(key) or "").strip():
+                merged[key] = str(merged.get(key) or "").strip() or str(incoming.get(key) or "").strip()
+        try:
+            merged["confidence_score"] = max(float(merged.get("confidence_score") or 0.0), float(incoming.get("confidence_score") or 0.0))
+        except (TypeError, ValueError):
+            merged["confidence_score"] = float(merged.get("confidence_score") or 0.0)
+        if isinstance(incoming.get("quality"), dict):
+            quality = dict(merged.get("quality") or {})
+            quality.update(dict(incoming.get("quality") or {}))
+            merged["quality"] = quality
+        incoming_sources = incoming.get("sources") if isinstance(incoming.get("sources"), list) else []
+        existing_sources = merged.get("sources") if isinstance(merged.get("sources"), list) else []
+        keyed_sources = []
+        seen_urls: set[str] = set()
+        for source in existing_sources + incoming_sources:
+            if not isinstance(source, dict):
+                continue
+            url = str(source.get("url") or "").strip()
+            if not url or url in seen_urls:
+                continue
+            seen_urls.add(url)
+            keyed_sources.append(
+                {
+                    "title": str(source.get("title") or "").strip(),
+                    "url": url,
+                    "domain": str(source.get("domain") or "").strip(),
+                }
+            )
+        merged["sources"] = keyed_sources[:12]
+        return merged
+
+    def _merge_evidence_into_structured(self, structured: Dict[str, Any], evidence: List[EvidenceItem]) -> Dict[str, Any]:
+        merged = dict(structured or {})
+        merged["evidence_count"] = len(evidence or [])
+        if not str(merged.get("summary") or "").strip():
+            merged["summary"] = self._fallback_summary(
+                ResearchReport(
+                    summary="",
+                    evidence=list(evidence or []),
+                )
+            )
+        existing_sources = merged.get("sources") if isinstance(merged.get("sources"), list) else []
+        seen_urls = {str(item.get("url") or "").strip() for item in existing_sources if isinstance(item, dict)}
+        for item in evidence[:8]:
+            if not item.url or item.url in seen_urls:
+                continue
+            seen_urls.add(item.url)
+            existing_sources.append(
+                {
+                    "title": item.title,
+                    "url": item.url,
+                    "domain": item.domain,
+                }
+            )
+        merged["sources"] = existing_sources[:12]
+        return merged
+
+    def _structured_findings(self, structured: Dict[str, Any]) -> List[str]:
+        findings: List[str] = []
+        for key in ("visible_insights", "signals", "user_types", "complaints", "behaviors", "behavior_patterns", "competition_reactions", "gaps_in_market"):
+            values = structured.get(key) if isinstance(structured.get(key), list) else []
+            for value in values:
+                text = str(value).strip()
+                if text and text not in findings:
+                    findings.append(text)
+        sentiment = structured.get("user_sentiment") if isinstance(structured.get("user_sentiment"), dict) else {}
+        for key in ("positive", "negative", "neutral"):
+            for value in sentiment.get(key) or []:
+                text = str(value).strip()
+                if text and text not in findings:
+                    findings.append(text)
+        return findings[:12]
+
+    def _allow_ai_estimation(self, state: OrchestrationState) -> bool:
+        value = str(
+            state.user_context.get("researchEstimationMode")
+            or state.schema.get("research_estimation_mode")
+            or ""
+        ).strip().lower()
+        return value in {"ai", "ai_estimation", "use_ai_estimation", "estimated"}
+
+    def _research_is_insufficient(self, report: ResearchReport) -> bool:
+        structured = report.structured_schema if isinstance(report.structured_schema, dict) else {}
+        quality = report.quality if isinstance(report.quality, dict) else {}
+        usable = int(quality.get("usable_sources") or 0)
+        domains = int(quality.get("domains") or 0)
+        confidence = float(structured.get("confidence_score") or 0.0)
+        estimation_mode = str(structured.get("estimation_mode") or "").strip().lower()
+        signal_count = sum(
+            len([str(item).strip() for item in structured.get(key) or [] if str(item).strip()])
+            for key in ("signals", "complaints", "behaviors", "behavior_patterns", "gaps_in_market")
+        )
+        sentiment_count = sum(
+            len([str(item).strip() for item in (structured.get("user_sentiment") or {}).get(key, []) if str(item).strip()])
+            for key in ("positive", "negative", "neutral")
+        )
+        if estimation_mode == "ai_estimation":
+            return confidence < 0.38 or (signal_count + sentiment_count) < 6
+        return usable < 2 or domains < 2 or confidence < 0.45 or (signal_count + sentiment_count) < 5
+
+    async def _estimate_human_signals(self, state: OrchestrationState, report: ResearchReport) -> Dict[str, Any]:
+        structured = report.structured_schema if isinstance(report.structured_schema, dict) else {}
+        fallback = {
+            "summary": str(structured.get("summary") or "").strip(),
+            "market_presence": str(structured.get("market_presence") or "").strip() or "emerging",
+            "price_range": str(structured.get("price_range") or "").strip(),
+            "user_sentiment": dict(structured.get("user_sentiment") or {"positive": [], "negative": [], "neutral": []}),
+            "signals": list(structured.get("signals") or []),
+            "user_types": list(structured.get("user_types") or []),
+            "complaints": list(structured.get("complaints") or []),
+            "behaviors": list(structured.get("behaviors") or []),
+            "competition_reactions": list(structured.get("competition_reactions") or []),
+            "behavior_patterns": list(structured.get("behavior_patterns") or structured.get("behaviors") or []),
+            "gaps_in_market": list(structured.get("gaps_in_market") or structured.get("gaps") or []),
+            "competition_level": str(structured.get("competition_level") or "medium"),
+            "demand_level": str(structured.get("demand_level") or "medium"),
+            "regulatory_risk": str(structured.get("regulatory_risk") or "medium"),
+            "price_sensitivity": str(structured.get("price_sensitivity") or "medium"),
+            "notable_locations": list(structured.get("notable_locations") or []),
+            "gaps": list(structured.get("gaps") or []),
+            "visible_insights": list(structured.get("visible_insights") or []),
+            "expandable_reasoning": list(structured.get("expandable_reasoning") or []),
+            "confidence_score": max(0.35, float(structured.get("confidence_score") or 0.0)),
+            "sources": list(structured.get("sources") or []),
+        }
+        payload = await self.runtime.llm.generate_json(
+            prompt=(
+                f"Idea: {state.user_context.get('idea')}\n"
+                f"Category: {state.user_context.get('category')}\n"
+                f"Location: {context_location_label(state.user_context)}\n"
+                f"Audience: {', '.join(state.user_context.get('targetAudience') or [])}\n"
+                f"Current summary: {report.summary}\n"
+                f"Current findings: {' | '.join(report.findings[:8])}\n"
+                f"Current structured schema: {structured}\n"
+                "Fill only the missing human-signal fields cautiously. "
+                "Return grounded JSON with the same schema and short Arabic signals. "
+                "No fake numbers, no fake reviews, no certainty beyond the available context."
+            ),
+            system=(
+                "You are a research intelligence engine. "
+                "Infer realistic human signals from the idea, place, category, and weak search evidence. "
+                "Keep outputs concrete, short, and persona-usable."
+            ),
+            temperature=0.2,
+            fallback_json=fallback,
+        )
+        payload["confidence_score"] = min(0.64, max(float(payload.get("confidence_score") or 0.0), 0.38))
+        return payload
+
+    async def _pause_for_research_review(self, state: OrchestrationState, report: ResearchReport) -> None:
+        state.pending_input = True
+        state.pending_input_kind = "research_review"
+        state.pending_resume_phase = SimulationPhase.INTERNET_RESEARCH.value
+        state.status = SimulationStatus.PAUSED.value
+        state.status_reason = "paused_research_review"
+        state.error = "ملقيتش بيانات كفاية عن المنطقة دي"
+        state.clarification_questions = [
+            ClarificationQuestion(
+                question_id="research_review",
+                field_name="research_review",
+                prompt="ملقيتش بيانات كفاية عن المنطقة دي. تحب نعيد البحث ولا نستخدم AI estimation؟",
+                reason=" | ".join((report.structured_schema or {}).get("visible_insights") or report.gaps or ["limited_research_signal"])[:280],
+                required=True,
+                options=["retry", "use_ai_estimation"],
+            )
+        ]
+        if getattr(self.runtime, "event_bus", None) is not None:
+            await self.runtime.event_bus.publish(
+                state,
+                "research_insufficient",
+                {
+                    "agent": self.name,
+                    "message": "ملقيتش بيانات كفاية عن المنطقة دي",
+                    "visible_insights": list((report.structured_schema or {}).get("visible_insights") or []),
+                    "confidence_score": float((report.structured_schema or {}).get("confidence_score") or 0.0),
+                },
+            )

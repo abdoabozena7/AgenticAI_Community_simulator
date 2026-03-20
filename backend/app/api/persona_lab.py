@@ -68,6 +68,8 @@ async def get_persona_lab_job(job_id: str, authorization: str = Header(None)) ->
 async def list_persona_sets(
     place: str = Query("", alias="place"),
     audience: str = Query("", alias="audience"),
+    source_type: str = Query("", alias="source_type"),
+    reusable_only: bool = Query(False, alias="reusable_only"),
     date_from: Optional[str] = Query(None, alias="date_from"),
     date_to: Optional[str] = Query(None, alias="date_to"),
     min_count: Optional[int] = Query(None, ge=1, alias="min_count"),
@@ -80,6 +82,8 @@ async def list_persona_sets(
         user_id=int(user.get("id")) if user else None,
         place_query=place.strip() or None,
         audience=audience.strip() or None,
+        source_type=source_type.strip() or None,
+        reusable_only=reusable_only,
         date_from=date_from,
         date_to=date_to,
         min_count=min_count,

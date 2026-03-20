@@ -144,6 +144,8 @@ export interface SimulationConfig {
   targetAudience: string[];
   country: string;
   city: string;
+  place_name?: string;
+  location?: string;
   riskAppetite: number;
   ideaMaturity: 'concept' | 'prototype' | 'mvp' | 'launched';
   goals: string[];
@@ -201,7 +203,10 @@ export interface SimulationStateResponse {
   simulation_id: string;
   status: 'running' | 'paused' | 'completed' | 'error';
   status_reason?: 'running' | 'interrupted' | 'paused_manual' | 'paused_search_failed' | 'paused_research_review' | 'paused_credits_exhausted' | 'paused_clarification_needed' | 'paused_coach_intervention' | 'error' | 'completed';
+  pending_input?: boolean;
+  pending_input_kind?: string | null;
   idea_context_type?: 'location_based' | 'general_non_location' | 'hybrid' | null;
+  schema?: Record<string, unknown>;
   persona_source?: {
     mode?: string | null;
     resolved?: boolean;
@@ -1969,6 +1974,9 @@ class ApiService {
     idea?: string;
     country?: string;
     city?: string;
+    place_name?: string;
+    location?: string;
+    location_scope?: 'city_country' | 'place_only' | 'none';
     category?: string;
     target_audience?: string[];
     goals?: string[];

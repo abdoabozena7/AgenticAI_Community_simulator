@@ -122,6 +122,7 @@ type PendingSimulationDraft = {
   category?: string;
   country?: string;
   city?: string;
+  placeName?: string;
   persona_source_mode?: SimulationConfig['persona_source_mode'];
   persona_set_key?: string;
   persona_set_label?: string;
@@ -200,6 +201,54 @@ const normalizeMaturityValue = (value?: string): UserInput['ideaMaturity'] | und
   return undefined;
 };
 
+type LocationExtraction = {
+  idea?: string;
+  country?: string;
+  city?: string;
+  place_name?: string;
+  location?: string;
+  location_scope?: 'city_country' | 'place_only' | 'none';
+  category?: string;
+  target_audience?: string[];
+  goals?: string[];
+  risk_appetite?: number;
+  idea_maturity?: string;
+  missing: string[];
+  question?: string;
+};
+
+const readTrimmedString = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (trimmed) return trimmed;
+    }
+  }
+  return '';
+};
+
+const resolveLocationState = (
+  input: Pick<UserInput, 'city' | 'country' | 'placeName'>,
+  extraction?: Partial<LocationExtraction> | null,
+) => {
+  const placeName = readTrimmedString(
+    input.placeName,
+    extraction?.place_name,
+    extraction?.location,
+  );
+  const city = readTrimmedString(input.city, extraction?.city);
+  const country = readTrimmedString(input.country, extraction?.country);
+  const locationLabel = readTrimmedString(placeName, [city, country].filter(Boolean).join(', '));
+
+  return {
+    city,
+    country,
+    placeName,
+    locationLabel,
+    hasLocation: Boolean(locationLabel),
+  };
+};
+
 
 
 const inferReplyLanguage = (
@@ -264,6 +313,7 @@ const Index = () => {
     targetAudience: [],
     country: '',
     city: '',
+    placeName: '',
     riskAppetite: 50,
     ideaMaturity: 'concept',
     goals: [],
@@ -464,7 +514,7 @@ const Index = () => {
     targetAudience: userInput.targetAudience,
     country: userInput.country,
     city: userInput.city,
-    placeName: userInput.city || userInput.country,
+    placeName: userInput.placeName || userInput.city || userInput.country,
     riskAppetite: userInput.riskAppetite,
     ideaMaturity: userInput.ideaMaturity,
     goals: userInput.goals,
@@ -476,6 +526,7 @@ const Index = () => {
     userInput.category,
     userInput.city,
     userInput.country,
+    userInput.placeName,
     userInput.goals,
     userInput.idea,
     userInput.ideaMaturity,
@@ -579,6 +630,7 @@ const Index = () => {
         targetAudience: draft.targetAudience?.length ? draft.targetAudience : prev.targetAudience,
         country: draft.country ?? prev.country,
         city: draft.city ?? prev.city,
+        placeName: draft.placeName ?? prev.placeName,
         riskAppetite: typeof draft.riskAppetite === 'number' ? draft.riskAppetite : prev.riskAppetite,
         ideaMaturity: (draft.ideaMaturity as UserInput['ideaMaturity']) || prev.ideaMaturity,
         goals: draft.goals?.length ? draft.goals : prev.goals,
@@ -1137,6 +1189,7 @@ const Index = () => {
         category: routeState?.category || pendingDraft?.category || prev.category,
         country: routeState?.country || pendingDraft?.country || prev.country,
         city: routeState?.city || pendingDraft?.city || prev.city,
+        placeName: routeState?.placeName || pendingDraft?.placeName || prev.placeName,
       }));
     }
     setRequestedPersonaSourceMode(routeState?.persona_source_mode || pendingDraft?.persona_source_mode || null);
@@ -1211,6 +1264,7 @@ const Index = () => {
     targetAudience: [...input.targetAudience].sort(),
     country: input.country.trim(),
     city: input.city.trim(),
+    placeName: (input.placeName || '').trim(),
     riskAppetite: Math.max(0, Math.min(100, input.riskAppetite ?? 50)),
     ideaMaturity: input.ideaMaturity || 'concept',
     goals: [...input.goals].sort(),
@@ -1225,6 +1279,7 @@ const Index = () => {
     goals: [...userInput.goals].sort(),
     country: userInput.country.trim(),
     city: userInput.city.trim(),
+    placeName: (userInput.placeName || '').trim(),
     language: settings.language,
   }), [settings.language, userInput]);
   const startChoiceKey = useMemo(
@@ -1325,6 +1380,7 @@ const Index = () => {
     idea: input.idea.trim(),
     country: input.country.trim(),
     city: input.city.trim(),
+    placeName: (input.placeName || '').trim(),
     category: input.category || DEFAULT_CATEGORY,
     target_audience: input.targetAudience,
     goals: input.goals,
@@ -1512,12 +1568,15 @@ const Index = () => {
     const preflightPayload = preflightResolvedKeyRef.current === preflightContextKey
       ? preflightStartPayloadRef.current
       : null;
+    const locationState = resolveLocationState(input);
     const payload: SimulationConfig = {
       idea: trimmedIdea,
       category: input.category || DEFAULT_CATEGORY,
       targetAudience: input.targetAudience,
       country: input.country.trim(),
       city: input.city.trim(),
+      place_name: locationState.placeName || undefined,
+      location: locationState.locationLabel || undefined,
       riskAppetite: (input.riskAppetite ?? 50) / 100,
       ideaMaturity: input.ideaMaturity ?? 'concept',
       goals: input.goals,
@@ -1529,7 +1588,7 @@ const Index = () => {
       agentCount: input.agentCount,
       society_mode: selectedStartPath === 'custom_build' ? 'custom' : 'default',
       start_path: selectedStartPath === 'custom_build' ? 'build_custom' : 'start_default',
-      persona_source_mode: personaOverride?.mode || requestedPersonaSourceMode || (input.city.trim() || input.country.trim()
+      persona_source_mode: personaOverride?.mode || requestedPersonaSourceMode || (locationState.hasLocation
         ? 'generate_new_from_place'
         : 'default_audience_only'),
       persona_set_key: personaOverride?.setKey || requestedPersonaSetKey || undefined,
@@ -1608,16 +1667,16 @@ const Index = () => {
     config.preflight_clarity_score = 1;
     config.preflight_assumptions = [];
     config.seed_context = {
-      ...(config.seed_context || {}),
-      guided_workflow: {
-        workflow_id: guidedWorkflowState?.workflow_id || null,
-        context_scope: workflowDraft?.contextScope || guidedContextScope,
-        place_name: workflowDraft?.placeName || input.city || input.country || '',
-        review_summary: review?.summary || '',
-        location_summary: locationResearch?.summary || '',
-        persona_snapshot: personaSnapshot || null,
-        corrections: guidedWorkflowState?.corrections || [],
-      },
+        ...(config.seed_context || {}),
+        guided_workflow: {
+          workflow_id: guidedWorkflowState?.workflow_id || null,
+          context_scope: workflowDraft?.contextScope || guidedContextScope,
+          place_name: workflowDraft?.placeName || locationState.placeName || locationState.locationLabel || '',
+          review_summary: review?.summary || '',
+          location_summary: locationResearch?.summary || '',
+          persona_snapshot: personaSnapshot || null,
+          corrections: guidedWorkflowState?.corrections || [],
+        },
     };
     return config;
   }, [buildConfig, guidedContextScope, guidedWorkflowState]);
@@ -1756,6 +1815,7 @@ const Index = () => {
       targetAudience: audience.length ? audience : userInput.targetAudience,
       country: readString(context.country) || userInput.country,
       city: readString(context.city) || userInput.city,
+      placeName: readString(context.placeName, context.place_name, context.location, context.place_label) || userInput.placeName,
       riskAppetite: normalizedRisk,
       ideaMaturity: normalizeMaturityValue(readString(context.ideaMaturity, context.idea_maturity)) || userInput.ideaMaturity || 'concept',
       goals: goals.length ? goals : userInput.goals,
@@ -1773,6 +1833,7 @@ const Index = () => {
       ...(Array.isArray(updates.targetAudience) ? { targetAudience: updates.targetAudience } : {}),
       ...(typeof updates.country === 'string' ? { country: updates.country } : {}),
       ...(typeof updates.city === 'string' ? { city: updates.city } : {}),
+      ...(typeof updates.placeName === 'string' ? { placeName: updates.placeName } : {}),
       ...(typeof updates.riskAppetite === 'number' ? { riskAppetite: updates.riskAppetite } : {}),
       ...(typeof updates.ideaMaturity === 'string' ? { ideaMaturity: updates.ideaMaturity as UserInput['ideaMaturity'] } : {}),
       ...(Array.isArray(updates.goals) ? { goals: updates.goals } : {}),
@@ -1782,14 +1843,18 @@ const Index = () => {
   const handleGuidedChooseScope = useCallback((scope: GuidedWorkflowDraftContext['contextScope']) => {
     setGuidedContextScope(scope);
     setLocationChoice(scope === 'specific_place' ? 'yes' : scope ? 'no' : null);
-    void guidedWorkflow.updateContextScope(scope, scope === 'specific_place' ? (userInput.city || userInput.country) : undefined).catch(() => undefined);
-  }, [guidedWorkflow, userInput.city, userInput.country]);
+    const locationState = resolveLocationState(userInput);
+    void guidedWorkflow.updateContextScope(
+      scope,
+      scope === 'specific_place' ? (locationState.locationLabel || undefined) : undefined
+    ).catch(() => undefined);
+  }, [guidedWorkflow, userInput]);
 
   const handleGuidedSubmitSchema = useCallback(async () => {
     await guidedWorkflow.submitSchema({
       ...guidedDraftInput,
       placeName: guidedDraftInput.contextScope === 'specific_place'
-        ? (guidedDraftInput.city || guidedDraftInput.country || guidedDraftInput.placeName)
+        ? (guidedDraftInput.placeName || guidedDraftInput.city || guidedDraftInput.country)
         : '',
     }).catch(() => undefined);
   }, [guidedDraftInput, guidedWorkflow]);
@@ -1817,15 +1882,64 @@ const Index = () => {
   const getMissingForStart = useCallback((input: UserInput, overrideChoice?: 'yes' | 'no' | null) => {
     const missing: string[] = [];
     if (!input.idea.trim()) missing.push('idea');
-    const hasLocation = Boolean(input.city.trim() || input.country.trim());
+    const hasLocation = resolveLocationState(input).hasLocation;
     const choice = overrideChoice ?? locationChoice;
     if (!hasLocation && choice === null) missing.push('location_choice');
-    if (choice === 'yes' && !input.city.trim()) missing.push('city');
+    if (choice === 'yes' && !hasLocation) missing.push('city');
     if (!input.category) missing.push('category');
     if (!input.targetAudience.length) missing.push('target_audience');
     if (!input.goals.length) missing.push('goals');
     return missing;
   }, [locationChoice]);
+
+  const mergeExtractionIntoInput = useCallback((
+    baseInput: UserInput,
+    extraction: Partial<LocationExtraction>,
+    fallbackIdea?: string,
+  ) => {
+    const locationState = resolveLocationState(baseInput, extraction);
+    const normalizedCategory = normalizeCategoryValue(extraction.category);
+    const normalizedAudiences = normalizeOptionList(extraction.target_audience, AUDIENCE_OPTIONS);
+    const normalizedGoals = normalizeOptionList(extraction.goals, GOAL_OPTIONS);
+    const normalizedRisk = normalizeRiskValue(extraction.risk_appetite);
+    const normalizedMaturity = normalizeMaturityValue(extraction.idea_maturity);
+
+    const nextInput: UserInput = {
+      ...baseInput,
+      idea: extraction.idea || baseInput.idea || fallbackIdea || '',
+      country: locationState.country || baseInput.country || '',
+      city: locationState.city || baseInput.city || '',
+      placeName: locationState.placeName || baseInput.placeName,
+      category: touched.category
+        ? baseInput.category
+        : normalizedCategory || baseInput.category || DEFAULT_CATEGORY,
+      targetAudience: touched.audience
+        ? baseInput.targetAudience
+        : normalizedAudiences.length
+        ? normalizedAudiences
+        : baseInput.targetAudience.length
+        ? baseInput.targetAudience
+        : DEFAULT_AUDIENCE,
+      goals: touched.goals
+        ? baseInput.goals
+        : normalizedGoals.length
+        ? normalizedGoals
+        : baseInput.goals.length
+        ? baseInput.goals
+        : DEFAULT_GOALS,
+      riskAppetite: touched.risk
+        ? baseInput.riskAppetite
+        : normalizedRisk ?? baseInput.riskAppetite,
+      ideaMaturity: touched.maturity
+        ? baseInput.ideaMaturity
+        : normalizedMaturity ?? baseInput.ideaMaturity,
+    };
+
+    return {
+      nextInput,
+      locationState,
+    };
+  }, [touched]);
 
   const isCreditsBlocked = useCallback((me?: UserMe | null) => {
     if (!me) return false;
@@ -1986,6 +2100,14 @@ const Index = () => {
       return true;
     }
 
+    if (question && (missing.includes('location_choice') || missing.includes('city') || missing.includes('country'))) {
+      addSystemMessage(question);
+      setIsWaitingForCountry(false);
+      setIsWaitingForCity(true);
+      setIsWaitingForLocationChoice(false);
+      return true;
+    }
+
     if (missing.includes('location_choice')) {
       return askLocationChoice();
     }
@@ -2118,7 +2240,7 @@ const Index = () => {
             controls: {
               diversity: societyControls.diversity,
               innovation_bias: societyControls.innovationBias,
-              risk_sensitivity: 100 - Math.max(0, Math.min(100, userInput.riskAppetite ?? 50)),
+              risk_sensitivity: 100 - Math.max(0, Math.min(100, activeInput.riskAppetite ?? 50)),
               strict_policy: societyControls.strictPolicy,
               human_debate_style: societyControls.humanDebate,
               persona_hint: societyControls.personaHint.trim(),
@@ -2203,21 +2325,85 @@ const Index = () => {
     userInput,
   ]);
 
-  const handleStart = useCallback(async () => {
+  const handleStart = useCallback(async (inputOverride?: UserInput) => {
+    let activeInput = inputOverride ?? userInput;
     if (isPrestartSearchActive || isRunStarting || isRunActive) {
       notifyActionBlocked();
       return;
     }
-    const missing = getMissingForStart(userInput);
-    const asked = await promptForMissing(missing);
+    const currentLocationState = resolveLocationState(activeInput);
+    const activePreflightKey = computePreflightKey(activeInput);
+    const activeResearchGateKey = JSON.stringify({
+      idea: activeInput.idea.trim(),
+      category: activeInput.category || DEFAULT_CATEGORY,
+      targetAudience: [...activeInput.targetAudience].sort(),
+      goals: [...activeInput.goals].sort(),
+      country: activeInput.country.trim(),
+      city: activeInput.city.trim(),
+      placeName: (activeInput.placeName || '').trim(),
+      language: settings.language,
+    });
+    const activeStartChoiceKey = `${activePreflightKey}|${activeResearchGateKey}|${(activeInput.agentCount ?? 20)}`;
+    const effectiveChoice = currentLocationState.hasLocation ? 'yes' : locationChoice;
+    const shouldExtractBeforeStart = Boolean(activeInput.idea.trim()) && (
+      (!currentLocationState.hasLocation && effectiveChoice !== 'no')
+      || !activeInput.category
+      || !activeInput.targetAudience.length
+      || !activeInput.goals.length
+    );
+    let extraction: LocationExtraction | null = null;
+    if (shouldExtractBeforeStart) {
+      const schemaPayload = {
+        idea: activeInput.idea,
+        country: activeInput.country,
+        city: activeInput.city,
+        placeName: activeInput.placeName || '',
+        place_name: activeInput.placeName || '',
+        location: currentLocationState.locationLabel || '',
+        category: activeInput.category,
+        target_audience: activeInput.targetAudience,
+        goals: activeInput.goals,
+        risk_appetite: (activeInput.riskAppetite ?? 50) / 100,
+        idea_maturity: activeInput.ideaMaturity,
+      };
+      try {
+        extraction = await extractWithRetry(activeInput.idea.trim(), schemaPayload) as LocationExtraction;
+      } catch (err: unknown) {
+        if (isAuthError(err)) {
+          handleSessionExpired();
+          return;
+        }
+        addSystemMessage(settings.language === 'ar'
+          ? 'الـ LLM مشغول الآن. حاول مرة أخرى بعد قليل.'
+          : 'LLM is busy right now. Please try again in a moment.');
+        setLlmBusy(true);
+        setLlmRetryMessage(activeInput.idea.trim());
+        return;
+      }
+      setLlmBusy(false);
+      setLlmRetryMessage(null);
+      const merged = mergeExtractionIntoInput(activeInput, extraction, activeInput.idea.trim());
+      activeInput = merged.nextInput;
+      setUserInput(activeInput);
+      setIsWaitingForCountry(false);
+      setIsWaitingForCity(false);
+      if (merged.locationState.hasLocation && effectiveChoice !== 'no') {
+        setLocationChoice('yes');
+        setIsWaitingForLocationChoice(false);
+      }
+    }
+
+    const activeLocationState = resolveLocationState(activeInput);
+    const missing = getMissingForStart(activeInput, activeLocationState.hasLocation ? 'yes' : effectiveChoice);
+    const asked = await promptForMissing(missing, extraction?.question || undefined);
     if (asked) return;
 
-    const preflightReady = await runPreflightGate();
+    const preflightReady = await runPreflightGate(undefined, activeInput);
     if (!preflightReady) {
       setActivePanel('chat');
       const waitingIdeaConfirmation = Boolean(
         preflightStartPayloadRef.current
-        && preflightConfirmedKeyRef.current !== preflightContextKey
+        && preflightConfirmedKeyRef.current !== activePreflightKey
       );
       if (pendingPreflightQuestion) return;
       if (waitingIdeaConfirmation || pendingIdeaConfirmation) {
@@ -2236,7 +2422,7 @@ const Index = () => {
       return;
     }
 
-    if (startChoiceResolvedKeyRef.current !== startChoiceKey) {
+    if (startChoiceResolvedKeyRef.current !== activeStartChoiceKey) {
       setStartChoiceModalOpen(true);
       if (!requestConfigPanel({ silent: true })) {
         notifyConfigLocked();
@@ -2250,7 +2436,7 @@ const Index = () => {
       return;
     }
 
-    if (!userInput.city.trim() && !userInput.country.trim() && !requestedPersonaSourceMode) {
+    if (!activeLocationState.hasLocation && !requestedPersonaSourceMode) {
       setSelectedPersonaSourceSetKey('');
       setPersonaSourceFilter('');
       setPersonaSourceModalOpen(true);
@@ -2280,14 +2466,14 @@ const Index = () => {
     ) {
       simulation.stopSimulation();
     }
-    if (!userInput.city.trim() && !userInput.country.trim()) {
+    if (!activeLocationState.hasLocation) {
       addSystemMessage(
         settings.language === 'ar'
           ? 'هذه الفكرة تبدو عامة، لذلك سيستخدم النظام شخصيات الجمهور الافتراضية ما لم تختر توليد شخصيات مخصصة. الخيارات المتاحة: شخصيات الجمهور الافتراضية، شخصيات مكان محفوظة، الذهاب إلى مختبر الشخصيات، أو المتابعة بالشخصيات الافتراضية المولدة.'
           : 'This idea looks general, so the system will use default audience personas unless you choose to generate custom personas. Available options: default audience personas, saved place personas, go to persona lab, or continue with default generated audience personas.'
       );
     }
-    addUserMessage(userInput.idea, { dedupe: true });
+    addUserMessage(activeInput.idea, { dedupe: true });
     setHasStarted(true);
     setActivePanel('chat');
     setReasoningActive(false);
@@ -2301,12 +2487,12 @@ const Index = () => {
           ? 'جارٍ تجهيز التشغيل: سنبدأ بالبحث ثم تجهيز الشخصيات قبل المحاكاة.'
           : 'Preparing the run: research and persona preparation will complete before simulation starts.'
       );
-      const config = buildConfig(userInput);
+      const config = buildConfig(activeInput);
       if (selectedStartPath === 'custom_build') {
         try {
           const built = await apiService.buildCustomSociety({
             profile_name: settings.language === 'ar' ? 'مجتمع مخصص' : 'Custom society',
-            agent_count: userInput.agentCount ?? 20,
+            agent_count: activeInput.agentCount ?? 20,
             distribution: {
               skeptic_ratio: Math.max(0, Math.min(100, societyControls.skepticRatio)),
               optimist_ratio: Math.max(0, Math.min(100, 100 - societyControls.skepticRatio)),
@@ -2316,7 +2502,7 @@ const Index = () => {
             controls: {
               diversity: societyControls.diversity,
               innovation_bias: societyControls.innovationBias,
-              risk_sensitivity: 100 - Math.max(0, Math.min(100, userInput.riskAppetite ?? 50)),
+              risk_sensitivity: 100 - Math.max(0, Math.min(100, activeInput.riskAppetite ?? 50)),
               strict_policy: societyControls.strictPolicy,
               human_debate_style: societyControls.humanDebate,
               persona_hint: societyControls.personaHint.trim(),
@@ -2388,7 +2574,9 @@ const Index = () => {
     addSystemMessage,
     beginUiBusy,
     buildConfig,
+    computePreflightKey,
     endUiBusy,
+    extractWithRetry,
     getMissingForStart,
     hasStarted,
     handleSessionExpired,
@@ -2397,27 +2585,20 @@ const Index = () => {
     isPrestartSearchActive,
     isRunActive,
     isRunStarting,
+    locationChoice,
     meSnapshot,
+    mergeExtractionIntoInput,
     notifyActionBlocked,
     notifyConfigLocked,
     pendingIdeaConfirmation,
     pendingPreflightQuestion,
-    pendingResearchReview,
     promptForMissing,
-    preflightContextKey,
     requestedPersonaSourceMode,
-    researchContext.sources.length,
-    researchContext.structured,
-    researchContext.summary,
-    researchGateKey,
-    researchIdea,
     runPreflightGate,
     requestConfigPanel,
-    searchState.status,
     selectedStartPath,
     settings.language,
     societyControls,
-    startChoiceKey,
     simulation,
     userInput,
   ]);
@@ -3259,15 +3440,13 @@ const Index = () => {
   ]);
 
   const getSearchLocationLabel = useCallback(() => {
-    const city = userInput.city?.trim();
-    const country = userInput.country?.trim();
-    const label = [city, country].filter(Boolean).join(', ');
-    if (label) return label;
+    const locationState = resolveLocationState(userInput);
+    if (locationState.locationLabel) return locationState.locationLabel;
     if (locationChoice === 'no') {
       return settings.language === 'ar' ? 'بدون مكان محدد' : 'no specific location';
     }
     return settings.language === 'ar' ? 'المكان الذي أدخلته' : 'the location you entered';
-  }, [locationChoice, settings.language, userInput.city, userInput.country]);
+  }, [locationChoice, settings.language, userInput]);
 
   const getSearchTimeoutPrompt = useCallback((params: {
     locationLabel: string;
@@ -3718,13 +3897,69 @@ Required sections:
       notifyActionBlocked();
       return;
     }
-    const missing = getMissingForStart(userInput);
+    const ideaText = userInput.idea.trim();
+    const currentLocationState = resolveLocationState(userInput);
+    const shouldExtractBeforeConfig = Boolean(ideaText) && (
+      (!currentLocationState.hasLocation && locationChoice !== 'no')
+      || !userInput.category
+      || !userInput.targetAudience.length
+      || !userInput.goals.length
+    );
+    let extraction: LocationExtraction | null = null;
+    if (shouldExtractBeforeConfig) {
+      const schemaPayload = {
+        idea: userInput.idea,
+        country: userInput.country,
+        city: userInput.city,
+        placeName: userInput.placeName || '',
+        place_name: userInput.placeName || '',
+        location: currentLocationState.locationLabel || '',
+        category: userInput.category,
+        target_audience: userInput.targetAudience,
+        goals: userInput.goals,
+        risk_appetite: (userInput.riskAppetite ?? 50) / 100,
+        idea_maturity: userInput.ideaMaturity,
+      };
+      try {
+        extraction = await extractWithRetry(ideaText, schemaPayload) as LocationExtraction;
+      } catch (err: unknown) {
+        if (isAuthError(err)) {
+          handleSessionExpired();
+          return;
+        }
+        addSystemMessage(settings.language === 'ar'
+          ? 'الـ LLM مشغول الآن. حاول مرة أخرى بعد قليل.'
+          : 'LLM is busy right now. Please try again in a moment.');
+        setLlmBusy(true);
+        setLlmRetryMessage(ideaText);
+        return;
+      }
+      setLlmBusy(false);
+      setLlmRetryMessage(null);
+    }
+
+    const merged = extraction
+      ? mergeExtractionIntoInput(userInput, extraction, ideaText)
+      : { nextInput: userInput, locationState: resolveLocationState(userInput) };
+    const nextInput = merged.nextInput;
+    const locationState = merged.locationState;
+    setUserInput(nextInput);
+    setIsWaitingForCountry(false);
+    setIsWaitingForCity(false);
+    if (locationState.hasLocation) {
+      setLocationChoice('yes');
+      setIsWaitingForLocationChoice(false);
+    }
+
+    const missing = getMissingForStart(nextInput, locationState.hasLocation ? 'yes' : undefined);
     const visibleMissing = missing.filter((field) => field !== 'location_choice');
     setMissingFields(visibleMissing);
     if (missing.length > 0) {
+      setActivePanel('chat');
       if (missing.includes('location_choice')) {
-        setActivePanel('chat');
-        await promptForMissing(missing);
+        await promptForMissing(missing, extraction?.question || undefined);
+      } else {
+        await promptForMissing(missing, extraction?.question || undefined);
       }
       return;
     }
@@ -3741,8 +3976,8 @@ Required sections:
     setUnderstandingQueue([]);
     setUnderstandingAnswers([]);
     setActivePanel('chat');
-    await handleStart();
-  }, [getMissingForStart, handleStart, isPrestartSearchActive, isRunActive, isRunStarting, notifyActionBlocked, promptForMissing, userInput, setPendingConfigReview, setActivePanel]);
+    await handleStart(nextInput);
+  }, [addSystemMessage, extractWithRetry, getMissingForStart, handleSessionExpired, handleStart, isPrestartSearchActive, isRunActive, isRunStarting, isAuthError, locationChoice, mergeExtractionIntoInput, notifyActionBlocked, promptForMissing, settings.language, userInput, setPendingConfigReview, setActivePanel]);
 
   const handleSearchRetry = useCallback(async () => {
     if (searchState.status !== 'timeout') return;
@@ -4023,10 +4258,14 @@ Write 4 to 6 short sentences that summarize an initial local market estimate. St
 
           // If we're explicitly waiting for location, handle it directly without search.
           if (isWaitingForCountry || isWaitingForCity) {
+            const locationState = resolveLocationState(userInput);
             const schemaPayload = {
               idea: userInput.idea,
               country: userInput.country,
               city: userInput.city,
+              placeName: userInput.placeName || '',
+              place_name: userInput.placeName || '',
+              location: locationState.locationLabel || '',
               category: userInput.category,
               target_audience: userInput.targetAudience,
               goals: userInput.goals,
@@ -4051,20 +4290,18 @@ Write 4 to 6 short sentences that summarize an initial local market estimate. St
             setLlmBusy(false);
             setLlmRetryMessage(null);
 
-            const nextInput: UserInput = {
-              ...userInput,
-              country: extraction.country || userInput.country,
-              city: extraction.city || userInput.city,
-            };
+            const merged = mergeExtractionIntoInput(userInput, extraction, trimmed);
+            const nextInput = merged.nextInput;
+            const nextLocationState = merged.locationState;
             setUserInput(nextInput);
             setIsWaitingForCountry(false);
             setIsWaitingForCity(false);
-            const hasLocation = Boolean(nextInput.city.trim() || nextInput.country.trim());
-            if (hasLocation) {
+            if (nextLocationState.hasLocation) {
               setLocationChoice('yes');
+              setIsWaitingForLocationChoice(false);
             }
 
-            const missing = getMissingForStart(nextInput, hasLocation ? 'yes' : undefined);
+            const missing = getMissingForStart(nextInput, nextLocationState.hasLocation ? 'yes' : undefined);
             const asked = await promptForMissing(missing, extraction.question || undefined);
             if (asked) return;
 
@@ -4080,7 +4317,8 @@ Write 4 to 6 short sentences that summarize an initial local market estimate. St
 
           // If a simulation is already running, handle discussion vs. update directly.
           if (simulation.status === 'running' || simulation.status === 'completed') {
-            const context = `Idea: ${userInput.idea}. Location: ${userInput.city}, ${userInput.country}.`;
+            const resolvedLocation = resolveLocationState(userInput);
+            const context = `Idea: ${userInput.idea}. Location: ${resolvedLocation.locationLabel || [resolvedLocation.city, resolvedLocation.country].filter(Boolean).join(', ')}.`;
             let mode: 'update' | 'discuss' = 'discuss';
             const modeBusyToken = beginUiBusy('detecting_mode');
             try {
@@ -4107,7 +4345,7 @@ Write 4 to 6 short sentences that summarize an initial local market estimate. St
                 .slice(-8)
                 .map((r) => `Agent ${r.agentId.slice(0, 4)}: ${r.message}`)
                 .join(' | ');
-              const constraintsContext = `Category=${userInput.category}; Audience=${userInput.targetAudience.join(', ')}; Goals=${userInput.goals.join(', ')}; Maturity=${userInput.ideaMaturity}; Location=${userInput.city}, ${userInput.country}`;
+              const constraintsContext = `Category=${userInput.category}; Audience=${userInput.targetAudience.join(', ')}; Goals=${userInput.goals.join(', ')}; Maturity=${userInput.ideaMaturity}; Location=${resolvedLocation.locationLabel || [resolvedLocation.city, resolvedLocation.country].filter(Boolean).join(', ')}`;
               const researchContextText = researchContext.summary || '';
               setIsChatThinking(true);
               const reply = await getAssistantMessage(
@@ -4139,6 +4377,9 @@ If rejection is about competition or location, suggest searching for a better lo
             idea: userInput.idea,
             country: userInput.country,
             city: userInput.city,
+            placeName: userInput.placeName || '',
+            place_name: userInput.placeName || '',
+            location: resolveLocationState(userInput).locationLabel || '',
             category: userInput.category,
             target_audience: userInput.targetAudience,
             goals: userInput.goals,
@@ -4170,46 +4411,26 @@ If rejection is about competition or location, suggest searching for a better lo
           const normalizedRisk = normalizeRiskValue(extraction.risk_appetite);
           const normalizedMaturity = normalizeMaturityValue(extraction.idea_maturity);
 
-          const nextInput: UserInput = {
-            ...userInput,
-            idea: extraction.idea || userInput.idea || trimmed,
-            country: userInput.country || extraction.country || '',
-            city: userInput.city || extraction.city || '',
-            category: touched.category
-              ? userInput.category
-              : normalizedCategory || userInput.category || DEFAULT_CATEGORY,
-            targetAudience: touched.audience
-              ? userInput.targetAudience
-              : normalizedAudiences.length
-              ? normalizedAudiences
-              : userInput.targetAudience.length
-              ? userInput.targetAudience
-              : DEFAULT_AUDIENCE,
-            goals: touched.goals
-              ? userInput.goals
-              : normalizedGoals.length
-              ? normalizedGoals
-              : userInput.goals.length
-              ? userInput.goals
-              : DEFAULT_GOALS,
-            riskAppetite: touched.risk
-              ? userInput.riskAppetite
-              : normalizedRisk ?? userInput.riskAppetite,
-            ideaMaturity: touched.maturity
-              ? userInput.ideaMaturity
-              : normalizedMaturity ?? userInput.ideaMaturity,
-          };
+          const merged = mergeExtractionIntoInput(userInput, {
+            ...extraction,
+            category: normalizedCategory || extraction.category,
+            target_audience: normalizedAudiences.length ? normalizedAudiences : extraction.target_audience,
+            goals: normalizedGoals.length ? normalizedGoals : extraction.goals,
+            risk_appetite: normalizedRisk ?? extraction.risk_appetite,
+            idea_maturity: normalizedMaturity || extraction.idea_maturity,
+          }, trimmed);
+          const nextInput = merged.nextInput;
+          const nextLocationState = merged.locationState;
 
           setUserInput(nextInput);
           setIsWaitingForCountry(false);
           setIsWaitingForCity(false);
-          const hasLocation = Boolean(nextInput.city.trim() || nextInput.country.trim());
-          if (hasLocation) {
+          if (nextLocationState.hasLocation) {
             setLocationChoice('yes');
             setIsWaitingForLocationChoice(false);
           }
 
-          const missing = getMissingForStart(nextInput, hasLocation ? 'yes' : undefined);
+          const missing = getMissingForStart(nextInput, nextLocationState.hasLocation ? 'yes' : undefined);
           const asked = await promptForMissing(missing, extraction.question || undefined);
           if (asked) return;
 
@@ -4866,7 +5087,7 @@ If rejection is about competition or location, suggest searching for a better lo
     }
     setUserInput((prev) => {
       const next = { ...prev, ...updates };
-      const hasLocation = Boolean(next.city.trim() || next.country.trim());
+      const hasLocation = resolveLocationState(next).hasLocation;
       if (hasLocation) {
         setLocationChoice('yes');
         setIsWaitingForLocationChoice(false);
@@ -4895,6 +5116,13 @@ If rejection is about competition or location, suggest searching for a better lo
     liveEvents: simulation.researchSources,
     reviewRequired: pendingResearchReview || isResearchReviewPause,
     pendingResearchReview: isResearchReviewPause ? simulation.pendingResearchReview : null,
+    pendingClarification: isClarificationPause ? simulation.pendingClarification : null,
+    coachIntervention: simulation.coachIntervention,
+    chatEvents: simulation.chatEvents,
+    reasoningFeed: simulation.reasoningFeed,
+    summary: simulation.summary,
+    schema: simulation.schema,
+    pendingInputKind: simulation.pendingInputKind,
     isRunStarting,
     isRunActive,
     simulationActuallyStarted,
@@ -4903,6 +5131,7 @@ If rejection is about competition or location, suggest searching for a better lo
     pipeline: simulation.pipeline,
   }), [
     activePanel,
+    isClarificationPause,
     isResearchReviewPause,
     isRunActive,
     isRunStarting,
@@ -4911,10 +5140,17 @@ If rejection is about competition or location, suggest searching for a better lo
     researchContext,
     searchState,
     settings.language,
+    simulation.chatEvents,
+    simulation.coachIntervention,
     simulation.currentPhaseKey,
+    simulation.pendingClarification,
+    simulation.pendingInputKind,
     simulation.pendingResearchReview,
     simulation.pipeline,
+    simulation.reasoningFeed,
     simulation.researchSources,
+    simulation.schema,
+    simulation.summary,
     simulationActuallyStarted,
   ]);
 
@@ -5208,7 +5444,7 @@ If rejection is about competition or location, suggest searching for a better lo
                       personaLaunchDraft: {
                         idea: userInput.idea.trim(),
                         category: userInput.category,
-                        location: userInput.city.trim() || userInput.country.trim(),
+                        location: resolveLocationState(userInput).locationLabel || '',
                       },
                     },
                   });
