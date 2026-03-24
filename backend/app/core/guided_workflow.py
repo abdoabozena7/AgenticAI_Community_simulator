@@ -23,6 +23,7 @@ from ..models.orchestration import (
     resolve_persona_source_mode,
 )
 from ..services.llm_gateway import LLMGateway
+from ..services.memory_provider import build_memory_provider
 from ..services.simulation_repository import SimulationRepository
 from . import db as db_core
 from .web_search import search_web
@@ -371,6 +372,7 @@ def _guided_persona_agent() -> PersonaAgent:
             llm=LLMGateway(),
             event_bus=_WorkflowEventBus(),
             repository=SimulationRepository(),
+            memory_provider=build_memory_provider(),
         )
         _WORKFLOW_PERSONA_AGENT = PersonaAgent(runtime)
     return _WORKFLOW_PERSONA_AGENT

@@ -2196,7 +2196,7 @@ const Index = () => {
     }
     if (isCreditsBlocked(meSnapshot)) {
       const msg = settings.language === 'ar'
-        ? 'ظ†ظپط¯ ط±طµظٹط¯ ط§ظ„طھظˆظƒظ†ط². ط§ط´ط­ظ† Credits ظ„ظ„ظ…طھط§ط¨ط¹ط©.'
+        ? 'نفد رصيد التوكنز. اشحن Credits للمتابعة.'
         : 'Token budget exhausted. Add credits to continue.';
       setCreditNotice(msg);
       addSystemMessage(msg);
@@ -2229,7 +2229,7 @@ const Index = () => {
       if (selectedStartPath === 'custom_build') {
         try {
           const built = await apiService.buildCustomSociety({
-            profile_name: settings.language === 'ar' ? 'ظ…ط¬طھظ…ط¹ ظ…ط®طµطµ' : 'Custom society',
+            profile_name: settings.language === 'ar' ? 'مجتمع مخصص' : 'Custom society',
             agent_count: userInput.agentCount ?? 20,
             distribution: {
               skeptic_ratio: Math.max(0, Math.min(100, societyControls.skepticRatio)),
@@ -2275,14 +2275,14 @@ const Index = () => {
           const exhausted = isCreditsBlocked(me);
           addSystemMessage(settings.language === 'ar'
             ? exhausted
-              ? 'ظ†ظپط¯ ط±طµظٹط¯ ط§ظ„طھظˆظƒظ†ط². ط§ط´ط­ظ† Credits ظ„ظ„ظ…طھط§ط¨ط¹ط©.'
-              : 'ط§ظ†طھظ‡طھ ط§ظ„ط­طµط© ط§ظ„ظٹظˆظ…ظٹط© ط§ظ„ظ…ط¬ط§ظ†ظٹط© ظ…ظ† ط§ظ„طھظˆظƒظ†ط². ط§ط´ط­ظ† Credits ط£ظˆ ط§ظ†طھط¸ط± ظ„ظ„ط؛ط¯.'
+              ? 'نفد رصيد التوكنز. اشحن Credits للمتابعة.'
+              : 'انتهت الحصة اليومية المجانية من التوكنز. اشحن Credits أو انتظر للغد.'
             : exhausted
               ? 'Token budget exhausted. Add credits to continue.'
               : 'Daily free token quota reached. Add credits or wait until tomorrow.');
           if (exhausted) {
             setCreditNotice(settings.language === 'ar'
-              ? 'ظ†ظپط¯ ط±طµظٹط¯ ط§ظ„طھظˆظƒظ†ط². ط§ط´ط­ظ† Credits ظ„ظ„ظ…طھط§ط¨ط¹ط©.'
+              ? 'نفد رصيد التوكنز. اشحن Credits للمتابعة.'
               : 'Token budget exhausted. Add credits to continue.');
           }
         } catch (meErr: unknown) {
@@ -2291,7 +2291,7 @@ const Index = () => {
             return;
           }
           addSystemMessage(settings.language === 'ar'
-            ? 'ط§ظ†طھظ‡طھ ط§ظ„ط­طµط© ط§ظ„ظٹظˆظ…ظٹط© ط§ظ„ظ…ط¬ط§ظ†ظٹط© ظ…ظ† ط§ظ„طھظˆظƒظ†ط². ط§ط´ط­ظ† Credits ط£ظˆ ط§ظ†طھط¸ط± ظ„ظ„ط؛ط¯.'
+            ? 'انتهت الحصة اليومية المجانية من التوكنز. اشحن Credits أو انتظر للغد.'
             : 'Daily free token quota reached. Add credits to continue.');
         }
         return;

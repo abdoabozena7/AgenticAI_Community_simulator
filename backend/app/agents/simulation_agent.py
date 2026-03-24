@@ -72,11 +72,22 @@ class SimulationAgent(BaseAgent):
                 target = self._select_target(state, speaker, speakers, iteration)
                 if target is None:
                     continue
+                memory_provider = getattr(self.runtime, "memory_provider", None)
                 question_mode = self._neutral_ratio(state) > 0.34 and (
                     speaker.opinion == "neutral" or float(speaker.traits.get("question_drive", 0.4)) > 0.56
                 )
                 argument = self._select_argument(state, speaker, target, question_mode)
                 evidence = self._pick_evidence(state, argument)
+                memory_context = (
+                    await memory_provider.retrieve_for_turn(
+                        state=state,
+                        speaker=speaker,
+                        target=target,
+                        argument=argument,
+                    )
+                    if memory_provider is not None
+                    else {}
+                )
                 fallback = self._fallback_turn_payload(
                     speaker=speaker,
                     target=target,
@@ -85,6 +96,7 @@ class SimulationAgent(BaseAgent):
                     question_mode=question_mode,
                     state=state,
                     iteration=iteration,
+                    memory_context=memory_context,
                 )
                 turn_payload = await self._generate_turn_payload(
                     state=state,
@@ -95,6 +107,7 @@ class SimulationAgent(BaseAgent):
                     question_mode=question_mode,
                     iteration=iteration,
                     fallback=fallback,
+                    memory_context=memory_context,
                 )
                 turn = self._build_turn(
                     state=state,
@@ -123,7 +136,17 @@ class SimulationAgent(BaseAgent):
                             "message_count": len(state.dialogue_turns),
                         },
                     )
-                await self.runtime.event_bus.publish_turn(state, turn)
+                published_turn = await self.runtime.event_bus.publish_turn(state, turn)
+                if memory_provider is not None:
+                    await memory_provider.ingest_turn(
+                        state=state,
+                        turn=turn,
+                        speaker=speaker,
+                        target=target,
+                        argument=argument,
+                        payload=turn_payload,
+                        event_seq=published_turn.get("event_seq"),
+                    )
                 intervention = self._detect_orchestrator_intervention(state, turn, argument)
                 if intervention is not None:
                     if iteration < min(3, total_iterations):
@@ -585,6 +608,7 @@ class SimulationAgent(BaseAgent):
         question_mode: bool,
         iteration: int,
         fallback: Dict[str, Any],
+        memory_context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         prompt = self._deliberation_prompt(
             state=state,
@@ -594,6 +618,7 @@ class SimulationAgent(BaseAgent):
             evidence=evidence,
             question_mode=question_mode,
             iteration=iteration,
+            memory_context=memory_context,
         )
         system = (
             "You write one short JSON debate turn for a persona-driven Arabic business simulation. "
@@ -1343,20 +1368,29 @@ class SimulationAgent(BaseAgent):
         question_mode: bool,
         state: OrchestrationState,
         iteration: int,
+        memory_context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
-        location = self._location_label(state) or "السوق"
+        location = self._location_label(state) or "المنطقة دي"
         focus = self._persona_focus_phrase(speaker)
         tone = self._persona_tone_phrase(speaker, iteration)
         research_line = self._research_reference_phrase(state, speaker, argument, evidence)
         local_line = self._local_context_phrase(state, speaker)
         stance_line = self._stance_progression_phrase(speaker, iteration)
-        challenge = "بس إنت شايف ده كفاية فعلًا؟"
+        memory_context = memory_context or {}
+        memory_line = ""
+        if memory_context.get("recurring_objections"):
+            memory_line = f" وفيه اعتراض متكرر قبل كده على نقطة {str((memory_context.get('recurring_objections') or [''])[0])}"
+        elif memory_context.get("execution_learnings"):
+            memory_line = f" وفيه تعلّم سابق بيقول إن المشكلة كانت في {str((memory_context.get('execution_learnings') or [''])[0])}"
+        challenge = "أنا شايف إن ده لسه محتاج سبب أقوى"
         if speaker.financial_sensitivity >= 0.65:
-            challenge = "بس السعر هيبقى مناسب فعلًا؟"
+            challenge = "أنا شايف إن السعر ممكن يبقى عقبة من أول لحظة"
         elif speaker.skepticism_level >= 0.65:
-            challenge = "بس الضمان فين لو ده ما مشيش؟"
+            challenge = "أنا محتاج دليل عملي مش مجرد كلام"
         elif speaker.innovation_openness >= 0.65:
-            challenge = "بس فين الجزء المختلف فعلًا؟"
+            challenge = "أنا فاهم الجديد فيه، بس لسه محتاج فايدة أوضح"
+        if memory_line:
+            research_line = f"{research_line}{memory_line}"
         max_shift = self._max_shift_for_iteration(iteration)
         if question_mode:
             return {
@@ -1419,7 +1453,9 @@ class SimulationAgent(BaseAgent):
         evidence: List[Dict[str, Any]],
         question_mode: bool,
         iteration: int,
+        memory_context: Optional[Dict[str, Any]] = None,
     ) -> str:
+        memory_context = memory_context or {}
         structured = self._research_schema(state)
         research_anchors = " | ".join(self._research_anchor_terms(state, speaker, argument, evidence)[:8]) or "السوق | الناس"
         persona_anchors = " | ".join(self._persona_anchor_terms(speaker)[:8]) or "القيمة | الطلب"
@@ -1433,6 +1469,20 @@ class SimulationAgent(BaseAgent):
             f"- {item.get('title')} | {item.get('domain')} | {item.get('snippet')} | {item.get('url')}"
             for item in evidence
         ) or "- no evidence URLs available"
+        memory_items: List[str] = []
+        for item in (
+            list(memory_context.get("recurring_objections") or [])
+            + list(memory_context.get("confirmed_signals") or [])
+            + list(memory_context.get("execution_learnings") or [])
+            + list(memory_context.get("relationship_context") or [])
+        ):
+            text = str(item or "").strip()
+            if not text or text in memory_items:
+                continue
+            memory_items.append(text)
+            if len(memory_items) >= 8:
+                break
+        memory_lines = "\n".join(f"- {item}" for item in memory_items) or "- no durable memory hits"
         return (
             f"Language: {'Arabic' if str(state.user_context.get('language') or 'en').startswith('ar') else 'English'}\n"
             f"Idea: {state.user_context.get('idea')}\n"
@@ -1464,6 +1514,7 @@ class SimulationAgent(BaseAgent):
             f"Mandatory research anchors to use exactly or closely: {research_anchors}\n"
             f"Recent direct exchange:\n{recent_lines}\n"
             f"Research evidence:\n{evidence_lines}\n"
+            f"Durable memory context:\n{memory_lines}\n"
             "Return JSON with keys: message, target_shift, speaker_shift, convincing, rejected, insight, insight_severity, question, reason_tag.\n"
             "Constraints:\n"
             "- message must be short colloquial Arabic, 1 to 3 short sentences, no bullet points.\n"
@@ -1902,6 +1953,9 @@ class SimulationAgent(BaseAgent):
                 latest["suggestions"] = suggestions
                 latest["user_answer"] = answer_text
                 state.schema["orchestratorSuggestions"] = suggestions
+                memory_provider = getattr(self.runtime, "memory_provider", None)
+                if memory_provider is not None:
+                    await memory_provider.ingest_orchestrator_intervention(state=state, insight=latest)
                 issue_overview = self._issue_overview_text(latest)
                 state.pending_input = True
                 state.pending_input_kind = "orchestrator_apply_suggestions"
@@ -1939,6 +1993,9 @@ class SimulationAgent(BaseAgent):
             latest["dismissed"] = True
             latest["resolved"] = True
             latest["user_answer"] = answer_text
+            memory_provider = getattr(self.runtime, "memory_provider", None)
+            if memory_provider is not None:
+                await memory_provider.ingest_orchestrator_intervention(state=state, insight=latest)
             state.pending_input = False
             state.pending_input_kind = None
             state.status = "running"
@@ -1951,6 +2008,9 @@ class SimulationAgent(BaseAgent):
             latest["applied"] = True
             latest["resolved"] = True
             latest["apply_answer"] = answer_text
+            memory_provider = getattr(self.runtime, "memory_provider", None)
+            if memory_provider is not None:
+                await memory_provider.ingest_orchestrator_intervention(state=state, insight=latest)
             state.pending_input = False
             state.pending_input_kind = None
             state.status = "running"
@@ -1961,6 +2021,9 @@ class SimulationAgent(BaseAgent):
         latest["applied"] = False
         latest["resolved"] = True
         latest["apply_answer"] = answer_text
+        memory_provider = getattr(self.runtime, "memory_provider", None)
+        if memory_provider is not None:
+            await memory_provider.ingest_orchestrator_intervention(state=state, insight=latest)
         state.pending_input = False
         state.pending_input_kind = None
         state.status = "running"
@@ -2716,6 +2779,8 @@ class SimulationAgent(BaseAgent):
         optimization_decision = self._build_optimization_decision(state)
         accepted_clusters = self._top_cluster_labels(state, "accept")
         rejected_clusters = self._top_cluster_labels(state, "reject")
+        memory_provider = getattr(self.runtime, "memory_provider", None)
+        summary_memory = await memory_provider.retrieve_for_summary(state) if memory_provider is not None else {}
         if str(state.user_context.get("language") or "en").lower().startswith("ar"):
             parts = [
                 f"النتيجة النهائية: بعد {metrics['iteration']} جولات، فيه {metrics['accepted']} قبول و{metrics['rejected']} رفض و{metrics['neutral']} حياد.",
@@ -2728,6 +2793,8 @@ class SimulationAgent(BaseAgent):
                 parts.append(f"أكتر الفئات تقبلًا كانت: {', '.join(accepted_clusters)}.")
             if rejected_clusters:
                 parts.append(f"وأكتر الفئات اعتراضًا كانت: {', '.join(rejected_clusters)}.")
+            if summary_memory.get("proven_adjustments"):
+                parts.append(f"ومن الذاكرة التراكمية: أكتر تعديل نفع قبل كده كان {self._join_or_fallback(summary_memory.get('proven_adjustments') or [], 'تحسين الوضوح وتقليل الاحتكاك.')}.")
             if improvement_eval:
                 parts.append(f"تقييم التعديل: {improvement_eval.get('summary')}")
                 if improvement_eval.get("remaining_problems") and optimization_decision.get("decision") != "READY_TO_MOVE_FORWARD":
@@ -2747,6 +2814,8 @@ class SimulationAgent(BaseAgent):
             f"Strongest positive signals: {self._join_or_fallback(positives or supports, 'There are early positive signals but they still need stronger proof.')}",
             f"Weakest points and risks: {self._join_or_fallback(risks or concerns, 'No single dominant weakness emerged strongly enough.')}",
         ]
+        if summary_memory.get("proven_adjustments"):
+            parts.append(f"Memory-backed pattern: {self._join_or_fallback(summary_memory.get('proven_adjustments') or [], 'Clearer execution framing improved prior runs.')}")
         if improvement_eval:
             parts.append(f"Idea improvement evaluation: {improvement_eval.get('summary')}")
         parts.append(f"Optimization decision: {optimization_decision.get('decision')}. {optimization_decision.get('message')} {optimization_decision.get('next_step')}")
@@ -2901,6 +2970,9 @@ class SimulationAgent(BaseAgent):
         history.append(followup)
         state.schema["execution_followups"] = history[-12:]
         state.schema["latest_execution_followup"] = followup
+        memory_provider = getattr(self.runtime, "memory_provider", None)
+        if memory_provider is not None:
+            await memory_provider.ingest_execution_followup(state=state, followup=followup)
         state.argument_bank.append(
             {
                 "id": f"exec-{uuid.uuid4().hex[:8]}",

@@ -130,6 +130,19 @@ export interface SimulationPipeline {
   steps: SimulationPipelineStep[];
 }
 
+export interface FinalSimulationReport {
+  strengths: string[];
+  weaknesses: string[];
+  success_probability: number;
+  success_score: number;
+  best_places: string[];
+  key_risks: string[];
+  top_objections: string[];
+  top_positive_signals: string[];
+  recommended_first_move: string;
+  confidence_notes: string[];
+}
+
 export interface SimulationUiState {
   screenTitle: string;
   stageLabel: string;

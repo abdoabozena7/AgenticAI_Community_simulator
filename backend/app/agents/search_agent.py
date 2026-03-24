@@ -34,6 +34,9 @@ class SearchAgent(BaseAgent):
         return merged
 
     async def run(self, state: OrchestrationState) -> OrchestrationState:
+        memory_provider = getattr(self.runtime, "memory_provider", None)
+        if memory_provider is not None:
+            await memory_provider.initialize_state(state)
         context = state.user_context
         context_type = state.idea_context_type or classify_idea_context(context).value
         query_plan = self._build_query_plan(context=context, context_type=context_type)
@@ -59,6 +62,11 @@ class SearchAgent(BaseAgent):
         candidate_pages: List[Dict[str, Any]] = []
         seen_candidate_urls: set[str] = set()
         pages_read = 0
+        provider_attempts_all: List[Dict[str, Any]] = []
+        provider_health_map: Dict[str, Dict[str, Any]] = {}
+        search_finished = False
+        research_ready = False
+        research_estimated = False
 
         for index, planned_query in enumerate(query_plan, start=1):
             cycle_id = f"search-{index}"
@@ -96,6 +104,71 @@ class SearchAgent(BaseAgent):
                 language=context.get("language") or "en",
                 strict_web_only=not self._allow_ai_estimation(state),
             )
+            if not state.schema.get("search_query_variants") and result.get("query_variants"):
+                state.schema["search_query_variants"] = list(result.get("query_variants") or [])
+            search_finished = search_finished or bool(result.get("search_finished"))
+            research_ready = research_ready or bool(result.get("research_ready"))
+            research_estimated = research_estimated or bool(result.get("research_estimated"))
+            for health in result.get("provider_health") or []:
+                provider = str(health.get("provider") or "").strip()
+                if not provider:
+                    continue
+                current = provider_health_map.setdefault(
+                    provider,
+                    {"provider": provider, "ok": 0, "empty": 0, "timeout": 0, "error": 0, "last_status": ""},
+                )
+                for key in ("ok", "empty", "timeout", "error"):
+                    current[key] = int(current.get(key) or 0) + int(health.get(key) or 0)
+                current["last_status"] = str(health.get("last_status") or current.get("last_status") or "")
+            provider_attempts_all.extend(list(result.get("provider_attempts") or []))
+            for attempt in result.get("provider_attempts") or []:
+                status = str(attempt.get("status") or "empty").strip().lower()
+                provider = str(attempt.get("provider") or "").strip()
+                if not provider:
+                    continue
+                action = {
+                    "ok": "search_provider_succeeded",
+                    "timeout": "search_provider_timed_out",
+                    "error": "search_provider_failed",
+                    "empty": "search_provider_empty",
+                }.get(status, "search_provider_empty")
+                await self.runtime.event_bus.publish(
+                    state,
+                    action,
+                    {
+                        "agent": self.name,
+                        "cycle_id": cycle_id,
+                        "query": str(attempt.get("query") or planned_query.query),
+                        "action": action,
+                        "status": status,
+                        "progress_pct": min(52, 16 + index * 7),
+                        "meta": {
+                            "provider": provider,
+                            "query_language": attempt.get("query_language"),
+                            "query_source": attempt.get("query_source"),
+                            "result_count": attempt.get("result_count"),
+                        },
+                        "error": attempt.get("error"),
+                    },
+                    persist_research=True,
+                )
+            if result.get("fallback_started"):
+                await self.runtime.event_bus.publish(
+                    state,
+                    "search_fallback_started",
+                    {
+                        "agent": self.name,
+                        "cycle_id": cycle_id,
+                        "query": planned_query.query,
+                        "action": "search_fallback_started",
+                        "status": "ok",
+                        "progress_pct": min(48, 15 + index * 6),
+                        "meta": {
+                            "query_variants": result.get("query_variants") or [],
+                        },
+                    },
+                    persist_research=True,
+                )
             top_results = result.get("results") if isinstance(result.get("results"), list) else []
             await self.runtime.event_bus.publish(
                 state,
@@ -111,6 +184,8 @@ class SearchAgent(BaseAgent):
                         "provider": result.get("provider"),
                         "quality": result.get("quality") or {},
                         "count": len(top_results),
+                        "research_ready": bool(result.get("research_ready")),
+                        "research_estimated": bool(result.get("research_estimated")),
                     },
                     "snippet": str((result.get("structured") or {}).get("summary") or "")[:400],
                 },
@@ -273,11 +348,17 @@ class SearchAgent(BaseAgent):
                 "research_expandable_reasoning": list(report.structured_schema.get("expandable_reasoning") or []),
                 "research_confidence_score": float(report.structured_schema.get("confidence_score") or 0.0),
                 "research_output_ready": state.search_completed,
+                "search_finished": bool(search_finished),
+                "research_ready": bool(research_ready),
+                "research_estimated": bool(research_estimated),
                 "research_insufficiency_reason": "research_insufficient_for_personas" if initial_research_insufficient else None,
                 "research_estimation_mode": estimation_mode,
                 "research_warnings": research_warnings,
                 "research_blockers": research_blockers,
                 "fatal_search_failure": fatal_search_failure,
+                "search_provider_health": list(provider_health_map.values()),
+                "search_provider_attempts": provider_attempts_all[-60:],
+                "search_query_variants": state.schema.get("search_query_variants") or list(result.get("query_variants") or []),
             }
         )
         state.set_pipeline_step(
@@ -307,6 +388,8 @@ class SearchAgent(BaseAgent):
             },
             persist_research=True,
         )
+        if memory_provider is not None and state.search_completed:
+            await memory_provider.ingest_research(state)
         if fatal_search_failure or (research_insufficient and not estimation_allowed):
             await self._pause_for_research_review(state, report)
         return state

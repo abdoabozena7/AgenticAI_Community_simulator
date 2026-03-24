@@ -19,6 +19,7 @@ import xml.etree.ElementTree as ET
 from typing import Any, Dict, List, Optional
 
 from .ollama_client import generate_ollama
+from ..services.translation_bridge import build_search_translator
 
 
 def _env_flag(name: str, default: bool = False) -> bool:
@@ -427,6 +428,83 @@ async def _llm_fallback(query: str) -> Dict[str, Any]:
     }
 
 
+def _empty_result(provider: str) -> Dict[str, Any]:
+    return {"provider": provider, "is_live": False, "answer": "", "results": []}
+
+
+async def _safe_provider_call(provider: str, coro: Any, *, timeout: float) -> Dict[str, Any]:
+    try:
+        result = await asyncio.wait_for(coro, timeout=timeout)
+    except asyncio.TimeoutError:
+        empty = _empty_result(provider)
+        empty["attempt_status"] = "timeout"
+        return empty
+    except Exception as exc:
+        empty = _empty_result(provider)
+        empty["attempt_status"] = "error"
+        empty["error"] = str(exc)
+        return empty
+    if not isinstance(result, dict):
+        empty = _empty_result(provider)
+        empty["attempt_status"] = "error"
+        return empty
+    result.setdefault("provider", provider)
+    result.setdefault("results", [])
+    result.setdefault("answer", "")
+    result["attempt_status"] = "ok" if result.get("results") else "empty"
+    return result
+
+
+def _result_rank(result: Dict[str, Any]) -> tuple[int, int]:
+    results = result.get("results") if isinstance(result.get("results"), list) else []
+    quality = _compute_search_quality(results)
+    return (int(quality.get("usable_sources") or 0), len(results))
+
+
+async def _run_provider_wave(
+    specs: List[tuple[str, Any]],
+    *,
+    timeout: float,
+    query_variant: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    if not specs:
+        return {"best_result": _empty_result("none"), "attempts": []}
+    tasks = [
+        asyncio.create_task(_safe_provider_call(provider, coro, timeout=timeout))
+        for provider, coro in specs
+    ]
+    best = _empty_result(specs[0][0])
+    attempts: List[Dict[str, Any]] = []
+    try:
+        for future in asyncio.as_completed(tasks):
+            result = await future
+            attempt = {
+                "provider": str(result.get("provider") or ""),
+                "status": str(result.get("attempt_status") or "empty"),
+                "result_count": len(result.get("results") or []),
+                "query": (query_variant or {}).get("text"),
+                "query_language": (query_variant or {}).get("language"),
+                "query_source": (query_variant or {}).get("source"),
+            }
+            if result.get("error"):
+                attempt["error"] = str(result.get("error") or "")
+            attempts.append(attempt)
+            if _result_rank(result) > _result_rank(best):
+                best = result
+            if result.get("results"):
+                for task in tasks:
+                    if not task.done():
+                        task.cancel()
+                await asyncio.gather(*tasks, return_exceptions=True)
+                return {"best_result": result, "attempts": attempts}
+        await asyncio.gather(*tasks, return_exceptions=True)
+        return {"best_result": best, "attempts": attempts}
+    finally:
+        for task in tasks:
+            if not task.done():
+                task.cancel()
+
+
 def _validate_structured(data: Dict[str, Any]) -> Dict[str, Any]:
     if not isinstance(data, dict):
         return {}
@@ -715,67 +793,106 @@ async def search_web(
             "answer": "",
             "results": [],
             "strict_mode": strict_mode,
+            "search_finished": True,
+            "research_ready": False,
+            "research_estimated": False,
+            "provider_attempts": [],
+            "provider_health": [],
+            "query_variants": [],
             "quality": {
                 "usable_sources": 0,
                 "domains": 0,
                 "extraction_success_rate": 0.0,
             },
         }
-    # Try Tavily first if API key is available
-    try:
-        result = await _tavily_search(normalized, max_results=max_results, language=language)
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, RuntimeError, Exception):
-        # If Tavily not configured or fails, try DuckDuckGo
-        result = await _ddg_search(normalized, max_results=max_results, language=language)
-        if not result.get("results"):
-            result = await _ddg_lite_search(normalized, max_results=max_results, language=language)
-        if not result.get("results"):
-            compact_query = _compact_query(normalized)
-            if compact_query and compact_query != normalized:
-                compact_result = await _ddg_search(compact_query, max_results=max_results, language=language)
-                if not compact_result.get("results"):
-                    compact_result = await _ddg_lite_search(compact_query, max_results=max_results, language=language)
-                if compact_result.get("results"):
-                    result = compact_result
-        if not result.get("results"):
-            # Fallback to Bing RSS if DDG fails/returns empty.
-            bing_result = await _bing_rss_search(normalized, max_results=max_results, language=language)
-            if bing_result.get("results"):
-                result = bing_result
-        if not result.get("results"):
-            # Try Wikipedia as fallback
-            wiki_result = await _wikipedia_search(normalized, max_results=max_results, language=language)
-            if wiki_result.get("results"):
-                result = wiki_result
-        if not result.get("results") and _contains_arabic(normalized):
-            # Arabic queries can intermittently return zero results from one provider.
-            # Retry with a compact bilingual query while staying web-only.
-            fallback_query = f"{_compact_query(normalized)} market demand competition pricing regulation".strip()
-            if fallback_query:
-                ddg_retry = await _ddg_search(fallback_query, max_results=max_results, language=language)
-                if not ddg_retry.get("results"):
-                    ddg_retry = await _ddg_lite_search(fallback_query, max_results=max_results, language=language)
-                if ddg_retry.get("results"):
-                    result = ddg_retry
-        if not result.get("results"):
-            # Last live-web rescue query stays anchored to user intent.
-            rescue_query = f"{_compact_query(normalized)} market analysis demand competition pricing regulation".strip()
-            ddg_rescue = await _ddg_search(rescue_query, max_results=max_results, language=language)
-            if not ddg_rescue.get("results"):
-                ddg_rescue = await _ddg_lite_search(rescue_query, max_results=max_results, language=language)
-            if not ddg_rescue.get("results"):
-                bing_rescue = await _bing_rss_search(rescue_query, max_results=max_results, language=language or "en")
-                if bing_rescue.get("results"):
-                    ddg_rescue = bing_rescue
-            if not ddg_rescue.get("results"):
-                wiki_rescue = await _wikipedia_search(rescue_query, max_results=max_results, language=language or "en")
-                if wiki_rescue.get("results"):
-                    ddg_rescue = wiki_rescue
-            if ddg_rescue.get("results"):
-                result = ddg_rescue
-        # Optional synthetic fallback (disabled by default and always disabled in strict mode).
-        if not result.get("results") and not strict_mode and ALLOW_SYNTHETIC_SEARCH_FALLBACK:
-            result = await _llm_fallback(normalized)
+    translator = build_search_translator()
+    query_variants = [item.to_dict() for item in translator.build_variants(normalized, language or "en")]
+    if not query_variants:
+        query_variants = [{"text": normalized, "language": language or "en", "source": "original"}]
+
+    provider_attempts: List[Dict[str, Any]] = []
+    fallback_started = False
+    wave_summaries: List[Dict[str, Any]] = []
+
+    def build_specs(variant: Dict[str, Any], *, include_tavily: bool = True) -> List[tuple[str, Any]]:
+        query_text = str(variant.get("text") or normalized).strip()
+        query_language = str(variant.get("language") or language or "en").strip() or "en"
+        specs: List[tuple[str, Any]] = []
+        if include_tavily:
+            specs.append(("tavily", _tavily_search(query_text, max_results=max_results, language=query_language)))
+        specs.extend(
+            [
+                ("duckduckgo", _ddg_search(query_text, max_results=max_results, language=query_language)),
+                ("duckduckgo_lite", _ddg_lite_search(query_text, max_results=max_results, language=query_language)),
+                ("bing_rss", _bing_rss_search(query_text, max_results=max_results, language=query_language)),
+                ("wikipedia", _wikipedia_search(query_text, max_results=max_results, language=query_language)),
+            ]
+        )
+        return specs
+
+    wave = await _run_provider_wave(build_specs(query_variants[0]), timeout=5.0, query_variant=query_variants[0])
+    result = wave.get("best_result") or _empty_result("none")
+    provider_attempts.extend(wave.get("attempts") or [])
+    wave_summaries.append({"query_variant": dict(query_variants[0]), "has_results": bool(result.get("results"))})
+
+    compact_query = _compact_query(normalized)
+    if not result.get("results") and compact_query and compact_query != normalized:
+        fallback_started = True
+        compact_variant = {"text": compact_query, "language": language or "en", "source": "compact"}
+        wave = await _run_provider_wave(
+            [
+                ("duckduckgo", _ddg_search(compact_query, max_results=max_results, language=compact_variant["language"])),
+                ("duckduckgo_lite", _ddg_lite_search(compact_query, max_results=max_results, language=compact_variant["language"])),
+                ("bing_rss", _bing_rss_search(compact_query, max_results=max_results, language=compact_variant["language"])),
+            ],
+            timeout=4.5,
+            query_variant=compact_variant,
+        )
+        candidate = wave.get("best_result") or _empty_result("none")
+        provider_attempts.extend(wave.get("attempts") or [])
+        wave_summaries.append({"query_variant": compact_variant, "has_results": bool(candidate.get("results"))})
+        if _result_rank(candidate) > _result_rank(result):
+            result = candidate
+
+    if not result.get("results"):
+        for variant in query_variants[1:]:
+            fallback_started = True
+            wave = await _run_provider_wave(build_specs(variant, include_tavily=False), timeout=4.5, query_variant=variant)
+            candidate = wave.get("best_result") or _empty_result("none")
+            provider_attempts.extend(wave.get("attempts") or [])
+            wave_summaries.append({"query_variant": dict(variant), "has_results": bool(candidate.get("results"))})
+            if _result_rank(candidate) > _result_rank(result):
+                result = candidate
+            if result.get("results"):
+                break
+
+    if not result.get("results"):
+        fallback_started = True
+        rescue_variant = {
+            "text": f"{_compact_query(normalized)} market analysis demand competition pricing regulation".strip(),
+            "language": "en" if _contains_arabic(normalized) else (language or "en"),
+            "source": "rescue",
+        }
+        wave = await _run_provider_wave(build_specs(rescue_variant, include_tavily=False), timeout=4.5, query_variant=rescue_variant)
+        candidate = wave.get("best_result") or _empty_result("none")
+        provider_attempts.extend(wave.get("attempts") or [])
+        wave_summaries.append({"query_variant": rescue_variant, "has_results": bool(candidate.get("results"))})
+        if _result_rank(candidate) > _result_rank(result):
+            result = candidate
+
+    if not result.get("results") and not strict_mode and ALLOW_SYNTHETIC_SEARCH_FALLBACK:
+        fallback_started = True
+        result = await _llm_fallback(normalized)
+        provider_attempts.append(
+            {
+                "provider": "llm_fallback",
+                "status": "ok" if result.get("results") else "empty",
+                "result_count": len(result.get("results") or []),
+                "query": normalized,
+                "query_language": language or "en",
+                "query_source": "llm_fallback",
+            }
+        )
 
     # Structured summary with timeout and fallback
     structured: Dict[str, Any] = {}
@@ -831,7 +948,41 @@ async def search_web(
         _structured_confidence_score(structured, quality),
     )
     structured["evidence_cards"] = _build_evidence_cards(structured, language or "en")
+    research_ready = bool(
+        str(structured.get("summary") or "").strip()
+        and str(structured.get("competition_level") or "").strip()
+        and str(structured.get("demand_level") or "").strip()
+        and str(structured.get("price_sensitivity") or "").strip()
+        and (
+            len([item for item in structured.get("signals") or [] if str(item).strip()])
+            + len([item for item in structured.get("complaints") or [] if str(item).strip()])
+            + len([item for item in structured.get("behaviors") or [] if str(item).strip()])
+        ) >= 3
+    )
+    research_estimated = str(structured.get("estimation_mode") or "").strip().lower() == "ai_estimation" or str(result.get("provider") or "") == "llm_fallback"
+    provider_health_map: Dict[str, Dict[str, Any]] = {}
+    for attempt in provider_attempts:
+        provider = str(attempt.get("provider") or "").strip()
+        if not provider:
+            continue
+        record = provider_health_map.setdefault(
+            provider,
+            {"provider": provider, "ok": 0, "empty": 0, "timeout": 0, "error": 0, "last_status": ""},
+        )
+        status_key = str(attempt.get("status") or "empty").strip().lower() or "empty"
+        if status_key not in {"ok", "empty", "timeout", "error"}:
+            status_key = "empty"
+        record[status_key] = int(record.get(status_key) or 0) + 1
+        record["last_status"] = status_key
     result["structured"] = structured
     result["strict_mode"] = strict_mode
     result["quality"] = quality
+    result["query_variants"] = query_variants
+    result["provider_attempts"] = provider_attempts
+    result["provider_health"] = list(provider_health_map.values())
+    result["search_finished"] = True
+    result["research_ready"] = research_ready
+    result["research_estimated"] = research_estimated
+    result["fallback_started"] = fallback_started
+    result["wave_summaries"] = wave_summaries
     return result

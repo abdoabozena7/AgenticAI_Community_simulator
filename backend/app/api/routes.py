@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, Header, HTTPException, Query, status
+from fastapi import APIRouter, Header, HTTPException, Query, Response, status
 
 from ..core import auth as auth_core
 from ..core.web_search import search_web
@@ -260,6 +260,22 @@ async def append_chat_event(payload: Dict[str, Any], authorization: str = Header
         meta=meta,
     )
     state.event_seq = next_seq
+    state.schema["event_log_status"] = "active"
+    state.schema["event_log_count"] = int(next_seq)
+    await _get_orchestrator().repository.persist_simulation_event(
+        simulation_id,
+        event_seq=next_seq,
+        phase=state.current_phase.value,
+        event_type="chat_event",
+        step_uid=message_id,
+        actor=role,
+        payload={
+            "message_id": message_id,
+            "role": role,
+            "content": content,
+            "meta": meta,
+        },
+    )
     await _get_orchestrator().repository.save_state(state)
     return {
         "ok": True,
@@ -444,6 +460,54 @@ async def get_research_sources(simulation_id: str, authorization: str = Header(N
         await _ensure_simulation_access(simulation_id, user)
     items = await _get_orchestrator().repository.fetch_research_events(simulation_id)
     return {"simulation_id": simulation_id, "items": items}
+
+
+@router.get("/events")
+async def get_simulation_events(
+    simulation_id: str,
+    limit: int = Query(500, ge=1, le=5000),
+    phase: Optional[str] = Query(None),
+    event_type: Optional[str] = Query(None),
+    authorization: str = Header(None),
+) -> Dict[str, Any]:
+    auth_required = _auth_required()
+    user = await _resolve_user(authorization, require=auth_required)
+    if user:
+        await _ensure_simulation_access(simulation_id, user)
+    items = await _get_orchestrator().repository.fetch_event_log(
+        simulation_id,
+        phase=phase,
+        event_type=event_type,
+        limit=limit,
+    )
+    return {"simulation_id": simulation_id, "items": items, "total": len(items)}
+
+
+@router.get("/events/export")
+async def export_simulation_events(
+    simulation_id: str,
+    format: str = Query("json"),
+    limit: int = Query(5000, ge=1, le=20000),
+    phase: Optional[str] = Query(None),
+    event_type: Optional[str] = Query(None),
+    authorization: str = Header(None),
+) -> Response:
+    auth_required = _auth_required()
+    user = await _resolve_user(authorization, require=auth_required)
+    if user:
+        await _ensure_simulation_access(simulation_id, user)
+    export_format = str(format or "json").strip().lower()
+    if export_format not in {"json", "ndjson"}:
+        raise HTTPException(status_code=400, detail="format must be json or ndjson")
+    payload = await _get_orchestrator().repository.export_event_log(
+        simulation_id,
+        format=export_format,
+        phase=phase,
+        event_type=event_type,
+        limit=limit,
+    )
+    media_type = "application/x-ndjson; charset=utf-8" if export_format == "ndjson" else "application/json; charset=utf-8"
+    return Response(content=payload, media_type=media_type)
 
 
 @router.get("/list")

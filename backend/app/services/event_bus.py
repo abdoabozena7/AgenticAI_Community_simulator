@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Awaitable, Callable, Dict, Optional
 
 from ..models.orchestration import DialogueTurn, OrchestrationState
+from .simulation_event_logger import SimulationEventLogger
 from .simulation_repository import SimulationRepository
 
 
@@ -15,9 +16,11 @@ class EventBus:
         *,
         broadcaster: BroadcastFn,
         repository: SimulationRepository,
+        event_logger: Optional[SimulationEventLogger] = None,
     ) -> None:
         self._broadcaster = broadcaster
         self._repository = repository
+        self._event_logger = event_logger or SimulationEventLogger(repository)
 
     async def publish(
         self,
@@ -32,6 +35,11 @@ class EventBus:
         if persist_research:
             message["type"] = "research_update"
             await self._repository.persist_research_event(state.simulation_id, event.seq, payload)
+        await self._event_logger.log_orchestration_event(
+            state=state,
+            event=event,
+            actor=str(payload.get("agent") or "").strip() or None,
+        )
         await self._repository.save_state(state)
         await self._broadcaster(message)
         return message
@@ -60,6 +68,7 @@ class EventBus:
             },
         )
         await self._repository.persist_dialogue_turn(state.simulation_id, turn, event.seq)
+        await self._event_logger.log_dialogue_turn(state=state, event=event, turn=turn)
         await self._repository.save_state(state)
         message = event.to_dict(state.simulation_id)
         await self._broadcaster(message)

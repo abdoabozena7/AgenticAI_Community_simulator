@@ -712,7 +712,7 @@ class SimulationReasoningTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(roadmap["first_five_steps"]), 5)
         self.assertTrue(any("الجيزة" in item for item in roadmap["why_now"] + roadmap["first_five_steps"]))
         self.assertIn("واتساب", roadmap["low_cost_version"])
-        self.assertEqual(state.schema["execution_roadmap"]["context"]["city"], "ط§ظ„ط¬ظٹط²ط©")
+        self.assertEqual(state.schema["execution_roadmap"]["context"]["city"], "الجيزة")
 
     async def test_summary_includes_execution_roadmap_when_ready(self) -> None:
         agent = _agent()

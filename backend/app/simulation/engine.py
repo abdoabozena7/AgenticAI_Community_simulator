@@ -1,4 +1,4 @@
-﻿# creates agents from the dataset, executes a specified number of
+# creates agents from the dataset, executes a specified number of
 
 from __future__ import annotations
 
@@ -323,23 +323,23 @@ class SimulationEngine:
             snippet = _clip(snippet_source, 160) if snippet_source else ""
             if language == "ar":
                 if new_opinion == "reject":
-                    base = f"ط¸â€¦ط¸â€  ط¸ث†ط·آ¬ط¸â€،ط·آ© ط¸â€ ط·آ¸ط·آ±ط¸ظ¹ ط¸ئ’ط¸â‚¬{role_label} ط·آ§ط¸â€‍ط¸ظ¾ط¸ئ’ط·آ±ط·آ© ط·آ¯ط¸ظ¹ ط¸â€¦ط·آ´ ط¸â€¦ط¸â€ ط·آ§ط·آ³ط·آ¨ط·آ© ط¸ث†ط¸â€¦ط·آ®ط·آ§ط·آ·ط·آ±ط¸â€،ط·آ§ ط¸ث†ط·آ§ط·آ¶ط·آ­ط·آ©."
+                    base = f"من وجهة نظري كـ{role_label} الفكرة دي مش مناسبة ومخاطرها واضحة."
                 elif new_opinion == "accept":
-                    base = f"ط¸â€¦ط¸â€  ط¸ث†ط·آ¬ط¸â€،ط·آ© ط¸â€ ط·آ¸ط·آ±ط¸ظ¹ ط¸ئ’ط¸â‚¬{role_label} ط·آ§ط¸â€‍ط¸ظ¾ط¸ئ’ط·آ±ط·آ© ط·آ¯ط¸ظ¹ ط¸â€¦ط¸â€¦ط¸ئ’ط¸â€  ط·ع¾ط¸â€ ط·آ¬ط·آ­ ط¸â€‍ط¸ث† ط·آ§ط·ع¾ط¸â€ ط¸ظ¾ط·آ°ط·ع¾ ط·آµط·آ­."
+                    base = f"من وجهة نظري كـ{role_label} الفكرة دي ممكن تنجح لو اتنفذت صح."
                 else:
-                    base = f"ط¸â€¦ط¸â€  ط¸ث†ط·آ¬ط¸â€،ط·آ© ط¸â€ ط·آ¸ط·آ±ط¸ظ¹ ط¸ئ’ط¸â‚¬{role_label} ط·آ£ط¸â€ ط·آ§ ط¸â€¦ط·ع¾ط·آ±ط·آ¯ط·آ¯ ط¸ث†ط¸â€‍ط·آ³ط¸â€، ط¸â€¦ط·آ­ط·ع¾ط·آ§ط·آ¬ ط·ع¾ط¸ث†ط·آ¶ط¸ظ¹ط·آ­."
+                    base = f"من وجهة نظري كـ{role_label} أنا متردد ولسه محتاج توضيح."
                 if snippet:
-                    base += f" ط·آ§ط¸â€‍ط¸â€¦ط·آ¤ط·آ´ط·آ±ط·آ§ط·ع¾: {snippet}"
+                    base += f" المؤشرات: {snippet}"
                 if reason_hint and debug:
                     base += f" [{reason_hint}]"
                 return _clip(base, 420)
             else:
                 if new_opinion == "reject":
-                    base = f"As {role_label}, I donأ¢â‚¬â„¢t think this idea is viable and the risks are clear."
+                    base = f"As {role_label}, I don’t think this idea is viable and the risks are clear."
                 elif new_opinion == "accept":
                     base = f"As {role_label}, this idea could work if executed carefully."
                 else:
-                    base = f"As {role_label}, Iأ¢â‚¬â„¢m on the fence and need more clarity."
+                    base = f"As {role_label}, I’m on the fence and need more clarity."
                 if snippet:
                     base += f" Signals: {snippet}"
                 if reason_hint and debug:
@@ -349,7 +349,7 @@ class SimulationEngine:
         def _trim_to_limit(text: str, limit: int) -> str:
             if len(text) <= limit:
                 return text
-            sentences = re.split(r"(?<=[.!?ط·ع؛])\s+", text)
+            sentences = re.split(r"(?<=[.!?؟])\s+", text)
             trimmed = ""
             for sentence in sentences:
                 if not sentence:
@@ -377,10 +377,10 @@ class SimulationEngine:
         constraints_summary = _clip(constraints_summary or "", 260)
 
         if language == "ar":
-            opinion_map = {"accept": "ط¸â€ڑط·آ¨ط¸ث†ط¸â€‍", "reject": "ط·آ±ط¸ظ¾ط·آ¶", "neutral": "ط¸â€¦ط·آ­ط·آ§ط¸ظ¹ط·آ¯"}
-            prev_label = opinion_map.get(prev_opinion, "ط¸â€¦ط·آ­ط·آ§ط¸ظ¹ط·آ¯")
-            new_label = opinion_map.get(new_opinion, "ط¸â€¦ط·آ­ط·آ§ط¸ظ¹ط·آ¯")
-            changed_label = "ط¸â€ ط·آ¹ط¸â€¦" if changed else "ط¸â€‍ط·آ§"
+            opinion_map = {"accept": "قبول", "reject": "رفض", "neutral": "محايد"}
+            prev_label = opinion_map.get(prev_opinion, "محايد")
+            new_label = opinion_map.get(new_opinion, "محايد")
+            changed_label = "نعم" if changed else "لا"
         else:
             prev_label = prev_opinion
             new_label = new_opinion
@@ -405,35 +405,35 @@ class SimulationEngine:
         if language == "ar":
             prompt_lines = [
                 human_guardrail,
-                f"ط·آ£ط¸â€ ط·ع¾ {role_label}. ط·آ§ط¸â€‍ط¸â€¦ط·آ±ط·آ­ط¸â€‍ط·آ©: {phase_label}.",
-                f"ط·آ§ط¸â€‍ط¸ظ¾ط¸ئ’ط·آ±ط·آ©: {idea_label}.",
-                f"ط¸â€¦ط¸ث†ط¸â€ڑط¸ظ¾ط¸ئ’ ط·آ§ط¸â€‍ط·آ­ط·آ§ط¸â€‍ط¸ظ¹: {new_label} (ط¸ئ’ط·آ§ط¸â€ : {prev_label}ط·إ’ ط·ع¾ط·ط›ط¸ظ¹ط¸â€کط·آ±: {changed_label}).",
-                f"ط·آ³ط¸â€¦ط·آ§ط·ع¾ط¸ئ’: {traits_desc}. ط·ع¾ط·آ­ط¸ظ¹ط·آ²ط·آ§ط·ع¾ط¸ئ’: {bias_desc}.",
-                f"ط·آ¢ط·آ®ط·آ± ط·آ£ط¸ظ¾ط¸ئ’ط·آ§ط·آ±ط¸ئ’: {memory_context}.",
-                f"ط·آ´ط·آ±ط¸ظ¹ط·آ­ط·ع¾ط¸ئ’ ط¸â€¦ط¸â€  ط·آ§ط¸â€‍ط·آ¨ط·آ­ط·آ« ط¸ظ¾ط¸â€ڑط·آ·: {research_summary or 'أ¢â‚¬â€‌'}",
-                f"ط·آ¥ط·آ´ط·آ§ط·آ±ط·آ§ط·ع¾: {research_signals or 'أ¢â‚¬â€‌'}",
-                f"ط·آ¨ط·آ·ط·آ§ط¸â€ڑط·آ§ط·ع¾ ط·آ§ط¸â€‍ط·آ£ط·آ¯ط¸â€‍ط·آ©:\n{evidence_lines or 'أ¢â‚¬â€‌'}",
+                f"أنت {role_label}. المرحلة: {phase_label}.",
+                f"الفكرة: {idea_label}.",
+                f"موقفك الحالي: {new_label} (كان: {prev_label}، تغيّر: {changed_label}).",
+                f"سماتك: {traits_desc}. تحيزاتك: {bias_desc}.",
+                f"آخر أفكارك: {memory_context}.",
+                f"شريحتك من البحث فقط: {research_summary or '-'}",
+                f"إشارات: {research_signals or '-'}",
+                f"بطاقات الأدلة:\n{evidence_lines or '-'}",
                 *(
                     [
-                        f"ط·آ±ط·آ¯ ط¸â€¦ط·آ¨ط·آ§ط·آ´ط·آ±ط·آ© ط·آ¹ط¸â€‍ط¸â€° {reply_to_short_id} ط¸ث†ط·آ§ط·آ°ط¸ئ’ط·آ± {reply_to_short_id} ط·آ­ط·آ±ط¸ظ¾ط¸ظ¹ط¸â€¹ط·آ§ ط·آ¯ط·آ§ط·آ®ط¸â€‍ ط·آ§ط¸â€‍ط·آ±ط·آ¯.",
-                        f"ط·آ±ط·آ³ط·آ§ط¸â€‍ط·آ© {reply_to_short_id}: \"{reply_snippet}\"",
+                        f"رد مباشرة على {reply_to_short_id} واذكر {reply_to_short_id} حرفيًا داخل الرد.",
+                        f"رسالة {reply_to_short_id}: \"{reply_snippet}\"",
                     ]
                     if reply_to_short_id
                     else []
                 ),
-                "ط¸â€ڑط¸ث†ط·آ§ط·آ¹ط·آ¯ ط·آµط·آ§ط·آ±ط¸â€¦ط·آ©:",
-                "- ط·آ§ط¸ئ’ط·ع¾ط·آ¨ 1-3 ط·آ¬ط¸â€¦ط¸â€‍ ط·آ¨ط·آ§ط¸â€‍ط¸â€‍ط¸â€،ط·آ¬ط·آ© ط·آ§ط¸â€‍ط¸â€¦ط·آµط·آ±ط¸ظ¹ط·آ©.",
-                "- ط¸â€¦ط¸â€¦ط¸â€ ط¸ث†ط·آ¹ ط·آ§ط¸â€‍ط¸â€ڑط¸ث†ط·آ§ط·آ¦ط¸â€¦/ط·آ§ط¸â€‍ط¸â€ ط¸â€ڑط·آ§ط·آ·/ط·آ§ط¸â€‍ط·آ§ط¸â€ڑط·ع¾ط·آ¨ط·آ§ط·آ³ط·آ§ط·ع¾.",
-                "- ط¸â€‍ط·آ§ ط·ع¾ط·آ³ط·ع¾ط·آ®ط·آ¯ط¸â€¦ ط¸ئ’ط¸â€‍ط·آ§ط¸â€¦ ط·آ¹ط·آ§ط¸â€¦ ط·آ£ط¸ث† ط·آ¹ط·آ¨ط·آ§ط·آ±ط·آ§ط·ع¾ ط¸â€¦ط·آ­ط¸ظ¾ط¸ث†ط·آ¸ط·آ©.",
-                f"- ط·آ§ط¸â€‍ط·ع¾ط·آ²ط¸â€¦ ط·آ¨ط¸â€¦ط·آ¬ط·آ§ط¸â€‍ط¸ئ’: {role_guidance}.",
-                "- ط·آ§ط·آ¬ط·آ¹ط¸â€‍ ط¸â€¦ط¸ث†ط¸â€ڑط¸ظ¾ط¸ئ’ ط¸ث†ط·آ§ط·آ¶ط·آ­ط¸â€¹ط·آ§ ط¸ث†ط·آ§ط·آ°ط¸ئ’ط·آ± ط·آ³ط·آ¨ط·آ¨ ط¸â€¦ط·آ­ط·آ¯ط·آ¯ ط¸â€¦ط·آ±ط·ع¾ط·آ¨ط·آ· ط·آ¨ط·آ§ط¸â€‍ط·آ´ط·آ±ط¸ظ¹ط·آ­ط·آ©/ط·آ§ط¸â€‍ط·آ£ط·آ¯ط¸â€‍ط·آ©.",
-                "- ط·آ§ط¸â€‍ط·آ·ط¸ث†ط¸â€‍ 160-420 ط·آ­ط·آ±ط¸ظ¾.",
-                f"- ط·ع¾ط·آ¬ط¸â€ ط·آ¨ ط·آ¨ط·آ¯ط·آ§ط¸ظ¹ط·آ§ط·ع¾: {avoid_openers_block or 'أ¢â‚¬â€‌'}.",
-                f"- ط¸â€‍ط·آ§ ط·ع¾ط·آ°ط¸ئ’ط·آ± ط·آ§ط¸â€‍ط¸â€ڑط¸ظ¹ط¸ث†ط·آ¯ ط·آ­ط·آ±ط¸ظ¾ط¸ظ¹ط¸â€¹ط·آ§: {constraints_summary or 'أ¢â‚¬â€‌'}.",
-                f"- ط·ع¾ط·آ¬ط¸â€ ط·آ¨ ط·ع¾ط¸ئ’ط·آ±ط·آ§ط·آ± ط·آ¹ط·آ¨ط·آ§ط·آ±ط·آ§ط·ع¾ ط·آ­ط·آ¯ط¸ظ¹ط·آ«ط·آ©: {recent_avoid or 'أ¢â‚¬â€‌'}.",
+                "قواعد صارمة:",
+                "- اكتب 1-3 جمل باللهجة المصرية.",
+                "- ممنوع القوائم/النقاط/الاقتباسات.",
+                "- لا تستخدم كلام عام أو عبارات محفوظة.",
+                f"- التزم بمجالك: {role_guidance}.",
+                "- اجعل موقفك واضحًا واذكر سبب محدد مرتبط بالشريحة/الأدلة.",
+                "- الطول 160-420 حرف.",
+                f"- تجنب بدايات: {avoid_openers_block or '-'}.",
+                f"- لا تذكر القيود حرفيًا: {constraints_summary or '-'}.",
+                f"- تجنب تكرار عبارات حديثة: {recent_avoid or '-'}.",
             ]
             if evidence_rule:
-                prompt_lines.insert(prompt_lines.index("ط¸â€ڑط¸ث†ط·آ§ط·آ¹ط·آ¯ ط·آµط·آ§ط·آ±ط¸â€¦ط·آ©:") + 1, f"- ط·آ§ط·آ°ط¸ئ’ط·آ± ط¸â€¦ط·آ¹ط·آ±ط¸ظ¾ ط·آ¯ط¸â€‍ط¸ظ¹ط¸â€‍ ط¸ث†ط·آ§ط·آ­ط·آ¯ ط·آ¹ط¸â€‍ط¸â€° ط·آ§ط¸â€‍ط·آ£ط¸â€ڑط¸â€‍ ط¸â€¦ط·آ«ط¸â€‍ {evidence_rule}.")
+                prompt_lines.insert(prompt_lines.index("قواعد صارمة:") + 1, f"- اذكر معرف دليل واحد على الأقل مثل {evidence_rule}.")
             prompt = "\n".join(prompt_lines)
         else:
             prompt_lines = [
@@ -443,9 +443,9 @@ class SimulationEngine:
                 f"Your stance: {new_label} (was: {prev_label}, changed: {changed_label}).",
                 f"Traits: {traits_desc}. Biases: {bias_desc}.",
                 f"Recent thoughts: {memory_context}.",
-                f"Your research slice only: {research_summary or 'أ¢â‚¬â€‌'}",
-                f"Signals: {research_signals or 'أ¢â‚¬â€‌'}",
-                f"Evidence cards:\n{evidence_lines or 'أ¢â‚¬â€‌'}",
+                f"Your research slice only: {research_summary or '-'}",
+                f"Signals: {research_signals or '-'}",
+                f"Evidence cards:\n{evidence_lines or '-'}",
                 *(
                     [
                         f"Reply directly to {reply_to_short_id} and include {reply_to_short_id} literally in the reply.",
@@ -461,9 +461,9 @@ class SimulationEngine:
                 f"- Stay strictly in your domain: {role_guidance}.",
                 "- Make the stance clear with a concrete, specific rationale grounded in the slice/evidence.",
                 "- Length 120-420 chars.",
-                f"- Avoid opener patterns: {avoid_openers_block or 'أ¢â‚¬â€‌'}.",
-                f"- Do not restate constraints literally: {constraints_summary or 'أ¢â‚¬â€‌'}.",
-                f"- Avoid repeating recent phrases: {recent_avoid or 'أ¢â‚¬â€‌'}.",
+                f"- Avoid opener patterns: {avoid_openers_block or '-'}.",
+                f"- Do not restate constraints literally: {constraints_summary or '-'}.",
+                f"- Avoid repeating recent phrases: {recent_avoid or '-'}.",
             ]
             if evidence_rule:
                 prompt_lines.insert(prompt_lines.index("Strict rules:") + 1, f"- Include at least one evidence ID like {evidence_rule}.")
@@ -495,7 +495,7 @@ class SimulationEngine:
                     16,
                 )
                 if language == "ar":
-                    extra_nudge = "ط¸â€¦ط¸â€،ط¸â€¦: ط¸â€‍ط·آ§ ط·ع¾ط·آ®ط·ع¾ط·آ±ط·آ¹ ط¸â€¦ط·آ®ط·آ§ط·آ·ط·آ± ط·آ¹ط·آ§ط¸â€¦ط·آ© ط·آ®ط·آ§ط·آ±ط·آ¬ ط·آ§ط¸â€‍ط·آ´ط·آ±ط¸ظ¹ط·آ­ط·آ©. ط·آ§ط¸ئ’ط·ع¾ط·آ¨ ط·آ¨ط·آµط¸ظ¹ط·آ§ط·ط›ط·آ© ط·آ¬ط·آ¯ط¸ظ¹ط·آ¯ط·آ© ط·ع¾ط¸â€¦ط·آ§ط¸â€¦ط¸â€¹ط·آ§."
+                    extra_nudge = "مهم: لا تخترع مخاطر عامة خارج الشريحة. اكتب بصياغة جديدة تمامًا."
                 else:
                     extra_nudge = "IMPORTANT: Do not invent generic risks outside the slice. Use fresh wording."
 
@@ -531,7 +531,7 @@ class SimulationEngine:
                     )
                 explanation = response.strip()
                 explanation = re.sub(r"\([^\)]*(category=|audience=|goals=|maturity=|location=|risk=)\s*[^\)]*\)", "", explanation)
-                sentences = re.split(r"(?<=[.!?ط·ع؛])\s+", explanation)
+                sentences = re.split(r"(?<=[.!?طں])\s+", explanation)
                 if len(sentences) > 3:
                     explanation = " ".join(sentences[:3]).strip()
                 explanation = _trim_to_limit(explanation, 480)
@@ -774,16 +774,16 @@ class SimulationEngine:
                 "password",
                 "ssn",
                 "social security",
-                "ط·آ®ط·آµط¸ث†ط·آµ",
-                "ط·ع¾ط·آ¬ط·آ³ط·آ³",
-                "ط¸â€¦ط¸ث†ط¸â€ڑط·آ¹",
-                "ط·آ±ط·آ³ط·آ§ط·آ¦ط¸â€‍",
-                "ط·آ¨ط¸â€ ط¸ئ’",
-                "ط·آ­ط·آ³ط·آ§ط·آ¨",
-                "ط·آ¨ط·آ·ط·آ§ط¸â€ڑط·آ©",
-                "ط·آ¨ط¸ظ¹ط·آ§ط¸â€ ط·آ§ط·ع¾",
-                "ط¸â€،ط¸ث†ط¸ظ¹ط·آ©",
-                "ط·آ±ط¸â€ڑط¸â€¦ ط¸â€ڑط¸ث†ط¸â€¦ط¸ظ¹",
+                "خصوص",
+                "تجسس",
+                "موقع",
+                "رسائل",
+                "بنك",
+                "حساب",
+                "بطاقة",
+                "بيانات",
+                "هوية",
+                "رقم قومي",
             ]):
                 score += 0.2
             return min(0.6, score)
@@ -883,11 +883,11 @@ class SimulationEngine:
             text = idea_text.lower()
             concerns = []
             if any(token in text for token in ["legal", "court", "lawsuit", "police", "regulation"]):
-                concerns.append("regulation and liability" if language != "ar" else "ط·آ§ط¸â€‍ط¸â€‍ط¸ث†ط·آ§ط·آ¦ط·آ­ ط¸ث†ط·آ§ط¸â€‍ط¸â€¦ط·آ³ط·آ¤ط¸ث†ط¸â€‍ط¸ظ¹ط·آ©")
+                concerns.append("regulation and liability" if language != "ar" else "اللوائح والمسؤولية")
             if any(token in text for token in ["predict", "prediction", "outcome"]):
-                concerns.append("prediction accuracy" if language != "ar" else "ط·آ¯ط¸â€ڑط·آ© ط·آ§ط¸â€‍ط·ع¾ط¸â€ ط·آ¨ط·آ¤")
+                concerns.append("prediction accuracy" if language != "ar" else "دقة التنبؤ")
             if any(token in text for token in ["documents", "upload", "records", "photos"]):
-                concerns.append("privacy and data security" if language != "ar" else "ط·آ§ط¸â€‍ط·آ®ط·آµط¸ث†ط·آµط¸ظ¹ط·آ© ط¸ث†ط·آ£ط¸â€¦ط¸â€  ط·آ§ط¸â€‍ط·آ¨ط¸ظ¹ط·آ§ط¸â€ ط·آ§ط·ع¾")
+                concerns.append("privacy and data security" if language != "ar" else "الخصوصية وأمن البيانات")
             if not concerns:
                 options = (
                     [
@@ -898,10 +898,10 @@ class SimulationEngine:
                     ]
                     if language != "ar"
                     else [
-                        "ط·ع¾ط¸ث†ط·آ§ط¸ظ¾ط¸â€ڑ ط·آ§ط¸â€‍ط·آ³ط¸ث†ط¸â€ڑ ط¸ث†ط·ع¾ط·آ¹ط¸â€ڑط¸ظ¹ط·آ¯ط·آ§ط·ع¾ ط·آ§ط¸â€‍ط·آ¥ط·آ·ط¸â€‍ط·آ§ط¸â€ڑ",
-                        "ط·آ¹ط¸ث†ط·آ§ط·آ¦ط¸â€ڑ ط·آ§ط¸â€‍ط·ع¾ط¸ث†ط·آ²ط¸ظ¹ط·آ¹ ط¸ث†ط·آµط·آ¹ط¸ث†ط·آ¨ط·آ© ط·آ§ط¸â€‍ط·ع¾ط·آ¨ط¸â€ ط¸ظ¹",
-                        "ط·ع¾ط·آ¹ط¸â€ڑط¸ظ¹ط·آ¯ ط·آ§ط¸â€‍ط·آ¥ط·آ·ط¸â€‍ط·آ§ط¸â€ڑ ط¸ث†ط·آ§ط¸â€‍ط·آ¶ط·ط›ط·آ· ط·آ§ط¸â€‍ط·ع¾ط·آ´ط·ط›ط¸ظ¹ط¸â€‍ط¸ظ¹",
-                        "ط¸ث†ط·آ¶ط¸ث†ط·آ­ ط·آ§ط¸â€‍ط·ع¾ط¸â€¦ط¸ث†ط·آ¶ط·آ¹ ط¸ث†ط·آ¥ط·آ¬ط¸â€،ط·آ§ط·آ¯ ط·آ§ط¸â€‍ط·ع¾ط¸â€ ط¸ظ¾ط¸ظ¹ط·آ°",
+                        "توافق السوق وتعقيدات الإطلاق",
+                        "عوائق التوزيع وصعوبة التبني",
+                        "تعقيد الإطلاق والضغط التشغيلي",
+                        "وضوح التموضع وإجهاد التنفيذ",
                     ]
                 )
                 return random.choice(options)
@@ -1196,7 +1196,7 @@ class SimulationEngine:
             value = int(hashlib.sha256(seed.encode("utf-8")).hexdigest()[:8], 16)
             return phrases[value % len(phrases)]
 
-        arabic_peer_tags = ["ط·آ£", "ط·آ¨", "ط·آ¬", "ط·آ¯", "ط¸â€،ط¸â‚¬", "ط¸ث†", "ط·آ²", "ط·آ­", "ط·آ·", "ط¸ظ¹"]
+        arabic_peer_tags = ["أ", "ب", "ج", "د", "هـ", "و", "ز", "ح", "ط", "ي"]
 
         recent_seed = resume_state.get("recent_messages")
         if not isinstance(recent_seed, list):
@@ -1911,20 +1911,20 @@ class SimulationEngine:
                 other_tag = f"Agent {other.agent_id[:4]}"
             else:
                 tag_index = int(hashlib.sha256(other.agent_id.encode("utf-8")).hexdigest()[:8], 16) % len(arabic_peer_tags)
-                other_tag = f"ط·آ§ط¸â€‍ط¸ث†ط¸ئ’ط¸ظ¹ط¸â€‍ {arabic_peer_tags[tag_index]}"
+                other_tag = f"الوكيل {arabic_peer_tags[tag_index]}"
             constraints = _constraints_summary()
-            insight_clause = f" Also, {insight}." if insight and language != "ar" else (f" ط·آ£ط¸ظ¹ط·آ¶ط·آ§ط¸â€¹ط·إ’ {insight}." if insight else "")
+            insight_clause = f" Also, {insight}." if insight and language != "ar" else (f" أيضاً، {insight}." if insight else "")
             if language == "ar":
                 if speaker.current_opinion == "reject":
                     return (
-                        f"{other_tag} ط·آ´ط·آ§ط¸ظ¹ط¸ظ¾ ط·آ§ط¸â€‍ط¸ظ¾ط¸ئ’ط·آ±ط·آ© ط·آ¬ط¸ظ¹ط·آ¯ط·آ©ط·إ’ ط¸â€‍ط¸ئ’ط¸â€  {focal} ط¸â€¦ط·آ§ ط·آ²ط·آ§ط¸â€‍ط·ع¾ ط¸â€ ط¸â€ڑط·آ·ط·آ© ط·آ¶ط·آ¹ط¸ظ¾ ط¸ث†ط·آ§ط·آ¶ط·آ­ط·آ© ط·آ¹ط¸â€ ط·آ¯ط¸ظ¹. "
-                        f"ط¸â€¦ط·آ­ط·ع¾ط·آ§ط·آ¬ ط·آ¯ط¸â€‍ط¸ظ¹ط¸â€‍ ط·آ¹ط¸â€¦ط¸â€‍ط¸ظ¹ ط·آ£ط¸ث† ط·آ£ط·آ±ط¸â€ڑط·آ§ط¸â€¦ ط¸â€ڑط·آ¨ط¸â€‍ ط¸â€¦ط·آ§ ط·آ£ط·ط›ط¸ظ¹ط¸â€کط·آ± ط·آ±ط·آ£ط¸ظ¹ط¸ظ¹. ({constraints}){insight_clause}"
+                        f"{other_tag} شايف الفكرة جيدة، لكن {focal} ما زالت نقطة ضعف واضحة عندي. "
+                        f"محتاج دليل عملي أو أرقام قبل ما أغيّر رأيي. ({constraints}){insight_clause}"
                     )
                 if speaker.current_opinion == "accept":
                     return (
-                        f"{other_tag} ط¸â€¦ط·ع¾ط·آ­ط¸ظ¾ط·آ¸ط·إ’ ط¸â€‍ط¸ئ’ط¸â€ ط¸ظ¹ ط·آ´ط·آ§ط¸ظ¹ط¸ظ¾ ط·آ£ط¸â€  {focal} ط¸ظ¹ط·آ¹ط·آ·ط¸ظ¹ ط·آ£ط¸ظ¾ط·آ¶ط¸â€‍ط¸ظ¹ط·آ© ط¸ث†ط·آ§ط·آ¶ط·آ­ط·آ© ط¸â€‍ط¸â€‍ط¸ظ¾ط¸ئ’ط·آ±ط·آ© ط·آ­ط·ع¾ط¸â€° ط·آ§ط¸â€‍ط·آ¢ط¸â€ . ({constraints}){insight_clause}"
+                        f"{other_tag} متحفظ، لكني شايف أن {focal} يعطي أفضلية واضحة للفكرة حتى الآن. ({constraints}){insight_clause}"
                     )
-                return f"{other_tag} ط¸â€ڑط·آ§ط¸â€‍ ط·آ±ط·آ£ط¸ظ¹ط¸â€،ط·إ’ ط¸ث†ط·آ£ط¸â€ ط·آ§ ط¸â€¦ط·آ­ط·آ§ط¸ظ¹ط·آ¯ ط¸â€‍ط·آ£ط¸â€  ط·ع¾ط¸ظ¾ط·آ§ط·آµط¸ظ¹ط¸â€‍ {focal} ط·ط›ط¸ظ¹ط·آ± ط¸â€¦ط·آ­ط·آ³ط¸ث†ط¸â€¦ط·آ© ط·آ­ط·ع¾ط¸â€° ط·آ§ط¸â€‍ط·آ¢ط¸â€ . ({constraints}){insight_clause}"
+                return f"{other_tag} قال رأيه، وأنا محايد لأن تفاصيل {focal} غير محسومة حتى الآن. ({constraints}){insight_clause}"
             if speaker.current_opinion == "reject":
                 return (
                     f"{other_tag} likes the idea, but I still see {focal} as a major weak spot. "
@@ -1939,24 +1939,24 @@ class SimulationEngine:
             c = category.lower()
             if "tech" in a or "developer" in a or "engineer" in c:
                 return (
-                    ["ط·ع¾ط·آ­ط·آ³ط¸ظ¹ط¸â€  ط·آ§ط¸â€‍ط¸ئ’ط¸ظ¾ط·آ§ط·طŒط·آ©", "ط¸â€ڑط·آ§ط·آ¨ط¸â€‍ط¸ظ¹ط·آ© ط·آ§ط¸â€‍ط·ع¾ط¸ث†ط·آ³ط·آ¹", "ط·آ²ط¸â€¦ط¸â€  ط·آ§ط¸â€‍ط·آ§ط·آ³ط·ع¾ط·آ¬ط·آ§ط·آ¨ط·آ©", "ط·آ§ط·آ³ط·ع¾ط¸â€ڑط·آ±ط·آ§ط·آ± ط·آ§ط¸â€‍ط¸â€ ط·آ¸ط·آ§ط¸â€¦"]
+                    ["تحسين الكفاءة", "قابلية التوسع", "زمن الاستجابة", "استقرار النظام"]
                     if language == "ar"
                     else ["efficiency gains", "scalability", "latency and reliability", "automation potential"]
                 )
             if "entrepreneur" in a or "business" in a:
                 return (
-                    ["ط·آ§ط¸â€‍ط·آ¹ط·آ§ط·آ¦ط·آ¯ ط·آ¹ط¸â€‍ط¸â€° ط·آ§ط¸â€‍ط·آ§ط·آ³ط·ع¾ط·آ«ط¸â€¦ط·آ§ط·آ±", "ط·آ·ط¸â€‍ط·آ¨ ط·آ§ط¸â€‍ط·آ³ط¸ث†ط¸â€ڑ", "ط¸â€،ط·آ§ط¸â€¦ط·آ´ ط·آ§ط¸â€‍ط·آ±ط·آ¨ط·آ­", "ط·ع¾ط¸ئ’ط¸â€‍ط¸ظ¾ط·آ© ط·آ§ط¸â€‍ط·آ§ط·آ³ط·ع¾ط·آ­ط¸ث†ط·آ§ط·آ°"]
+                    ["العائد على الاستثمار", "طلب السوق", "هامش الربح", "تكلفة الاستحواذ"]
                     if language == "ar"
                     else ["ROI", "market demand", "profit margin", "pricing leverage"]
                 )
             if "worker" in a or "employee" in c:
                 return (
-                    ["ط·آ§ط¸â€‍ط·ع¾ط¸ث†ط¸ظ¾ط¸ظ¹ط·آ± ط·آ§ط¸â€‍ط·آ´ط¸â€،ط·آ±ط¸ظ¹", "ط·آ³ط¸â€،ط¸ث†ط¸â€‍ط·آ© ط·آ§ط¸â€‍ط·آ§ط·آ³ط·ع¾ط·آ®ط·آ¯ط·آ§ط¸â€¦", "ط·آ§ط¸â€‍ط·آ§ط·آ³ط·ع¾ط¸â€ڑط·آ±ط·آ§ط·آ± ط·آ§ط¸â€‍ط¸ث†ط·آ¸ط¸ظ¹ط¸ظ¾ط¸ظ¹", "ط·آ§ط¸â€‍ط¸â€¦ط¸ث†ط·آ«ط¸ث†ط¸â€ڑط¸ظ¹ط·آ©"]
+                    ["التوفير الشهري", "سهولة الاستخدام", "الاستقرار الوظيفي", "الموثوقية"]
                     if language == "ar"
                     else ["monthly savings", "reliability", "day-to-day usability", "job stability"]
                 )
             return (
-                ["ط·ع¾ط¸ث†ط·آ§ط¸ظ¾ط¸â€ڑ ط·آ§ط¸â€‍ط·آ³ط¸ث†ط¸â€ڑ", "ط·آ§ط¸â€‍ط·آ«ط¸â€ڑط·آ©", "ط·آ§ط¸â€‍ط·آ§ط¸â€¦ط·ع¾ط·آ«ط·آ§ط¸â€‍", "ط·ع¾ط·آ¨ط¸â€ ط¸ظ¹ ط·آ§ط¸â€‍ط¸â€¦ط·آ³ط·ع¾ط·آ®ط·آ¯ط¸â€¦ط¸ظ¹ط¸â€ "]
+                ["توافق السوق", "الثقة", "الامتثال", "تبني المستخدمين"]
                 if language == "ar"
                 else ["go-to-market traction", "trust", "compliance", "user adoption"]
             )
@@ -1980,21 +1980,21 @@ class SimulationEngine:
                 f"{agent.agent_id}-{iteration}",
                 ["From my perspective", "Given my background", "As someone in this segment", "In my view"]
                 if language != "ar"
-                else ["ط¸â€¦ط¸â€  ط¸ث†ط·آ¬ط¸â€،ط·آ© ط¸â€ ط·آ¸ط·آ±ط¸ظ¹", "ط·آ¨ط·آ­ط¸ئ’ط¸â€¦ ط·آ®ط·آ¨ط·آ±ط·ع¾ط¸ظ¹", "ط¸ئ’ط¸â€¦ط¸â€¦ط·آ«ط¸â€‍ ط¸â€‍ط¸â€،ط·آ°ط·آ§ ط·آ§ط¸â€‍ط¸â€ ط¸ث†ط·آ¹ ط¸â€¦ط¸â€  ط·آ§ط¸â€‍ط·آ¬ط¸â€¦ط¸â€،ط¸ث†ط·آ±", "ط·آ¨ط·آ±ط·آ£ط¸ظ¹ط¸ظ¹ ط·آ§ط¸â€‍ط·آ´ط·آ®ط·آµط¸ظ¹"],
+                else ["من وجهة نظري", "بحكم خبرتي", "كممثل لهذا النوع من الجمهور", "برأيي الشخصي"],
             )
             vocab = _persona_vocab(archetype, category, language)
             insight = _research_insight()
             focal = _pick_phrase(f"{agent.agent_id}-vocab-{iteration}", vocab) if vocab else _idea_concerns()
             peer = _pick_phrase(
                 f"{agent.agent_id}-peer-{iteration}",
-                ["Agent A", "Agent B", "Agent C"] if language != "ar" else ["ط·آ§ط¸â€‍ط¸ث†ط¸ئ’ط¸ظ¹ط¸â€‍ ط·آ£", "ط·آ§ط¸â€‍ط¸ث†ط¸ئ’ط¸ظ¹ط¸â€‍ ط·آ¨", "ط·آ§ط¸â€‍ط¸ث†ط¸ئ’ط¸ظ¹ط¸â€‍ ط·آ¬"],
+                ["Agent A", "Agent B", "Agent C"] if language != "ar" else ["الوكيل أ", "الوكيل ب", "الوكيل ج"],
             )
             if changed and prev_opinion and new_opinion:
                 if new_opinion == "accept":
                     if language == "ar":
                         return (
-                            f"{prefix} ({archetype}) ط·آ£ط·آµط·آ¨ط·آ­ط·ع¾ ط¸â€¦ط¸ظ¹ط¸â€کط·آ§ط¸â€‍ط·آ§ط¸â€¹ ط¸â€‍ط¸â€‍ط¸â€ڑط·آ¨ط¸ث†ط¸â€‍ ط¸â€‍ط·آ£ط¸â€  {idea_local} ط·ع¾ط·آ¨ط·آ¯ط¸ث† ط¸â€ڑط·آ§ط·آ¨ط¸â€‍ط·آ© ط¸â€‍ط¸â€‍ط·ع¾ط¸â€ ط¸ظ¾ط¸ظ¹ط·آ°ط·إ’ "
-                            f"ط¸ث†ط¸â€ ط¸â€ڑط·آ·ط·آ© {peer} ط·آ­ط¸ث†ط¸â€‍ {focal} ط¸â€ڑط¸â€‍ط¸â€‍ط·ع¾ ط·ع¾ط·آ±ط·آ¯ط·آ¯ط¸ظ¹ط·إ’ ط¸â€‍ط¸ئ’ط¸â€  ط¸â€¦ط·آ§ ط·آ²ط¸â€‍ط·ع¾ ط·آ£ط·آ±ط·آ§ط¸â€ڑط·آ¨ ط¸â€¦ط·آ®ط·آ§ط·آ·ط·آ± {_idea_concerns()}."
+                            f"{prefix} ({archetype}) أصبحت ميّالاً للقبول لأن {idea_local} تبدو قابلة للتنفيذ، "
+                            f"ونقطة {peer} حول {focal} قللت ترددي، لكن ما زلت أراقب مخاطر {_idea_concerns()}."
                         )
                     return (
                         f"{prefix} ({archetype}), I now lean accept because {idea_local} feels feasible "
@@ -2003,8 +2003,8 @@ class SimulationEngine:
                 if new_opinion == "reject":
                     if language == "ar":
                         return (
-                            f"{prefix} ({archetype}) ط·آ§ط·ع¾ط·آ¬ط¸â€،ط·ع¾ ط¸â€‍ط¸â€‍ط·آ±ط¸ظ¾ط·آ¶ ط¸â€‍ط·آ£ط¸â€  {idea_local} ط·ع¾ط·آ«ط¸ظ¹ط·آ± ط¸â€¦ط·آ®ط·آ§ط·آ·ط·آ± ط·ع¾ط·آ®ط·آµ "
-                            f"{_idea_concerns()}ط·إ’ ط¸ث†ط·ع¾ط·آ­ط·آ°ط¸ظ¹ط·آ± {peer} ط·آ¹ط·آ²ط·آ² ط·آ°ط¸â€‍ط¸ئ’ط·إ’ ط¸ث†ط¸â€‍ط¸â€¦ ط·آ£ط·آ¬ط·آ¯ ط¸â€¦ط¸ظ¹ط·آ²ط·آ© ط¸â€ڑط¸ث†ط¸ظ¹ط·آ© ط¸ظ¾ط¸ظ¹ {focal}."
+                            f"{prefix} ({archetype}) اتجهت للرفض لأن {idea_local} تثير مخاطر تخص "
+                            f"{_idea_concerns()}، وتحذير {peer} عزز ذلك، ولم أجد ميزة قوية في {focal}."
                         )
                     return (
                         f"{prefix} ({archetype}), I moved to reject because {idea_local} raises "
@@ -2012,8 +2012,8 @@ class SimulationEngine:
                     )
                 if language == "ar":
                     return (
-                        f"{prefix} ({archetype}) ط·آ§ط¸â€ ط·ع¾ط¸â€ڑط¸â€‍ط·ع¾ ط¸â€‍ط¸â€‍ط¸â€¦ط¸ث†ط¸â€ڑط¸ظ¾ ط·آ§ط¸â€‍ط¸â€¦ط·آ­ط·آ§ط¸ظ¹ط·آ¯ ط·ع¾ط·آ¬ط·آ§ط¸â€، {idea_local} ط¸â€‍ط·آ£ط¸â€  ط·آ§ط¸â€‍ط¸â€¦ط·آ¤ط·آ´ط·آ±ط·آ§ط·ع¾ "
-                        f"ط¸â€¦ط·آ®ط·ع¾ط¸â€‍ط·آ·ط·آ©: ط¸â€،ط¸â€ ط·آ§ط¸ئ’ ط¸ظ¾ط·آ§ط·آ¦ط·آ¯ط·آ© ط¸ظ¾ط¸ظ¹ {focal} ط¸â€‍ط¸ئ’ط¸â€  ط¸â€¦ط·آ®ط·آ§ط·آ·ط·آ± {_idea_concerns()} ط¸â€¦ط·آ§ ط·آ²ط·آ§ط¸â€‍ط·ع¾ ط·آ¨ط¸â€‍ط·آ§ ط·آ¥ط·آ¬ط·آ§ط·آ¨ط·آ©."
+                        f"{prefix} ({archetype}) انتقلت للموقف المحايد تجاه {idea_local} لأن المؤشرات "
+                        f"مختلطة: هناك فائدة في {focal} لكن مخاطر {_idea_concerns()} ما زالت بلا إجابة."
                     )
                 return (
                     f"{prefix} ({archetype}), I moved to neutral on {idea_local} because the signals "
@@ -2026,12 +2026,12 @@ class SimulationEngine:
                     f"{agent.agent_id}-accept-{iteration}",
                     [f"{focal} looks strong", f"{focal} is still compelling", f"{focal} keeps the value clear"]
                     if language != "ar"
-                    else [f"{focal} ط·ع¾ط·آ¨ط·آ¯ط¸ث† ط¸â€ڑط¸ث†ط¸ظ¹ط·آ©", f"{focal} ط¸â€¦ط·آ§ ط·آ²ط·آ§ط¸â€‍ط·ع¾ ط¸â€¦ط¸â€ڑط¸â€ ط·آ¹ط·آ©", f"{focal} ط·ع¾ط¸ث†ط·آ¶ط·آ­ ط·آ§ط¸â€‍ط¸â€ڑط¸ظ¹ط¸â€¦ط·آ© ط·آ¨ط·آ´ط¸ئ’ط¸â€‍ ط¸ئ’ط·آ§ط¸ظ¾ط¸ع†"],
+                    else [f"{focal} تبدو قوية", f"{focal} ما زالت مقنعة", f"{focal} توضح القيمة بشكل كافٍ"],
                 )
                 if skepticism > 0.6:
-                    reason = f"{focal} ط¸ث†ط·آ§ط·آ¶ط·آ­ط·آ© ط¸â€‍ط¸ئ’ط¸â€ ط¸ظ¹ ط·آ£ط·آ±ط¸ظ¹ط·آ¯ ط·آ¶ط¸â€¦ط·آ§ط¸â€ ط·آ§ط·ع¾" if language == "ar" else f"{focal} is clear, but I still want safeguards"
+                    reason = f"{focal} واضحة لكني أريد ضمانات" if language == "ar" else f"{focal} is clear, but I still want safeguards"
                 if language == "ar":
-                    return f"{prefix} ({archetype}) ط¸â€¦ط·آ§ ط·آ²ط¸â€‍ط·ع¾ ط·آ£ط¸â€¦ط¸ظ¹ط¸â€‍ ط¸â€‍ط¸â€‍ط¸â€ڑط·آ¨ط¸ث†ط¸â€‍ ط·آ¨ط·آ®ط·آµط¸ث†ط·آµ {idea_local} ط¸â€‍ط·آ£ط¸â€  {reason}ط·إ’ ط¸â€¦ط·آ¹ ط·ع¾ط·آ­ط¸ظ¾ط·آ¸ ط·آ­ط¸ث†ط¸â€‍ {_idea_concerns()}."
+                    return f"{prefix} ({archetype}) ما زلت أميل للقبول بخصوص {idea_local} لأن {reason}، مع تحفظ حول {_idea_concerns()}."
                 return f"{prefix} ({archetype}), I still lean accept on {idea_local} because {reason}, though {_idea_concerns()} needs safeguards."
 
             if agent.current_opinion == "reject":
@@ -2044,26 +2044,26 @@ class SimulationEngine:
                     ]
                     if language != "ar"
                     else [
-                        f"ط¸â€¦ط·آ®ط·آ§ط·آ·ط·آ± {focal} ط¸â€¦ط·آ±ط·ع¾ط¸ظ¾ط·آ¹ط·آ©ط·إ’ ط·آ®ط·آµط¸ث†ط·آµط·آ§ط¸â€¹ ط¸ظ¾ط¸ظ¹ط¸â€¦ط·آ§ ط¸ظ¹ط·ع¾ط·آ¹ط¸â€‍ط¸â€ڑ ط·آ¨ط¸â‚¬ {_idea_concerns()}",
-                        f"ط·آ¹ط·آ¯ط¸â€¦ ط¸ث†ط·آ¶ط¸ث†ط·آ­ {focal} ط¸â€¦ط·آ§ ط·آ²ط·آ§ط¸â€‍ ط¸ئ’ط·آ¨ط¸ظ¹ط·آ±ط·آ§ط¸â€¹",
-                        f"{focal} ط¸ث† {_idea_concerns()} ط¸â€‍ط¸â€¦ ط·ع¾ط¸عˆط·آ­ط¸â€‍ ط·آ¨ط·آ¹ط·آ¯",
+                        f"مخاطر {focal} مرتفعة، خصوصاً فيما يتعلق بـ {_idea_concerns()}",
+                        f"عدم وضوح {focal} ما زال كبيراً",
+                        f"{focal} و {_idea_concerns()} لم تُحل بعد",
                     ],
                 )
                 if risk_tolerance > 0.7:
-                    reason = f"{focal} ط¸â€¦ط·آ±ط·ع¾ط¸ظ¾ط·آ¹ط·آ© ط¸ث†ط·آ§ط¸â€‍ط¸â€ڑط¸ظ¹ط¸â€¦ط·آ© ط·ط›ط¸ظ¹ط·آ± ط¸ث†ط·آ§ط·آ¶ط·آ­ط·آ©" if language == "ar" else f"{focal} is high and the value is unclear"
+                    reason = f"{focal} مرتفعة والقيمة غير واضحة" if language == "ar" else f"{focal} is high and the value is unclear"
                 if language == "ar":
-                    return f"{prefix} ({archetype}) ط·آ£ط¸â€¦ط¸ظ¹ط¸â€‍ ط¸â€‍ط¸â€‍ط·آ±ط¸ظ¾ط·آ¶ ط·آ¨ط·آ®ط·آµط¸ث†ط·آµ {idea_local} ط¸â€‍ط·آ£ط¸â€  {reason}ط·إ’ ط¸ث†ط¸â€‍ط·آ§ ط·آ£ط·آ±ط¸â€° ط¸â€¦ط¸ظ¹ط·آ²ط·آ© ط·آ­ط¸â€ڑط¸ظ¹ط¸â€ڑط¸ظ¹ط·آ© ط¸ظ¾ط¸ظ¹ {focal} ط·آ¨ط·آ¹ط·آ¯."
+                    return f"{prefix} ({archetype}) أميل للرفض بخصوص {idea_local} لأن {reason}، ولا أرى ميزة حقيقية في {focal} بعد."
                 return f"{prefix} ({archetype}), I'm leaning reject on {idea_local} because {reason}, and {focal} doesn't offset it yet."
 
             if optimism > 0.6:
                 if language == "ar":
-                    return f"{prefix} ({archetype}) ط¸â€¦ط·آ§ ط·آ²ط¸â€‍ط·ع¾ ط¸â€¦ط·آ­ط·آ§ط¸ظ¹ط·آ¯ط·آ§ط¸â€¹ ط·ع¾ط·آ¬ط·آ§ط¸â€، {idea_local}: ط·آ£ط·آ±ط¸â€° ط·آ¥ط¸â€¦ط¸ئ’ط·آ§ط¸â€ ط·آ§ط·ع¾ ط¸ظ¾ط¸ظ¹ {focal}ط·إ’ ط¸â€‍ط¸ئ’ط¸â€  ط·آ§ط¸â€‍ط·آ£ط·آ¯ط¸â€‍ط·آ© ط¸â€‍ط¸ظ¹ط·آ³ط·ع¾ ط¸â€ڑط¸ث†ط¸ظ¹ط·آ© ط·آ¨ط·آ¹ط·آ¯."
+                    return f"{prefix} ({archetype}) ما زلت محايداً تجاه {idea_local}: أرى إمكانات في {focal}، لكن الأدلة ليست قوية بعد."
                 return f"{prefix} ({archetype}), I stay neutral on {idea_local}: I see potential in {focal}, but the evidence is not strong yet."
 
             if language == "ar":
                 return (
-                    f"{prefix} ({archetype}) ط¸â€¦ط·آ§ ط·آ²ط¸â€‍ط·ع¾ ط¸â€¦ط·آ­ط·آ§ط¸ظ¹ط·آ¯ط·آ§ط¸â€¹ ط¸â€‍ط·آ£ط¸â€  ط·آ¨ط¸ظ¹ط·آ§ط¸â€ ط·آ§ط·ع¾ {focal} ط·ط›ط¸ظ¹ط·آ± ط¸ئ’ط·آ§ط¸ظ¾ط¸ظ¹ط·آ© ط¸â€‍ط·آ¯ط¸ظ¹ ط·آ§ط¸â€‍ط·آ¢ط¸â€ ط·إ’ "
-                    f"ط¸ث†ط¸â€¦ط·آ®ط·آ§ط·آ·ط·آ± {_idea_concerns()} ط·ع¾ط·آ­ط·ع¾ط·آ§ط·آ¬ ط·ع¾ط¸ث†ط·آ¶ط¸ظ¹ط·آ­ط·آ§ط¸â€¹ ط·آ¹ط¸â€¦ط¸â€‍ط¸ظ¹ط·آ§ط¸â€¹ ط¸â€ڑط·آ¨ط¸â€‍ ط·آ§ط¸â€‍ط·آ­ط·آ³ط¸â€¦."
+                    f"{prefix} ({archetype}) ما زلت محايداً لأن بيانات {focal} غير كافية لدي الآن، "
+                    f"ومخاطر {_idea_concerns()} تحتاج توضيحاً عملياً قبل الحسم."
                 )
             return (
                 f"{prefix} ({archetype}), I'm still neutral because {focal} evidence feels thin, "

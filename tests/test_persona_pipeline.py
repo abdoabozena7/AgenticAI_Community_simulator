@@ -93,6 +93,12 @@ def _signal_plan() -> dict:
                 "life_stages": ["raising children", "family balancing", "caregiver"],
                 "source_kind": "hybrid",
                 "signal_refs": ["sig-fees", "sig-compare"],
+                "segment_id": "working-parents",
+                "archetype_name": "Working Professionals",
+                "price_sensitivity_bucket": "high",
+                "decision_style": "price-first",
+                "purchase_triggers": ["family convenience", "clear value"],
+                "rejection_triggers": ["delivery fees", "missing items"],
             },
             {
                 "cluster": "Household Buyers",
@@ -104,6 +110,12 @@ def _signal_plan() -> dict:
                 "life_stages": ["habit builder", "household buyer", "family balancing"],
                 "source_kind": "research_signal",
                 "signal_refs": ["sig-price", "sig-demand"],
+                "segment_id": "household-buyers",
+                "archetype_name": "Consumers",
+                "price_sensitivity_bucket": "medium",
+                "decision_style": "comparison-led",
+                "purchase_triggers": ["convenience", "trust"],
+                "rejection_triggers": ["price spikes", "quality inconsistency"],
             },
             {
                 "cluster": "Promo Chasers",
@@ -115,8 +127,20 @@ def _signal_plan() -> dict:
                 "life_stages": ["early career", "household buyer", "habit builder"],
                 "source_kind": "research_signal",
                 "signal_refs": ["sig-promo", "sig-fees"],
+                "segment_id": "promo-chasers",
+                "archetype_name": "Gen Z",
+                "price_sensitivity_bucket": "high",
+                "decision_style": "discount-first",
+                "purchase_triggers": ["discounts", "low friction"],
+                "rejection_triggers": ["delivery fees", "unclear value"],
             },
         ],
+        "dynamic_segments": [],
+        "market_grounding": {
+            "competition_level": "high",
+            "price_sensitivity": "high",
+            "local_objections": ["delivery fees", "price spikes"],
+        },
         "signal_catalog": [
             {"id": "sig-fees", "type": "complaints", "text": "delivery fees", "source_kind": "research_signal", "source_ref": "https://example.com/1"},
             {"id": "sig-compare", "type": "behaviors", "text": "comparison shopping", "source_kind": "research_signal", "source_ref": "https://example.com/2"},
@@ -135,6 +159,7 @@ def _persona(index: int) -> PersonaProfile:
         name=f"Persona {index}",
         source_mode="research_signal" if index % 2 == 0 else "hybrid",
         target_audience_cluster=cluster,
+        segment_id=["working-parents", "household-buyers", "promo-chasers"][index % 3],
         location_context="Cairo",
         age_band=["30-44", "35-49", "25-34"][index % 3],
         life_stage=["family balancing", "raising children", "habit builder"][index % 3],
@@ -161,6 +186,10 @@ def _persona(index: int) -> PersonaProfile:
         motivations=["family convenience", "value for money"],
         concerns=["delivery fees", "price spikes"],
         location="Cairo",
+        price_sensitivity_bucket="high" if index % 2 == 0 else "medium",
+        decision_style=["price-first", "comparison-led", "discount-first"][index % 3],
+        purchase_trigger=["family convenience", "trust", "discounts"][index % 3],
+        rejection_trigger=["delivery fees", "quality inconsistency", "price spikes"][index % 3],
         opinion="neutral",
         confidence=0.5,
         influence_weight=1.0,
@@ -171,12 +200,12 @@ def _persona(index: int) -> PersonaProfile:
 
 
 class PersonaPipelineTests(unittest.IsolatedAsyncioTestCase):
-    def test_target_count_requires_30_when_research_is_sufficient(self) -> None:
+    def test_coverage_target_is_based_on_dynamic_segments(self) -> None:
         agent = _agent()
         state = _state()
         state.research = _research_report()
-        self.assertTrue(agent._has_enough_data(state))
-        self.assertGreaterEqual(agent._target_persona_count(state), 30)
+        target = agent._coverage_target_count(state, signal_plan=_signal_plan(), requested_count=24)
+        self.assertEqual(target, 15)
 
     def test_validation_blocks_simulation_but_not_persistence_for_low_count(self) -> None:
         agent = _agent()
@@ -193,6 +222,35 @@ class PersonaPipelineTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(validation["fatal_errors"], [])
         self.assertIn("persona_count_below_simulation_minimum", validation["simulation_blockers"])
         self.assertTrue(validation["persistence_allowed"])
+
+    def test_build_market_grounding_and_source_type_are_dynamic(self) -> None:
+        agent = _agent()
+        state = _state()
+        state.research = _research_report()
+        structured_inputs = agent._structured_persona_inputs(state)
+        grounding = agent.build_market_grounding(
+            state=state,
+            place_label="Cairo",
+            structured_inputs=structured_inputs,
+            memory_context={"recurring_objections": ["hidden fees"], "stable_behaviors": ["comparison shopping"]},
+            saved_persona_hints=[],
+        )
+        self.assertEqual(grounding["competition_level"], "medium")
+        self.assertIn("delivery fees", grounding["local_objections"])
+        self.assertEqual(agent._source_type_label(state), "dynamic_hybrid")
+
+    def test_signal_fitted_blueprints_include_dynamic_fields(self) -> None:
+        agent = _agent()
+        state = _state()
+        state.research = _research_report()
+        signal_plan = _signal_plan()
+        signal_plan["dynamic_segments"] = list(signal_plan["audience_clusters"])
+        rows = agent._signal_fitted_blueprints(state, signal_plan, 2)
+        self.assertEqual(len(rows), 2)
+        self.assertTrue(all(row.get("segment_id") for row in rows))
+        self.assertTrue(all(row.get("decision_style") for row in rows))
+        self.assertTrue(all(row.get("purchase_trigger") for row in rows))
+        self.assertTrue(all(row.get("rejection_trigger") for row in rows))
 
     def test_pipeline_blockers_use_validation_snapshot(self) -> None:
         state = _state()

@@ -259,6 +259,16 @@ export interface SimulationStateResponse {
   pause_available?: boolean;
   summary_ready?: boolean;
   reasoning_started?: boolean;
+  report_status?: string | null;
+  report_summary?: string | null;
+  final_report?: Record<string, unknown> | null;
+  event_log_status?: string | null;
+  event_log_count?: number | null;
+  search_finished?: boolean;
+  research_ready?: boolean;
+  research_estimated?: boolean;
+  search_provider_health?: Array<Record<string, unknown>>;
+  search_provider_attempts?: Array<Record<string, unknown>>;
   summary_at?: string;
   can_resume?: boolean;
   resume_reason?: string | null;
@@ -643,6 +653,13 @@ export interface SearchResponse {
   answer: string;
   results: SearchResult[];
   structured?: SearchStructured;
+  search_finished?: boolean;
+  research_ready?: boolean;
+  research_estimated?: boolean;
+  provider_attempts?: Array<Record<string, unknown>>;
+  provider_health?: Array<Record<string, unknown>>;
+  query_variants?: Array<{ text: string; language: string; source: string }>;
+  fallback_started?: boolean;
 }
 
 export interface SearchStructured {

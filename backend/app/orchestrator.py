@@ -7,6 +7,7 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple
 from .agents.base import AgentRuntime
 from .agents.clarification_agent import ClarificationAgent
 from .agents.persona_agent import PersonaAgent
+from .agents.report_agent import ReportAgent
 from .agents.search_agent import SearchAgent
 from .agents.simulation_agent import SimulationAgent
 from .core.dataset_loader import Dataset
@@ -24,6 +25,7 @@ from .models.orchestration import (
 )
 from .services.event_bus import EventBus
 from .services.llm_gateway import LLMGateway
+from .services.memory_provider import build_memory_provider
 from .services.simulation_repository import SimulationRepository
 
 
@@ -37,16 +39,19 @@ class SimulationOrchestrator:
         self.repository = SimulationRepository()
         self.llm = LLMGateway()
         self.event_bus = EventBus(broadcaster=broadcaster, repository=self.repository)
+        self.memory_provider = build_memory_provider()
         runtime = AgentRuntime(
             dataset=dataset,
             llm=self.llm,
             event_bus=self.event_bus,
             repository=self.repository,
+            memory_provider=self.memory_provider,
         )
         self.search_agent = SearchAgent(runtime)
         self.persona_agent = PersonaAgent(runtime)
         self.clarification_agent = ClarificationAgent(runtime)
         self.simulation_agent = SimulationAgent(runtime)
+        self.report_agent = ReportAgent(runtime)
         self._states: Dict[str, OrchestrationState] = {}
         self._tasks: Dict[str, asyncio.Task[None]] = {}
         self._locks: Dict[str, asyncio.Lock] = {}
@@ -72,6 +77,7 @@ class SimulationOrchestrator:
             user_id=user_id,
             user_context=normalize_context(user_context),
         )
+        await self.memory_provider.initialize_state(state)
         self._states[simulation_id] = state
         await self.repository.create_run(state)
         self._schedule(simulation_id, state.current_phase)
@@ -199,6 +205,9 @@ class SimulationOrchestrator:
             state.user_context[question.field_name] = text
             state.schema[question.field_name] = text
             resolved_question_ids.append(question_id)
+        memory_provider = getattr(self, "memory_provider", None)
+        if resolved_question_ids and memory_provider is not None:
+            await memory_provider.ingest_clarification_answers(state=state, answers=answers)
         if not state.pending_questions():
             state.pending_input = False
             if state.pending_input_kind == "clarification":
@@ -471,6 +480,16 @@ class SimulationOrchestrator:
         if phase == SimulationPhase.SUMMARY:
             state.summary = await self.simulation_agent.build_summary(state)
             state.summary_ready = True
+            report = await self.report_agent.build_report(state)
+            await self.event_bus.publish(
+                state,
+                "report_ready",
+                {
+                    "agent": self.report_agent.name,
+                    "report": report,
+                    "report_status": state.schema.get("report_status"),
+                },
+            )
             return False
         return False
 

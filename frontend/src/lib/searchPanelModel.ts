@@ -120,6 +120,12 @@ const ACTION_LABELS: Record<string, { ar: string; en: string; progress: number }
   research_started: { ar: 'بدء البحث', en: 'Research started', progress: 10 },
   query_started: { ar: 'تشغيل الاستعلام', en: 'Query started', progress: 14 },
   query_planned: { ar: 'تخطيط البحث', en: 'Query planned', progress: 18 },
+  search_provider_started: { ar: 'بدء مزود بحث', en: 'Provider started', progress: 16 },
+  search_provider_succeeded: { ar: 'مزود نجح', en: 'Provider succeeded', progress: 24 },
+  search_provider_timed_out: { ar: 'مزود تأخر', en: 'Provider timed out', progress: 24 },
+  search_provider_failed: { ar: 'مزود فشل', en: 'Provider failed', progress: 24 },
+  search_provider_empty: { ar: 'مزود بدون نتائج', en: 'Provider returned no results', progress: 24 },
+  search_fallback_started: { ar: 'بدء fallback سريع', en: 'Fast fallback started', progress: 30 },
   search_results_found: { ar: 'لقينا نتائج', en: 'Results found', progress: 28 },
   search_results_ready: { ar: 'النتائج جاهزة', en: 'Results ready', progress: 34 },
   query_result: { ar: 'استلام نتائج', en: 'Received results', progress: 38 },
@@ -492,6 +498,29 @@ const buildExecutionNotes = (language: Language, schema: Record<string, unknown>
   return items;
 };
 
+const buildReportNote = (language: Language, schema: Record<string, unknown>): SearchPanelItem[] => {
+  const report = toRecord(schema.final_report);
+  if (!report) return [];
+  const strengths = toStringList(report.strengths, 3);
+  const weaknesses = toStringList(report.weaknesses, 2);
+  const objections = toStringList(report.top_objections, 2);
+  const firstMove = String(report.recommended_first_move || '').trim();
+  const score = Number(report.success_score ?? 0);
+  return [{
+    kind: 'note',
+    id: 'final-report',
+    title: language === 'ar' ? 'التقرير النهائي الجاهز' : 'Final structured report',
+    badgeLabel: language === 'ar' ? 'تقرير' : 'Report',
+    content: language === 'ar'
+      ? `درجة النجاح الحالية ${Number.isFinite(score) ? `${Math.max(0, Math.min(100, score))}%` : 'غير محددة'}، وأهم خطوة تالية: ${firstMove || 'راجع التقرير الكامل.'}`
+      : `Current success score: ${Number.isFinite(score) ? `${Math.max(0, Math.min(100, score))}%` : 'n/a'}. Recommended first move: ${firstMove || 'Review the full report.'}`,
+    tone: score >= 60 ? 'success' : 'info',
+    bullets: [...strengths, ...weaknesses, ...objections].slice(0, 5),
+    cta: Array.isArray(report.confidence_notes)
+      ? report.confidence_notes.map((item) => String(item || '').trim()).filter(Boolean).slice(0, 1)[0]
+      : undefined,
+  }];
+};
 const buildAutomationNotes = (
   language: Language,
   schema: Record<string, unknown>,
@@ -696,6 +725,7 @@ export const buildSearchPanelModel = ({
     ...buildCoachNote(language, coachIntervention),
     ...buildImprovementNote(language, safeSchema),
     ...buildExecutionNotes(language, safeSchema),
+    ...buildReportNote(language, safeSchema),
     ...buildAutomationNotes(language, safeSchema, personaSource),
     ...buildReasoningNote(language, reasoningFeed || []),
     ...buildChatEventNote(language, chatEvents || []),

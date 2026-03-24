@@ -185,4 +185,41 @@ describe("buildSearchPanelModel", () => {
     expect(model.items.some((item) => item.kind === "note" && item.title.includes("AI estimation"))).toBe(true);
     expect(model.items.some((item) => item.kind === "note" && item.title.includes("auto-selected"))).toBe(true);
   });
+
+  it("renders the final structured report from schema", () => {
+    const model = buildSearchPanelModel({
+      language: "en",
+      activePanel: "reasoning",
+      searchState: { status: "complete", results: [] },
+      researchContext: { summary: "Research completed.", sources: [] },
+      liveEvents: [],
+      reviewRequired: false,
+      pendingResearchReview: null,
+      pendingClarification: null,
+      coachIntervention: null,
+      chatEvents: [],
+      reasoningFeed: [],
+      summary: "Simulation summary",
+      schema: {
+        final_report: {
+          success_score: 71,
+          strengths: ["Strong convenience signal"],
+          weaknesses: ["Price still needs testing"],
+          top_objections: ["Why commit weekly?"],
+          recommended_first_move: "Test a smaller starter package.",
+          confidence_notes: ["Research is usable but partially estimated."],
+        },
+      },
+      pendingInputKind: null,
+      isRunStarting: false,
+      isRunActive: false,
+      simulationActuallyStarted: true,
+      reasoningPanelAvailable: true,
+      currentPhaseKey: "summary",
+      pipeline: null,
+      personaSource: null,
+    });
+
+    expect(model.items.some((item) => item.kind === "note" && item.id === "final-report")).toBe(true);
+  });
 });

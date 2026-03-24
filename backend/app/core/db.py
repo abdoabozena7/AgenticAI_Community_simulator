@@ -273,6 +273,24 @@ def _apply_migrations(cursor: mysql.connector.cursor.MySQLCursor) -> None:
             "REFERENCES simulations(simulation_id) ON DELETE CASCADE"
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
         ),
+        (
+            "CREATE TABLE IF NOT EXISTS simulation_events ("
+            "id BIGINT AUTO_INCREMENT PRIMARY KEY, "
+            "simulation_id VARCHAR(36) NOT NULL, "
+            "event_seq BIGINT NOT NULL, "
+            "phase VARCHAR(64) NULL, "
+            "event_type VARCHAR(64) NOT NULL, "
+            "step_uid VARCHAR(96) NULL, "
+            "actor VARCHAR(64) NULL, "
+            "payload_json JSON NULL, "
+            "created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+            "UNIQUE KEY uq_simulation_events_seq (simulation_id, event_seq), "
+            "INDEX idx_simulation_events_type (simulation_id, event_type), "
+            "INDEX idx_simulation_events_phase (simulation_id, phase), "
+            "CONSTRAINT fk_simulation_events_sim FOREIGN KEY (simulation_id) "
+            "REFERENCES simulations(simulation_id) ON DELETE CASCADE"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        ),
         "ALTER TABLE research_events ADD COLUMN favicon_url VARCHAR(1024) NULL AFTER domain",
         "ALTER TABLE research_events ADD COLUMN title VARCHAR(512) NULL AFTER status",
         "ALTER TABLE research_events ADD COLUMN http_status INT NULL AFTER title",
@@ -280,6 +298,96 @@ def _apply_migrations(cursor: mysql.connector.cursor.MySQLCursor) -> None:
         "ALTER TABLE research_events ADD COLUMN relevance_score FLOAT NULL AFTER content_chars",
         "ALTER TABLE research_events ADD COLUMN cycle_id VARCHAR(64) NULL AFTER event_seq",
         "ALTER TABLE research_events ADD COLUMN meta_json JSON NULL AFTER error",
+        (
+            "CREATE TABLE IF NOT EXISTS memory_scopes ("
+            "id BIGINT AUTO_INCREMENT PRIMARY KEY, "
+            "scope_key VARCHAR(255) NOT NULL, "
+            "user_id BIGINT NULL, "
+            "scope_mode VARCHAR(32) NOT NULL DEFAULT 'cross_run', "
+            "place_key VARCHAR(128) NULL, "
+            "audience_key VARCHAR(128) NULL, "
+            "idea_fingerprint VARCHAR(128) NULL, "
+            "scope_meta JSON NULL, "
+            "created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+            "updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, "
+            "UNIQUE KEY uq_memory_scope_key (scope_key), "
+            "INDEX idx_memory_scopes_user (user_id)"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        ),
+        (
+            "CREATE TABLE IF NOT EXISTS memory_nodes ("
+            "id BIGINT AUTO_INCREMENT PRIMARY KEY, "
+            "scope_id BIGINT NOT NULL, "
+            "node_key VARCHAR(255) NOT NULL, "
+            "node_type VARCHAR(64) NOT NULL, "
+            "label VARCHAR(255) NOT NULL, "
+            "attrs_json JSON NULL, "
+            "weight FLOAT NOT NULL DEFAULT 0.0, "
+            "support_count INT NOT NULL DEFAULT 0, "
+            "contradiction_count INT NOT NULL DEFAULT 0, "
+            "last_seen_seq BIGINT NULL, "
+            "created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+            "updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, "
+            "UNIQUE KEY uq_memory_node_scope_key (scope_id, node_key), "
+            "INDEX idx_memory_nodes_scope_type (scope_id, node_type), "
+            "CONSTRAINT fk_memory_nodes_scope FOREIGN KEY (scope_id) REFERENCES memory_scopes(id) ON DELETE CASCADE"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        ),
+        (
+            "CREATE TABLE IF NOT EXISTS memory_edges ("
+            "id BIGINT AUTO_INCREMENT PRIMARY KEY, "
+            "scope_id BIGINT NOT NULL, "
+            "edge_key VARCHAR(255) NOT NULL, "
+            "source_node_key VARCHAR(255) NOT NULL, "
+            "target_node_key VARCHAR(255) NULL, "
+            "relation_type VARCHAR(64) NOT NULL, "
+            "attrs_json JSON NULL, "
+            "weight FLOAT NOT NULL DEFAULT 0.0, "
+            "support_count INT NOT NULL DEFAULT 0, "
+            "contradiction_count INT NOT NULL DEFAULT 0, "
+            "last_seen_seq BIGINT NULL, "
+            "created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+            "updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, "
+            "UNIQUE KEY uq_memory_edge_scope_key (scope_id, edge_key), "
+            "INDEX idx_memory_edges_scope_relation (scope_id, relation_type), "
+            "INDEX idx_memory_edges_scope_source (scope_id, source_node_key), "
+            "INDEX idx_memory_edges_scope_target (scope_id, target_node_key), "
+            "CONSTRAINT fk_memory_edges_scope FOREIGN KEY (scope_id) REFERENCES memory_scopes(id) ON DELETE CASCADE"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        ),
+        (
+            "CREATE TABLE IF NOT EXISTS memory_episodes ("
+            "id BIGINT AUTO_INCREMENT PRIMARY KEY, "
+            "scope_id BIGINT NOT NULL, "
+            "episode_key VARCHAR(255) NOT NULL, "
+            "simulation_id VARCHAR(36) NULL, "
+            "event_seq BIGINT NULL, "
+            "episode_type VARCHAR(64) NOT NULL, "
+            "source_node_key VARCHAR(255) NULL, "
+            "target_node_key VARCHAR(255) NULL, "
+            "payload_json JSON NULL, "
+            "created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+            "UNIQUE KEY uq_memory_episode_scope_key (scope_id, episode_key), "
+            "INDEX idx_memory_episodes_scope_type (scope_id, episode_type), "
+            "INDEX idx_memory_episodes_scope_source (scope_id, source_node_key), "
+            "INDEX idx_memory_episodes_scope_target (scope_id, target_node_key), "
+            "CONSTRAINT fk_memory_episodes_scope FOREIGN KEY (scope_id) REFERENCES memory_scopes(id) ON DELETE CASCADE"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        ),
+        (
+            "CREATE TABLE IF NOT EXISTS memory_retrieval_logs ("
+            "id BIGINT AUTO_INCREMENT PRIMARY KEY, "
+            "scope_id BIGINT NOT NULL, "
+            "simulation_id VARCHAR(36) NULL, "
+            "persona_signature VARCHAR(255) NULL, "
+            "retrieval_type VARCHAR(64) NOT NULL, "
+            "query_meta_json JSON NULL, "
+            "hits_json JSON NULL, "
+            "created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+            "INDEX idx_memory_logs_scope_type (scope_id, retrieval_type), "
+            "CONSTRAINT fk_memory_logs_scope FOREIGN KEY (scope_id) REFERENCES memory_scopes(id) ON DELETE CASCADE"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        ),
         (
             "CREATE TABLE IF NOT EXISTS simulation_chat_events ("
             "id BIGINT AUTO_INCREMENT PRIMARY KEY, "
@@ -1306,6 +1414,298 @@ async def fetch_research_events(simulation_id: str) -> List[Dict[str, Any]]:
             }
         )
     return items
+
+
+async def insert_simulation_event(simulation_id: str, data: Dict[str, Any]) -> None:
+    await execute(
+        "INSERT INTO simulation_events (simulation_id, event_seq, phase, event_type, step_uid, actor, payload_json) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s) "
+        "ON DUPLICATE KEY UPDATE "
+        "phase=VALUES(phase), "
+        "event_type=VALUES(event_type), "
+        "step_uid=VALUES(step_uid), "
+        "actor=VALUES(actor), "
+        "payload_json=VALUES(payload_json)",
+        (
+            simulation_id,
+            int(data.get("event_seq") or 0),
+            data.get("phase"),
+            data.get("event_type"),
+            data.get("step_uid"),
+            data.get("actor"),
+            json.dumps(data.get("payload_json") or {}, ensure_ascii=False),
+        ),
+    )
+
+
+async def count_simulation_events(simulation_id: str) -> int:
+    rows = await execute(
+        "SELECT COUNT(*) AS total FROM simulation_events WHERE simulation_id=%s",
+        (simulation_id,),
+        fetch=True,
+    )
+    return int((rows or [{}])[0].get("total") or 0)
+
+
+async def fetch_simulation_events(
+    simulation_id: str,
+    *,
+    phase: Optional[str] = None,
+    event_type: Optional[str] = None,
+    limit: int = 500,
+) -> List[Dict[str, Any]]:
+    clauses = ["simulation_id=%s"]
+    params: List[Any] = [simulation_id]
+    if phase:
+        clauses.append("phase=%s")
+        params.append(phase)
+    if event_type:
+        clauses.append("event_type=%s")
+        params.append(event_type)
+    params.append(max(1, min(5000, int(limit or 500))))
+    rows = await execute(
+        "SELECT event_seq, phase, event_type, step_uid, actor, payload_json, created_at "
+        "FROM simulation_events "
+        f"WHERE {' AND '.join(clauses)} "
+        "ORDER BY event_seq ASC LIMIT %s",
+        tuple(params),
+        fetch=True,
+    )
+    items: List[Dict[str, Any]] = []
+    for row in rows or []:
+        items.append(
+            {
+                "event_seq": int(row.get("event_seq") or 0),
+                "phase": row.get("phase"),
+                "event_type": row.get("event_type"),
+                "step_uid": row.get("step_uid"),
+                "actor": row.get("actor"),
+                "payload": _safe_json(row.get("payload_json"), {}),
+                "timestamp": int((row.get("created_at") or 0).timestamp() * 1000) if row.get("created_at") else None,
+            }
+        )
+    return items
+
+
+async def upsert_memory_scope(
+    *,
+    scope_key: str,
+    user_id: Optional[int],
+    scope_mode: str,
+    place_key: Optional[str],
+    audience_key: Optional[str],
+    idea_fingerprint: Optional[str],
+    scope_meta: Optional[Dict[str, Any]],
+) -> Dict[str, Any]:
+    await execute(
+        "INSERT INTO memory_scopes (scope_key, user_id, scope_mode, place_key, audience_key, idea_fingerprint, scope_meta) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s) "
+        "ON DUPLICATE KEY UPDATE user_id=VALUES(user_id), scope_mode=VALUES(scope_mode), place_key=VALUES(place_key), "
+        "audience_key=VALUES(audience_key), idea_fingerprint=VALUES(idea_fingerprint), scope_meta=VALUES(scope_meta)",
+        (
+            scope_key,
+            user_id,
+            scope_mode,
+            place_key,
+            audience_key,
+            idea_fingerprint,
+            json.dumps(scope_meta or {}, ensure_ascii=False),
+        ),
+    )
+    rows = await execute(
+        "SELECT id, scope_key, user_id, scope_mode, place_key, audience_key, idea_fingerprint, scope_meta "
+        "FROM memory_scopes WHERE scope_key=%s LIMIT 1",
+        (scope_key,),
+        fetch=True,
+    )
+    row = (rows or [{}])[0]
+    row["scope_meta"] = _safe_json(row.get("scope_meta"), {})
+    return row
+
+
+async def upsert_memory_node(
+    *,
+    scope_id: int,
+    node_key: str,
+    node_type: str,
+    label: str,
+    attrs: Optional[Dict[str, Any]],
+    weight: float,
+    last_seen_seq: Optional[int],
+) -> None:
+    await execute(
+        "INSERT INTO memory_nodes (scope_id, node_key, node_type, label, attrs_json, weight, support_count, contradiction_count, last_seen_seq) "
+        "VALUES (%s, %s, %s, %s, %s, %s, 0, 0, %s) "
+        "ON DUPLICATE KEY UPDATE node_type=VALUES(node_type), label=VALUES(label), attrs_json=VALUES(attrs_json), "
+        "weight=GREATEST(weight, VALUES(weight)), last_seen_seq=GREATEST(COALESCE(last_seen_seq, 0), COALESCE(VALUES(last_seen_seq), 0))",
+        (scope_id, node_key, node_type, label[:255], json.dumps(attrs or {}, ensure_ascii=False), float(weight or 0.0), last_seen_seq),
+    )
+
+
+async def upsert_memory_edge(
+    *,
+    scope_id: int,
+    edge_key: str,
+    source_node_key: str,
+    target_node_key: Optional[str],
+    relation_type: str,
+    attrs: Optional[Dict[str, Any]],
+    weight: float,
+    support_delta: int,
+    contradiction_delta: int,
+    last_seen_seq: Optional[int],
+) -> None:
+    await execute(
+        "INSERT INTO memory_edges (scope_id, edge_key, source_node_key, target_node_key, relation_type, attrs_json, weight, support_count, contradiction_count, last_seen_seq) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) "
+        "ON DUPLICATE KEY UPDATE target_node_key=VALUES(target_node_key), relation_type=VALUES(relation_type), attrs_json=VALUES(attrs_json), "
+        "weight=GREATEST(weight, VALUES(weight)), support_count=support_count + VALUES(support_count), "
+        "contradiction_count=contradiction_count + VALUES(contradiction_count), "
+        "last_seen_seq=GREATEST(COALESCE(last_seen_seq, 0), COALESCE(VALUES(last_seen_seq), 0))",
+        (
+            scope_id,
+            edge_key,
+            source_node_key,
+            target_node_key,
+            relation_type,
+            json.dumps(attrs or {}, ensure_ascii=False),
+            float(weight or 0.0),
+            int(support_delta or 0),
+            int(contradiction_delta or 0),
+            last_seen_seq,
+        ),
+    )
+
+
+async def insert_memory_episode(
+    *,
+    scope_id: int,
+    episode_key: str,
+    simulation_id: Optional[str],
+    event_seq: Optional[int],
+    episode_type: str,
+    source_node_key: Optional[str],
+    target_node_key: Optional[str],
+    payload: Optional[Dict[str, Any]],
+) -> None:
+    await execute(
+        "INSERT INTO memory_episodes (scope_id, episode_key, simulation_id, event_seq, episode_type, source_node_key, target_node_key, payload_json) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s) "
+        "ON DUPLICATE KEY UPDATE simulation_id=VALUES(simulation_id), event_seq=VALUES(event_seq), episode_type=VALUES(episode_type), "
+        "source_node_key=VALUES(source_node_key), target_node_key=VALUES(target_node_key), payload_json=VALUES(payload_json)",
+        (
+            scope_id,
+            episode_key,
+            simulation_id,
+            event_seq,
+            episode_type,
+            source_node_key,
+            target_node_key,
+            json.dumps(payload or {}, ensure_ascii=False),
+        ),
+    )
+
+
+async def fetch_memory_nodes(*, scope_id: int, node_types: Optional[List[str]], limit: int) -> List[Dict[str, Any]]:
+    params: List[Any] = [scope_id]
+    query = (
+        "SELECT id, scope_id, node_key, node_type, label, attrs_json, weight, support_count, contradiction_count, last_seen_seq, updated_at "
+        "FROM memory_nodes WHERE scope_id=%s"
+    )
+    if node_types:
+        query += " AND node_type IN (" + ", ".join(["%s"] * len(node_types)) + ")"
+        params.extend(node_types)
+    query += " ORDER BY last_seen_seq DESC, weight DESC, updated_at DESC LIMIT %s"
+    params.append(max(1, int(limit or 20)))
+    rows = await execute(query, tuple(params), fetch=True)
+    for row in rows or []:
+        row["attrs"] = _safe_json(row.get("attrs_json"), {})
+    return rows or []
+
+
+async def fetch_memory_edges(
+    *,
+    scope_id: int,
+    relation_types: Optional[List[str]],
+    source_node_key: Optional[str],
+    target_node_key: Optional[str],
+    limit: int,
+) -> List[Dict[str, Any]]:
+    params: List[Any] = [scope_id]
+    query = (
+        "SELECT e.id, e.scope_id, e.edge_key, e.source_node_key, e.target_node_key, e.relation_type, e.attrs_json, e.weight, "
+        "e.support_count, e.contradiction_count, e.last_seen_seq, sn.label AS source_label, sn.node_type AS source_type, "
+        "tn.label AS target_label, tn.node_type AS target_type "
+        "FROM memory_edges e "
+        "LEFT JOIN memory_nodes sn ON sn.scope_id = e.scope_id AND sn.node_key = e.source_node_key "
+        "LEFT JOIN memory_nodes tn ON tn.scope_id = e.scope_id AND tn.node_key = e.target_node_key "
+        "WHERE e.scope_id=%s"
+    )
+    if relation_types:
+        query += " AND e.relation_type IN (" + ", ".join(["%s"] * len(relation_types)) + ")"
+        params.extend(relation_types)
+    if source_node_key:
+        query += " AND e.source_node_key=%s"
+        params.append(source_node_key)
+    if target_node_key:
+        query += " AND e.target_node_key=%s"
+        params.append(target_node_key)
+    query += " ORDER BY e.last_seen_seq DESC, e.weight DESC, e.updated_at DESC LIMIT %s"
+    params.append(max(1, int(limit or 20)))
+    rows = await execute(query, tuple(params), fetch=True)
+    for row in rows or []:
+        row["attrs"] = _safe_json(row.get("attrs_json"), {})
+    return rows or []
+
+
+async def fetch_memory_episodes(
+    *,
+    scope_id: int,
+    episode_types: Optional[List[str]],
+    entity_keys: Optional[List[str]],
+    limit: int,
+) -> List[Dict[str, Any]]:
+    params: List[Any] = [scope_id]
+    query = (
+        "SELECT id, scope_id, episode_key, simulation_id, event_seq, episode_type, source_node_key, target_node_key, payload_json, created_at "
+        "FROM memory_episodes WHERE scope_id=%s"
+    )
+    if episode_types:
+        query += " AND episode_type IN (" + ", ".join(["%s"] * len(episode_types)) + ")"
+        params.extend(episode_types)
+    if entity_keys:
+        query += " AND (source_node_key IN (" + ", ".join(["%s"] * len(entity_keys)) + ") OR target_node_key IN (" + ", ".join(["%s"] * len(entity_keys)) + "))"
+        params.extend(entity_keys)
+        params.extend(entity_keys)
+    query += " ORDER BY event_seq DESC, id DESC LIMIT %s"
+    params.append(max(1, int(limit or 20)))
+    rows = await execute(query, tuple(params), fetch=True)
+    for row in rows or []:
+        row["payload"] = _safe_json(row.get("payload_json"), {})
+    return rows or []
+
+
+async def insert_memory_retrieval_log(
+    *,
+    scope_id: int,
+    simulation_id: Optional[str],
+    persona_signature: Optional[str],
+    retrieval_type: str,
+    query_meta: Optional[Dict[str, Any]],
+    hits: Optional[Dict[str, Any]],
+) -> None:
+    await execute(
+        "INSERT INTO memory_retrieval_logs (scope_id, simulation_id, persona_signature, retrieval_type, query_meta_json, hits_json) "
+        "VALUES (%s, %s, %s, %s, %s, %s)",
+        (
+            scope_id,
+            simulation_id,
+            persona_signature,
+            retrieval_type,
+            json.dumps(query_meta or {}, ensure_ascii=False),
+            json.dumps(hits or {}, ensure_ascii=False),
+        ),
+    )
 
 
 async def insert_chat_event(

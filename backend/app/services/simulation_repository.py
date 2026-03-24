@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
+from io import StringIO
 from typing import Any, Dict, List, Optional
 
 from ..core import db as db_core
@@ -135,6 +136,29 @@ class SimulationRepository:
         }
         await db_core.insert_research_event(simulation_id, record)
 
+    async def persist_simulation_event(
+        self,
+        simulation_id: str,
+        *,
+        event_seq: int,
+        phase: str,
+        event_type: str,
+        payload: Dict[str, Any],
+        step_uid: Optional[str] = None,
+        actor: Optional[str] = None,
+    ) -> None:
+        await db_core.insert_simulation_event(
+            simulation_id,
+            {
+                "event_seq": event_seq,
+                "phase": phase,
+                "event_type": event_type,
+                "step_uid": step_uid,
+                "actor": actor,
+                "payload_json": payload,
+            },
+        )
+
     async def persist_metrics(self, simulation_id: str, metrics: Dict[str, Any]) -> None:
         await db_core.insert_metrics(simulation_id, metrics)
 
@@ -163,6 +187,47 @@ class SimulationRepository:
 
     async def fetch_research_events(self, simulation_id: str) -> List[Dict[str, Any]]:
         return await db_core.fetch_research_events(simulation_id)
+
+    async def fetch_event_log(
+        self,
+        simulation_id: str,
+        *,
+        phase: Optional[str] = None,
+        event_type: Optional[str] = None,
+        limit: int = 500,
+    ) -> List[Dict[str, Any]]:
+        return await db_core.fetch_simulation_events(
+            simulation_id,
+            phase=phase,
+            event_type=event_type,
+            limit=limit,
+        )
+
+    async def count_event_log(self, simulation_id: str) -> int:
+        return await db_core.count_simulation_events(simulation_id)
+
+    async def export_event_log(
+        self,
+        simulation_id: str,
+        *,
+        format: str = "json",
+        phase: Optional[str] = None,
+        event_type: Optional[str] = None,
+        limit: int = 5000,
+    ) -> str:
+        items = await self.fetch_event_log(
+            simulation_id,
+            phase=phase,
+            event_type=event_type,
+            limit=limit,
+        )
+        if str(format or "").strip().lower() == "ndjson":
+            buffer = StringIO()
+            for item in items:
+                buffer.write(json.dumps(item, ensure_ascii=False))
+                buffer.write("\n")
+            return buffer.getvalue()
+        return json.dumps(items, ensure_ascii=False, indent=2)
 
     async def list_runs(
         self,

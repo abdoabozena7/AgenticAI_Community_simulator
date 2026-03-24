@@ -165,6 +165,12 @@ PIPELINE_BLOCKER_META: Dict[str, Dict[str, str]] = {
         "message": "At least one persona cannot be traced back to approved signals.",
         "action": "Regenerate personas from the structured research signals.",
     },
+    "dynamic_persona_schema_incomplete": {
+        "phase": SimulationPhase.PERSONA_GENERATION.value,
+        "title": "Dynamic persona schema is incomplete",
+        "message": "At least one generated persona is missing dynamic segment or decision fields.",
+        "action": "Regenerate personas with complete dynamic segment metadata.",
+    },
     "duplicate_display_name": {
         "phase": SimulationPhase.PERSONA_GENERATION.value,
         "title": "Duplicate personas were detected",
@@ -176,6 +182,12 @@ PIPELINE_BLOCKER_META: Dict[str, Dict[str, str]] = {
         "title": "Duplicate persona IDs were detected",
         "message": "The persona set still contains duplicate IDs.",
         "action": "Regenerate personas and ensure unique IDs before simulation.",
+    },
+    "segment_collapse_detected": {
+        "phase": SimulationPhase.PERSONA_GENERATION.value,
+        "title": "Persona segments collapsed",
+        "message": "The generated personas do not cover enough distinct dynamic segments for a healthy simulation.",
+        "action": "Regenerate personas with broader segment coverage.",
     },
     "clarification_pending": {
         "phase": SimulationPhase.CLARIFICATION_QUESTIONS.value,
@@ -509,6 +521,11 @@ class PersonaProfile:
     motivations: List[str]
     concerns: List[str]
     location: str
+    segment_id: str = ""
+    price_sensitivity_bucket: str = "medium"
+    decision_style: str = ""
+    purchase_trigger: str = ""
+    rejection_trigger: str = ""
     opinion: str = "neutral"
     confidence: float = 0.5
     influence_weight: float = 1.0
@@ -523,6 +540,7 @@ class PersonaProfile:
             "display_name": self.name,
             "source_mode": self.source_mode,
             "target_audience_cluster": self.target_audience_cluster,
+            "segment_id": self.segment_id,
             "location_context": self.location_context,
             "age_band": self.age_band,
             "life_stage": self.life_stage,
@@ -544,6 +562,10 @@ class PersonaProfile:
             "motivations": list(self.motivations),
             "concerns": list(self.concerns),
             "location": self.location,
+            "price_sensitivity_bucket": self.price_sensitivity_bucket,
+            "decision_style": self.decision_style,
+            "purchase_trigger": self.purchase_trigger,
+            "rejection_trigger": self.rejection_trigger,
             "opinion": self.opinion,
             "confidence": self.confidence,
             "influence_weight": self.influence_weight,
@@ -562,6 +584,7 @@ class PersonaProfile:
             "display_name": self.name,
             "source_mode": self.source_mode,
             "target_audience_cluster": self.target_audience_cluster,
+            "segment_id": self.segment_id,
             "location_context": self.location_context,
             "age_band": self.age_band,
             "life_stage": self.life_stage,
@@ -580,6 +603,10 @@ class PersonaProfile:
             "evidence_signals": list(self.evidence_signals),
             "traits": self.traits,
             "biases": self.biases,
+            "price_sensitivity_bucket": self.price_sensitivity_bucket,
+            "decision_style": self.decision_style,
+            "purchase_trigger": self.purchase_trigger,
+            "rejection_trigger": self.rejection_trigger,
             "influence_weight": self.influence_weight,
             "is_leader": False,
             "fixed_opinion": None,
@@ -597,6 +624,7 @@ class PersonaProfile:
             "category_id": self.category_id,
             "source_mode": self.source_mode,
             "target_audience_cluster": self.target_audience_cluster,
+            "segment_id": self.segment_id,
             "location_context": self.location_context,
             "age_band": self.age_band,
             "life_stage": self.life_stage,
@@ -616,6 +644,10 @@ class PersonaProfile:
             "tags": list(self.tags),
             "source_attribution": dict(self.source_attribution),
             "evidence_signals": list(self.evidence_signals),
+            "price_sensitivity_bucket": self.price_sensitivity_bucket,
+            "decision_style": self.decision_style,
+            "purchase_trigger": self.purchase_trigger,
+            "rejection_trigger": self.rejection_trigger,
             "influence_weight": self.influence_weight,
             "traits": dict(self.traits),
             "biases": list(self.biases),
@@ -1326,6 +1358,21 @@ class OrchestrationState:
             "summary_ready": self.summary_ready,
             "reasoning_started": bool(self.dialogue_turns),
             "event_seq": self.event_seq,
+            "report_status": self.schema.get("report_status"),
+            "final_report": self.schema.get("final_report"),
+            "report_summary": self.schema.get("report_summary"),
+            "event_log_status": self.schema.get("event_log_status"),
+            "event_log_count": int(self.schema.get("event_log_count") or 0),
+            "search_finished": bool(self.schema.get("search_finished")),
+            "research_ready": bool(self.schema.get("research_ready")),
+            "research_estimated": bool(self.schema.get("research_estimated")),
+            "search_provider_health": list(self.schema.get("search_provider_health") or []),
+            "search_provider_attempts": list(self.schema.get("search_provider_attempts") or []),
+            "memory_status": self.schema.get("memory_status"),
+            "memory_provider": self.schema.get("memory_provider"),
+            "memory_scope_key": self.schema.get("memory_scope_key"),
+            "memory_hits_count": int(self.schema.get("memory_hits_count") or 0),
+            "memory_last_update_seq": int(self.schema.get("memory_last_update_seq") or 0),
             "can_resume": self.status in {SimulationStatus.PAUSED.value, SimulationStatus.ERROR.value},
             "pending_clarification": (
                 {
@@ -1461,6 +1508,7 @@ def hydrate_state(raw: Dict[str, Any]) -> OrchestrationState:
             name=str(item.get("display_name") or item.get("name") or ""),
             source_mode=str(item.get("source_mode") or ""),
             target_audience_cluster=str(item.get("target_audience_cluster") or ""),
+            segment_id=str(item.get("segment_id") or item.get("cluster_id") or item.get("target_audience_cluster") or ""),
             location_context=str(item.get("location_context") or item.get("location") or ""),
             age_band=str(item.get("age_band") or ""),
             life_stage=str(item.get("life_stage") or ""),
@@ -1482,6 +1530,10 @@ def hydrate_state(raw: Dict[str, Any]) -> OrchestrationState:
             motivations=[str(value) for value in item.get("motivations") or item.get("probable_motivations") or [] if str(value).strip()],
             concerns=[str(value) for value in item.get("concerns") or item.get("main_concerns") or [] if str(value).strip()],
             location=str(item.get("location") or ""),
+            price_sensitivity_bucket=str(item.get("price_sensitivity_bucket") or item.get("priceSensitivityBucket") or "medium"),
+            decision_style=str(item.get("decision_style") or item.get("decisionStyle") or ""),
+            purchase_trigger=str(item.get("purchase_trigger") or item.get("purchaseTrigger") or ""),
+            rejection_trigger=str(item.get("rejection_trigger") or item.get("rejectionTrigger") or ""),
             opinion=str(item.get("opinion") or item.get("current_opinion") or "neutral"),
             confidence=float(item.get("confidence") or 0.5),
             influence_weight=float(item.get("influence_weight") or 1.0),

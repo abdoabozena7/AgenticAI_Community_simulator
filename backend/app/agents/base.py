@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 from ..core.dataset_loader import Dataset
 from ..models.orchestration import OrchestrationState
@@ -15,6 +16,7 @@ class AgentRuntime:
     llm: LLMGateway
     event_bus: EventBus
     repository: SimulationRepository
+    memory_provider: Any | None = None
 
 
 class BaseAgent:

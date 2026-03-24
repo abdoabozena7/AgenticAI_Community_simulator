@@ -261,6 +261,103 @@ CREATE TABLE IF NOT EXISTS metrics (
     REFERENCES simulations(simulation_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS memory_scopes (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  scope_key VARCHAR(191) NOT NULL UNIQUE,
+  user_id BIGINT NULL,
+  scope_mode VARCHAR(32) NOT NULL DEFAULT 'cross_run',
+  place_key VARCHAR(128) NOT NULL,
+  audience_key VARCHAR(128) NOT NULL,
+  idea_fingerprint VARCHAR(64) NOT NULL,
+  scope_meta_json JSON NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_memory_scopes_place (place_key),
+  INDEX idx_memory_scopes_audience (audience_key),
+  INDEX idx_memory_scopes_idea (idea_fingerprint),
+  CONSTRAINT fk_memory_scopes_user FOREIGN KEY (user_id)
+    REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS memory_nodes (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  scope_id BIGINT NOT NULL,
+  node_key VARCHAR(191) NOT NULL,
+  node_type VARCHAR(64) NOT NULL,
+  label VARCHAR(255) NOT NULL,
+  attrs_json JSON NULL,
+  weight FLOAT NOT NULL DEFAULT 0,
+  first_seen_seq BIGINT NULL,
+  last_seen_seq BIGINT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_memory_nodes_scope_key (scope_id, node_key),
+  INDEX idx_memory_nodes_scope_type (scope_id, node_type),
+  CONSTRAINT fk_memory_nodes_scope FOREIGN KEY (scope_id)
+    REFERENCES memory_scopes(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS memory_edges (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  scope_id BIGINT NOT NULL,
+  edge_key VARCHAR(191) NOT NULL,
+  source_node_key VARCHAR(191) NOT NULL,
+  target_node_key VARCHAR(191) NOT NULL,
+  relation_type VARCHAR(64) NOT NULL,
+  weight FLOAT NOT NULL DEFAULT 0,
+  support_count INT NOT NULL DEFAULT 0,
+  contradiction_count INT NOT NULL DEFAULT 0,
+  attrs_json JSON NULL,
+  first_seen_seq BIGINT NULL,
+  last_seen_seq BIGINT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_memory_edges_scope_key (scope_id, edge_key),
+  INDEX idx_memory_edges_scope_relation (scope_id, relation_type),
+  INDEX idx_memory_edges_source (scope_id, source_node_key),
+  INDEX idx_memory_edges_target (scope_id, target_node_key),
+  CONSTRAINT fk_memory_edges_scope FOREIGN KEY (scope_id)
+    REFERENCES memory_scopes(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS memory_episodes (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  scope_id BIGINT NOT NULL,
+  episode_key VARCHAR(191) NOT NULL,
+  simulation_id VARCHAR(36) NULL,
+  event_seq BIGINT NULL,
+  episode_type VARCHAR(64) NOT NULL,
+  source_node_key VARCHAR(191) NULL,
+  target_node_key VARCHAR(191) NULL,
+  payload_json JSON NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_memory_episodes_scope_key (scope_id, episode_key),
+  INDEX idx_memory_episodes_scope_type (scope_id, episode_type),
+  INDEX idx_memory_episodes_scope_seq (scope_id, event_seq),
+  CONSTRAINT fk_memory_episodes_scope FOREIGN KEY (scope_id)
+    REFERENCES memory_scopes(id) ON DELETE CASCADE,
+  CONSTRAINT fk_memory_episodes_sim FOREIGN KEY (simulation_id)
+    REFERENCES simulations(simulation_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS memory_retrieval_logs (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  scope_id BIGINT NOT NULL,
+  simulation_id VARCHAR(36) NULL,
+  persona_signature VARCHAR(191) NULL,
+  retrieval_type VARCHAR(64) NOT NULL,
+  query_meta_json JSON NULL,
+  hit_count INT NOT NULL DEFAULT 0,
+  hits_json JSON NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_memory_retrieval_scope_type (scope_id, retrieval_type),
+  INDEX idx_memory_retrieval_sim (simulation_id),
+  CONSTRAINT fk_memory_retrieval_scope FOREIGN KEY (scope_id)
+    REFERENCES memory_scopes(id) ON DELETE CASCADE,
+  CONSTRAINT fk_memory_retrieval_sim FOREIGN KEY (simulation_id)
+    REFERENCES simulations(simulation_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS simulation_checkpoints (
   simulation_id VARCHAR(36) PRIMARY KEY,
   checkpoint_json LONGTEXT NULL,

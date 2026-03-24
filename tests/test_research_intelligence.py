@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import asyncio
 import sys
+import time
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -11,8 +13,10 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "backend"))
 
 from app.agents.search_agent import SearchAgent  # noqa: E402
+from app.core import web_search as web_search_core  # noqa: E402
 from app.models.orchestration import OrchestrationState, SimulationPhase  # noqa: E402
 from app.orchestrator import SimulationOrchestrator  # noqa: E402
+from app.services.translation_bridge import SearchQueryVariant  # noqa: E402
 
 
 def _runtime(llm: object | None = None, event_bus: object | None = None) -> SimpleNamespace:
@@ -77,6 +81,26 @@ def _low_signal_result() -> dict:
 
 
 class ResearchIntelligenceTests(unittest.IsolatedAsyncioTestCase):
+    async def test_search_web_returns_fastest_successful_provider(self) -> None:
+        async def slow_provider(*args: object, **kwargs: object) -> dict:
+            await asyncio.sleep(0.3)
+            return {"provider": "slow", "is_live": True, "answer": "", "results": [{"title": "slow", "url": "https://slow", "domain": "slow", "snippet": "slow"}]}
+
+        async def fast_provider(*args: object, **kwargs: object) -> dict:
+            await asyncio.sleep(0.02)
+            return {"provider": "fast", "is_live": True, "answer": "", "results": [{"title": "fast", "url": "https://fast", "domain": "fast", "snippet": "fast snippet long enough for quality"}]}
+
+        async def empty_provider(*args: object, **kwargs: object) -> dict:
+            await asyncio.sleep(0.05)
+            return {"provider": "empty", "is_live": True, "answer": "", "results": []}
+
+        start = time.perf_counter()
+        with patch.object(web_search_core, "_tavily_search", slow_provider), patch.object(web_search_core, "_ddg_search", fast_provider), patch.object(web_search_core, "_ddg_lite_search", empty_provider), patch.object(web_search_core, "_bing_rss_search", empty_provider), patch.object(web_search_core, "_wikipedia_search", empty_provider), patch.object(web_search_core, "_extract_structured", AsyncMock(return_value={})):
+            result = await web_search_core.search_web("healthy meals giza", max_results=3, language="en", strict_web_only=True)
+        elapsed = time.perf_counter() - start
+        self.assertEqual(result.get("provider"), "fast")
+        self.assertLess(elapsed, 0.2)
+
     async def test_search_agent_auto_estimates_when_data_is_thin_by_default(self) -> None:
         agent = SearchAgent(_runtime())
         state = _state()
@@ -91,6 +115,7 @@ class ResearchIntelligenceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(state.schema.get("research_estimation_mode"), "ai_estimation")
         self.assertIn("used_ai_estimation_due_to_weak_search", state.schema.get("research_warnings") or [])
         self.assertIn("research_visible_insights", state.schema)
+        self.assertIn("search_provider_health", state.schema)
 
     async def test_search_agent_uses_ai_estimation_when_user_requested_it(self) -> None:
         llm = SimpleNamespace(
@@ -168,6 +193,33 @@ class ResearchIntelligenceTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(state.current_phase, SimulationPhase.INTERNET_RESEARCH)
         self.assertFalse(state.pending_input)
         self.assertTrue(scheduled and scheduled[0][2] is True)
+
+    async def test_search_web_exposes_query_variants_and_provider_health(self) -> None:
+        class StubTranslator:
+            def build_variants(self, query: str, language: str) -> list[SearchQueryVariant]:
+                return [
+                    SearchQueryVariant(text=query, language="ar", source="original"),
+                    SearchQueryVariant(text="healthy cafe new cairo", language="en", source="translated"),
+                ]
+
+        async def empty_provider(*args: object, **kwargs: object) -> dict:
+            return {"provider": "empty", "is_live": True, "answer": "", "results": []}
+
+        async def fast_provider(*args: object, **kwargs: object) -> dict:
+            return {
+                "provider": "fast",
+                "is_live": True,
+                "answer": "",
+                "results": [{"title": "Fast", "url": "https://fast", "domain": "fast", "snippet": "strong enough snippet for quality"}],
+            }
+
+        with patch.object(web_search_core, "build_search_translator", return_value=StubTranslator()), patch.object(web_search_core, "_tavily_search", empty_provider), patch.object(web_search_core, "_ddg_search", empty_provider), patch.object(web_search_core, "_ddg_lite_search", fast_provider), patch.object(web_search_core, "_bing_rss_search", empty_provider), patch.object(web_search_core, "_wikipedia_search", empty_provider), patch.object(web_search_core, "_extract_structured", AsyncMock(return_value={})):
+            result = await web_search_core.search_web("كافيه للمذاكرة في القاهرة الجديدة", max_results=3, language="ar", strict_web_only=True)
+
+        self.assertTrue(any(item.get("language") == "en" for item in result.get("query_variants") or []))
+        self.assertTrue(isinstance(result.get("provider_health"), list) and result.get("provider_health"))
+        self.assertIn("search_finished", result)
+        self.assertIn("research_ready", result)
 
 
 if __name__ == "__main__":
