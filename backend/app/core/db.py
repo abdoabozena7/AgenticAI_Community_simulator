@@ -635,7 +635,6 @@ async def init_db() -> None:
     skipped. This prevents errors in environments without a database and
     allows the application to start up cleanly.
     """
-    global _STUB_DB
     if _STUB_DB:
         # No‑op in stub mode
         return
@@ -643,7 +642,6 @@ async def init_db() -> None:
         await asyncio.to_thread(_init_db_sync)
     except Exception as exc:
         if _should_disable_db(exc):
-            _STUB_DB = True
             return
         raise
 
@@ -710,7 +708,6 @@ async def execute(
     fetch: bool = False,
     many: bool = False,
 ) -> Optional[List[Dict[str, Any]]]:
-    global _STUB_DB
     # Skip execution entirely when running without a real database.  This
     # prevents attempts to connect to a missing MySQL server and simply
     # returns ``None`` to the caller.
@@ -720,7 +717,6 @@ async def execute(
         return await asyncio.to_thread(_run_query, query, params, fetch, many)
     except Exception as exc:
         if _should_disable_db(exc):
-            _STUB_DB = True
             return [] if fetch else None
         raise
 

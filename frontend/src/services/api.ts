@@ -98,6 +98,17 @@ const getStoredRefreshToken = () => {
   return localStorage.getItem(REFRESH_TOKEN_KEY);
 };
 
+const hasAuthorizationHeader = (headers?: HeadersInit): boolean => {
+  if (!headers) return false;
+  if (headers instanceof Headers) {
+    return headers.has('Authorization');
+  }
+  if (Array.isArray(headers)) {
+    return headers.some(([key]) => String(key).toLowerCase() === 'authorization');
+  }
+  return Object.keys(headers).some((key) => key.toLowerCase() === 'authorization');
+};
+
 const setStoredTokens = (accessToken?: string | null, refreshToken?: string | null) => {
   if (typeof window === 'undefined') return;
   const prevAccess = localStorage.getItem(ACCESS_TOKEN_KEY);
@@ -1237,13 +1248,32 @@ class ApiService {
     return getStoredAccessToken();
   }
 
+  private shouldSkipProactiveRefresh(endpoint: string): boolean {
+    return [
+      '/auth/login',
+      '/auth/register',
+      '/auth/google',
+      '/auth/refresh',
+      '/auth/request-password-reset',
+      '/auth/reset-password',
+      '/auth/resend-verification',
+      '/auth/verify-email',
+    ].some((path) => endpoint.startsWith(path));
+  }
+
   private async request<T>(
     endpoint: string,
     options?: (RequestInit & { timeoutMs?: number }),
     retry = true
   ): Promise<T> {
     const { timeoutMs = ApiService.DEFAULT_TIMEOUT_MS, ...requestInit } = options || {};
-    const token = getStoredAccessToken();
+    const shouldProactivelyRefresh =
+      !hasAuthorizationHeader(requestInit.headers)
+      && !this.shouldSkipProactiveRefresh(endpoint)
+      && (Boolean(getStoredAccessToken()) || Boolean(getStoredRefreshToken()));
+    const token = shouldProactivelyRefresh
+      ? await this.ensureAccessTokenFresh()
+      : getStoredAccessToken();
     const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
     const timeoutController = new AbortController();
     const timer = window.setTimeout(() => timeoutController.abort(), timeoutMs);
