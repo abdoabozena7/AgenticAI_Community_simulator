@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { AlertTriangle, Beaker, CheckCircle2, Gauge, Search, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { apiService, type DevLabSuiteCase, type DevLabSuiteStateResponse } from '@/services/api';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 
 const buildDefaultCases = (isArabic: boolean): DevLabSuiteCase[] => {
   if (isArabic) {
@@ -13,7 +15,7 @@ const buildDefaultCases = (isArabic: boolean): DevLabSuiteCase[] => {
       {
         key: 'good_idea',
         title: 'فكرة ممتازة',
-        idea: 'تطبيق ذكي لاكتشاف تسريب المياه عبر حساسات IoT مع تنبيهات فورية وتقارير توفير.',
+        idea: 'تطبيق ذكي لاكتشاف تسرب المياه عبر حساسات IoT مع تنبيهات فورية وتقارير توفير.',
         expected: { accept_min: 0.55, neutral_max: 0.3 },
       },
       {
@@ -53,8 +55,41 @@ const buildDefaultCases = (isArabic: boolean): DevLabSuiteCase[] => {
   ];
 };
 
+type StatTileProps = {
+  label: string;
+  value: string;
+  caption?: string;
+};
+
+function StatTile({ label, value, caption }: StatTileProps) {
+  return (
+    <div className="rounded-2xl bg-background/55 p-4">
+      <div className="text-[11px] uppercase tracking-[0.3em] text-muted-foreground">{label}</div>
+      <div className="mt-2 text-2xl font-semibold text-foreground">{value}</div>
+      {caption ? <div className="mt-2 text-xs text-muted-foreground">{caption}</div> : null}
+    </div>
+  );
+}
+
+function SurfaceCard({ title, icon: Icon, children }: { title: string; icon: typeof Search; children: ReactNode }) {
+  return (
+    <section className="architect-panel space-y-5 p-6">
+      <div className="flex items-center gap-3">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-foreground">
+          <Icon className="h-4 w-4" />
+        </span>
+        <div>
+          <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{title}</div>
+        </div>
+      </div>
+      {children}
+    </section>
+  );
+}
+
 export default function DeveloperLabTab() {
-  const { language, isRTL } = useLanguage();
+  const { language } = useLanguage();
+  const { theme } = useTheme();
   const t = (en: string, ar: string) => (language === 'ar' ? ar : en);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -78,30 +113,20 @@ export default function DeveloperLabTab() {
   const [suiteError, setSuiteError] = useState<string | null>(null);
   const [suiteHistory, setSuiteHistory] = useState<Array<{ suite_id: string; status: string; created_at?: string }>>([]);
 
+  const shellClass = theme === 'dark' ? 'architect-shell architect-shell-dark' : 'architect-shell architect-shell-light';
+
   const getCaseStatusMeta = (status?: string, pass?: boolean | null) => {
     const normalized = String(status || 'pending').toLowerCase();
     if (pass === true || normalized === 'completed') {
-      return {
-        label: t('Completed', 'مكتمل'),
-        variant: 'outline' as const,
-      };
+      return { label: t('Completed', 'مكتمل'), variant: 'outline' as const };
     }
     if (normalized === 'failed') {
-      return {
-        label: t('Failed', 'فشل'),
-        variant: 'destructive' as const,
-      };
+      return { label: t('Failed', 'فشل'), variant: 'destructive' as const };
     }
     if (normalized === 'running') {
-      return {
-        label: t('Running', 'جارٍ'),
-        variant: 'secondary' as const,
-      };
+      return { label: t('Running', 'جارٍ'), variant: 'secondary' as const };
     }
-    return {
-      label: t('Pending', 'قيد الانتظار'),
-      variant: 'secondary' as const,
-    };
+    return { label: t('Pending', 'قيد الانتظار'), variant: 'secondary' as const };
   };
 
   useEffect(() => {
@@ -119,12 +144,12 @@ export default function DeveloperLabTab() {
       const list = await apiService.listDevlabReasoningSuites(15, 0);
       setSuiteHistory(list.items || []);
     } catch {
-      // ignore history fetch failure in UI
+      // history is optional in the UI
     }
   };
 
   useEffect(() => {
-    loadSuiteHistory();
+    void loadSuiteHistory();
   }, []);
 
   useEffect(() => {
@@ -143,7 +168,7 @@ export default function DeveloperLabTab() {
         }
       } catch (err: any) {
         if (!active) return;
-        setSuiteError(err?.message || t('Failed to refresh suite state.', 'فشل تحديث حالة الاختبار.'));
+        setSuiteError(err?.message || t('Failed to refresh suite state.', 'تعذر تحديث حالة الحزمة.'));
       }
     };
 
@@ -163,9 +188,9 @@ export default function DeveloperLabTab() {
     return [
       { label: t('Search strict mode active', 'وضع البحث الصارم مفعّل'), pass: Boolean(searchResult?.strict_mode) },
       { label: t('Clarification triggered when needed', 'تم تشغيل التوضيح عند الحاجة'), pass: hasClarification },
-      { label: t('Neutral <= target cap', 'الحياد أقل من الحد المطلوب'), pass: neutralCheck },
+      { label: t('Neutral <= target cap', 'الحياد ضمن السقف المستهدف'), pass: neutralCheck },
       { label: t('Fallback ratio in acceptable range', 'نسبة fallback ضمن النطاق المقبول'), pass: fallbackCheck },
-      { label: t('Arabic encoding healthy', 'سلامة ترميز العربية'), pass: !Boolean(llmResult?.mojibake_detected) },
+      { label: t('Arabic encoding healthy', 'ترميز العربية سليم'), pass: !Boolean(llmResult?.mojibake_detected) },
     ];
   }, [suiteState, searchResult, llmResult, neutralCapPct, agentCount, language]);
 
@@ -225,215 +250,271 @@ export default function DeveloperLabTab() {
     }
   };
 
+  const statSummary = [
+    { label: t('Agents', 'الوكلاء'), value: `${agentCount}` },
+    { label: t('Iterations', 'التكرارات'), value: `${iterations}` },
+    { label: t('Neutral cap', 'سقف الحياد'), value: `${neutralCapPct}%` },
+  ];
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30">
-          <Beaker className="w-5 h-5 text-cyan-400" />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold">{t('Developer Lab', 'مختبر المطور')}</h2>
-          <p className="text-sm text-muted-foreground">
+    <div className={cn(shellClass, 'space-y-8')}>
+      <header className="architect-hero">
+        <div className="space-y-3">
+          <div className="text-[11px] uppercase tracking-[0.4em] text-muted-foreground">
+            {t('Developer workspace', 'مساحة المطور')}
+          </div>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">{t('Developer Lab', 'مختبر المطور')}</h1>
+          <p className="max-w-2xl text-sm leading-7 text-muted-foreground">
             {t(
-              'Test search, LLM and multi-idea reasoning quality from one place.',
-              'اختبر البحث والنموذج وجودة الاستدلال متعدد الأفكار من مكان واحد.'
+              'Test search, LLM output, and multi-case reasoning from one calm operational surface.',
+              'اختبر البحث، ومخرجات النموذج، والاستدلال متعدد الحالات من سطح تشغيلي واحد هادئ.'
             )}
           </p>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-        <section className="liquid-glass rounded-2xl p-5 space-y-4">
-          <div className="flex items-center gap-2 font-semibold">
-            <Search className="w-4 h-4" />
-            {t('Search Playground', 'اختبار البحث')}
-          </div>
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t('Type query...', 'اكتب الاستعلام...')}
-          />
-          <Button onClick={runSearchTest} disabled={searchLoading || !searchQuery.trim()}>
-            {searchLoading ? t('Running...', 'جارٍ التنفيذ...') : t('Run Search Test', 'تشغيل اختبار البحث')}
-          </Button>
-          {searchError && <p className="text-sm text-rose-300">{searchError}</p>}
-          {searchResult && (
-            <div className="space-y-3">
-              <div className="flex flex-wrap gap-2 text-xs">
-                <Badge variant="outline">{`${t('Latency', 'الزمن')}: ${searchResult.latency_ms}ms`}</Badge>
-                <Badge variant="outline">{`usable: ${searchResult.quality?.usable_sources ?? 0}`}</Badge>
-                <Badge variant="outline">{`domains: ${searchResult.quality?.domains ?? 0}`}</Badge>
-              </div>
-              <div className="space-y-2 max-h-56 overflow-auto pr-1">
-                {(searchResult.results || []).map((item: any, idx: number) => {
-                  const domain = item.domain || '';
-                  const favicon = domain
-                    ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`
-                    : '';
-                  return (
-                    <div key={`${item.url}-${idx}`} className="rounded-xl border border-border/50 p-3">
-                      <div className={`flex items-center gap-2 text-sm font-medium ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
-                        {favicon && <img src={favicon} alt={domain} className="w-4 h-4 rounded-sm" />}
-                        <span className="truncate">{item.title || item.url}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-1 break-all">{item.url}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </section>
-
-        <section className="liquid-glass rounded-2xl p-5 space-y-4">
-          <div className="flex items-center gap-2 font-semibold">
-            <Sparkles className="w-4 h-4" />
-            {t('LLM Playground', 'اختبار النموذج')}
-          </div>
-          <Textarea
-            value={llmPrompt}
-            onChange={(e) => setLlmPrompt(e.target.value)}
-            placeholder={t('Prompt...', 'اكتب البرومبت...')}
-            className="min-h-24"
-          />
-          <Textarea
-            value={llmSystem}
-            onChange={(e) => setLlmSystem(e.target.value)}
-            placeholder={t('Optional system prompt...', 'تعليمات النظام (اختياري)...')}
-            className="min-h-16"
-          />
-          <Button onClick={runLlmTest} disabled={llmLoading || !llmPrompt.trim()}>
-            {llmLoading ? t('Running...', 'جارٍ التنفيذ...') : t('Run LLM Test', 'تشغيل اختبار النموذج')}
-          </Button>
-          {llmError && <p className="text-sm text-rose-300">{llmError}</p>}
-          {llmResult && (
-            <div className="space-y-2">
-              <div className="flex flex-wrap gap-2 text-xs">
-                <Badge variant="outline">{`${t('Latency', 'الزمن')}: ${llmResult.latency_ms}ms`}</Badge>
-                <Badge variant={llmResult.mojibake_detected ? 'destructive' : 'outline'}>
-                  {llmResult.mojibake_detected
-                    ? t('Encoding issue detected', 'تم اكتشاف مشكلة ترميز')
-                    : t('Encoding OK', 'الترميز سليم')}
-                </Badge>
-              </div>
-              <div className="rounded-xl border border-border/50 p-3 text-sm whitespace-pre-wrap max-h-56 overflow-auto">
-                {llmResult.text}
-              </div>
-            </div>
-          )}
-        </section>
-      </div>
-
-      <section className="liquid-glass rounded-2xl p-5 space-y-4">
-        <div className="flex items-center gap-2 font-semibold">
-          <Gauge className="w-4 h-4" />
-          {t('Reasoning Suite', 'حزمة اختبارات الاستدلال')}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <Input
-            type="number"
-            value={agentCount}
-            onChange={(e) => setAgentCount(Math.max(6, Math.min(500, Number(e.target.value) || 20)))}
-          />
-          <Input
-            type="number"
-            value={iterations}
-            onChange={(e) => setIterations(Math.max(1, Math.min(12, Number(e.target.value) || 4)))}
-          />
-          <Input
-            type="number"
-            value={neutralCapPct}
-            onChange={(e) => setNeutralCapPct(Math.max(5, Math.min(70, Number(e.target.value) || 30)))}
-          />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          {suiteCases.map((item, idx) => (
-            <div key={item.key} className="rounded-xl border border-border/50 p-3 space-y-2">
-              <p className="text-sm font-medium">{item.title}</p>
-              <Textarea
-                value={item.idea}
-                onChange={(e) => {
-                  const next = [...suiteCases];
-                  next[idx] = { ...next[idx], idea: e.target.value };
-                  setSuiteCases(next);
-                }}
-                className="min-h-28"
-              />
-            </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {statSummary.map((item) => (
+            <StatTile key={item.label} label={item.label} value={item.value} />
           ))}
         </div>
-        <Button onClick={runSuite} disabled={suiteLoading}>
-          {suiteLoading ? t('Starting...', 'جارٍ البدء...') : t('Run Reasoning Suite', 'تشغيل حزمة الاختبارات')}
-        </Button>
-        {suiteError && <p className="text-sm text-rose-300">{suiteError}</p>}
-        {suiteState && (
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-2 items-center">
-              <Badge variant="outline">{`Suite: ${suiteState.suite_id.slice(0, 8)}`}</Badge>
-              <Badge variant="outline">{`${t('Progress', 'التقدم')}: ${Math.round(Number(suiteState.progress_pct || 0))}%`}</Badge>
-              <Badge variant={suiteState.status === 'completed' ? 'outline' : suiteState.status === 'failed' ? 'destructive' : 'secondary'}>
-                {suiteState.status}
-              </Badge>
+      </header>
+
+      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+        <div className="space-y-6">
+          <SurfaceCard title={t('Search playground', 'ساحة البحث')} icon={Search}>
+            <div className="space-y-4">
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t('Type query...', 'اكتب الاستعلام...')}
+                className="architect-input"
+              />
+              <Button onClick={runSearchTest} disabled={searchLoading || !searchQuery.trim()} className="architect-button-primary">
+                {searchLoading ? t('Running...', 'جارٍ التنفيذ...') : t('Run Search Test', 'تشغيل اختبار البحث')}
+              </Button>
+              {searchError ? <div className="rounded-2xl bg-rose-500/10 px-4 py-3 text-sm text-rose-100">{searchError}</div> : null}
+              {searchResult ? (
+                <div className="space-y-4">
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    <Badge variant="outline">{`${t('Latency', 'الزمن')}: ${searchResult.latency_ms}ms`}</Badge>
+                    <Badge variant="outline">{`usable: ${searchResult.quality?.usable_sources ?? 0}`}</Badge>
+                    <Badge variant="outline">{`domains: ${searchResult.quality?.domains ?? 0}`}</Badge>
+                  </div>
+                  <div className="max-h-60 space-y-3 overflow-auto pr-1">
+                    {(searchResult.results || []).map((item: any, idx: number) => {
+                      const domain = item.domain || '';
+                      const favicon = domain
+                        ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`
+                        : '';
+                      return (
+                        <article key={`${item.url}-${idx}`} className="architect-ledger-row rounded-2xl px-4 py-3">
+                          <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                            {favicon ? <img src={favicon} alt={domain} className="h-4 w-4 rounded-sm" /> : null}
+                            <span className="truncate">{item.title || item.url}</span>
+                          </div>
+                          <p className="mt-1 break-all text-xs text-muted-foreground">{item.url}</p>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm leading-7 text-muted-foreground">
+                  {t('Search results appear here after a run.', 'ستظهر نتائج البحث هنا بعد التشغيل.')}
+                </p>
+              )}
             </div>
-            <div className="space-y-2">
-              {(suiteState.cases || []).map((item) => (
-                <div key={item.key} className="rounded-xl border border-border/50 p-3 text-sm">
-                  {(() => {
+          </SurfaceCard>
+
+          <SurfaceCard title={t('LLM playground', 'ساحة النموذج')} icon={Sparkles}>
+            <div className="space-y-4">
+              <Textarea
+                value={llmPrompt}
+                onChange={(e) => setLlmPrompt(e.target.value)}
+                placeholder={t('Prompt...', 'اكتب البرومبت...')}
+                className="architect-input min-h-28 resize-none"
+              />
+              <Textarea
+                value={llmSystem}
+                onChange={(e) => setLlmSystem(e.target.value)}
+                placeholder={t('Optional system prompt...', 'تعليمات النظام (اختياري)...')}
+                className="architect-input min-h-20 resize-none"
+              />
+              <Button onClick={runLlmTest} disabled={llmLoading || !llmPrompt.trim()} className="architect-button-primary">
+                {llmLoading ? t('Running...', 'جارٍ التنفيذ...') : t('Run LLM Test', 'تشغيل اختبار النموذج')}
+              </Button>
+              {llmError ? <div className="rounded-2xl bg-rose-500/10 px-4 py-3 text-sm text-rose-100">{llmError}</div> : null}
+              {llmResult ? (
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline">{`${t('Latency', 'الزمن')}: ${llmResult.latency_ms}ms`}</Badge>
+                    <Badge variant={llmResult.mojibake_detected ? 'destructive' : 'outline'}>
+                      {llmResult.mojibake_detected
+                        ? t('Encoding issue detected', 'تم رصد مشكلة ترميز')
+                        : t('Encoding OK', 'الترميز سليم')}
+                    </Badge>
+                  </div>
+                  <div className="rounded-2xl bg-background/45 p-4 text-sm whitespace-pre-wrap leading-7 text-foreground">
+                    {llmResult.text}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm leading-7 text-muted-foreground">
+                  {t('Model output will appear here.', 'ستظهر مخرجات النموذج هنا.')}
+                </p>
+              )}
+            </div>
+          </SurfaceCard>
+        </div>
+
+        <div className="space-y-6">
+          <section className="architect-panel space-y-5 p-6">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-foreground">
+                <Gauge className="h-4 w-4" />
+              </span>
+              <div>
+                <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                  {t('Reasoning suite', 'حزمة الاستدلال')}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  {t('Tune the batch before running the suite.', 'اضبط الدفعة قبل تشغيل الحزمة.')}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-3">
+              <Input
+                type="number"
+                value={agentCount}
+                onChange={(e) => setAgentCount(Math.max(6, Math.min(500, Number(e.target.value) || 20)))}
+                className="architect-input"
+              />
+              <Input
+                type="number"
+                value={iterations}
+                onChange={(e) => setIterations(Math.max(1, Math.min(12, Number(e.target.value) || 4)))}
+                className="architect-input"
+              />
+              <Input
+                type="number"
+                value={neutralCapPct}
+                onChange={(e) => setNeutralCapPct(Math.max(5, Math.min(70, Number(e.target.value) || 30)))}
+                className="architect-input"
+              />
+            </div>
+
+            <div className="grid gap-3 lg:grid-cols-3">
+              {suiteCases.map((item, idx) => (
+                <div key={item.key} className="rounded-2xl bg-background/45 p-4">
+                  <p className="text-sm font-medium text-foreground">{item.title}</p>
+                  <Textarea
+                    value={item.idea}
+                    onChange={(e) => {
+                      const next = [...suiteCases];
+                      next[idx] = { ...next[idx], idea: e.target.value };
+                      setSuiteCases(next);
+                    }}
+                    className="architect-input mt-3 min-h-28 resize-none"
+                  />
+                </div>
+              ))}
+            </div>
+
+            <Button onClick={runSuite} disabled={suiteLoading} className="architect-button-primary">
+              {suiteLoading ? t('Starting...', 'جارٍ التشغيل...') : t('Run Reasoning Suite', 'تشغيل حزمة الاستدلال')}
+            </Button>
+
+            {suiteError ? <div className="rounded-2xl bg-rose-500/10 px-4 py-3 text-sm text-rose-100">{suiteError}</div> : null}
+
+            {suiteState ? (
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline">{`Suite: ${suiteState.suite_id.slice(0, 8)}`}</Badge>
+                  <Badge variant="outline">{`${t('Progress', 'التقدم')}: ${Math.round(Number(suiteState.progress_pct || 0))}%`}</Badge>
+                  <Badge variant={suiteState.status === 'completed' ? 'outline' : suiteState.status === 'failed' ? 'destructive' : 'secondary'}>
+                    {suiteState.status}
+                  </Badge>
+                </div>
+
+                <div className="space-y-3">
+                  {(suiteState.cases || []).map((item) => {
                     const meta = getCaseStatusMeta(item.status, item.pass);
                     return (
-                  <div className="flex flex-wrap gap-2 items-center">
-                    <span className="font-medium">{item.key}</span>
-                    <Badge variant={meta.variant}>
-                      {meta.label}
-                    </Badge>
-                    {item.simulation_id && (
-                      <span className="text-xs text-muted-foreground">{`sim: ${item.simulation_id.slice(0, 8)}`}</span>
-                    )}
-                  </div>
+                      <div key={item.key} className="architect-ledger-row rounded-2xl px-4 py-3 text-sm">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-medium text-foreground">{item.key}</span>
+                          <Badge variant={meta.variant}>{meta.label}</Badge>
+                          {item.simulation_id ? (
+                            <span className="text-xs text-muted-foreground">{`sim: ${item.simulation_id.slice(0, 8)}`}</span>
+                          ) : null}
+                        </div>
+                        {Array.isArray(item.failures) && item.failures.length > 0 ? (
+                          <p className="mt-2 text-xs text-rose-300">{item.failures.join(', ')}</p>
+                        ) : null}
+                      </div>
                     );
-                  })()}
-                  {Array.isArray(item.failures) && item.failures.length > 0 && (
-                    <p className="text-xs text-rose-300 mt-1">{item.failures.join(', ')}</p>
+                  })}
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm leading-7 text-muted-foreground">
+                {t('Start a suite to see progress, case statuses, and developer assertions.', 'ابدأ الحزمة لرؤية التقدم وحالات الاختبارات ونتائج التحقق.')}
+              </p>
+            )}
+          </section>
+
+          <section className="architect-panel space-y-4 p-6">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-foreground">
+                <CheckCircle2 className="h-4 w-4" />
+              </span>
+              <div>
+                <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                  {t('Developer checks', 'فحوصات المطور')}
+                </div>
+              </div>
+            </div>
+            <div className="grid gap-2 md:grid-cols-2">
+              {checklist.map((item) => (
+                <div key={item.label} className="architect-ledger-row flex items-center justify-between rounded-2xl px-4 py-3 text-sm">
+                  <span className="text-foreground">{item.label}</span>
+                  {item.pass ? (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                  ) : (
+                    <AlertTriangle className="h-4 w-4 text-amber-400" />
                   )}
                 </div>
               ))}
             </div>
-          </div>
-        )}
-      </section>
+          </section>
 
-      <section className="liquid-glass rounded-2xl p-5 space-y-3">
-        <div className="font-semibold">{t('Developer Checks', 'فحوصات المطور')}</div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {checklist.map((item) => (
-            <div key={item.label} className="rounded-xl border border-border/50 px-3 py-2 flex items-center justify-between text-sm">
-              <span>{item.label}</span>
-              {item.pass ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              ) : (
-                <AlertTriangle className="w-4 h-4 text-amber-400" />
-              )}
+          <section className="architect-panel space-y-4 p-6">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-foreground">
+                <Beaker className="h-4 w-4" />
+              </span>
+              <div>
+                <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                  {t('Recent suite runs', 'أحدث الحزم')}
+                </div>
+              </div>
             </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="liquid-glass rounded-2xl p-5 space-y-2">
-        <div className="font-semibold">{t('Recent Suite Runs', 'آخر تشغيلات الحزمة')}</div>
-        <div className="space-y-2">
-          {suiteHistory.map((item) => (
-            <div key={item.suite_id} className="rounded-xl border border-border/50 px-3 py-2 text-sm flex items-center justify-between">
-              <span>{item.suite_id.slice(0, 8)}</span>
-              <Badge variant="outline">{item.status}</Badge>
+            <div className="space-y-2">
+              {suiteHistory.map((item) => (
+                <div key={item.suite_id} className="architect-ledger-row flex items-center justify-between rounded-2xl px-4 py-3 text-sm">
+                  <span className="text-foreground">{item.suite_id.slice(0, 8)}</span>
+                  <Badge variant="outline">{item.status}</Badge>
+                </div>
+              ))}
+              {!suiteHistory.length ? (
+                <p className="text-sm leading-7 text-muted-foreground">
+                  {t('No suite history yet.', 'لا يوجد سجل حزم حتى الآن.')}
+                </p>
+              ) : null}
             </div>
-          ))}
-          {!suiteHistory.length && (
-            <p className="text-sm text-muted-foreground">
-              {t('No suite history yet.', 'لا يوجد سجل اختبارات حتى الآن.')}
-            </p>
-          )}
+          </section>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

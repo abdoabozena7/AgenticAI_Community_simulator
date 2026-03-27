@@ -16,6 +16,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
+import { cn } from '@/lib/utils';
 import type { SearchResponse, SearchStructured } from '@/services/api';
 
 interface ResearchResult {
@@ -47,6 +49,8 @@ interface ResearchTabProps {
 
 export default function ResearchTab({ loading, result, query, onStartSimulation }: ResearchTabProps) {
   const { isRTL } = useLanguage();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [steps, setSteps] = useState<TimelineStep[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -114,136 +118,219 @@ export default function ResearchTab({ loading, result, query, onStartSimulation 
     return `https://www.openstreetmap.org/?mlat=${mapCenter.lat}&mlon=${mapCenter.lon}#map=14/${mapCenter.lat}/${mapCenter.lon}`;
   }, [mapCenter]);
 
+  const pageClass = cn(
+    'architect-shell rounded-[32px] p-4 md:p-6',
+    isDark ? 'architect-shell-dark bg-black text-white' : 'architect-shell-light bg-[#f5f2ea] text-slate-900',
+  );
+  const panelClass = cn(
+    'rounded-[28px] p-5 shadow-[0_24px_60px_-36px_rgba(0,0,0,0.35)]',
+    isDark ? 'bg-zinc-950/90 text-white ring-1 ring-white/5' : 'bg-white/90 text-slate-900 ring-1 ring-black/5',
+  );
+  const surfaceClass = isDark ? 'bg-white/5 text-white/80 ring-1 ring-white/10' : 'bg-slate-50 text-slate-900 ring-1 ring-black/5';
+  const mutedClass = isDark ? 'text-white/60' : 'text-slate-600';
+  const strongClass = isDark ? 'text-white' : 'text-slate-900';
+  const linkClass = isDark ? 'text-emerald-300 hover:text-emerald-200' : 'text-emerald-700 hover:text-emerald-800';
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{isRTL ? 'بحث الوكلاء' : 'Agent Research'}</h1>
-          <p className="text-muted-foreground text-sm">{isRTL ? 'تتبع عملية البحث خطوة بخطوة' : 'Track research process step-by-step'}</p>
+    <div className={pageClass}>
+      <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-1">
+            <div className={cn('inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs tracking-[0.22em] uppercase', isDark ? 'bg-white/5 text-white/60' : 'bg-slate-100 text-slate-600')}>
+            <Search className="h-3.5 w-3.5" />
+            {isRTL ? 'البحث والمرجع' : 'Research and reference'}
+          </div>
+          <h1 className={cn('text-2xl md:text-3xl font-semibold tracking-tight', strongClass)}>
+            {isRTL ? 'بحث الوكلاء' : 'Agent Research'}
+          </h1>
+          <p className={cn('max-w-2xl text-sm md:text-base leading-7', mutedClass)}>
+            {isRTL ? 'تابع مراحل البحث خطوة بخطوة داخل مساحة عمل هادئة وواضحة.' : 'Track the research pipeline step by step inside a calm, readable workspace.'}
+          </p>
         </div>
+
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className="liquid-glass-button">
-            <Loader2 className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            {loading ? (isRTL ? 'جارٍ التنفيذ...' : 'Processing...') : (isRTL ? 'مكتمل' : 'Complete')}
+          <Badge
+            variant="outline"
+            className={cn('px-3 py-1.5 text-xs font-medium', isDark ? 'border-white/10 bg-white/5 text-white' : 'border-black/10 bg-white text-slate-800')}
+          >
+            <Loader2 className={cn('mr-2 h-4 w-4', loading ? 'animate-spin' : '')} />
+            {loading ? (isRTL ? 'جارٍ التنفيذ...' : 'Processing...') : isRTL ? 'مكتمل' : 'Complete'}
           </Badge>
           {result && onStartSimulation && (
-            <Button onClick={onStartSimulation} size="sm" className="liquid-glass-button">
-              <Play className="w-4 h-4 mr-1" />
-              {isRTL ? 'تابع إلى خط الأنابيب الإلزامي' : 'Continue to Mandatory Pipeline'}
+            <Button
+              onClick={onStartSimulation}
+              size="sm"
+              className={cn('architect-button-primary h-10 px-4', isDark ? 'bg-white text-black hover:bg-white/90' : 'bg-slate-950 text-white hover:bg-slate-800')}
+            >
+              <Play className="mr-2 h-4 w-4" />
+              {isRTL ? 'انتقل إلى المحاكاة' : 'Continue to simulation'}
             </Button>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-3 liquid-glass rounded-2xl p-5">
-          <h3 className="font-bold mb-4">{isRTL ? 'الجدول الزمني' : 'Timeline'}</h3>
-          <div className="space-y-3">
+      <div className="grid gap-5 lg:grid-cols-[0.84fr_1.08fr_0.88fr]">
+        <section className={panelClass}>
+          <div className="flex items-center justify-between">
+            <h3 className={cn('text-lg font-semibold', strongClass)}>{isRTL ? 'الجدول الزمني' : 'Timeline'}</h3>
+            <span className={cn('text-xs uppercase tracking-[0.18em]', mutedClass)}>{steps.length} steps</span>
+          </div>
+          <div className="mt-4 space-y-3">
             {steps.map((step, idx) => (
               <motion.div
                 key={step.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: idx * 0.05 }}
-                className={`flex items-start gap-3 p-3 rounded-xl ${
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.04 }}
+                className={cn(
+                  'flex items-start gap-3 rounded-2xl px-4 py-3 transition-colors',
                   step.status === 'running'
-                    ? 'bg-cyan-500/10 border border-cyan-500/30'
+                    ? isDark
+                      ? 'bg-white/10 ring-1 ring-white/10'
+                      : 'bg-slate-100 ring-1 ring-black/5'
                     : step.status === 'done'
-                      ? 'bg-green-500/10'
-                      : 'opacity-60'
-                }`}
+                      ? isDark
+                        ? 'bg-emerald-500/10'
+                        : 'bg-emerald-50'
+                      : isDark
+                        ? 'bg-white/5'
+                        : 'bg-slate-50',
+                )}
               >
-                <div className={`p-1.5 rounded-lg ${step.status === 'running' ? 'bg-cyan-500/20' : step.status === 'done' ? 'bg-green-500/20' : 'bg-secondary'}`}>
+                <div
+                  className={cn(
+                    'mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl',
+                    step.status === 'running'
+                      ? isDark
+                        ? 'bg-white/10'
+                        : 'bg-slate-200'
+                      : step.status === 'done'
+                        ? isDark
+                          ? 'bg-emerald-500/10'
+                          : 'bg-emerald-100'
+                        : isDark
+                          ? 'bg-white/5'
+                          : 'bg-white',
+                  )}
+                >
                   {step.status === 'running' ? (
-                    <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
+                    <Loader2 className={cn('h-4 w-4 animate-spin', isDark ? 'text-white' : 'text-slate-900')} />
                   ) : step.status === 'done' ? (
-                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <CheckCircle className="h-4 w-4 text-emerald-500" />
                   ) : (
-                    <step.icon className="w-4 h-4 text-muted-foreground" />
+                    <step.icon className={cn('h-4 w-4', mutedClass)} />
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground">{isRTL ? step.titleAr : step.title}</p>
+                <p className={cn('text-sm leading-6', step.status === 'done' ? strongClass : mutedClass)}>{isRTL ? step.titleAr : step.title}</p>
               </motion.div>
             ))}
           </div>
-        </div>
+        </section>
 
-        <div className="lg:col-span-5 liquid-glass rounded-2xl p-5">
-          {loading && !result ? (
-            <div className="space-y-3">
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-24 w-full" />
+        <section className={panelClass}>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className={cn('text-xs uppercase tracking-[0.18em]', mutedClass)}>{isRTL ? 'النتيجة الحالية' : 'Current result'}</p>
+              <h3 className={cn('mt-1 text-lg font-semibold', strongClass)}>{firstSource ? firstSource.title || (isRTL ? 'نتيجة البحث' : 'Search result') : isRTL ? 'لا توجد نتائج بعد' : 'No results yet'}</h3>
             </div>
-          ) : firstSource ? (
-            <div className="space-y-3">
-              <h3 className="text-lg font-bold">{firstSource.title || (isRTL ? 'نتيجة البحث' : 'Search result')}</h3>
-              <a href={firstSource.url} target="_blank" rel="noreferrer" className="text-xs text-cyan-400 flex items-center gap-1 break-all">
-                {firstSource.url}
-                <ExternalLink className="w-3 h-3" />
-              </a>
-              <p className="text-sm text-muted-foreground whitespace-pre-line">
-                {structured?.summary || firstSource.snippet || (isRTL ? 'لا يوجد ملخص متاح بعد.' : 'No summary available yet.')}
-              </p>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              {isRTL ? 'لا توجد نتائج بعد. ابدأ البحث من الصفحة الرئيسية.' : 'No results yet. Start research from Home.'}
-            </p>
-          )}
-        </div>
+            {firstSource ? <Badge className={cn('px-3 py-1 text-xs', isDark ? 'bg-white/5 text-white' : 'bg-slate-100 text-slate-700')}>{isRTL ? 'مصدر رئيسي' : 'Primary source'}</Badge> : null}
+          </div>
 
-        <div className="lg:col-span-4 space-y-4">
-          <div className="liquid-glass rounded-2xl p-5">
-            <h3 className="font-bold mb-3 flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-yellow-400" />
-              {isRTL ? 'الأدلة' : 'Evidence'}
-            </h3>
-            <div className="space-y-2">
-              {evidenceCards.length ? evidenceCards.map((ev, i) => (
-                <div key={`${ev}-${i}`} className="p-3 rounded-xl bg-secondary/50 border border-border/50">
-                  <Badge variant="outline" className="mb-1 text-xs">{`E${i + 1}`}</Badge>
-                  <p className="text-xs text-foreground">{ev}</p>
+          <div className="mt-4 space-y-4">
+            {loading && !result ? (
+              <div className="space-y-3">
+                <Skeleton className={cn('h-6 w-3/4', isDark ? 'bg-white/10' : 'bg-slate-200')} />
+                <Skeleton className={cn('h-4 w-1/2', isDark ? 'bg-white/10' : 'bg-slate-200')} />
+                <Skeleton className={cn('h-24 w-full rounded-2xl', isDark ? 'bg-white/10' : 'bg-slate-200')} />
+              </div>
+            ) : firstSource ? (
+              <>
+                <a href={firstSource.url} target="_blank" rel="noreferrer" className={cn('inline-flex items-center gap-1 text-sm break-all', linkClass)}>
+                  {firstSource.url}
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+                <p className={cn('text-sm leading-7 whitespace-pre-line', mutedClass)}>
+                  {structured?.summary || firstSource.snippet || (isRTL ? 'لا يوجد ملخص متاح بعد.' : 'No summary available yet.')}
+                </p>
+                <div className={cn('grid gap-3 rounded-2xl p-4 md:grid-cols-2', surfaceClass)}>
+                  <div>
+                    <p className={cn('text-xs uppercase tracking-[0.18em]', mutedClass)}>{isRTL ? 'العنوان' : 'Title'}</p>
+                    <p className={cn('mt-1 text-sm font-medium leading-6', strongClass)}>{firstSource.title || (isRTL ? 'غير متوفر' : 'Unavailable')}</p>
+                  </div>
+                  <div>
+                    <p className={cn('text-xs uppercase tracking-[0.18em]', mutedClass)}>{isRTL ? 'نوع السطح' : 'Surface'}</p>
+                    <p className={cn('mt-1 text-sm font-medium leading-6', strongClass)}>{isRTL ? 'أسطح هادئة ومتدرجة' : 'Quiet layered surfaces'}</p>
+                  </div>
                 </div>
-              )) : <p className="text-xs text-muted-foreground">{isRTL ? 'لا توجد بطاقات أدلة حتى الآن.' : 'No evidence cards yet.'}</p>}
+              </>
+            ) : (
+              <p className={cn('text-sm leading-7', mutedClass)}>{isRTL ? 'ابدأ البحث من الصفحة الرئيسية.' : 'Start research from Home.'}</p>
+            )}
+          </div>
+        </section>
+
+        <aside className="space-y-5">
+          <section className={panelClass}>
+            <div className="flex items-center gap-2">
+              <CreditCard className={cn('h-4 w-4', isDark ? 'text-emerald-300' : 'text-emerald-700')} />
+              <h3 className={cn('text-lg font-semibold', strongClass)}>{isRTL ? 'الأدلة' : 'Evidence'}</h3>
             </div>
-          </div>
+            <div className="mt-4 space-y-3">
+              {evidenceCards.length ? (
+                evidenceCards.map((ev, i) => (
+                  <div key={`${ev}-${i}`} className={cn('rounded-2xl p-4', surfaceClass)}>
+                    <Badge variant="outline" className={cn('mb-2 text-[11px] uppercase tracking-[0.18em]', isDark ? 'border-white/10 bg-white/5 text-white' : 'border-black/10 bg-white text-slate-700')}>
+                      {`E${i + 1}`}
+                    </Badge>
+                    <p className={cn('text-sm leading-6', strongClass)}>{ev}</p>
+                  </div>
+                ))
+              ) : (
+                <p className={cn('text-sm leading-7', mutedClass)}>{isRTL ? 'لا توجد بطاقات أدلة حتى الآن.' : 'No evidence cards yet.'}</p>
+              )}
+            </div>
+          </section>
 
-          <div className="liquid-glass rounded-2xl p-5">
-            <h3 className="font-bold mb-3 flex items-center gap-2">
-              <Globe className="w-4 h-4 text-cyan-400" />
-              {isRTL ? 'المصادر' : 'Sources'}
-            </h3>
-            {sources.length ? sources.map((src, i) => (
-              <a key={`${src.url}-${i}`} href={src.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-xs text-muted-foreground hover:text-cyan-400 transition-colors py-1">
-                <ChevronRight className="w-3 h-3" />
-                {src.title || src.url}
-              </a>
-            )) : <p className="text-xs text-muted-foreground">{isRTL ? 'لا توجد مصادر بعد.' : 'No sources yet.'}</p>}
-          </div>
+          <section className={panelClass}>
+            <div className="flex items-center gap-2">
+              <Globe className={cn('h-4 w-4', isDark ? 'text-white/80' : 'text-slate-700')} />
+              <h3 className={cn('text-lg font-semibold', strongClass)}>{isRTL ? 'المصادر' : 'Sources'}</h3>
+            </div>
+            <div className="mt-4 space-y-2">
+              {sources.length ? (
+                sources.map((src, i) => (
+                  <a key={`${src.url}-${i}`} href={src.url} target="_blank" rel="noreferrer" className={cn('flex items-center gap-2 rounded-2xl px-3 py-2 text-sm transition-colors', isDark ? 'bg-white/5 text-white/75 hover:bg-white/10' : 'bg-slate-50 text-slate-700 hover:bg-slate-100')}>
+                    <ChevronRight className="h-3.5 w-3.5 shrink-0" />
+                    <span className="min-w-0 flex-1 truncate">{src.title || src.url}</span>
+                  </a>
+                ))
+              ) : (
+                <p className={cn('text-sm leading-7', mutedClass)}>{isRTL ? 'لا توجد مصادر بعد.' : 'No sources yet.'}</p>
+              )}
+            </div>
+          </section>
 
-          <div className="liquid-glass rounded-2xl p-5">
-            <h3 className="font-bold mb-3 flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-green-400" />
-              {isRTL ? 'تحليل الخريطة' : 'Map Analysis'}
-            </h3>
-            <div className="aspect-video rounded-xl bg-secondary/50 mb-3 overflow-hidden border border-border/50">
+          <section className={panelClass}>
+            <div className="flex items-center gap-2">
+              <MapPin className={cn('h-4 w-4', isDark ? 'text-emerald-300' : 'text-emerald-700')} />
+              <h3 className={cn('text-lg font-semibold', strongClass)}>{isRTL ? 'تحليل الخريطة' : 'Map Analysis'}</h3>
+            </div>
+            <div className={cn('mt-4 aspect-video overflow-hidden rounded-2xl', surfaceClass)}>
               <iframe
                 title="OpenStreetMap area analysis"
                 src={osmEmbedUrl}
-                className="w-full h-full border-0"
+                className="h-full w-full border-0"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
               />
             </div>
             {osmPageUrl && (
-              <a href={osmPageUrl} target="_blank" rel="noreferrer" className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors inline-flex items-center gap-1">
-                {isRTL ? 'فتح الخريطة في نافذة جديدة' : 'Open map in new tab'}
-                <ExternalLink className="w-3 h-3" />
+              <a href={osmPageUrl} target="_blank" rel="noreferrer" className={cn('mt-3 inline-flex items-center gap-1 text-sm', linkClass)}>
+                {isRTL ? 'افتح الخريطة في تبويب جديد' : 'Open map in new tab'}
+                <ExternalLink className="h-3.5 w-3.5" />
               </a>
             )}
-          </div>
-        </div>
+          </section>
+        </aside>
       </div>
     </div>
   );

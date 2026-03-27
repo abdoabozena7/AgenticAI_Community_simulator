@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { Navbar } from '@/components/landing/Navbar';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { ProofMetricsSection } from '@/components/landing/ProofMetricsSection';
@@ -20,10 +21,59 @@ gsap.registerPlugin(ScrollTrigger);
 
 const MarketingLandingPage = () => {
   const { isRTL } = useLanguage();
+  const { theme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('register');
+
+  const shellVars = useMemo<CSSProperties>(
+    () =>
+      theme === 'dark'
+        ? ({
+            '--background': '0 0% 4%',
+            '--foreground': '40 20% 96%',
+            '--card': '0 0% 7%',
+            '--card-foreground': '40 20% 96%',
+            '--popover': '0 0% 7%',
+            '--popover-foreground': '40 20% 96%',
+            '--primary': '40 20% 96%',
+            '--primary-foreground': '0 0% 4%',
+            '--secondary': '0 0% 11%',
+            '--secondary-foreground': '40 20% 96%',
+            '--muted': '0 0% 11%',
+            '--muted-foreground': '0 0% 68%',
+            '--accent': '0 0% 12%',
+            '--accent-foreground': '40 20% 96%',
+            '--destructive': '0 62.8% 55.6%',
+            '--destructive-foreground': '0 0% 98%',
+            '--border': '0 0% 16%',
+            '--input': '0 0% 14%',
+            '--ring': '40 20% 96%',
+          } as CSSProperties)
+        : ({
+            '--background': '0 0% 97%',
+            '--foreground': '230 46% 14%',
+            '--card': '0 0% 100%',
+            '--card-foreground': '230 46% 14%',
+            '--popover': '0 0% 100%',
+            '--popover-foreground': '230 46% 14%',
+            '--primary': '230 46% 14%',
+            '--primary-foreground': '0 0% 98%',
+            '--secondary': '0 0% 92%',
+            '--secondary-foreground': '230 46% 14%',
+            '--muted': '0 0% 92%',
+            '--muted-foreground': '230 15% 40%',
+            '--accent': '0 0% 90%',
+            '--accent-foreground': '230 46% 14%',
+            '--destructive': '0 72% 48%',
+            '--destructive-foreground': '0 0% 98%',
+            '--border': '0 0% 84%',
+            '--input': '0 0% 84%',
+            '--ring': '230 46% 14%',
+          } as CSSProperties),
+    [theme]
+  );
 
   useEffect(() => {
     document.documentElement.style.scrollBehavior = 'smooth';
@@ -62,8 +112,19 @@ const MarketingLandingPage = () => {
   };
 
   return (
-    <div className={`relative min-h-screen bg-background transition-colors duration-300 ${isRTL ? 'rtl' : 'ltr'}`}>
+    <div
+      className={`architect-shell relative min-h-screen overflow-hidden bg-background text-foreground transition-colors duration-300 ${isRTL ? 'rtl' : 'ltr'}`}
+      style={shellVars}
+    >
       <LandingVisualBackground />
+      <div
+        aria-hidden
+        className={`pointer-events-none fixed inset-0 z-[1] ${
+          theme === 'dark'
+            ? 'bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.04),transparent_32%),linear-gradient(180deg,rgba(5,5,5,0.72),rgba(8,8,8,0.92))]'
+            : 'bg-[radial-gradient(circle_at_top,rgba(16,12,61,0.04),transparent_32%),linear-gradient(180deg,rgba(247,249,251,0.68),rgba(236,238,240,0.9))]'
+        }`}
+      />
 
       <div className="relative z-10">
         <Navbar

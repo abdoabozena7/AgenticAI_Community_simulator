@@ -571,7 +571,7 @@ const buildPipelineBlockerNote = (
   return [{
     kind: 'note',
     id: 'pipeline-blocker',
-    title: language === 'ar' ? 'سبب توقف الخط الحالي' : 'Why the pipeline stopped',
+    title: language === 'ar' ? 'سبب توقف المسار الحالي' : 'Why the pipeline stopped',
     badgeLabel: language === 'ar' ? 'تعطّل' : 'Blocked',
     content: primary?.title || (language === 'ar' ? 'فيه خطوة مانعة المحاكاة من الاستمرار.' : 'A blocker is preventing the simulation from continuing.'),
     tone: 'warning',

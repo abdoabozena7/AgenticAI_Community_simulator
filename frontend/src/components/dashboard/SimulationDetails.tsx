@@ -1,10 +1,23 @@
-﻿import { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  ArrowLeft, Brain, TrendingUp, Users, Clock, Target,
-  CheckCircle, XCircle, Sparkles, Send, Bot, User,
-  Rocket, Lightbulb, RefreshCw, Star, ArrowRight,
-  ThumbsUp, ThumbsDown, Zap, MessageCircle
+  ArrowLeft,
+  Bot,
+  Brain,
+  CheckCircle,
+  Clock,
+  Lightbulb,
+  MessageCircle,
+  RefreshCw,
+  Rocket,
+  Send,
+  Sparkles,
+  Target,
+  ThumbsDown,
+  ThumbsUp,
+  TrendingUp,
+  User,
+  Users,
+  XCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +25,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 import { apiService } from '@/services/api';
 
@@ -47,8 +61,19 @@ interface SimulationDetailsProps {
   onRerun: (simId: string) => void;
 }
 
+function MetricTile({ label, value, icon: Icon, tone }: { label: string; value: string; icon: any; tone: string }) {
+  return (
+    <div className="rounded-2xl bg-background/55 p-4">
+      <Icon className={cn('h-5 w-5', tone)} />
+      <div className="mt-3 text-2xl font-semibold text-foreground">{value}</div>
+      <div className="mt-1 text-xs uppercase tracking-[0.3em] text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
 export default function SimulationDetails({ simulation, onBack, onRerun }: SimulationDetailsProps) {
   const { isRTL } = useLanguage();
+  const { theme } = useTheme();
   const rawAcceptanceRate = typeof simulation.acceptanceRate === 'number' ? simulation.acceptanceRate : 0;
   const acceptanceRate = rawAcceptanceRate <= 1 ? rawAcceptanceRate * 100 : rawAcceptanceRate;
   const isAbove60 = acceptanceRate >= 60;
@@ -61,6 +86,8 @@ export default function SimulationDetails({ simulation, onBack, onRerun }: Simul
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
+
+  const shellClass = theme === 'dark' ? 'architect-shell architect-shell-dark' : 'architect-shell architect-shell-light';
 
   const handleSendMessage = async (preset?: string) => {
     const text = (preset ?? chatInput).trim();
@@ -94,6 +121,7 @@ export default function SimulationDetails({ simulation, onBack, onRerun }: Simul
       setChatLoading(false);
     }
   };
+
   const pros = simulation.pros ?? [];
   const cons = simulation.cons ?? [];
   const suggestions = simulation.suggestions ?? [];
@@ -102,15 +130,14 @@ export default function SimulationDetails({ simulation, onBack, onRerun }: Simul
       label: isRTL ? 'نسبة القبول' : 'Acceptance',
       value: `${Math.round(acceptanceRate)}%`,
       icon: Target,
-      color: isAbove60 ? 'text-green-400' : 'text-yellow-400',
-      glow: true,
+      tone: isAbove60 ? 'text-emerald-400' : 'text-amber-400',
     },
     simulation.totalAgents !== undefined
       ? {
           label: isRTL ? 'إجمالي الوكلاء' : 'Total Agents',
           value: simulation.totalAgents.toString(),
           icon: Users,
-          color: 'text-cyan-400',
+          tone: 'text-foreground/80',
         }
       : null,
     simulation.avgResponseTime
@@ -118,7 +145,7 @@ export default function SimulationDetails({ simulation, onBack, onRerun }: Simul
           label: isRTL ? 'متوسط الاستجابة' : 'Avg Response',
           value: simulation.avgResponseTime,
           icon: Clock,
-          color: 'text-purple-400',
+          tone: 'text-foreground/80',
         }
       : null,
     simulation.confidenceScore !== undefined
@@ -126,342 +153,300 @@ export default function SimulationDetails({ simulation, onBack, onRerun }: Simul
           label: isRTL ? 'درجة الثقة' : 'Confidence',
           value: `${simulation.confidenceScore}%`,
           icon: TrendingUp,
-          color: 'text-blue-400',
+          tone: 'text-foreground/80',
         }
       : null,
-  ].filter(Boolean) as { label: string; value: string; icon: any; color: string; glow?: boolean }[];
+  ].filter(Boolean) as { label: string; value: string; icon: any; tone: string }[];
+
+  const summaryText = (isRTL ? (simulation.summaryAr || simulation.summary) : (simulation.summary || simulation.summaryAr)) || (isRTL ? 'لا يوجد ملخص بعد.' : 'No summary yet.');
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full">
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            {isRTL ? (simulation.nameAr || simulation.name) : simulation.name}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            {[isRTL ? (simulation.locationAr || simulation.location) : simulation.location, simulation.category].filter(Boolean).join(' • ')}
-          </p>
-        </div>
-      </div>
-
-      {/* Summary Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className={`liquid-glass rounded-2xl p-6 ${isAbove60 ? 'ai-glow-card-success' : 'ai-glow-card-warning'}`}
-      >
-        <p className="text-muted-foreground">{isRTL ? (simulation.summaryAr || simulation.summary) : (simulation.summary || simulation.summaryAr) || (isRTL ? "لا يوجد ملخص بعد." : "No summary yet.")}</p>
-      </motion.div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {stats.map((stat) => (
-          <Card key={stat.label} className={`liquid-glass border-border/50 ${stat.glow ? 'ai-glow-subtle' : ''}`}>
-            <CardContent className="p-4">
-              <stat.icon className={`w-6 h-6 mb-2 ${stat.color}`} />
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Acceptance Progress */}
-      <div className="liquid-glass rounded-2xl p-6">
-        <div className="flex justify-between mb-2">
-          <span className="text-sm text-muted-foreground">{isRTL ? 'نسبة القبول' : 'Acceptance Rate'}</span>
-          <span className={`text-sm font-bold ${isAbove60 ? 'text-green-400' : 'text-yellow-400'}`}>
-            {Math.round(acceptanceRate)}%
-          </span>
-        </div>
-        <Progress value={acceptanceRate} className="h-3" />
-        <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-          <span>0%</span>
-          <span className="text-yellow-400">60%</span>
-          <span>100%</span>
-        </div>
-      </div>
-
-      {/* Pros & Cons */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="liquid-glass rounded-2xl p-6">
-          <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-            <ThumbsUp className="w-5 h-5 text-green-400" />
-            {isRTL ? 'نقاط القوة' : 'Strengths'}
-          </h3>
-          <ul className="space-y-3">
-            {pros.length ? pros.map((p, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
-                <CheckCircle className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
-                {isRTL ? (p.textAr || p.text) : p.text}
-              </li>
-            )) : (
-              <li className="text-xs text-muted-foreground">
-                {isRTL ? 'لا توجد نقاط قوة مستخرجة بعد.' : 'No strengths extracted yet.'}
-              </li>
-            )}
-          </ul>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="liquid-glass rounded-2xl p-6">
-          <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-            <ThumbsDown className="w-5 h-5 text-red-400" />
-            {isRTL ? 'نقاط الضعف' : 'Weaknesses'}
-          </h3>
-          <ul className="space-y-3">
-            {cons.length ? cons.map((c, i) => (
-              <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
-                <XCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
-                {isRTL ? (c.textAr || c.text) : c.text}
-              </li>
-            )) : (
-              <li className="text-xs text-muted-foreground">
-                {isRTL ? 'لا توجد نقاط ضعف مستخرجة بعد.' : 'No weaknesses extracted yet.'}
-              </li>
-            )}
-          </ul>
-        </motion.div>
-      </div>
-
-      {/* Conditional Section based on acceptance */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className={`liquid-glass rounded-2xl p-8 text-center ${isAbove60 ? 'ai-glow-card-success' : 'ai-glow-card-warning'}`}
-      >
-        <div className={`inline-flex p-4 rounded-full mb-4 ${isAbove60 ? 'bg-green-500/20' : 'bg-yellow-500/20'} ai-glow-subtle`}>
-          {isAbove60 ? (
-            <Rocket className="w-10 h-10 text-green-400" />
-          ) : (
-            <Lightbulb className="w-10 h-10 text-yellow-400" />
-          )}
-        </div>
-        <h2 className="text-2xl font-bold text-foreground mb-2">
-          {isAbove60
-            ? (isRTL ? '🎉 خلينا نحول فكرتك لحقيقة!' : '🎉 Let\'s bring your idea to real life!')
-            : (isRTL ? '💪 خلينا نخلي فكرتك مقبولة!' : '💪 Let\'s make your idea acceptable!')}
-        </h2>
-        <p className="text-muted-foreground mb-6">
-          {isAbove60
-            ? (isRTL ? 'نسبة القبول عالية! الناس فعلاً محتاجة فكرتك. اسألني عن خطة البداية.' : 'High acceptance! People genuinely need your idea. Ask me about a launch plan.')
-            : (isRTL ? 'بتعديلات بسيطة ممكن نرفع نسبة القبول. خليني أساعدك!' : 'With small tweaks we can raise acceptance. Let me help!')}
-        </p>
-
-        {!showChat && (
-          <Button onClick={() => setShowChat(true)} className="ai-glow-button liquid-glass-button py-6 px-8 text-lg">
-            <MessageCircle className="w-5 h-5 mr-2" />
-            {isAbove60
-              ? (isRTL ? 'تكلم مع المساعد الذكي' : 'Chat with AI Assistant')
-              : (isRTL ? 'اسأل عن التحسينات' : 'Ask about improvements')}
+    <div className={cn(shellClass, 'space-y-8')}>
+      <header className="architect-hero">
+        <div className="flex items-start gap-4">
+          <Button variant="outline" size="icon" onClick={onBack} className="shrink-0 rounded-full border-border/60 bg-background/50">
+            <ArrowLeft className="h-5 w-5" />
           </Button>
-        )}
-      </motion.div>
-
-      {/* Suggestion Cards (> 60%) */}
-      {isAbove60 && suggestions.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {suggestions.slice(0, 4).map((sug, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + i * 0.1 }}
-              className="liquid-glass rounded-xl p-5 hover:bg-white/5 transition-all cursor-pointer ai-glow-subtle group"
-            >
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-green-500/20">
-                  <Star className="w-5 h-5 text-green-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-foreground text-sm">{isRTL ? (sug.textAr || sug.text) : sug.text}</p>
-                  {typeof sug.impact === 'number' && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-xs text-green-400">+{Math.round(sug.impact)}% {isRTL ? 'تأثير' : 'impact'}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))}
+          <div className="space-y-2">
+            <div className="text-[11px] uppercase tracking-[0.4em] text-muted-foreground">
+              {isRTL ? 'تفاصيل المحاكاة' : 'Simulation details'}
+            </div>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+              {isRTL ? (simulation.nameAr || simulation.name) : simulation.name}
+            </h1>
+            <p className="text-sm leading-7 text-muted-foreground">
+              {[isRTL ? (simulation.locationAr || simulation.location) : simulation.location, simulation.category].filter(Boolean).join(' • ')}
+            </p>
+          </div>
         </div>
-      )}
-
-      {/* Improvement Cards (< 60%) */}
-      {!isAbove60 && suggestions.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {suggestions.map((sug, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + i * 0.1 }}
-              className="liquid-glass rounded-xl p-5 hover:bg-white/5 transition-all cursor-pointer group"
-            >
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-yellow-500/20">
-                  <Lightbulb className="w-5 h-5 text-yellow-400" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-foreground text-sm">{isRTL ? (sug.textAr || sug.text) : sug.text}</p>
-                  {typeof sug.impact === 'number' && (
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-xs text-yellow-400">+{Math.round(sug.impact)}% {isRTL ? 'تحسين متوقع' : 'expected improvement'}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          ))}
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="outline">{simulation.status}</Badge>
+          <Badge variant="outline">{theme === 'dark' ? 'Charcoal dark' : 'Light mode'}</Badge>
         </div>
-      )}
+      </header>
 
-      {/* AI Chat */}
-      <AnimatePresence>
-        {showChat && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="liquid-glass rounded-2xl overflow-hidden ai-glow-card"
-          >
-            <div className="p-4 border-b border-border/50 flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-cyan-500/20 ai-glow-subtle">
-                <Bot className="w-5 h-5 text-cyan-400" />
-              </div>
+      <section className="architect-panel p-6">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+              {isRTL ? 'الملخص' : 'Summary'}
+            </div>
+            <h2 className="mt-2 text-xl font-semibold text-foreground">
+              {isRTL ? 'قراءة سريعة' : 'Quick read'}
+            </h2>
+          </div>
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-foreground">
+            <Brain className="h-5 w-5" />
+          </div>
+        </div>
+        <p className="mt-4 max-w-4xl text-sm leading-8 text-muted-foreground">{summaryText}</p>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {stats.map((stat) => (
+          <MetricTile key={stat.label} label={stat.label} value={stat.value} icon={stat.icon} tone={stat.tone} />
+        ))}
+      </section>
+
+      <div className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+        <div className="space-y-6">
+          <section className="architect-panel p-6">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <h3 className="font-bold text-foreground">
-                  {isRTL ? 'المساعد الذكي' : 'AI Assistant'}
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  {isRTL ? 'هنا عشان أساعدك - اسألني أي حاجة!' : 'Here to help - ask me anything!'}
-                </p>
+                <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                  {isRTL ? 'القبول' : 'Acceptance'}
+                </div>
+                <h2 className="mt-2 text-xl font-semibold text-foreground">
+                  {isRTL ? 'نسبة القبول' : 'Acceptance rate'}
+                </h2>
+              </div>
+              <Badge variant="outline">{Math.round(acceptanceRate)}%</Badge>
+            </div>
+            <div className="mt-5 space-y-3">
+              <Progress value={acceptanceRate} className="h-3" />
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>0%</span>
+                <span>{isRTL ? '60%' : '60%'}</span>
+                <span>100%</span>
               </div>
             </div>
+          </section>
 
-            <div className="max-h-80 overflow-y-auto p-4 space-y-4">
-              {chatMessages.length === 0 && (
-                <div className="text-center py-8">
-                  <Sparkles className="w-10 h-10 mx-auto text-cyan-400/50 mb-3" />
-                  <p className="text-sm text-muted-foreground">
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card className="architect-panel border-0">
+              <CardContent className="p-6">
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
+                  <ThumbsUp className="h-5 w-5 text-emerald-400" />
+                  {isRTL ? 'نقاط القوة' : 'Strengths'}
+                </h3>
+                <ul className="space-y-3">
+                  {pros.length ? pros.map((p, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm leading-7 text-muted-foreground">
+                      <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />
+                      <span>{isRTL ? (p.textAr || p.text) : p.text}</span>
+                    </li>
+                  )) : (
+                    <li className="text-sm text-muted-foreground">
+                      {isRTL ? 'لا توجد نقاط قوة مستخرجة بعد.' : 'No strengths extracted yet.'}
+                    </li>
+                  )}
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="architect-panel border-0">
+              <CardContent className="p-6">
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-foreground">
+                  <ThumbsDown className="h-5 w-5 text-rose-400" />
+                  {isRTL ? 'نقاط الضعف' : 'Weaknesses'}
+                </h3>
+                <ul className="space-y-3">
+                  {cons.length ? cons.map((c, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm leading-7 text-muted-foreground">
+                      <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-rose-400" />
+                      <span>{isRTL ? (c.textAr || c.text) : c.text}</span>
+                    </li>
+                  )) : (
+                    <li className="text-sm text-muted-foreground">
+                      {isRTL ? 'لا توجد نقاط ضعف مستخرجة بعد.' : 'No weaknesses extracted yet.'}
+                    </li>
+                  )}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+
+          <section className={cn('architect-panel p-6', isAbove60 ? 'ring-1 ring-emerald-500/20' : 'ring-1 ring-amber-500/20')}>
+            <div className="flex items-start gap-4">
+              <div className={cn('flex h-12 w-12 items-center justify-center rounded-full', isAbove60 ? 'bg-emerald-500/10' : 'bg-amber-500/10')}>
+                {isAbove60 ? <Rocket className="h-6 w-6 text-emerald-400" /> : <Lightbulb className="h-6 w-6 text-amber-400" />}
+              </div>
+              <div className="space-y-3">
+                <h2 className="text-2xl font-semibold text-foreground">
+                  {isAbove60
+                    ? (isRTL ? 'خلينا نحول فكرتك لحقيقة' : 'Let’s bring your idea to real life')
+                    : (isRTL ? 'خلينا نخلي فكرتك مقبولة' : 'Let’s make your idea acceptable')}
+                </h2>
+                <p className="max-w-3xl text-sm leading-7 text-muted-foreground">
+                  {isAbove60
+                    ? (isRTL ? 'نسبة القبول عالية. اسأل عن خطة البداية أو تفاصيل التشغيل.' : 'Acceptance is high. Ask for a launch plan or operational details.')
+                    : (isRTL ? 'بتعديلات بسيطة ممكن نرفع نسبة القبول.' : 'Small edits can raise acceptance quickly.')}
+                </p>
+                {!showChat ? (
+                  <Button onClick={() => setShowChat(true)} className="architect-button-primary">
+                    <MessageCircle className="mr-2 h-4 w-4" />
                     {isAbove60
-                      ? (isRTL ? 'اسألني عن خطة البداية أو البحث العميق!' : 'Ask me about your launch plan or deep research!')
-                      : (isRTL ? 'اسألني إزاي تحسن فكرتك!' : 'Ask me how to improve your idea!')}
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-2 mt-4">
-                    {(isAbove60
-                      ? [
-                          { text: isRTL ? 'إزاي أبدأ؟' : 'How do I start?', key: 'start' },
-                          { text: isRTL ? 'بحث عميق' : 'Deep research', key: 'research' },
-                        ]
-                      : [
-                          { text: isRTL ? 'إزاي أحسن؟' : 'How to improve?', key: 'improve' },
-                          { text: isRTL ? 'ليه النسبة منخفضة؟' : 'Why is it low?', key: 'why' },
-                        ]
-                    ).map((q) => (
-                      <Button
-                        key={q.key}
-                        variant="outline"
-                        size="sm"
-                        className="rounded-full text-xs"
-                        onClick={() => handleSendMessage(q.text)}
-                      >
-                        {q.text}
-                      </Button>
-                    ))}
+                      ? (isRTL ? 'تحدث مع المساعد' : 'Chat with assistant')
+                      : (isRTL ? 'اسأل عن التحسينات' : 'Ask for improvements')}
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+          </section>
+
+          {suggestions.length > 0 ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              {suggestions.slice(0, isAbove60 ? 4 : suggestions.length).map((sug, i) => (
+                <div key={i} className="architect-panel p-5">
+                  <div className="flex items-start gap-3">
+                    <div className={cn('flex h-10 w-10 items-center justify-center rounded-full', isAbove60 ? 'bg-emerald-500/10' : 'bg-amber-500/10')}>
+                      {isAbove60 ? <Sparkles className="h-4 w-4 text-emerald-400" /> : <Lightbulb className="h-4 w-4 text-amber-400" />}
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm leading-7 text-foreground">{isRTL ? (sug.textAr || sug.text) : sug.text}</p>
+                      {typeof sug.impact === 'number' ? (
+                        <div className="mt-2 text-xs text-muted-foreground">
+                          {isAbove60
+                            ? `+${Math.round(sug.impact)}% ${isRTL ? 'تأثير' : 'impact'}`
+                            : `+${Math.round(sug.impact)}% ${isRTL ? 'تحسين متوقع' : 'expected improvement'}`}
+                        </div>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
-              )}
-
-              {chatMessages.map((msg) => (
-                <motion.div
-                  key={msg.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={cn(
-                    "flex gap-3",
-                    msg.role === 'user' ? "justify-end" : "justify-start"
-                  )}
-                >
-                  {msg.role === 'ai' && (
-                    <div className="p-2 rounded-full bg-cyan-500/20 h-fit ai-glow-subtle">
-                      <Bot className="w-4 h-4 text-cyan-400" />
-                    </div>
-                  )}
-                  <div className={cn(
-                    "max-w-[80%] p-4 rounded-2xl text-sm whitespace-pre-wrap",
-                    msg.role === 'user'
-                      ? "bg-foreground text-background rounded-br-sm"
-                      : "liquid-glass rounded-bl-sm"
-                  )}>
-                    {msg.content}
-                  </div>
-                  {msg.role === 'user' && (
-                    <div className="p-2 rounded-full bg-foreground/10 h-fit">
-                      <User className="w-4 h-4 text-foreground" />
-                    </div>
-                  )}
-                </motion.div>
               ))}
-              <div ref={chatEndRef} />
             </div>
+          ) : null}
+        </div>
 
-            <div className="p-4 border-t border-border/50 flex gap-2">
-              <Input
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder={isRTL ? 'اكتب رسالتك...' : 'Type your message...'}
-                className="flex-1 bg-secondary/50 border-border/50"
-              />
-              <Button onClick={handleSendMessage} disabled={!chatInput.trim() || chatLoading} size="icon" className="ai-glow-button">
-                <Send className="w-4 h-4" />
+        <div className="space-y-6">
+          {showChat ? (
+            <section className="architect-panel overflow-hidden">
+              <div className="flex items-center gap-3 px-6 pt-6">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-foreground">
+                  <Bot className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                    {isRTL ? 'المساعد الذكي' : 'AI assistant'}
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    {isRTL ? 'اسأل عن النتائج أو خطة التحسين.' : 'Ask about the results or the next move.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="max-h-[420px] space-y-4 overflow-y-auto px-6 py-5">
+                {chatMessages.length === 0 ? (
+                  <div className="rounded-2xl bg-background/45 p-5 text-center">
+                    <Sparkles className="mx-auto h-8 w-8 text-foreground/70" />
+                    <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                      {isAbove60
+                        ? (isRTL ? 'اسأل عن خطة البداية أو البحث العميق.' : 'Ask about the launch plan or a deeper review.')
+                        : (isRTL ? 'اسأل عن كيف ترفع القبول.' : 'Ask how to raise acceptance.')}
+                    </p>
+                    <div className="mt-4 flex flex-wrap justify-center gap-2">
+                      {(isAbove60
+                        ? [
+                            { text: isRTL ? 'كيف أبدأ؟' : 'How do I start?' },
+                            { text: isRTL ? 'خطة الإطلاق' : 'Launch plan' },
+                          ]
+                        : [
+                            { text: isRTL ? 'كيف أحسنها؟' : 'How do I improve it?' },
+                            { text: isRTL ? 'لماذا منخفضة؟' : 'Why is it low?' },
+                          ]
+                      ).map((item) => (
+                        <Button key={item.text} variant="outline" size="sm" className="rounded-full" onClick={() => handleSendMessage(item.text)}>
+                          {item.text}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {chatMessages.map((msg) => (
+                  <div key={msg.id} className={cn('flex gap-3', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
+                    {msg.role === 'ai' ? (
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-foreground">
+                        <Bot className="h-4 w-4" />
+                      </div>
+                    ) : null}
+                    <div className={cn(
+                      'max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-7 whitespace-pre-wrap',
+                      msg.role === 'user' ? 'bg-foreground text-background' : 'bg-background/45 text-foreground'
+                    )}>
+                      {msg.content}
+                    </div>
+                    {msg.role === 'user' ? (
+                      <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-foreground">
+                        <User className="h-4 w-4" />
+                      </div>
+                    ) : null}
+                  </div>
+                ))}
+                <div ref={chatEndRef} />
+              </div>
+
+              <div className="flex gap-2 border-t border-border/50 p-4">
+                <Input
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                  placeholder={isRTL ? 'اكتب رسالتك...' : 'Type your message...'}
+                  className="architect-input flex-1"
+                />
+                <Button onClick={handleSendMessage} disabled={!chatInput.trim() || chatLoading} size="icon" className="architect-button-primary">
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </section>
+          ) : (
+            <section className="architect-panel p-6">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-foreground">
+                  <Bot className="h-4 w-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+                    {isRTL ? 'المساعد الذكي' : 'AI assistant'}
+                  </h3>
+                </div>
+              </div>
+              <p className="mt-4 text-sm leading-7 text-muted-foreground">
+                {isRTL ? 'افتح المحادثة لطرح أسئلة على نتيجة المحاكاة.' : 'Open the assistant to ask about the simulation result.'}
+              </p>
+              <Button onClick={() => setShowChat(true)} className="mt-4 architect-button-primary">
+                <MessageCircle className="mr-2 h-4 w-4" />
+                {isRTL ? 'فتح المحادثة' : 'Open chat'}
               </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </section>
+          )}
 
-      {/* Re-run Simulation Prompt */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="liquid-glass rounded-2xl p-6 text-center ai-glow-subtle"
-      >
-        <RefreshCw className="w-8 h-8 mx-auto text-cyan-400 mb-3" />
-        <h3 className="text-lg font-bold text-foreground mb-2">
-          {isRTL ? 'عايز تجرب محاكاة جديدة بالتحديثات دي؟' : 'Want to run a new simulation with these updates?'}
-        </h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          {isRTL
-            ? `🎯 أعد المحاكاة بعد تعديل الفكرة لمقارنة النتائج`
-            : `🎯 Re-run after adjusting the idea to compare results`}
-        </p>
-        <Button onClick={() => onRerun(simulation.id)} className="ai-glow-button liquid-glass-button px-8 py-5 text-base">
-          <RefreshCw className="w-4 h-4 mr-2" />
-          {isRTL ? 'إعادة المحاكاة' : 'Re-run Simulation'}
-        </Button>
-      </motion.div>
+          <section className="architect-panel p-6 text-center">
+            <RefreshCw className="mx-auto h-8 w-8 text-foreground/70" />
+            <h3 className="mt-3 text-lg font-semibold text-foreground">
+              {isRTL ? 'تشغيل محاكاة جديدة' : 'Run a new simulation'}
+            </h3>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">
+              {isRTL ? 'أعد التشغيل بعد التعديلات لمقارنة النتائج.' : 'Re-run after edits to compare the results.'}
+            </p>
+            <Button onClick={() => onRerun(simulation.id)} className="mt-4 architect-button-primary">
+              <RefreshCw className="mr-2 h-4 w-4" />
+              {isRTL ? 'إعادة المحاكاة' : 'Re-run simulation'}
+            </Button>
+          </section>
+        </div>
+      </div>
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

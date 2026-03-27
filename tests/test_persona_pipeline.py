@@ -252,6 +252,64 @@ class PersonaPipelineTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(all(row.get("purchase_trigger") for row in rows))
         self.assertTrue(all(row.get("rejection_trigger") for row in rows))
 
+    async def test_run_auto_completes_persona_shortfall_before_blocking_simulation(self) -> None:
+        runtime = SimpleNamespace(
+            dataset=None,
+            llm=SimpleNamespace(generate_json=AsyncMock(return_value={})),
+            event_bus=SimpleNamespace(publish=AsyncMock(return_value=None)),
+            repository=None,
+        )
+        agent = PersonaAgent(runtime)
+        state = _state()
+        state.research = _research_report()
+        state.search_completed = True
+        state.persona_source_mode = PersonaSourceMode.GENERATE_NEW_FROM_SEARCH.value
+        state.persona_source_auto_selected = True
+
+        sparse_personas = []
+        for index in range(6):
+            persona = _persona(index)
+            persona.target_audience_cluster = "Working Parents"
+            persona.segment_id = "working-parents"
+            sparse_personas.append(persona)
+
+        sparse_signal_plan = _signal_plan()
+        sparse_signal_plan["audience_clusters"] = [dict(_signal_plan()["audience_clusters"][0])]
+        sparse_signal_plan["dynamic_segments"] = [dict(_signal_plan()["audience_clusters"][0])]
+
+        with patch.object(agent, "_build_signal_plan", AsyncMock(return_value=sparse_signal_plan)), patch.object(
+            agent,
+            "_generate_personas",
+            AsyncMock(
+                return_value=(
+                    sparse_personas,
+                    {
+                        "message": "Initial persona pass produced only a sparse set.",
+                        "quality_score": 0.41,
+                        "confidence_score": 0.44,
+                        "duplicate_rejection_count": 0,
+                        "batch_size": 10,
+                        "batch_count": 1,
+                        "source_summary": "Sparse research output.",
+                        "evidence_signals": list(sparse_signal_plan["evidence_signals"]),
+                        "user_types": list(sparse_signal_plan["user_types"]),
+                        "complaints": list(sparse_signal_plan["complaints"]),
+                        "behaviors": list(sparse_signal_plan["behaviors"]),
+                        "competition_reactions": list(sparse_signal_plan["competition_reactions"]),
+                        "quality_meta": {"coverage": "low"},
+                    },
+                )
+            ),
+        ):
+            await agent.run(state)
+
+        validation = dict((state.persona_generation_debug or {}).get("validation") or {})
+        auto_completion = dict((state.persona_generation_debug or {}).get("auto_completion") or {})
+        self.assertTrue(auto_completion.get("attempted"))
+        self.assertGreaterEqual(len(state.personas), state.schema.get("minimum_persona_threshold", 15))
+        self.assertEqual(validation.get("simulation_blockers"), [])
+        self.assertGreaterEqual(len({persona.segment_id for persona in state.personas if persona.segment_id}), 3)
+
     def test_pipeline_blockers_use_validation_snapshot(self) -> None:
         state = _state()
         state.search_completed = True

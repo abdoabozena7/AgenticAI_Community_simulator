@@ -27,13 +27,13 @@ const STAGE_LABELS: Record<BusyStage, { ar: string; en: string }> = {
   detecting_mode: { ar: 'نحدد مسار التنفيذ', en: 'Detecting the execution flow' },
   assistant_reply: { ar: 'نحضّر الرد التالي', en: 'Preparing the next reply' },
   prestart_research: { ar: 'نحضّر البحث الإلزامي', en: 'Preparing mandatory research' },
-  starting_simulation: { ar: 'نطلق خط أنابيب التنفيذ', en: 'Launching the execution pipeline' },
+  starting_simulation: { ar: 'نبدأ مسار التنفيذ', en: 'Launching the execution pipeline' },
   checking_session: { ar: 'نتأكد من الجلسة الحالية', en: 'Checking the current session' },
 };
 
 const FALLBACK_BY_STATUS = {
   idle: { ar: 'جاهز للمتابعة', en: 'Ready to continue', tone: 'idle' as const },
-  running: { ar: 'خط التنفيذ يعمل الآن', en: 'The execution pipeline is running', tone: 'info' as const },
+  running: { ar: 'مسار التنفيذ جارٍ الآن', en: 'The execution pipeline is running', tone: 'info' as const },
   paused: { ar: 'التنفيذ متوقف مؤقتًا', en: 'Execution is paused', tone: 'warning' as const },
   completed: { ar: 'اكتملت المحاكاة', en: 'Simulation completed', tone: 'success' as const },
   error: { ar: 'يوجد خطأ يحتاج مراجعة', en: 'There is an issue that needs review', tone: 'error' as const },
@@ -41,10 +41,10 @@ const FALLBACK_BY_STATUS = {
 
 const EMPTY_COPY = {
   ar: {
-    screenTitle: 'خط أنابيب تقييم الفكرة',
+    screenTitle: 'مسار تقييم الفكرة',
     graphTitle: 'خريطة الحوار بين الوكلاء',
     graphDescription: 'توضح كيف تنتقل الآراء بين الوكلاء أثناء النقاش.',
-    graphEmptyTitle: 'ستظهر خريطة الحوار بعد اكتمال خط الأنابيب وبدء النقاش',
+    graphEmptyTitle: 'ستظهر خريطة الحوار بعد اكتمال المسار وبدء النقاش',
     graphEmptyDescription: 'ابدأ التشغيل ليتم تنفيذ البحث ثم بناء الشخصيات قبل النقاش.',
     metricsHeadline: 'مؤشرات القرار',
     metricsDescription: 'ملخص سريع يساعدك على فهم اتجاه التقييم الآن.',

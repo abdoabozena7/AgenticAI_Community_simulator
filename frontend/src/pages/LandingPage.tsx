@@ -2,6 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { apiService, UserMe } from "@/services/api";
 import { Input } from "@/components/ui/input";
+import type { CSSProperties } from "react";
 
 const ideaList = [
   {
@@ -65,6 +66,52 @@ const templates = [
     },
   },
 ];
+
+const getArchitectShellVars = (theme: "dark" | "light"): CSSProperties => (
+  theme === "dark"
+    ? ({
+        "--background": "0 0% 4%",
+        "--foreground": "40 20% 96%",
+        "--card": "0 0% 7%",
+        "--card-foreground": "40 20% 96%",
+        "--popover": "0 0% 7%",
+        "--popover-foreground": "40 20% 96%",
+        "--primary": "40 20% 96%",
+        "--primary-foreground": "0 0% 4%",
+        "--secondary": "0 0% 11%",
+        "--secondary-foreground": "40 20% 96%",
+        "--muted": "0 0% 11%",
+        "--muted-foreground": "0 0% 68%",
+        "--accent": "0 0% 12%",
+        "--accent-foreground": "40 20% 96%",
+        "--destructive": "0 62.8% 55.6%",
+        "--destructive-foreground": "0 0% 98%",
+        "--border": "0 0% 16%",
+        "--input": "0 0% 14%",
+        "--ring": "40 20% 96%",
+      } as CSSProperties)
+    : ({
+        "--background": "0 0% 97%",
+        "--foreground": "230 46% 14%",
+        "--card": "0 0% 100%",
+        "--card-foreground": "230 46% 14%",
+        "--popover": "0 0% 100%",
+        "--popover-foreground": "230 46% 14%",
+        "--primary": "230 46% 14%",
+        "--primary-foreground": "0 0% 98%",
+        "--secondary": "0 0% 92%",
+        "--secondary-foreground": "230 46% 14%",
+        "--muted": "0 0% 92%",
+        "--muted-foreground": "230 15% 40%",
+        "--accent": "0 0% 90%",
+        "--accent-foreground": "230 46% 14%",
+        "--destructive": "0 72% 48%",
+        "--destructive-foreground": "0 0% 98%",
+        "--border": "0 0% 84%",
+        "--input": "0 0% 84%",
+        "--ring": "230 46% 14%",
+      } as CSSProperties)
+);
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -272,7 +319,11 @@ const LandingPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0b0b12] text-white">
+      <div
+        className="architect-shell min-h-screen flex items-center justify-center bg-background text-foreground"
+        style={getArchitectShellVars(appSettings.theme)}
+        dir={appSettings.language === "ar" ? "rtl" : "ltr"}
+      >
         {t("Loading dashboard...", "جارٍ تحميل لوحة التحكم...")}
       </div>
     );
@@ -280,16 +331,24 @@ const LandingPage = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0b0b12] text-white">
+      <div
+        className="architect-shell min-h-screen flex items-center justify-center bg-background text-foreground"
+        style={getArchitectShellVars(appSettings.theme)}
+        dir={appSettings.language === "ar" ? "rtl" : "ltr"}
+      >
         {t("Session not found.", "لم يتم العثور على الجلسة.")}
       </div>
     );
   }
 
   return (
-    <div className="font-display h-screen bg-[#0b0b12] text-white overflow-hidden">
+    <div
+      className="architect-shell font-display min-h-screen overflow-hidden bg-background text-foreground"
+      style={getArchitectShellVars(appSettings.theme)}
+      dir={appSettings.language === "ar" ? "rtl" : "ltr"}
+    >
       <div className="flex h-full">
-        <aside className="w-[280px] shrink-0 border-r border-white/10 bg-[#0e0f14] flex flex-col px-4 py-6 overflow-y-auto scrollbar-thin">
+        <aside className="w-[280px] shrink-0 border-r border-border bg-card/92 flex flex-col px-4 py-6 overflow-y-auto scrollbar-thin">
           <div className="flex items-center justify-between mb-6">
             <div className="relative">
                 <button
@@ -297,7 +356,7 @@ const LandingPage = () => {
                 type="button"
                 onClick={() => setShowProfileMenu((prev) => !prev)}
                 aria-label="Open profile menu"
-                className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-300 via-cyan-300 to-amber-200 overflow-hidden flex items-center justify-center text-xs font-semibold text-slate-900"
+                className="h-10 w-10 rounded-full bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] overflow-hidden flex items-center justify-center text-xs font-semibold text-foreground"
                 >
                 {profileSettings.photo && !photoError ? (
                   <img
@@ -314,7 +373,7 @@ const LandingPage = () => {
               {showProfileMenu && (
                 <div
                   ref={menuRef}
-                  className={`absolute mt-2 w-48 rounded-xl border border-white/10 bg-[#15161c] p-2 text-sm shadow-xl ${appSettings.language === "ar" ? "right-0" : "left-0"}`}
+                  className={`absolute mt-2 w-48 rounded-xl border border-border bg-card/96 p-2 text-sm shadow-xl ${appSettings.language === "ar" ? "right-0" : "left-0"}`}
                 >
                   <button
                     type="button"
@@ -322,7 +381,7 @@ const LandingPage = () => {
                       setShowProfileMenu(false);
                       navigate("/settings");
                     }}
-                    className="w-full rounded-lg px-3 py-2 text-left text-white/80 hover:bg-white/10"
+                    className="w-full rounded-lg px-3 py-2 text-left text-foreground/82 hover:bg-white/5"
                   >
                     {t("Settings", "الإعدادات")}
                   </button>
@@ -332,14 +391,14 @@ const LandingPage = () => {
                       setShowProfileMenu(false);
                       navigate("/bonus");
                     }}
-                    className="w-full rounded-lg px-3 py-2 text-left text-white/80 hover:bg-white/10"
+                    className="w-full rounded-lg px-3 py-2 text-left text-foreground/82 hover:bg-white/5"
                   >
                     {t("Bonus (coming soon)", "المكافآت (قريبًا)")}
                   </button>
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="w-full rounded-lg px-3 py-2 text-left text-white/80 hover:bg-white/10"
+                    className="w-full rounded-lg px-3 py-2 text-left text-foreground/82 hover:bg-white/5"
                   >
                     {t("Log out", "تسجيل الخروج")}
                   </button>
@@ -353,36 +412,36 @@ const LandingPage = () => {
           <div className="mt-6 space-y-2 text-sm">
             <button
               type="button"
-              className="flex w-full items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-left"
+              className="flex w-full items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-left text-foreground"
             >
               {t("Home", "الرئيسية")}
             </button>
             <button
               type="button"
               onClick={() => navigate("/simulate")}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-white/70 hover:bg-white/5"
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-foreground/70 hover:bg-white/5"
             >
               {t("Simulation", "المحاكاة")}
             </button>
             <button
               type="button"
               onClick={() => navigate("/research")}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-white/70 hover:bg-white/5"
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-foreground/70 hover:bg-white/5"
             >
               {t("Research", "الأبحاث")}
             </button>
             <button
               type="button"
               onClick={() => navigate("/court")}
-              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-white/70 hover:bg-white/5"
+              className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-foreground/70 hover:bg-white/5"
             >
               {t("Idea Court", "محكمة الأفكار")}
             </button>
           </div>
 
           <div className="mt-8">
-            <div className="text-xs uppercase tracking-[0.25em] text-white/40">{t("Ideas", "الأفكار")}</div>
-            <div className="mt-3 space-y-1 text-sm text-white/70">
+            <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">{t("Ideas", "الأفكار")}</div>
+            <div className="mt-3 space-y-1 text-sm text-foreground/72">
               {ideaList.map((idea) => (
                 <button
                   key={idea.title.en}
@@ -397,25 +456,25 @@ const LandingPage = () => {
             <button
               type="button"
               onClick={() => navigate("/simulate")}
-              className="mt-3 text-xs text-white/60 hover:text-white"
+              className="mt-3 text-xs text-muted-foreground hover:text-foreground"
             >
               {t("All ideas", "كل الأفكار")}
             </button>
           </div>
 
           <div className="mt-auto space-y-4 pt-6">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <div className="text-xs uppercase tracking-[0.2em] text-white/50">{t("Credits", "الرصيد")}</div>
+            <div className="rounded-2xl border border-border bg-card/88 p-4">
+              <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{t("Credits", "الرصيد")}</div>
               <div className="mt-2 text-2xl font-semibold">{user.credits}</div>
               {typeof user.daily_tokens_used === "number" && typeof user.daily_tokens_limit === "number" ? (
-                <div className="mt-1 text-xs text-white/50">
+                <div className="mt-1 text-xs text-muted-foreground">
                   {t("Daily tokens", "التوكنز اليومية")}{' '}
                   <span dir="ltr">
                     {user.daily_tokens_used} / {user.daily_tokens_limit}
                   </span>
                 </div>
               ) : (typeof user.daily_usage === "number" && typeof user.daily_limit === "number" && (
-                <div className="mt-1 text-xs text-white/50">
+                <div className="mt-1 text-xs text-muted-foreground">
                   {t("Daily usage", "الاستخدام اليومي")}{' '}
                   <span dir="ltr">
                     {user.daily_usage} / {user.daily_limit}
@@ -427,7 +486,7 @@ const LandingPage = () => {
             <button
               type="button"
               onClick={() => navigate("/bonus")}
-              className="w-full rounded-full border border-white/20 py-2 text-sm text-white/80"
+              className="w-full rounded-full border border-border bg-card py-2 text-sm text-foreground/82 hover:bg-white/5"
             >
               {t("Buy credits", "شراء رصيد")}
             </button>
@@ -435,10 +494,10 @@ const LandingPage = () => {
         </aside>
 
         <main className="relative flex-1 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.55),_transparent_55%),radial-gradient(circle_at_bottom,_rgba(236,72,153,0.65),_transparent_50%),linear-gradient(180deg,_#0b0b12_0%,_#0f111a_100%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.05),_transparent_45%),radial-gradient(circle_at_bottom,_rgba(255,255,255,0.025),_transparent_42%),linear-gradient(180deg,_rgba(8,8,8,1)_0%,_rgba(14,14,14,1)_100%)]" />
           <div className="relative z-10 h-full overflow-y-auto px-10 py-10 scrollbar-thin">
             {creditNotice && (
-              <div className="mb-6 rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-100 flex flex-wrap items-center justify-between gap-3">
+              <div className="mb-6 rounded-2xl border border-amber-500/20 bg-amber-500/8 px-4 py-3 text-sm text-amber-100 flex flex-wrap items-center justify-between gap-3">
                 <span>{creditNotice}</span>
                 <button
                   type="button"
@@ -450,19 +509,19 @@ const LandingPage = () => {
               </div>
             )}
             <div className="flex items-center justify-center">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs text-white/70">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-foreground/72">
                 {t("New", "جديد")}
-                <span className="text-white/90">{t("Introducing Agentic Lab Pro", "نقدّم Agentic Lab Pro")}</span>
+                <span className="text-foreground/92">{t("Introducing Agentic Lab Pro", "نقدّم Agentic Lab Pro")}</span>
               </div>
             </div>
 
-            <h1 className="mt-6 text-center text-4xl font-semibold text-white md:text-5xl">
+            <h1 className="mt-6 text-center text-4xl font-semibold text-foreground md:text-5xl">
               {t(`Lets build something, ${displayName}`, `خلّينا نبني شيئًا مميزًا، ${displayName}`)}
             </h1>
 
             <div className="mt-8 flex justify-center">
-              <div className="w-full max-w-4xl rounded-[28px] border border-white/15 bg-black/60 p-6 shadow-2xl backdrop-blur-xl">
-                <div className="text-sm text-white/60">{t("Ask Agentic to simulate a launch for", "اطلب من Agentic محاكاة إطلاق لـ")}</div>
+              <div className="w-full max-w-4xl rounded-[28px] border border-white/10 bg-card/88 p-6 shadow-[0_20px_40px_-32px_rgba(0,0,0,0.7)] backdrop-blur-xl">
+                <div className="text-sm text-muted-foreground">{t("Ask Agentic to simulate a launch for", "اطلب من Agentic محاكاة إطلاق لـ")}</div>
                 <div className="mt-4 flex flex-col gap-4 md:flex-row md:items-center">
                   <button
                     type="button"
@@ -471,7 +530,7 @@ const LandingPage = () => {
                       setShowIdeaActions((prev) => !prev);
                     }}
                     disabled={!quickIdea.trim()}
-                    className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-white/5 text-lg text-white/80 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/5 text-lg text-foreground/80 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     +
                   </button>
@@ -479,10 +538,10 @@ const LandingPage = () => {
                     value={quickIdea}
                     onChange={(event) => setQuickIdea(event.target.value)}
                     placeholder={t("Describe your idea", "صِف فكرتك")}
-                    className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/30"
+                    className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-white/20"
                   />
                   <div className="flex items-center gap-4">
-                    <span className="text-xs uppercase tracking-[0.3em] text-white/50">{t("Plan", "الخطة")}</span>
+                    <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{t("Plan", "الخطة")}</span>
                     <button
                       type="button"
                       onClick={() => {
@@ -490,7 +549,7 @@ const LandingPage = () => {
                         setShowIdeaActions((prev) => !prev);
                       }}
                       disabled={!quickIdea.trim()}
-                      className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-900 shadow-lg shadow-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-900 shadow-lg shadow-white/10 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       -{'>'}
                     </button>
@@ -499,31 +558,31 @@ const LandingPage = () => {
 
                 {showIdeaActions && quickIdea.trim() && (
                   <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <div className="text-xs uppercase tracking-[0.3em] text-white/50">{t("Next steps", "الخطوات التالية")}</div>
+                    <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{t("Next steps", "الخطوات التالية")}</div>
                     <div className="mt-3 space-y-2">
                       <button
                         type="button"
                         onClick={() => handleStartSimulation()}
-                        className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white/90 hover:border-white/30"
+                        className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-black/45 px-4 py-3 text-sm text-foreground/92 hover:border-white/25"
                       >
                         <span>{t("1 - Simulate your idea", "1 - حاكِ فكرتك")}</span>
-                        <span className="text-xs text-white/40">{t("Start", "ابدأ")}</span>
+                        <span className="text-xs text-muted-foreground">{t("Start", "ابدأ")}</span>
                       </button>
                       <button
                         type="button"
                         onClick={handleIdeaCourt}
-                        className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-black/40 px-4 py-3 text-sm text-white/90 hover:border-white/30"
+                        className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-black/45 px-4 py-3 text-sm text-foreground/92 hover:border-white/25"
                       >
                         <span>{t("2 - Take it to court", "2 - اعرضها على محكمة الأفكار")}</span>
-                        <span className="text-xs text-white/40">{t("Debate", "نقاش")}</span>
+                        <span className="text-xs text-muted-foreground">{t("Debate", "نقاش")}</span>
                       </button>
                       <button
                         type="button"
                         disabled
-                        className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/60 opacity-60"
+                        className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-muted-foreground opacity-60"
                       >
                         <span>{t("3 - Simulate your project live (virtual)", "3 - حاكِ مشروعك مباشرة (افتراضي)")}</span>
-                        <span className="text-xs text-white/40">{t("Coming soon", "قريبًا")}</span>
+                        <span className="text-xs text-muted-foreground">{t("Coming soon", "قريبًا")}</span>
                       </button>
                     </div>
                   </div>
@@ -531,12 +590,12 @@ const LandingPage = () => {
               </div>
             </div>
 
-            <div className="mt-10 rounded-3xl border border-white/10 bg-black/70 p-6 shadow-2xl backdrop-blur-xl">
+            <div className="mt-10 rounded-3xl border border-white/10 bg-card/88 p-6 shadow-[0_20px_40px_-32px_rgba(0,0,0,0.7)] backdrop-blur-xl">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex flex-wrap gap-2 text-sm text-white/70">
+                <div className="flex flex-wrap gap-2 text-sm text-foreground/72">
                   <button
                     type="button"
-                    className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-white"
+                    className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-foreground"
                   >
                     {t("Recently viewed", "شوهد مؤخرًا")}
                   </button>
@@ -548,7 +607,7 @@ const LandingPage = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/simulate")}
-                  className="text-sm text-white/70 hover:text-white"
+                  className="text-sm text-foreground/72 hover:text-foreground"
                 >
                   {t("Browse all", "تصفّح الكل")} -{'>'}
                 </button>
@@ -561,9 +620,9 @@ const LandingPage = () => {
                     onClick={() => handleStartSimulation(pick(idea.prompt))}
                     className="rounded-2xl border border-white/10 bg-white/5 p-4 text-left hover:border-white/20"
                   >
-                    <div className="text-xs uppercase tracking-[0.3em] text-white/50">{pick(idea.tag)}</div>
-                    <div className="mt-2 text-sm font-semibold text-white">{pick(idea.title)}</div>
-                    <div className="mt-1 text-xs text-white/60">{pick(idea.description)}</div>
+                    <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{pick(idea.tag)}</div>
+                    <div className="mt-2 text-sm font-semibold text-foreground">{pick(idea.title)}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">{pick(idea.description)}</div>
                   </button>
                 ))}
               </div>
@@ -571,7 +630,7 @@ const LandingPage = () => {
 
             <div className="mt-10 grid gap-6 lg:grid-cols-[2fr_1fr]">
               <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-                <div className="text-xs uppercase tracking-[0.3em] text-white/50">{t("Idea templates", "قوالب الأفكار")}</div>
+                <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{t("Idea templates", "قوالب الأفكار")}</div>
                 <div className="mt-4 grid gap-4 md:grid-cols-3">
                   {templates.map((template) => (
                     <button
@@ -580,8 +639,8 @@ const LandingPage = () => {
                       onClick={() => navigate("/simulate")}
                       className="rounded-2xl border border-white/10 bg-white/5 p-4 text-left hover:border-white/20"
                     >
-                      <div className="text-sm font-semibold">{pick(template.title)}</div>
-                      <div className="mt-2 text-xs text-white/60">{pick(template.description)}</div>
+                      <div className="text-sm font-semibold text-foreground">{pick(template.title)}</div>
+                      <div className="mt-2 text-xs text-muted-foreground">{pick(template.description)}</div>
                     </button>
                   ))}
                 </div>
@@ -589,12 +648,12 @@ const LandingPage = () => {
 
               <div className="space-y-6">
                 <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-                  <div className="text-xs uppercase tracking-[0.3em] text-white/50">{t("Redeem code", "استبدال كود")}</div>
+                  <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{t("Redeem code", "استبدال كود")}</div>
                   <Input
                     value={promo}
                     placeholder={t("Enter promo code", "أدخل كود الترويج")}
                     onChange={(event) => setPromo(event.target.value)}
-                    className="mt-3 bg-white/5 border-white/10 text-white placeholder:text-white/40 focus-visible:ring-emerald-300"
+                    className="architect-input mt-3"
                   />
                   <button
                     type="button"
@@ -603,35 +662,35 @@ const LandingPage = () => {
                   >
                     {t("Redeem", "استبدال")}
                   </button>
-                  {redeemMessage && <p className="mt-2 text-xs text-white/60">{redeemMessage}</p>}
+                  {redeemMessage && <p className="mt-2 text-xs text-muted-foreground">{redeemMessage}</p>}
                 </div>
 
                 {user.role === "admin" ? (
                   <button
                     type="button"
                     onClick={() => navigate("/control-center")}
-                    className="w-full rounded-full border border-white/20 py-3 text-sm text-white/80"
+                    className="w-full rounded-full border border-border bg-card py-3 text-sm text-foreground/82 hover:bg-white/5"
                   >
                     {t("Open admin dashboard", "فتح لوحة الإدارة")}
                   </button>
                 ) : (
                   <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-                    <div className="text-xs uppercase tracking-[0.3em] text-white/50">{t("Admin access", "وصول الإدارة")}</div>
+                    <div className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{t("Admin access", "وصول الإدارة")}</div>
                     <Input
                       value={promoteSecret}
                       placeholder={t("Promotion secret", "سر الترقية")}
                       onChange={(event) => setPromoteSecret(event.target.value)}
-                      className="mt-3 bg-white/5 border-white/10 text-white placeholder:text-white/40 focus-visible:ring-emerald-300"
+                      className="architect-input mt-3"
                     />
                     <button
                       type="button"
                       onClick={handlePromote}
                       disabled={promoteBusy}
-                      className="mt-3 w-full rounded-full border border-white/20 py-2 text-sm text-white/80 disabled:opacity-60"
+                      className="mt-3 w-full rounded-full border border-border bg-card py-2 text-sm text-foreground/82 disabled:opacity-60 hover:bg-white/5"
                     >
                       {promoteBusy ? t("Please wait...", "يرجى الانتظار...") : t("Promote", "ترقية")}
                     </button>
-                    {promoteMessage && <p className="mt-2 text-xs text-white/60">{promoteMessage}</p>}
+                    {promoteMessage && <p className="mt-2 text-xs text-muted-foreground">{promoteMessage}</p>}
                   </div>
                 )}
               </div>
@@ -645,4 +704,3 @@ const LandingPage = () => {
 };
 
 export default LandingPage;
-

@@ -15,6 +15,12 @@ import {
 import { useNavigate } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
+import {
+  SystemChip,
+  SystemPanel,
+  SystemStat,
+  systemSectionVariants,
+} from "@/components/system/Architect";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
@@ -36,72 +42,6 @@ type FeedbackItem = {
   kind: "error" | "success";
   message: string;
 };
-
-type PanelProps = {
-  title: string;
-  description: string;
-  icon: React.ComponentType<{ className?: string }>;
-  children: React.ReactNode;
-  className?: string;
-};
-
-const sectionVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: (index: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: index * 0.06,
-      duration: 0.38,
-      ease: "easeOut",
-    },
-  }),
-};
-
-function ArchitectPanel({ title, description, icon: Icon, children, className }: PanelProps) {
-  return (
-    <section className={cn("architect-panel p-5 sm:p-6", className)}>
-      <div className="mb-5 flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="architect-kicker">{title}</p>
-          <p className="mt-2 max-w-xl text-sm leading-7 text-[color:var(--architect-muted)]">{description}</p>
-        </div>
-        <div className="architect-icon-wrap">
-          <Icon className="h-5 w-5" />
-        </div>
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function InfoStat({
-  label,
-  value,
-  detail,
-  tone = "default",
-}: {
-  label: string;
-  value: string;
-  detail: string;
-  tone?: "default" | "accent" | "success";
-}) {
-  return (
-    <div
-      className={cn(
-        "architect-stat-block",
-        tone === "accent" && "architect-stat-block-accent",
-        tone === "success" && "architect-stat-block-success",
-      )}
-    >
-      <p className="architect-kicker">{label}</p>
-      <div className="mt-3 font-['Be_Vietnam_Pro'] text-3xl font-semibold tracking-[-0.04em] text-[color:var(--architect-ink)]">
-        {value}
-      </div>
-      <p className="mt-2 text-sm leading-6 text-[color:var(--architect-muted)]">{detail}</p>
-    </div>
-  );
-}
 
 export function AdminControlCenterContent({ embedded = false }: { embedded?: boolean }) {
   const navigate = useNavigate();
@@ -412,19 +352,19 @@ export function AdminControlCenterContent({ embedded = false }: { embedded?: boo
           initial="hidden"
           animate="visible"
           custom={0}
-          variants={sectionVariants}
+          variants={systemSectionVariants}
           className="architect-hero"
         >
           <div className="grid gap-8 xl:grid-cols-[minmax(0,1.25fr)_20rem] xl:items-start">
             <div>
               <div className="mb-5 flex flex-wrap items-center gap-3">
-                <span className="architect-chip architect-chip-primary">
+                <SystemChip tone="primary">
                   <ShieldCheck className="h-4 w-4" />
                   {t("Control Center", "مركز التحكم")}
-                </span>
-                <span className="architect-chip architect-chip-soft">
+                </SystemChip>
+                <SystemChip tone="soft">
                   {t("Architectural Minimalist", "النسق المعماري الهادئ")}
-                </span>
+                </SystemChip>
               </div>
 
               <h1 className="font-['IBM_Plex_Sans_Arabic','Be_Vietnam_Pro',sans-serif] text-4xl font-semibold leading-[1.18] tracking-[-0.05em] text-[color:var(--architect-ink)] sm:text-5xl">
@@ -471,7 +411,7 @@ export function AdminControlCenterContent({ embedded = false }: { embedded?: boo
             initial="hidden"
             animate="visible"
             custom={1}
-            variants={sectionVariants}
+            variants={systemSectionVariants}
             className="mt-6 grid gap-3"
           >
             {feedbackItems.map((item, index) => (
@@ -493,7 +433,7 @@ export function AdminControlCenterContent({ embedded = false }: { embedded?: boo
             initial="hidden"
             animate="visible"
             custom={2}
-            variants={sectionVariants}
+            variants={systemSectionVariants}
             className="space-y-8"
           >
             <section className="grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.9fr)]">
@@ -535,13 +475,13 @@ export function AdminControlCenterContent({ embedded = false }: { embedded?: boo
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-                <InfoStat
+                <SystemStat
                   label={t("Users", "المستخدمون")}
                   value={String(userCount)}
                   detail={t("Registered identities under active control.", "الهويات المسجلة تحت نطاق الإدارة الحالية.")}
                   tone="accent"
                 />
-                <InfoStat
+                <SystemStat
                   label={t("Average Credits", "متوسط الأرصدة")}
                   value={averageCredits.toFixed(2)}
                   detail={t("Average balance per account.", "متوسط الرصيد لكل حساب داخل النظام.")}
@@ -551,24 +491,24 @@ export function AdminControlCenterContent({ embedded = false }: { embedded?: boo
             </section>
 
             <section className="grid gap-4 lg:grid-cols-3">
-              <InfoStat
+              <SystemStat
                 label={t("Simulations Today", "محاكيات اليوم")}
                 value={String(stats?.used_today ?? 0)}
                 detail={t("Sessions launched in the current day.", "عدد الجلسات التي بدأت خلال اليوم الحالي.")}
               />
-              <InfoStat
+              <SystemStat
                 label={t("Total Simulations", "إجمالي المحاكيات")}
                 value={String(stats?.total_simulations ?? 0)}
                 detail={t("Cumulative simulation runs.", "عدد المحاكيات المنفذة تراكميًا.")}
               />
-              <InfoStat
+              <SystemStat
                 label={t("Free Daily Tokens", "التوكنات اليومية المجانية")}
                 value={String(billing?.free_daily_tokens ?? 0)}
                 detail={t("Current allowance before billing applies.", "الحصة الحالية قبل بدء احتساب الفوترة.")}
               />
             </section>
 
-            <ArchitectPanel
+            <SystemPanel
               title={t("System Pulse", "نبض النظام")}
               description={t(
                 "A concise operator-grade summary of the live usage rhythm and current billing stance.",
@@ -604,9 +544,9 @@ export function AdminControlCenterContent({ embedded = false }: { embedded?: boo
                   </p>
                 </div>
               </div>
-            </ArchitectPanel>
+            </SystemPanel>
 
-            <ArchitectPanel
+            <SystemPanel
               title={t("Users Ledger", "سجل المستخدمين")}
               description={t(
                 "A dense but calm list for balances and access roles, with whitespace replacing dividers.",
@@ -615,13 +555,13 @@ export function AdminControlCenterContent({ embedded = false }: { embedded?: boo
               icon={Users}
             >
               <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                <span className="architect-chip architect-chip-soft">
+                <SystemChip tone="soft">
                   {t(`${users.length} records`, `${users.length} سجل`)}
-                </span>
-                <span className="architect-chip architect-chip-jewel">
+                </SystemChip>
+                <SystemChip tone="jewel">
                   <Coins className="h-4 w-4" />
                   {t(`Total credits ${totalCredits.toFixed(2)}`, `إجمالي الأرصدة ${totalCredits.toFixed(2)}`)}
-                </span>
+                </SystemChip>
               </div>
 
               <div className="architect-ledger-shell">
@@ -665,17 +605,17 @@ export function AdminControlCenterContent({ embedded = false }: { embedded?: boo
                   )}
                 </div>
               </div>
-            </ArchitectPanel>
+            </SystemPanel>
           </motion.main>
 
           <motion.aside
             initial="hidden"
             animate="visible"
             custom={3}
-            variants={sectionVariants}
+            variants={systemSectionVariants}
             className="architect-rail space-y-4"
           >
-            <ArchitectPanel
+            <SystemPanel
               title={t("Billing Controls", "ضبط الفوترة")}
               description={t(
                 "Adjust how token usage converts into credits.",
@@ -719,9 +659,9 @@ export function AdminControlCenterContent({ embedded = false }: { embedded?: boo
                   {billingBusy ? t("Updating...", "جارٍ التحديث...") : t("Update billing", "تحديث الفوترة")}
                 </Button>
               </div>
-            </ArchitectPanel>
+            </SystemPanel>
 
-            <ArchitectPanel
+            <SystemPanel
               title={t("Credits", "الأرصدة")}
               description={t(
                 "Add or deduct balance by username or numeric user ID.",
@@ -756,9 +696,9 @@ export function AdminControlCenterContent({ embedded = false }: { embedded?: boo
                   {creditBusy ? t("Applying...", "جارٍ التطبيق...") : t("Apply credits", "تطبيق الرصيد")}
                 </Button>
               </div>
-            </ArchitectPanel>
+            </SystemPanel>
 
-            <ArchitectPanel
+            <SystemPanel
               title={t("Roles", "الأدوار")}
               description={t(
                 "Change account access levels without leaving the control rail.",
@@ -792,9 +732,9 @@ export function AdminControlCenterContent({ embedded = false }: { embedded?: boo
                   {roleBusy ? t("Updating...", "جارٍ التحديث...") : t("Apply role", "تطبيق الدور")}
                 </Button>
               </div>
-            </ArchitectPanel>
+            </SystemPanel>
 
-            <ArchitectPanel
+            <SystemPanel
               title={t("Usage Reset", "تصفير الاستخدام")}
               description={t(
                 "Reset daily usage counters for one account or the full system.",
@@ -836,9 +776,9 @@ export function AdminControlCenterContent({ embedded = false }: { embedded?: boo
                   </Button>
                 </div>
               </div>
-            </ArchitectPanel>
+            </SystemPanel>
 
-            <ArchitectPanel
+            <SystemPanel
               title={t("Promo Codes", "أكواد الخصم")}
               description={t(
                 "Create reusable or one-off campaign codes with optional expiry.",
@@ -885,7 +825,7 @@ export function AdminControlCenterContent({ embedded = false }: { embedded?: boo
                   {promoBusy ? t("Creating...", "جارٍ الإنشاء...") : t("Create promo code", "إنشاء كود خصم")}
                 </Button>
               </div>
-            </ArchitectPanel>
+            </SystemPanel>
 
             <div className="architect-premium-note">
               <p className="architect-kicker">{t("Governance Note", "ملاحظة تشغيلية")}</p>

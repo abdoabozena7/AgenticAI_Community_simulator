@@ -103,7 +103,7 @@ export function IterationTimeline({
         <div className="flex items-center gap-2">
           <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-primary" />
           <span className="text-base font-semibold text-foreground">
-            {language === 'ar' ? 'خط التقدم' : 'Progress Timeline'}
+            {language === 'ar' ? 'تسلسل التقدم' : 'Progress Timeline'}
           </span>
         </div>
         <div className="flex items-center gap-2" dir="ltr">

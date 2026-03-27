@@ -82,7 +82,7 @@ type DashboardSchemaExtraction = {
   category?: string;
 };
 
-const CHART_COLORS = ['#22d3ee', '#f472b6', '#facc15', '#4ade80', '#a78bfa', '#f97316'];
+const CHART_COLORS = ['#006a61', '#a8a29e', '#100c3d', '#d6d3d1', '#b45309', '#7c6a5d'];
 
 const DASHBOARD_PLACE_CONTEXT: Record<string, { city: string; country: string }> = {
   'الهرم': { city: 'Giza', country: 'Egypt' },
@@ -262,6 +262,28 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const { isRTL, language, setLanguage } = useLanguage();
   const { theme, toggleTheme } = useTheme();
+  const isDarkTheme = theme === 'dark';
+  const shellClassName = isDarkTheme
+    ? 'bg-[#050505] text-zinc-100'
+    : 'bg-[#f4f1eb] text-slate-900';
+  const railClassName = isDarkTheme
+    ? 'bg-[#0a0a0b] text-zinc-100 border-white/10'
+    : 'bg-[#f9f6f1] text-slate-900 border-black/10';
+  const panelClassName = isDarkTheme
+    ? 'bg-[#111113] text-zinc-100 border-white/10'
+    : 'bg-white text-slate-900 border-black/10';
+  const panelSoftClassName = isDarkTheme
+    ? 'bg-[#141416] text-zinc-100 border-white/10'
+    : 'bg-[#fffdfa] text-slate-900 border-black/10';
+  const mutedTextClassName = isDarkTheme ? 'text-zinc-400' : 'text-slate-500';
+  const navActiveClassName = isDarkTheme
+    ? 'bg-[#1a1a1d] text-white border-white/10'
+    : 'bg-white text-slate-900 border-black/10 shadow-sm';
+  const navIdleClassName = isDarkTheme
+    ? 'text-zinc-400 hover:text-white hover:bg-white/5 border-transparent'
+    : 'text-slate-500 hover:text-slate-900 hover:bg-black/5 border-transparent';
+  const iconTileClassName = isDarkTheme ? 'bg-[#1a1a1d] text-zinc-100' : 'bg-[#f1ece4] text-slate-900';
+  const accentTextClassName = isDarkTheme ? 'text-emerald-300' : 'text-[#006a61]';
 
   const [user, setUser] = useState<UserMe | null>(null);
   const [loading, setLoading] = useState(true);
@@ -410,10 +432,10 @@ export default function DashboardPage() {
     : (user?.daily_limit ? `${user.daily_usage ?? 0}/${user.daily_limit} today` : '--');
 
   const stats = [
-    { label: isRTL ? 'Total Simulations' : 'Total Simulations', value: String(totalSimulations), change: simChangeLabel, trend: latestDay && latestDay.simulations > 0 ? 'up' : 'neutral', icon: Brain, color: 'text-cyan-400' },
-    { label: isRTL ? 'Agents Deployed' : 'Agents Deployed', value: String(totalAgents), change: agentsChangeLabel, trend: latestDay && latestDay.agents > 0 ? 'up' : 'neutral', icon: Users, color: 'text-pink-400' },
-    { label: isRTL ? 'Avg Success Rate' : 'Avg Success Rate', value: `${avgSuccessPercent}%`, change: successChangeLabel, trend: 'neutral', icon: TrendingUp, color: 'text-yellow-400' },
-    { label: isRTL ? 'Credits' : 'Credits', value: String(user?.credits ?? 0), change: usageLabel, trend: 'neutral', icon: Zap, color: 'text-green-400' },
+    { label: isRTL ? 'Total Simulations' : 'Total Simulations', value: String(totalSimulations), change: simChangeLabel, trend: latestDay && latestDay.simulations > 0 ? 'up' : 'neutral', icon: Brain, color: accentTextClassName },
+    { label: isRTL ? 'Agents Deployed' : 'Agents Deployed', value: String(totalAgents), change: agentsChangeLabel, trend: latestDay && latestDay.agents > 0 ? 'up' : 'neutral', icon: Users, color: isDarkTheme ? 'text-zinc-100' : 'text-slate-900' },
+    { label: isRTL ? 'Avg Success Rate' : 'Avg Success Rate', value: `${avgSuccessPercent}%`, change: successChangeLabel, trend: 'neutral', icon: TrendingUp, color: isDarkTheme ? 'text-zinc-100' : 'text-slate-900' },
+    { label: isRTL ? 'Credits' : 'Credits', value: String(user?.credits ?? 0), change: usageLabel, trend: 'neutral', icon: Zap, color: accentTextClassName },
   ];
 
   const navItems = [
@@ -430,11 +452,11 @@ export default function DashboardPage() {
 
   const getStatusColor = (status: Simulation['status']) => {
     switch (status) {
-      case 'running': return 'text-cyan-400 bg-cyan-400/10';
-      case 'paused': return 'text-amber-400 bg-amber-400/10';
-      case 'completed': return 'text-green-400 bg-green-400/10';
-      case 'draft': return 'text-muted-foreground bg-muted';
-      case 'error': return 'text-red-400 bg-red-400/10';
+      case 'running': return 'text-emerald-300 bg-emerald-500/10';
+      case 'paused': return 'text-amber-300 bg-amber-500/10';
+      case 'completed': return isDarkTheme ? 'text-zinc-100 bg-white/5' : 'text-slate-900 bg-black/5';
+      case 'draft': return 'text-zinc-400 bg-white/5';
+      case 'error': return 'text-rose-300 bg-rose-500/10';
     }
   };
 
@@ -774,43 +796,43 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">{isRTL ? 'أهلاً بك' : 'Welcome back'} ًں‘‹</h1>
-        <p className="text-muted-foreground mt-1">{isRTL ? 'ملخص نشاطك' : "Here's your activity summary"}</p>
+        <p className={cn('mt-1', mutedTextClassName)}>{isRTL ? 'ملخص نشاطك' : "Here's your activity summary"}</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((s) => (
-          <Card key={s.label} className="liquid-glass border-border/50">
+          <Card key={s.label} className={cn('rounded-2xl border shadow-[0_24px_60px_-45px_rgba(0,0,0,0.55)]', panelClassName)}>
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">{s.label}</p>
+                  <p className={cn('text-sm', mutedTextClassName)}>{s.label}</p>
                   <p className="text-3xl font-bold mt-2">{s.value}</p>
                   <p
                     className={cn(
                       "text-sm mt-1",
                       s.trend === 'up'
-                        ? 'text-green-400'
+                        ? accentTextClassName
                         : s.trend === 'down'
-                          ? 'text-red-400'
-                          : 'text-muted-foreground'
+                          ? 'text-rose-400'
+                          : mutedTextClassName
                     )}
                   >
                     {s.change}
                   </p>
                 </div>
-                <div className={cn("p-3 rounded-xl bg-white/5", s.color)}><s.icon className="w-6 h-6" /></div>
+                <div className={cn('p-3 rounded-xl border', iconTileClassName)}><s.icon className={cn('w-6 h-6', accentTextClassName)} /></div>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
-      <Card className="liquid-glass border-border/50">
+      <Card className={cn('rounded-2xl border shadow-[0_24px_60px_-45px_rgba(0,0,0,0.55)]', panelClassName)}>
         <CardHeader>
           <CardTitle>{isRTL ? 'آخر المحاكاة' : 'Recent Simulations'}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {simulations.length === 0 && (
-              <p className="text-sm text-muted-foreground">No simulations yet.</p>
+              <p className={cn('text-sm', mutedTextClassName)}>No simulations yet.</p>
             )}
             {simulations.slice(0, 4).map((sim) => (
               <div
@@ -823,14 +845,15 @@ export default function DashboardPage() {
                   }
                 }}
                 className={cn(
-                  "flex items-center gap-4 p-4 rounded-xl bg-white/5 transition-all group",
+                  "flex items-center gap-4 p-4 rounded-xl border transition-all group",
+                  panelSoftClassName,
                   sim.status === 'completed' || isContinuableStatus(sim.status)
-                    ? "hover:bg-white/10 cursor-pointer"
+                    ? "hover:brightness-[1.03] cursor-pointer"
                     : "cursor-default"
                 )}
               >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center">
-                  <Brain className="w-5 h-5 text-cyan-400" />
+                <div className={cn('w-10 h-10 rounded-xl border flex items-center justify-center', iconTileClassName)}>
+                  <Brain className={cn('w-5 h-5', accentTextClassName)} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -839,9 +862,9 @@ export default function DashboardPage() {
                       {getStatusIcon(sim.status)}{sim.status}
                     </span>
                   </div>
-                  <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
+                  <div className={cn('flex items-center gap-4 mt-1 text-xs', mutedTextClassName)}>
                     <span>{sim.agents} agents</span>
-                    {sim.status === 'completed' && <span className="text-green-400">{sim.successRate}%</span>}
+                    {sim.status === 'completed' && <span className={accentTextClassName}>{sim.successRate}%</span>}
                     <span>{sim.createdAt}</span>
                   </div>
                 </div>
@@ -858,14 +881,14 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{isRTL ? 'المحاكاة' : 'Simulations'}</h1>
-          <p className="text-muted-foreground text-sm">{isRTL ? 'إدارة جميع المحاكاة' : 'Manage all simulations'}</p>
+          <p className={cn('text-sm', mutedTextClassName)}>{isRTL ? 'إدارة جميع المحاكاة' : 'Manage all simulations'}</p>
         </div>
         <RippleButton className="gap-2" onClick={() => setActiveNav('home')}>
           <Plus className="w-4 h-4" />{isRTL ? 'محاكاة جديدة' : 'New Simulation'}
         </RippleButton>
       </div>
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="liquid-glass">
+        <TabsList className={cn('rounded-2xl p-1 border', panelClassName)}>
           <TabsTrigger value="all">{isRTL ? 'الكل' : 'All'}</TabsTrigger>
           <TabsTrigger value="running">{isRTL ? 'جارية' : 'Running'}</TabsTrigger>
           <TabsTrigger value="completed">{isRTL ? 'مكتملة' : 'Completed'}</TabsTrigger>
@@ -874,14 +897,14 @@ export default function DashboardPage() {
         <TabsContent value="all" className="mt-4">
           <div className="grid gap-3">
             {filteredSimulations.length === 0 && (
-              <p className="text-sm text-muted-foreground">No simulations yet.</p>
+              <p className={cn('text-sm', mutedTextClassName)}>No simulations yet.</p>
             )}
             {filteredSimulations.map((sim) => (
-              <Card key={sim.id} className="liquid-glass border-border/50 hover:bg-white/5 transition-all">
+              <Card key={sim.id} className={cn('rounded-2xl border transition-all hover:brightness-[1.03]', panelClassName)}>
                 <CardContent className="p-5">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center">
-                      <Brain className="w-6 h-6 text-cyan-400" />
+                    <div className={cn('w-12 h-12 rounded-xl border flex items-center justify-center', iconTileClassName)}>
+                      <Brain className={cn('w-6 h-6', accentTextClassName)} />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -889,11 +912,11 @@ export default function DashboardPage() {
                         <span className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full text-xs", getStatusColor(sim.status))}>
                           {getStatusIcon(sim.status)}{sim.status}
                         </span>
-                        <span className="px-2 py-0.5 rounded-full text-xs bg-white/10 text-muted-foreground">{sim.category}</span>
+                        <span className={cn('px-2 py-0.5 rounded-full text-xs', isDarkTheme ? 'bg-white/5 text-zinc-300' : 'bg-black/5 text-slate-500')}>{sim.category}</span>
                       </div>
-                      <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                      <div className={cn('flex items-center gap-4 mt-1 text-sm', mutedTextClassName)}>
                         <span>{sim.agents} agents</span>
-                        {sim.status === 'completed' && <span className="text-green-400">{sim.successRate}%</span>}
+                        {sim.status === 'completed' && <span className={accentTextClassName}>{sim.successRate}%</span>}
                         <span>{sim.createdAt}</span>
                       </div>
                       {(sim.status === 'running' || sim.status === 'paused') && <Progress value={sim.progress} className="mt-2 h-1.5" />}
@@ -926,14 +949,14 @@ export default function DashboardPage() {
         <TabsContent value="running" className="mt-4">
           <div className="grid gap-3">
             {filteredSimulations.filter((sim) => sim.status === 'running' || sim.status === 'paused' || sim.status === 'error').length === 0 && (
-              <p className="text-sm text-muted-foreground">No active simulations.</p>
+              <p className={cn('text-sm', mutedTextClassName)}>No active simulations.</p>
             )}
             {filteredSimulations.filter((sim) => sim.status === 'running' || sim.status === 'paused' || sim.status === 'error').map((sim) => (
-              <Card key={sim.id} className="liquid-glass border-border/50 hover:bg-white/5 transition-all">
+              <Card key={sim.id} className={cn('rounded-2xl border transition-all hover:brightness-[1.03]', panelClassName)}>
                 <CardContent className="p-5">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center">
-                      <Brain className="w-6 h-6 text-cyan-400" />
+                    <div className={cn('w-12 h-12 rounded-xl border flex items-center justify-center', iconTileClassName)}>
+                      <Brain className={cn('w-6 h-6', accentTextClassName)} />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -941,9 +964,9 @@ export default function DashboardPage() {
                         <span className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full text-xs", getStatusColor(sim.status))}>
                           {getStatusIcon(sim.status)}{sim.status}
                         </span>
-                        <span className="px-2 py-0.5 rounded-full text-xs bg-white/10 text-muted-foreground">{sim.category}</span>
+                        <span className={cn('px-2 py-0.5 rounded-full text-xs', isDarkTheme ? 'bg-white/5 text-zinc-300' : 'bg-black/5 text-slate-500')}>{sim.category}</span>
                       </div>
-                      <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                      <div className={cn('flex items-center gap-4 mt-1 text-sm', mutedTextClassName)}>
                         <span>{sim.agents} agents</span>
                         <span>{sim.createdAt}</span>
                       </div>
@@ -965,14 +988,14 @@ export default function DashboardPage() {
         <TabsContent value="completed" className="mt-4">
           <div className="grid gap-3">
             {filteredSimulations.filter((sim) => sim.status === 'completed').length === 0 && (
-              <p className="text-sm text-muted-foreground">No completed simulations.</p>
+              <p className={cn('text-sm', mutedTextClassName)}>No completed simulations.</p>
             )}
             {filteredSimulations.filter((sim) => sim.status === 'completed').map((sim) => (
-              <Card key={sim.id} className="liquid-glass border-border/50 hover:bg-white/5 transition-all">
+              <Card key={sim.id} className={cn('rounded-2xl border transition-all hover:brightness-[1.03]', panelClassName)}>
                 <CardContent className="p-5">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center">
-                      <Brain className="w-6 h-6 text-cyan-400" />
+                    <div className={cn('w-12 h-12 rounded-xl border flex items-center justify-center', iconTileClassName)}>
+                      <Brain className={cn('w-6 h-6', accentTextClassName)} />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -980,11 +1003,11 @@ export default function DashboardPage() {
                         <span className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full text-xs", getStatusColor(sim.status))}>
                           {getStatusIcon(sim.status)}{sim.status}
                         </span>
-                        <span className="px-2 py-0.5 rounded-full text-xs bg-white/10 text-muted-foreground">{sim.category}</span>
+                        <span className={cn('px-2 py-0.5 rounded-full text-xs', isDarkTheme ? 'bg-white/5 text-zinc-300' : 'bg-black/5 text-slate-500')}>{sim.category}</span>
                       </div>
-                      <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                      <div className={cn('flex items-center gap-4 mt-1 text-sm', mutedTextClassName)}>
                         <span>{sim.agents} agents</span>
-                        <span className="text-green-400">{sim.successRate}%</span>
+                        <span className={accentTextClassName}>{sim.successRate}%</span>
                         <span>{sim.createdAt}</span>
                       </div>
                     </div>
@@ -1004,14 +1027,14 @@ export default function DashboardPage() {
         <TabsContent value="draft" className="mt-4">
           <div className="grid gap-3">
             {filteredSimulations.filter((sim) => sim.status === 'draft').length === 0 && (
-              <p className="text-sm text-muted-foreground">No drafts yet.</p>
+              <p className={cn('text-sm', mutedTextClassName)}>No drafts yet.</p>
             )}
             {filteredSimulations.filter((sim) => sim.status === 'draft').map((sim) => (
-              <Card key={sim.id} className="liquid-glass border-border/50 hover:bg-white/5 transition-all">
+              <Card key={sim.id} className={cn('rounded-2xl border transition-all hover:brightness-[1.03]', panelClassName)}>
                 <CardContent className="p-5">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center">
-                      <Brain className="w-6 h-6 text-cyan-400" />
+                    <div className={cn('w-12 h-12 rounded-xl border flex items-center justify-center', iconTileClassName)}>
+                      <Brain className={cn('w-6 h-6', accentTextClassName)} />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -1019,9 +1042,9 @@ export default function DashboardPage() {
                         <span className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full text-xs", getStatusColor(sim.status))}>
                           {getStatusIcon(sim.status)}{sim.status}
                         </span>
-                        <span className="px-2 py-0.5 rounded-full text-xs bg-white/10 text-muted-foreground">{sim.category}</span>
+                        <span className={cn('px-2 py-0.5 rounded-full text-xs', isDarkTheme ? 'bg-white/5 text-zinc-300' : 'bg-black/5 text-slate-500')}>{sim.category}</span>
                       </div>
-                      <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                      <div className={cn('flex items-center gap-4 mt-1 text-sm', mutedTextClassName)}>
                         <span>{sim.createdAt}</span>
                       </div>
                     </div>
@@ -1046,7 +1069,7 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">{isRTL ? 'Analytics' : 'Analytics'}</h1>
-        <p className="text-muted-foreground text-sm">{isRTL ? 'Detailed insights' : 'Detailed insights'}</p>
+        <p className={cn('text-sm', mutedTextClassName)}>{isRTL ? 'Detailed insights' : 'Detailed insights'}</p>
       </div>
       {dataError && (
         <div className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-4 py-2 text-sm text-rose-100">
@@ -1054,7 +1077,7 @@ export default function DashboardPage() {
         </div>
       )}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="liquid-glass border-border/50 lg:col-span-2">
+        <Card className={cn('lg:col-span-2 rounded-2xl border', panelClassName)}>
           <CardHeader><CardTitle>{isRTL ? 'Weekly Activity' : 'Weekly Activity'}</CardTitle></CardHeader>
           <CardContent>
             {weeklyData.length ? (
@@ -1075,7 +1098,7 @@ export default function DashboardPage() {
             )}
           </CardContent>
         </Card>
-        <Card className="liquid-glass border-border/50">
+        <Card className={cn('rounded-2xl border', panelClassName)}>
           <CardHeader><CardTitle>{isRTL ? 'By Category' : 'By Category'}</CardTitle></CardHeader>
           <CardContent>
             {categoryData.length ? (
@@ -1098,14 +1121,14 @@ export default function DashboardPage() {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
-          { value: `${completionRate}%`, label: isRTL ? 'Completion Rate' : 'Completion Rate', color: 'text-cyan-400' },
-          { value: String(completedSimulations), label: isRTL ? 'Completed Sims' : 'Completed Sims', color: 'text-pink-400' },
-          { value: String(totalAgents), label: isRTL ? 'Total Agents' : 'Total Agents', color: 'text-yellow-400' },
+          { value: `${completionRate}%`, label: isRTL ? 'Completion Rate' : 'Completion Rate', color: accentTextClassName },
+          { value: String(completedSimulations), label: isRTL ? 'Completed Sims' : 'Completed Sims', color: isDarkTheme ? 'text-zinc-100' : 'text-slate-900' },
+          { value: String(totalAgents), label: isRTL ? 'Total Agents' : 'Total Agents', color: isDarkTheme ? 'text-zinc-100' : 'text-slate-900' },
         ].map(s => (
-          <Card key={s.label} className="liquid-glass border-border/50">
+          <Card key={s.label} className={cn('rounded-2xl border', panelClassName)}>
             <CardContent className="p-5 text-center">
               <div className={`text-3xl font-bold ${s.color}`}>{s.value}</div>
-              <p className="text-muted-foreground mt-1 text-sm">{s.label}</p>
+              <p className={cn('mt-1 text-sm', mutedTextClassName)}>{s.label}</p>
             </CardContent>
           </Card>
         ))}
@@ -1117,13 +1140,13 @@ export default function DashboardPage() {
     <div className="space-y-6 max-w-2xl">
       <div>
         <h1 className="text-2xl font-bold">{isRTL ? 'الإعدادات' : 'Settings'}</h1>
-        <p className="text-muted-foreground text-sm">{isRTL ? 'إدارة حسابك' : 'Manage your account'}</p>
+        <p className={cn('text-sm', mutedTextClassName)}>{isRTL ? 'إدارة حسابك' : 'Manage your account'}</p>
       </div>
-      <Card className="liquid-glass border-border/50">
+      <Card className={cn('rounded-2xl border', panelClassName)}>
         <CardHeader><CardTitle className="flex items-center gap-2"><User className="w-5 h-5" />{isRTL ? 'الملف الشخصي' : 'Profile'}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-2xl font-bold text-white">
+            <div className={cn('w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold border', iconTileClassName)}>
               {(user?.username || 'U').slice(0, 1).toUpperCase()}
             </div>
             <RippleButton variant="outline" size="sm">{isRTL ? 'تغيير الصورة' : 'Change Avatar'}</RippleButton>
@@ -1134,19 +1157,19 @@ export default function DashboardPage() {
           </div>
         </CardContent>
       </Card>
-      <Card className="liquid-glass border-border/50">
+      <Card className={cn('rounded-2xl border', panelClassName)}>
         <CardHeader><CardTitle className="flex items-center gap-2"><CreditCard className="w-5 h-5" />{isRTL ? 'الفوترة' : 'Billing'}</CardTitle></CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-cyan-500/20 to-purple-500/20">
+          <div className={cn('flex items-center justify-between p-4 rounded-xl border', panelSoftClassName)}>
             <div>
               <p className="font-semibold">Pro Plan</p>
-              <p className="text-sm text-muted-foreground">$29/{isRTL ? 'شهر' : 'month'}</p>
+              <p className={cn('text-sm', mutedTextClassName)}>$29/{isRTL ? 'شهر' : 'month'}</p>
             </div>
             <RippleButton variant="outline" size="sm">{isRTL ? 'إدارة' : 'Manage'}</RippleButton>
           </div>
         </CardContent>
       </Card>
-      <Card className="liquid-glass border-border/50">
+      <Card className={cn('rounded-2xl border', panelClassName)}>
         <CardHeader><CardTitle className="flex items-center gap-2"><Settings className="w-5 h-5" />{isRTL ? 'المظهر' : 'Appearance'}</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
@@ -1266,7 +1289,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+      <div className={cn('min-h-screen flex items-center justify-center transition-colors duration-300', shellClassName)}>
         {isRTL ? 'جارٍ تحميل لوحة التحكم...' : 'Loading dashboard...'}
       </div>
     );
@@ -1274,19 +1297,19 @@ export default function DashboardPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
+      <div className={cn('min-h-screen flex items-center justify-center transition-colors duration-300', shellClassName)}>
         {isRTL ? 'لم يتم العثور على الجلسة.' : 'Session not found.'}
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen bg-background flex ${isRTL ? 'flex-row-reverse' : ''}`}>
-      <aside className={`w-56 border-border/50 liquid-glass flex flex-col shrink-0 ${isRTL ? 'border-l' : 'border-r'}`}>
-        <div className="p-5 border-b border-border/50">
+    <div className={cn('min-h-screen flex transition-colors duration-300', shellClassName, isRTL && 'flex-row-reverse')}>
+      <aside className={cn('w-56 flex flex-col shrink-0 transition-colors duration-300', railClassName, isRTL ? 'border-l' : 'border-r')}>
+        <div className="p-5 border-b border-white/10">
           <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 via-purple-500 to-yellow-500 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center border', iconTileClassName)}>
+              <Sparkles className={cn('w-5 h-5', accentTextClassName)} />
             </div>
             <span className="font-bold text-lg tracking-tight">ASSET</span>
           </div>
@@ -1298,10 +1321,10 @@ export default function DashboardPage() {
               key={item.id}
               onClick={() => { setActiveNav(item.id); setSelectedSimulation(null); }}
               className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 text-sm",
+                "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm border",
                 activeNav === item.id
-                  ? "bg-gradient-to-r from-cyan-500/20 to-transparent text-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                  ? navActiveClassName
+                  : navIdleClassName
               )}
             >
               <item.icon className="w-4 h-4" />
@@ -1310,32 +1333,38 @@ export default function DashboardPage() {
           ))}
         </nav>
 
-        <div className="p-3 border-t border-border/50">
+        <div className="p-3 border-t border-white/10">
           <div className="flex items-center gap-2 px-3 py-2">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
+            <div className={cn('w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border', iconTileClassName)}>
               {(user.username || 'U').slice(0, 1).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{user.username || 'User'}</p>
-              <p className="text-xs text-muted-foreground">{isAdmin ? (isRTL ? 'مسؤول' : 'Administrator') : 'Pro Plan'}</p>
+              <p className={cn('text-xs', mutedTextClassName)}>{isAdmin ? (isRTL ? 'مسؤول' : 'Administrator') : 'Pro Plan'}</p>
             </div>
-            <button onClick={handleLogout} className="p-1.5 hover:bg-white/5 rounded-lg transition-colors" title="Logout">
-              <LogOut className="w-4 h-4 text-muted-foreground" />
+            <button onClick={handleLogout} className={cn('p-1.5 rounded-lg transition-colors', isDarkTheme ? 'hover:bg-white/5' : 'hover:bg-black/5')} title="Logout">
+              <LogOut className={cn('w-4 h-4', mutedTextClassName)} />
             </button>
           </div>
         </div>
       </aside>
 
       <main className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-14 border-b border-border/50 liquid-glass flex items-center justify-between px-5 shrink-0">
+        <header className={cn('h-14 flex items-center justify-between px-5 shrink-0 border-b transition-colors duration-300', isDarkTheme ? 'bg-[#090909]/95 border-white/10' : 'bg-[#fbf8f4]/95 border-black/10')}>
           <div className="flex items-center gap-3 flex-1 max-w-sm">
             <div className="relative flex-1">
-              <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground`} />
+              <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 w-4 h-4 ${isDarkTheme ? 'text-zinc-500' : 'text-slate-400'}`} />
               <RippleInput
                 placeholder={isRTL ? 'بحث...' : 'Search...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`${isRTL ? 'pr-9' : 'pl-9'} bg-white/5 border-transparent h-9 text-sm`}
+                className={cn(
+                  isRTL ? 'pr-9' : 'pl-9',
+                  'h-9 text-sm border transition-colors duration-300',
+                  isDarkTheme
+                    ? 'bg-[#111113] border-white/10 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-white/20'
+                    : 'bg-white border-black/10 text-slate-900 placeholder:text-slate-400 focus-visible:ring-[#006a61]/20'
+                )}
               />
             </div>
           </div>
@@ -1347,10 +1376,10 @@ export default function DashboardPage() {
               <Globe className="w-4 h-4" />
             </RippleButton>
             <div className="relative">
-              <button onClick={() => setShowNotifications(!showNotifications)} className="relative p-2 hover:bg-white/5 rounded-lg transition-colors">
-                <Bell className="w-4 h-4 text-muted-foreground" />
+              <button onClick={() => setShowNotifications(!showNotifications)} className={cn('relative p-2 rounded-lg transition-colors', isDarkTheme ? 'hover:bg-white/5' : 'hover:bg-black/5')}>
+                <Bell className={cn('w-4 h-4', mutedTextClassName)} />
                 {unreadNotifications > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-cyan-400 rounded-full" />
+                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#006a61]" />
                 )}
               </button>
               <NotificationsPanel
@@ -1376,18 +1405,18 @@ export default function DashboardPage() {
       </main>
 
       <Dialog open={personaSourceDialogOpen} onOpenChange={setPersonaSourceDialogOpen}>
-        <DialogContent className="max-w-3xl border-border/60 bg-background/95">
+        <DialogContent className={cn('max-w-3xl border backdrop-blur-md', panelClassName, isDarkTheme ? 'bg-[#101012]/95' : 'bg-white/95')}>
           <DialogHeader>
             <DialogTitle>{isRTL ? 'اختيار مصدر الشخصيات' : 'Choose Persona Source'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-5">
-            <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 px-4 py-3 text-sm">
+            <div className={cn('rounded-2xl border px-4 py-3 text-sm', isDarkTheme ? 'border-amber-400/20 bg-amber-500/10' : 'border-amber-500/20 bg-amber-50')}>
               <div className="font-medium text-foreground">
                 {personaLaunchDraft?.location
                   ? (isRTL ? 'تم تحديد مكان مسبقًا. سيتم استخدام توليد شخصيات المكان افتراضيًا ما لم تغيّره يدويًا.' : 'A place is already set. The default path is to generate personas from that place unless you override it.')
                   : (isRTL ? 'هذه الفكرة تبدو عامة، لذلك سيستخدم النظام شخصيات الجمهور الافتراضية ما لم تختر مصدرًا آخر للشخصيات.' : 'This idea looks general, so the system will use default audience personas unless you choose another persona source.')}
               </div>
-              {personaLaunchDraft?.idea ? <div className="text-muted-foreground mt-1">{personaLaunchDraft.idea}</div> : null}
+              {personaLaunchDraft?.idea ? <div className={cn('mt-1', mutedTextClassName)}>{personaLaunchDraft.idea}</div> : null}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1398,10 +1427,10 @@ export default function DashboardPage() {
                   setPersonaSourceDialogOpen(false);
                   continueToSimulation(personaLaunchDraft, { persona_source_mode: 'default_audience_only' });
                 }}
-                className="rounded-2xl border border-border/50 bg-background/60 p-4 text-left hover:bg-white/5 transition"
+                className={cn('rounded-2xl border p-4 text-left transition', panelSoftClassName, isDarkTheme ? 'hover:brightness-[1.03]' : 'hover:shadow-sm')}
               >
                 <div className="font-medium">{isRTL ? 'شخصيات الجمهور فقط' : 'Target audience personas only'}</div>
-                <div className="text-sm text-muted-foreground mt-2">{isRTL ? 'أكثر عمومية وعشوائية من الشخصيات المولدة من البحث.' : 'More generic and randomized than research-derived personas.'}</div>
+                <div className={cn('text-sm mt-2', mutedTextClassName)}>{isRTL ? 'أكثر عمومية وعشوائية من الشخصيات المولدة من البحث.' : 'More generic and randomized than research-derived personas.'}</div>
               </button>
 
               <button
@@ -1417,21 +1446,21 @@ export default function DashboardPage() {
                     });
                   }}
                   disabled={!personaLaunchDraft?.location && !personaLaunchDraft?.city && !personaLaunchDraft?.country && !personaLaunchDraft?.placeName}
-                  className="rounded-2xl border border-border/50 bg-background/60 p-4 text-left hover:bg-white/5 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                  className={cn('rounded-2xl border p-4 text-left transition disabled:opacity-40 disabled:cursor-not-allowed', panelSoftClassName, isDarkTheme ? 'hover:brightness-[1.03]' : 'hover:shadow-sm')}
               >
                 <div className="font-medium">{isRTL ? 'ولّد شخصيات من هذا المكان' : 'Generate personas from this place'}</div>
-                <div className="text-sm text-muted-foreground mt-2">{personaLaunchDraft?.placeName || personaLaunchDraft?.location || [personaLaunchDraft?.city, personaLaunchDraft?.country].filter(Boolean).join(', ') || (isRTL ? 'هذا الخيار يحتاج إلى مكان.' : 'This option requires a place.')}</div>
+                <div className={cn('text-sm mt-2', mutedTextClassName)}>{personaLaunchDraft?.placeName || personaLaunchDraft?.location || [personaLaunchDraft?.city, personaLaunchDraft?.country].filter(Boolean).join(', ') || (isRTL ? 'هذا الخيار يحتاج إلى مكان.' : 'This option requires a place.')}</div>
               </button>
             </div>
 
-            <div className="rounded-2xl border border-border/50 bg-background/40 p-4 space-y-3">
+            <div className={cn('rounded-2xl border p-4 space-y-3', panelSoftClassName)}>
               <div className="font-medium">{isRTL ? 'شخصيات محفوظة من أماكن محددة' : 'Saved personas from specific places'}</div>
               <div className="flex flex-col md:flex-row gap-3">
                 <RippleInput
                   value={savedPersonaSearch}
                   onChange={(e) => setSavedPersonaSearch(e.target.value)}
                   placeholder={isRTL ? 'ابحث عن مكان محفوظ' : 'Search saved places'}
-                  className="bg-white/5 border-border/50"
+                  className={cn('border', isDarkTheme ? 'bg-[#111113] border-white/10' : 'bg-white border-black/10')}
                 />
                 <RippleButton variant="outline" onClick={() => void loadSavedPersonaSets(savedPersonaSearch)}>
                   {isRTL ? 'تحديث' : 'Refresh'}
@@ -1440,9 +1469,9 @@ export default function DashboardPage() {
               {savedPersonaSetsError ? <div className="text-sm text-rose-300">{savedPersonaSetsError}</div> : null}
               <div className="max-h-52 overflow-auto space-y-2 pr-1">
                 {savedPersonaSetsLoading ? (
-                  <div className="text-sm text-muted-foreground flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" />{isRTL ? 'جارٍ تحميل المجموعات المحفوظة...' : 'Loading saved sets...'}</div>
+                  <div className={cn('text-sm flex items-center gap-2', mutedTextClassName)}><Loader2 className="w-4 h-4 animate-spin" />{isRTL ? 'جارٍ تحميل المجموعات المحفوظة...' : 'Loading saved sets...'}</div>
                 ) : savedPersonaSets.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">{isRTL ? 'لا توجد مجموعات محفوظة مطابقة.' : 'No saved persona sets matched.'}</div>
+                  <div className={cn('text-sm', mutedTextClassName)}>{isRTL ? 'لا توجد مجموعات محفوظة مطابقة.' : 'No saved persona sets matched.'}</div>
                 ) : savedPersonaSets.map((item) => (
                   <button
                     type="button"
@@ -1450,11 +1479,13 @@ export default function DashboardPage() {
                     onClick={() => setSelectedSavedPersonaSetKey(item.set_key || '')}
                     className={cn(
                       'w-full rounded-xl border px-3 py-3 text-left transition',
-                      selectedSavedPersonaSetKey === item.set_key ? 'border-cyan-400/60 bg-cyan-500/10' : 'border-border/40 bg-background/40 hover:bg-white/5',
+                      selectedSavedPersonaSetKey === item.set_key
+                        ? (isDarkTheme ? 'border-emerald-400/60 bg-emerald-500/10' : 'border-[#006a61]/40 bg-[#006a61]/10')
+                        : (isDarkTheme ? 'border-white/10 bg-[#111113] hover:bg-white/5' : 'border-black/10 bg-white hover:bg-black/5'),
                     )}
                   >
                     <div className="font-medium">{item.place_label || item.set_key}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{item.persona_count || 0} {isRTL ? 'شخصية' : 'personas'} • {item.audience_filters?.join(', ') || (isRTL ? 'كل الجماهير' : 'all audiences')}</div>
+                    <div className={cn('text-xs mt-1', mutedTextClassName)}>{item.persona_count || 0} {isRTL ? 'شخصية' : 'personas'} • {item.audience_filters?.join(', ') || (isRTL ? 'كل الجماهير' : 'all audiences')}</div>
                   </button>
                 ))}
               </div>

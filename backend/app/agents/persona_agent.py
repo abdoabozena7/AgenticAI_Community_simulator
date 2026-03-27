@@ -211,8 +211,27 @@ class PersonaAgent(BaseAgent):
             target_count=requested_count,
             strict_target=self._has_enough_data(state),
         )
+        auto_completion_report: Dict[str, Any] = {}
+        if validation.get("simulation_blockers") and not validation.get("fatal_errors"):
+            personas, signal_plan, auto_completion_report = await self._auto_complete_personas_for_simulation(
+                state=state,
+                personas=personas,
+                signal_plan=signal_plan,
+                place_label=place_label or "global",
+                target_count=requested_count,
+                validation=validation,
+            )
+            personas = [apply_persona_dynamic_defaults(persona) for persona in personas]
+            validation = self._validate_personas(
+                personas=personas,
+                signal_plan=signal_plan,
+                state=state,
+                target_count=requested_count,
+                strict_target=self._has_enough_data(state),
+            )
         state.persona_validation_errors = list(dict.fromkeys((validation.get("fatal_errors") or []) + (validation.get("simulation_blockers") or [])))
         report["validation"] = validation
+        report["auto_completion"] = auto_completion_report
         report["social_sentiment"] = signal_plan.get("social_sentiment") or {}
         report["evidence_signals"] = signal_plan.get("evidence_signals") or []
         report["structured_signal_catalog"] = signal_plan.get("signal_catalog") or []
@@ -1071,6 +1090,104 @@ class PersonaAgent(BaseAgent):
             "persistence_allowed": not bool(fatal_errors),
         }
 
+    async def _auto_complete_personas_for_simulation(
+        self,
+        *,
+        state: OrchestrationState,
+        personas: Sequence[PersonaProfile],
+        signal_plan: Dict[str, Any],
+        place_label: str,
+        target_count: int,
+        validation: Dict[str, Any],
+    ) -> Tuple[List[PersonaProfile], Dict[str, Any], Dict[str, Any]]:
+        initial_personas = list(personas)
+        if not validation.get("simulation_blockers"):
+            return initial_personas, signal_plan, {}
+
+        completion_target = max(target_count, self._minimum_persona_threshold(state))
+        required_segments = self._required_segment_count(max(completion_target, len(initial_personas)))
+        augmented_signal_plan = self._build_auto_completion_signal_plan(
+            state=state,
+            signal_plan=signal_plan,
+            place_label=place_label,
+            minimum_segments=required_segments,
+        )
+        signatures = {self._persona_signature(persona) for persona in initial_personas}
+        used_names = {str(persona.name or "").strip().lower() for persona in initial_personas if str(persona.name or "").strip()}
+        completed = list(initial_personas)
+        rounds = max(1, math.ceil(max(0, completion_target - len(initial_personas)) / self.BATCH_SIZE) + 1)
+        duplicate_rejections = 0
+        weak_rejections = 0
+
+        for round_index in range(rounds):
+            current_validation = self._validate_personas(
+                personas=completed,
+                signal_plan=augmented_signal_plan,
+                state=state,
+                target_count=completion_target,
+                strict_target=False,
+            )
+            blockers = list(current_validation.get("simulation_blockers") or [])
+            if not blockers:
+                break
+            missing_count = max(0, completion_target - len(completed))
+            current_segments = {persona.segment_id for persona in completed if persona.segment_id}
+            segment_shortfall = max(0, required_segments - len(current_segments))
+            batch_goal = max(2, missing_count, segment_shortfall * 2)
+            batch_goal = min(self.BATCH_SIZE, batch_goal)
+            seed_offset = len(completed) + (round_index * self.BATCH_SIZE)
+            blueprint = await self._generate_batch_blueprint(
+                state=state,
+                signal_plan=augmented_signal_plan,
+                batch_number=round_index + 1,
+                batch_count=rounds,
+                batch_goal=batch_goal + 2,
+                existing_names=sorted(used_names)[:20],
+            )
+            batch_personas, rejected = self._materialize_personas(
+                state=state,
+                blueprint=blueprint,
+                signal_plan=augmented_signal_plan,
+                place_label=place_label,
+                requested_count=batch_goal,
+                signatures=signatures,
+                used_names=used_names,
+                seed_offset=seed_offset,
+            )
+            if not batch_personas:
+                fallback_blueprint = {
+                    "personas": self._signal_fitted_blueprints(state, augmented_signal_plan, batch_goal + 2),
+                }
+                batch_personas, rejected = self._materialize_personas(
+                    state=state,
+                    blueprint=fallback_blueprint,
+                    signal_plan=augmented_signal_plan,
+                    place_label=place_label,
+                    requested_count=batch_goal,
+                    signatures=signatures,
+                    used_names=used_names,
+                    seed_offset=seed_offset + 1,
+                )
+            duplicate_rejections += int(rejected.get("duplicate") or 0)
+            weak_rejections += int(rejected.get("weak") or 0)
+            if not batch_personas:
+                break
+            completed.extend(batch_personas)
+
+        return completed, augmented_signal_plan, {
+            "attempted": True,
+            "reason_codes": list(validation.get("simulation_blockers") or []),
+            "initial_count": len(initial_personas),
+            "final_count": len(completed),
+            "completion_target": completion_target,
+            "required_segments": required_segments,
+            "used_llm_top_up": len(completed) > len(initial_personas),
+            "added_count": max(0, len(completed) - len(initial_personas)),
+            "duplicate_rejection_count": duplicate_rejections,
+            "weak_rejection_count": weak_rejections,
+            "final_segment_count": len({persona.segment_id for persona in completed if persona.segment_id}),
+        }
+
     def _target_persona_count(self, state: OrchestrationState) -> int:
         explicit_requested = state.schema.get("persona_count_requested")
         requested = int(explicit_requested if explicit_requested is not None else (state.user_context.get("agentCount") or 24))
@@ -1135,6 +1252,159 @@ class PersonaAgent(BaseAgent):
             ),
         )
         return min(self.HARD_MAX_PERSONAS, reliable)
+
+    def _required_segment_count(self, persona_count: int) -> int:
+        return max(2, min(4, persona_count // 5 or 1))
+
+    def _persona_signature(self, persona: PersonaProfile) -> str:
+        concern_seed = ",".join(sorted(str(text).strip().lower() for text in list(persona.concerns or [])[:2] if str(text).strip()))
+        return "|".join(
+            [
+                str(persona.target_audience_cluster or "").strip().lower(),
+                str(persona.age_band or "").strip().lower(),
+                str(persona.profession_role or "").strip().lower(),
+                str(persona.attitude_baseline or "").strip().lower(),
+                str(persona.speaking_style or "").strip().lower(),
+                concern_seed,
+            ]
+        )
+
+    def _build_auto_completion_signal_plan(
+        self,
+        *,
+        state: OrchestrationState,
+        signal_plan: Dict[str, Any],
+        place_label: str,
+        minimum_segments: int,
+    ) -> Dict[str, Any]:
+        augmented = dict(signal_plan)
+        current_clusters = list(
+            signal_plan.get("dynamic_segments")
+            if isinstance(signal_plan.get("dynamic_segments"), list) and signal_plan.get("dynamic_segments")
+            else signal_plan.get("audience_clusters")
+            if isinstance(signal_plan.get("audience_clusters"), list)
+            else []
+        )
+        structured_inputs = self._structured_persona_inputs(state)
+        market_grounding = (
+            signal_plan.get("market_grounding")
+            if isinstance(signal_plan.get("market_grounding"), dict) and signal_plan.get("market_grounding")
+            else self.build_market_grounding(
+                state=state,
+                place_label=place_label,
+                structured_inputs=structured_inputs,
+                memory_context={},
+                saved_persona_hints=[],
+            )
+        )
+        fallback_clusters = self._fallback_dynamic_segments(
+            state=state,
+            place_label=place_label,
+            structured_inputs=structured_inputs,
+            market_grounding=market_grounding,
+            saved_persona_hints=[],
+        )
+        merged_clusters: List[Dict[str, Any]] = []
+        seen: set[str] = set()
+        for source in (current_clusters, fallback_clusters):
+            for item in source:
+                if not isinstance(item, dict):
+                    continue
+                cluster_name = str(item.get("cluster") or "").strip()
+                segment_id = str(item.get("segment_id") or "").strip()
+                key = f"{cluster_name.lower()}::{segment_id.lower()}"
+                if not cluster_name or key in seen:
+                    continue
+                seen.add(key)
+                merged_clusters.append(item)
+        if len(merged_clusters) < minimum_segments:
+            merged_clusters.extend(
+                self._expand_cluster_variants(
+                    clusters=merged_clusters or fallback_clusters or self._audience_clusters(state),
+                    minimum_segments=minimum_segments,
+                )
+            )
+        normalized = self._normalize_dynamic_clusters(
+            state=state,
+            place_label=place_label,
+            clusters=merged_clusters,
+            fallback_clusters=fallback_clusters or merged_clusters,
+            market_grounding=market_grounding,
+        )
+        normalized = normalized[: max(minimum_segments, len(current_clusters), 1)]
+        evidence_signals = self._string_list(
+            list(signal_plan.get("evidence_signals") or []) + self._evidence_signals(state),
+            fallback=self._research_signal_texts(state),
+            limit=24,
+        )
+        augmented["market_grounding"] = market_grounding
+        augmented["audience_clusters"] = list(normalized)
+        augmented["dynamic_segments"] = list(normalized)
+        augmented["evidence_signals"] = evidence_signals
+        return augmented
+
+    def _expand_cluster_variants(self, *, clusters: Sequence[Dict[str, Any]], minimum_segments: int) -> List[Dict[str, Any]]:
+        base_clusters = [item for item in clusters if isinstance(item, dict)]
+        if not base_clusters:
+            return []
+        themes = [
+            {"label": "Budget-sensitive", "decision_style": "price-first", "price_bucket": "high"},
+            {"label": "Convenience-first", "decision_style": "speed-first", "price_bucket": "medium"},
+            {"label": "Trust-seeking", "decision_style": "risk-aware", "price_bucket": "medium"},
+            {"label": "Early-adopter", "decision_style": "experimentation-led", "price_bucket": "low"},
+        ]
+        variants: List[Dict[str, Any]] = []
+        seen_names = {
+            str(item.get("cluster") or "").strip().lower()
+            for item in base_clusters
+            if str(item.get("cluster") or "").strip()
+        }
+        attempt = 0
+        while len(base_clusters) + len(variants) < minimum_segments and attempt < (minimum_segments * 6):
+            base = base_clusters[attempt % len(base_clusters)]
+            theme = themes[attempt % len(themes)]
+            base_name = str(base.get("cluster") or "").strip() or "Audience"
+            variant_name = f"{theme['label']} {base_name}"
+            if variant_name.lower() in seen_names:
+                attempt += 1
+                continue
+            seen_names.add(variant_name.lower())
+            motivations = self._string_list(base.get("motivations"), fallback=["clear value", "predictable results"], limit=4)
+            concerns = self._string_list(base.get("concerns"), fallback=["weak differentiation", "unclear ROI"], limit=4)
+            roles = self._string_list(base.get("roles"), fallback=["customer"], limit=4)
+            styles = self._string_list(base.get("speaking_styles"), fallback=["practical"], limit=4)
+            ages = self._string_list(base.get("age_bands"), fallback=["25-34", "30-44"], limit=3)
+            life_stages = self._string_list(base.get("life_stages"), fallback=["habit builder", "working adult"], limit=3)
+            variants.append(
+                {
+                    "cluster": variant_name,
+                    "segment_id": self._slug(f"{variant_name}-{attempt + 1}")[:64],
+                    "source_kind": str(base.get("source_kind") or "hybrid"),
+                    "rationale": f"Auto-expanded from {base_name} to keep simulation coverage healthy.",
+                    "signal_refs": self._string_list(base.get("signal_refs"), fallback=[self._slug(base_name)[:48]], limit=4),
+                    "roles": roles[attempt % len(roles):] + roles[: attempt % len(roles)] if roles else roles,
+                    "motivations": motivations[1:] + motivations[:1] if len(motivations) > 1 else motivations,
+                    "concerns": concerns[-1:] + concerns[:-1] if len(concerns) > 1 else concerns,
+                    "speaking_styles": styles[1:] + styles[:1] if len(styles) > 1 else styles,
+                    "age_bands": ages,
+                    "life_stages": life_stages,
+                    "archetype_name": str(base.get("archetype_name") or base_name),
+                    "price_sensitivity_bucket": theme["price_bucket"],
+                    "decision_style": theme["decision_style"],
+                    "purchase_triggers": self._string_list(
+                        list(base.get("purchase_triggers") or []) + motivations,
+                        fallback=["clear value", "easy onboarding"],
+                        limit=3,
+                    ),
+                    "rejection_triggers": self._string_list(
+                        list(base.get("rejection_triggers") or []) + concerns,
+                        fallback=["hidden cost", "weak trust"],
+                        limit=3,
+                    ),
+                }
+            )
+            attempt += 1
+        return variants
 
     def _research_signal_texts(self, state: OrchestrationState) -> List[str]:
         structured = state.research.structured_schema if state.research else {}

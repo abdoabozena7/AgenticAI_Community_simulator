@@ -447,6 +447,8 @@ const Index = () => {
   const guidedWorkflowBootstrappedForSimulationRef = useRef<string | null>(null);
   const guidedWorkflowAttachRequestRef = useRef<string | null>(null);
   const guidedWorkflowStartingSimulationRef = useRef(false);
+  const guidedWorkflowAutoApproveRef = useRef<string | null>(null);
+  const guidedWorkflowAutoStartRef = useRef<string | null>(null);
   const autoReasoningSwitchedRef = useRef(false);
   const userOverrodeAutoRef = useRef(false);
   const configLockHintAtRef = useRef(0);
@@ -2646,6 +2648,49 @@ const Index = () => {
     settings.language,
     simulation,
     userInput,
+  ]);
+
+  useEffect(() => {
+    const workflowId = guidedWorkflowState?.workflow_id;
+    if (!workflowId) {
+      guidedWorkflowAutoApproveRef.current = null;
+      return;
+    }
+    if (guidedWorkflowLoading || guidedWorkflowStartingSimulationRef.current) return;
+    if (guidedWorkflowState?.current_stage !== 'review' || guidedWorkflowState?.review_approved) {
+      guidedWorkflowAutoApproveRef.current = null;
+      return;
+    }
+    const autoApproveKey = `${workflowId}:review`;
+    if (guidedWorkflowAutoApproveRef.current === autoApproveKey) return;
+    guidedWorkflowAutoApproveRef.current = autoApproveKey;
+    void guidedWorkflow.approveReview().catch(() => undefined);
+  }, [
+    guidedWorkflow.approveReview,
+    guidedWorkflowLoading,
+    guidedWorkflowState?.current_stage,
+    guidedWorkflowState?.review_approved,
+    guidedWorkflowState?.workflow_id,
+  ]);
+
+  useEffect(() => {
+    const workflowId = guidedWorkflowState?.workflow_id;
+    if (!workflowId || !guidedWorkflow.canStartSimulation) {
+      guidedWorkflowAutoStartRef.current = null;
+      return;
+    }
+    if (guidedWorkflowLoading || guidedWorkflowStartingSimulationRef.current) return;
+    if (simulation.status === 'running') return;
+    const autoStartKey = `${workflowId}:ready_to_start`;
+    if (guidedWorkflowAutoStartRef.current === autoStartKey) return;
+    guidedWorkflowAutoStartRef.current = autoStartKey;
+    void handleGuidedStartSimulation();
+  }, [
+    guidedWorkflow.canStartSimulation,
+    guidedWorkflowLoading,
+    guidedWorkflowState?.workflow_id,
+    handleGuidedStartSimulation,
+    simulation.status,
   ]);
 
   const handleApplyGuidedCorrectionToSimulation = useCallback(async () => {
