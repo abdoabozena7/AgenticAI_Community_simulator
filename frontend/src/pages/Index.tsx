@@ -3937,33 +3937,34 @@ Required sections:
   runSearchRef.current = runSearch;
 
 
-  const handleConfigSubmit = useCallback(async () => {
+  const handleConfigSubmit = useCallback(async (inputOverride?: UserInput) => {
     if (isPrestartSearchActive || isRunStarting || isRunActive) {
       notifyActionBlocked();
       return;
     }
-    const ideaText = userInput.idea.trim();
-    const currentLocationState = resolveLocationState(userInput);
+    const activeInput = inputOverride ?? userInput;
+    const ideaText = activeInput.idea.trim();
+    const currentLocationState = resolveLocationState(activeInput);
     const shouldExtractBeforeConfig = Boolean(ideaText) && (
       (!currentLocationState.hasLocation && locationChoice !== 'no')
-      || !userInput.category
-      || !userInput.targetAudience.length
-      || !userInput.goals.length
+      || !activeInput.category
+      || !activeInput.targetAudience.length
+      || !activeInput.goals.length
     );
     let extraction: LocationExtraction | null = null;
     if (shouldExtractBeforeConfig) {
       const schemaPayload = {
-        idea: userInput.idea,
-        country: userInput.country,
-        city: userInput.city,
-        placeName: userInput.placeName || '',
-        place_name: userInput.placeName || '',
+        idea: activeInput.idea,
+        country: activeInput.country,
+        city: activeInput.city,
+        placeName: activeInput.placeName || '',
+        place_name: activeInput.placeName || '',
         location: currentLocationState.locationLabel || '',
-        category: userInput.category,
-        target_audience: userInput.targetAudience,
-        goals: userInput.goals,
-        risk_appetite: (userInput.riskAppetite ?? 50) / 100,
-        idea_maturity: userInput.ideaMaturity,
+        category: activeInput.category,
+        target_audience: activeInput.targetAudience,
+        goals: activeInput.goals,
+        risk_appetite: (activeInput.riskAppetite ?? 50) / 100,
+        idea_maturity: activeInput.ideaMaturity,
       };
       try {
         extraction = await extractWithRetry(ideaText, schemaPayload) as LocationExtraction;
@@ -3984,8 +3985,8 @@ Required sections:
     }
 
     const merged = extraction
-      ? mergeExtractionIntoInput(userInput, extraction, ideaText)
-      : { nextInput: userInput, locationState: resolveLocationState(userInput) };
+      ? mergeExtractionIntoInput(activeInput, extraction, ideaText)
+      : { nextInput: activeInput, locationState: resolveLocationState(activeInput) };
     const nextInput = merged.nextInput;
     const locationState = merged.locationState;
     setUserInput(nextInput);
@@ -5201,12 +5202,28 @@ If rejection is about competition or location, suggest searching for a better lo
     simulationActuallyStarted,
   ]);
 
+  const canStartFromComposerDraft = primaryControl?.key === 'start';
+
+  const handleComposerDraftStart = useCallback((draft?: string) => {
+    const nextIdea = (draft || '').trim();
+    const nextInput = nextIdea ? { ...userInput, idea: nextIdea } : userInput;
+    if (nextIdea && nextIdea !== userInput.idea) {
+      setUserInput(nextInput);
+    }
+    void handleConfigSubmit(nextInput);
+  }, [handleConfigSubmit, userInput]);
+
   const sharedChatPanelProps = {
     messages: chatMessages,
     reasoningFeed: simulation.reasoningFeed,
     highlightReasoningMessageIds: highlightedReasoningMessageIds,
     reasoningDebug: simulation.reasoningDebug,
     onSendMessage: handleSendMessage,
+    onComposerDraftChange: canStartFromComposerDraft
+      ? (value: string) => {
+          setUserInput((prev) => (prev.idea === value ? prev : { ...prev, idea: value }));
+        }
+      : undefined,
     onSelectOption: handleOptionSelect,
     isWaitingForCity,
     isWaitingForCountry,
@@ -5218,6 +5235,8 @@ If rejection is about competition or location, suggest searching for a better lo
     onRetryLlm: handleRetryLlm,
     onSearchRetry: handleSearchRetry,
     onSearchUseLlm: handleSearchUseLlm,
+    canConfirmStart: canStartFromComposerDraft,
+    onConfirmStart: canStartFromComposerDraft ? handleComposerDraftStart : undefined,
     simulationStatus: simulation.status,
     simulationError: simulation.error,
     reasoningActive: simulation.reasoningStarted || reasoningActive,

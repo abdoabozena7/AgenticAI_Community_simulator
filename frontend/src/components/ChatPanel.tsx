@@ -30,6 +30,7 @@ interface ChatPanelProps {
   highlightReasoningMessageIds?: string[];
   reasoningDebug?: { id: string; agentShortId?: string; reason: string; stage?: string; attempt?: number; phase?: string; timestamp: number }[];
   onSendMessage: (msg: string) => void;
+  onComposerDraftChange?: (value: string) => void;
   onSelectOption?: (field: string, value: string) => void;
   isWaitingForCity?: boolean;
   isWaitingForCountry?: boolean;
@@ -40,7 +41,7 @@ interface ChatPanelProps {
   onSearchRetry?: () => void;
   onSearchUseLlm?: () => void;
   canConfirmStart?: boolean;
-  onConfirmStart?: () => void;
+  onConfirmStart?: (draft?: string) => void;
   quickReplies?: { label: string; value: string }[];
   onQuickReply?: (value: string) => void;
   simulationStatus?: SimulationStatus;
@@ -168,6 +169,7 @@ export function ChatPanel(props: ChatPanelProps) {
     reasoningFeed,
     highlightReasoningMessageIds = [],
     onSendMessage,
+    onComposerDraftChange,
     onSelectOption,
     isWaitingForCity = false,
     isWaitingForCountry = false,
@@ -298,7 +300,20 @@ export function ChatPanel(props: ChatPanelProps) {
   }, [language, searchState, uiProgress]);
 
   const primaryAction = useMemo<ComposerAction | null>(() => {
-    if (inputValue.trim()) return { key: 'send', label: language === 'ar' ? 'إرسال الرسالة' : 'Send message', icon: <Send className="h-4 w-4" />, onClick: () => { const next = inputValue.trim(); if (!next) return; onSendMessage(next); setInputValue(''); allowAutoFocusRef.current = true; window.requestAnimationFrame(() => inputRef.current?.focus()); } };
+    const draft = inputValue.trim();
+    if (draft && canConfirmStart && onConfirmStart) {
+      return {
+        key: 'confirm-start',
+        label: primaryControl?.label || (language === 'ar' ? 'شغّل المسار الإلزامي' : 'Run mandatory pipeline'),
+        description: primaryControl?.description,
+        disabled: primaryControl?.disabled,
+        busy: primaryControl?.busy,
+        tone: primaryControl?.tone === 'warning' ? 'warning' : primaryControl?.tone === 'secondary' ? 'secondary' : 'primary',
+        icon: primaryControl?.busy ? <Loader2 className="h-4 w-4 animate-spin" /> : primaryControl?.icon === 'retry' ? <RefreshCcw className="h-4 w-4" /> : primaryControl?.icon === 'sparkles' ? <Sparkles className="h-4 w-4" /> : <Play className="h-4 w-4" />,
+        onClick: () => { onConfirmStart(draft); },
+      };
+    }
+    if (draft) return { key: 'send', label: language === 'ar' ? 'إرسال الرسالة' : 'Send message', icon: <Send className="h-4 w-4" />, onClick: () => { onSendMessage(draft); setInputValue(''); onComposerDraftChange?.(''); allowAutoFocusRef.current = true; window.requestAnimationFrame(() => inputRef.current?.focus()); } };
     if (searchState?.status === 'timeout' && onSearchRetry) return { key: 'retry-search', label: language === 'ar' ? 'إعادة البحث' : 'Retry search', description: language === 'ar' ? 'يمكنك إعادة المحاولة أو استخدام البديل المحلي.' : 'Retry or use the local fallback.', tone: 'warning', icon: <Search className="h-4 w-4" />, onClick: () => (onSearchUseLlm ? setMenuOpen((open) => !open) : onSearchRetry()) };
     if (showRetry && onRetryLlm) return { key: 'fallback', label: language === 'ar' ? 'استخدام بديل LLM' : 'Use LLM fallback', tone: 'warning', icon: <Wand2 className="h-4 w-4" />, onClick: onRetryLlm };
     if (canConfirmStart && onConfirmStart) return { key: 'start', label: language === 'ar' ? 'شغّل المسار الإلزامي' : 'Run mandatory pipeline', icon: <Play className="h-4 w-4" />, onClick: onConfirmStart };
@@ -313,7 +328,7 @@ export function ChatPanel(props: ChatPanelProps) {
       onClick: primaryControl.onClick,
     };
     return null;
-  }, [canConfirmStart, inputValue, language, onConfirmStart, onRetryLlm, onSearchRetry, onSearchUseLlm, onSendMessage, primaryControl, searchState?.status, showRetry]);
+  }, [canConfirmStart, inputValue, language, onComposerDraftChange, onConfirmStart, onRetryLlm, onSearchRetry, onSearchUseLlm, onSendMessage, primaryControl, searchState?.status, showRetry]);
 
   const secondaryActions = useMemo<ComposerAction[]>(() => {
     if (searchState?.status === 'timeout' && onSearchRetry) {
@@ -362,7 +377,7 @@ export function ChatPanel(props: ChatPanelProps) {
           {quickReplies.length && !pendingClarification && !pendingPreflightQuestion && !pendingResearchReview ? <div className="flex flex-wrap gap-2">{quickReplies.map((reply) => <button key={reply.value} type="button" onClick={() => onQuickReply?.(reply.value)} className="rounded-full border border-border/55 bg-card/80 px-4 py-2 text-sm text-foreground transition hover:border-primary/30 hover:bg-primary/8">{reply.label}</button>)}</div> : null}
         </>}
       </div>
-      {!isReasoningView ? <div className="border-t border-border/45 px-5 pb-5 pt-4"><form ref={formRef} onSubmit={(event) => { event.preventDefault(); primaryAction?.onClick(); }} className="relative"><div className="flex items-end gap-3"><Input ref={inputRef} value={inputValue} onChange={(event) => setInputValue(event.target.value)} placeholder={language === 'ar' ? 'اكتب رسالتك أو عدّل الفكرة...' : 'Type your message or refine the idea...'} className="h-14 flex-1 rounded-[24px] border-border/60 bg-card/80 px-5 text-base" dir="rtl" /><div className="relative shrink-0"><Button type="submit" disabled={!primaryAction || primaryAction.disabled || primaryAction.busy || isThinking || simulationStatus === 'configuring'} className={cn('h-14 min-w-[180px] rounded-[24px] px-5 transition-all duration-200', primaryAction?.tone === 'warning' && 'bg-amber-500 text-slate-950 hover:bg-amber-400', primaryAction?.tone === 'secondary' && 'bg-secondary text-foreground hover:bg-secondary/85', menuOpen && 'translate-y-[-1px] shadow-[0_12px_32px_-16px_rgba(0,0,0,0.45)]')}>{primaryAction?.busy ? <Loader2 className="h-4 w-4 animate-spin" /> : primaryAction?.icon}<span>{primaryAction?.label || (language === 'ar' ? 'اكتب رسالة' : 'Write message')}</span>{secondaryActions.length ? <ChevronDown className={cn('h-4 w-4 transition-transform', menuOpen && 'rotate-180')} /> : null}</Button>{secondaryActions.length ? <div className={cn('absolute bottom-[calc(100%+10px)] start-0 w-72 origin-bottom rounded-[24px] border border-border/60 bg-card/95 p-2 shadow-2xl backdrop-blur-xl transition-all duration-200', menuOpen ? 'pointer-events-auto translate-y-0 scale-100 opacity-100' : 'pointer-events-none translate-y-2 scale-95 opacity-0')}>{secondaryActions.map((action) => <button key={action.key} type="button" disabled={action.disabled} onClick={action.onClick} className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-start text-sm text-foreground transition hover:bg-primary/8 disabled:opacity-50"><span className={cn('flex h-9 w-9 items-center justify-center rounded-2xl border', action.tone === 'warning' ? 'border-amber-400/30 bg-amber-500/15 text-amber-300' : 'border-border/60 bg-background/65 text-foreground')}>{action.icon}</span><span>{action.label}</span></button>)}</div> : null}</div></div></form></div> : null}
+      {!isReasoningView ? <div className="border-t border-border/45 px-5 pb-5 pt-4"><form ref={formRef} onSubmit={(event) => { event.preventDefault(); primaryAction?.onClick(); }} className="relative"><div className="flex items-end gap-3"><Input ref={inputRef} value={inputValue} onChange={(event) => { const nextValue = event.target.value; setInputValue(nextValue); onComposerDraftChange?.(nextValue); }} placeholder={language === 'ar' ? 'اكتب رسالتك أو عدّل الفكرة...' : 'Type your message or refine the idea...'} className="h-14 flex-1 rounded-[24px] border-border/60 bg-card/80 px-5 text-base" dir="rtl" /><div className="relative shrink-0"><Button type="submit" disabled={!primaryAction || primaryAction.disabled || primaryAction.busy || isThinking || simulationStatus === 'configuring'} className={cn('h-14 min-w-[180px] rounded-[24px] px-5 transition-all duration-200', primaryAction?.tone === 'warning' && 'bg-amber-500 text-slate-950 hover:bg-amber-400', primaryAction?.tone === 'secondary' && 'bg-secondary text-foreground hover:bg-secondary/85', menuOpen && 'translate-y-[-1px] shadow-[0_12px_32px_-16px_rgba(0,0,0,0.45)]')}>{primaryAction?.busy ? <Loader2 className="h-4 w-4 animate-spin" /> : primaryAction?.icon}<span>{primaryAction?.label || (language === 'ar' ? 'اكتب رسالة' : 'Write message')}</span>{secondaryActions.length ? <ChevronDown className={cn('h-4 w-4 transition-transform', menuOpen && 'rotate-180')} /> : null}</Button>{secondaryActions.length ? <div className={cn('absolute bottom-[calc(100%+10px)] start-0 w-72 origin-bottom rounded-[24px] border border-border/60 bg-card/95 p-2 shadow-2xl backdrop-blur-xl transition-all duration-200', menuOpen ? 'pointer-events-auto translate-y-0 scale-100 opacity-100' : 'pointer-events-none translate-y-2 scale-95 opacity-0')}>{secondaryActions.map((action) => <button key={action.key} type="button" disabled={action.disabled} onClick={action.onClick} className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-start text-sm text-foreground transition hover:bg-primary/8 disabled:opacity-50"><span className={cn('flex h-9 w-9 items-center justify-center rounded-2xl border', action.tone === 'warning' ? 'border-amber-400/30 bg-amber-500/15 text-amber-300' : 'border-border/60 bg-background/65 text-foreground')}>{action.icon}</span><span>{action.label}</span></button>)}</div> : null}</div></div></form></div> : null}
     </div>
   );
 }

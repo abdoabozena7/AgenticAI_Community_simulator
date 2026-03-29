@@ -1,0 +1,426 @@
+{
+  "startedAt": "2026-03-29T14:47:21.365Z",
+  "baseUrl": "http://127.0.0.1:8082",
+  "pass": false,
+  "steps": [
+    {
+      "name": "open-landing",
+      "status": "passed",
+      "details": {},
+      "ts": "2026-03-29T14:47:39.479Z"
+    },
+    {
+      "name": "login-admin",
+      "status": "passed",
+      "details": {},
+      "ts": "2026-03-29T14:47:47.008Z"
+    },
+    {
+      "name": "open-simulate",
+      "status": "failed",
+      "details": {
+        "error": "page.waitForSelector: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"chat-input\"]') to be visible\u001b[22m\n"
+      },
+      "ts": "2026-03-29T14:48:32.145Z"
+    },
+    {
+      "name": "insert-idea-send",
+      "status": "failed",
+      "details": {
+        "error": "page.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"chat-input\"]')\u001b[22m\n"
+      },
+      "ts": "2026-03-29T14:49:02.235Z"
+    },
+    {
+      "name": "followup-go",
+      "status": "failed",
+      "details": {
+        "error": "page.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"chat-input\"]')\u001b[22m\n"
+      },
+      "ts": "2026-03-29T14:49:32.336Z"
+    },
+    {
+      "name": "wait-progress-45s",
+      "status": "passed",
+      "details": {},
+      "ts": "2026-03-29T14:50:17.642Z"
+    },
+    {
+      "name": "tab-switch-check",
+      "status": "failed",
+      "details": {
+        "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /Reasoning|����� �������/i }).first()\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"button\" title=\"Reasoning opens after the search stage completes and agent debate starts.\" class=\"flex h-11 items-center justify-center gap-2 rounded-full border text-sm font-semibold transition-all duration-200 border-border/60 bg-background/65 text-muted-foreground hover:border-primary/30 hover:text-foreground cursor-not-allowed opacity-50\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    53 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not enabled\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n"
+      },
+      "ts": "2026-03-29T14:50:47.658Z"
+    }
+  ],
+  "observations": [
+    {
+      "label": "poll-5s",
+      "url": "http://127.0.0.1:8082/simulate",
+      "title": "ASSET",
+      "hasChatInput": false,
+      "chatInputDisabled": null,
+      "hasSend": false,
+      "sendDisabled": null,
+      "chatMessagesCount": 0,
+      "reasoningMessagesCount": 0,
+      "hasMetricsTotalAgents": false,
+      "hasMetricsAcceptance": false,
+      "hasClarificationBanner": false,
+      "hasResearchReviewBanner": false,
+      "hasRuntimeErrorWords": false,
+      "visibleTabs": [
+        "Back to dashboard",
+        "Log out",
+        "Settings",
+        "Chat",
+        "Reasoning",
+        "Config",
+        "Start research and persona preparation",
+        "Start research and persona preparation"
+      ],
+      "bodyTextSample": "Point of no return\n\nTest your ideas before launching them\n\nBack to dashboard\nLog out\nRealtime: Disconnected\nSettings\nIdle\nIdea evaluation pipeline\nIdea intake\nDark mode\nReady to continue\nChat\nReasoning\nConfig\nIdea intake\nLive activity\nExecution activity\n\nTrack research, personas, debate, and execution as they happen.\n\nSTATUS\nReady to start\nNo activity yet\nOnce the run starts, you will see research, persona building, debate, and execution step by step.\nStart research and persona preparation\nDecision metrics\n\nA compact summary to understand the current direction.\n\nWaiting for data",
+      "ts": "2026-03-29T14:49:37.438Z"
+    },
+    {
+      "label": "poll-10s",
+      "url": "http://127.0.0.1:8082/simulate",
+      "title": "ASSET",
+      "hasChatInput": false,
+      "chatInputDisabled": null,
+      "hasSend": false,
+      "sendDisabled": null,
+      "chatMessagesCount": 0,
+      "reasoningMessagesCount": 0,
+      "hasMetricsTotalAgents": false,
+      "hasMetricsAcceptance": false,
+      "hasClarificationBanner": false,
+      "hasResearchReviewBanner": false,
+      "hasRuntimeErrorWords": false,
+      "visibleTabs": [
+        "Back to dashboard",
+        "Log out",
+        "Settings",
+        "Chat",
+        "Reasoning",
+        "Config",
+        "Start research and persona preparation",
+        "Start research and persona preparation"
+      ],
+      "bodyTextSample": "Point of no return\n\nTest your ideas before launching them\n\nBack to dashboard\nLog out\nRealtime: Disconnected\nSettings\nIdle\nIdea evaluation pipeline\nIdea intake\nDark mode\nReady to continue\nChat\nReasoning\nConfig\nIdea intake\nLive activity\nExecution activity\n\nTrack research, personas, debate, and execution as they happen.\n\nSTATUS\nReady to start\nNo activity yet\nOnce the run starts, you will see research, persona building, debate, and execution step by step.\nStart research and persona preparation\nDecision metrics\n\nA compact summary to understand the current direction.\n\nWaiting for data",
+      "ts": "2026-03-29T14:49:42.450Z"
+    },
+    {
+      "label": "poll-15s",
+      "url": "http://127.0.0.1:8082/simulate",
+      "title": "ASSET",
+      "hasChatInput": false,
+      "chatInputDisabled": null,
+      "hasSend": false,
+      "sendDisabled": null,
+      "chatMessagesCount": 0,
+      "reasoningMessagesCount": 0,
+      "hasMetricsTotalAgents": false,
+      "hasMetricsAcceptance": false,
+      "hasClarificationBanner": false,
+      "hasResearchReviewBanner": false,
+      "hasRuntimeErrorWords": false,
+      "visibleTabs": [
+        "Back to dashboard",
+        "Log out",
+        "Settings",
+        "Chat",
+        "Reasoning",
+        "Config",
+        "Start research and persona preparation",
+        "Start research and persona preparation"
+      ],
+      "bodyTextSample": "Point of no return\n\nTest your ideas before launching them\n\nBack to dashboard\nLog out\nRealtime: Disconnected\nSettings\nIdle\nIdea evaluation pipeline\nIdea intake\nDark mode\nReady to continue\nChat\nReasoning\nConfig\nIdea intake\nLive activity\nExecution activity\n\nTrack research, personas, debate, and execution as they happen.\n\nSTATUS\nReady to start\nNo activity yet\nOnce the run starts, you will see research, persona building, debate, and execution step by step.\nStart research and persona preparation\nDecision metrics\n\nA compact summary to understand the current direction.\n\nWaiting for data",
+      "ts": "2026-03-29T14:49:47.464Z"
+    },
+    {
+      "label": "poll-20s",
+      "url": "http://127.0.0.1:8082/simulate",
+      "title": "ASSET",
+      "hasChatInput": false,
+      "chatInputDisabled": null,
+      "hasSend": false,
+      "sendDisabled": null,
+      "chatMessagesCount": 0,
+      "reasoningMessagesCount": 0,
+      "hasMetricsTotalAgents": false,
+      "hasMetricsAcceptance": false,
+      "hasClarificationBanner": false,
+      "hasResearchReviewBanner": false,
+      "hasRuntimeErrorWords": false,
+      "visibleTabs": [
+        "Back to dashboard",
+        "Log out",
+        "Settings",
+        "Chat",
+        "Reasoning",
+        "Config",
+        "Start research and persona preparation",
+        "Start research and persona preparation"
+      ],
+      "bodyTextSample": "Point of no return\n\nTest your ideas before launching them\n\nBack to dashboard\nLog out\nRealtime: Disconnected\nSettings\nIdle\nIdea evaluation pipeline\nIdea intake\nDark mode\nReady to continue\nChat\nReasoning\nConfig\nIdea intake\nLive activity\nExecution activity\n\nTrack research, personas, debate, and execution as they happen.\n\nSTATUS\nReady to start\nNo activity yet\nOnce the run starts, you will see research, persona building, debate, and execution step by step.\nStart research and persona preparation\nDecision metrics\n\nA compact summary to understand the current direction.\n\nWaiting for data",
+      "ts": "2026-03-29T14:49:52.474Z"
+    },
+    {
+      "label": "poll-25s",
+      "url": "http://127.0.0.1:8082/simulate",
+      "title": "ASSET",
+      "hasChatInput": false,
+      "chatInputDisabled": null,
+      "hasSend": false,
+      "sendDisabled": null,
+      "chatMessagesCount": 0,
+      "reasoningMessagesCount": 0,
+      "hasMetricsTotalAgents": false,
+      "hasMetricsAcceptance": false,
+      "hasClarificationBanner": false,
+      "hasResearchReviewBanner": false,
+      "hasRuntimeErrorWords": false,
+      "visibleTabs": [
+        "Back to dashboard",
+        "Log out",
+        "Settings",
+        "Chat",
+        "Reasoning",
+        "Config",
+        "Start research and persona preparation",
+        "Start research and persona preparation"
+      ],
+      "bodyTextSample": "Point of no return\n\nTest your ideas before launching them\n\nBack to dashboard\nLog out\nRealtime: Disconnected\nSettings\nIdle\nIdea evaluation pipeline\nIdea intake\nDark mode\nReady to continue\nChat\nReasoning\nConfig\nIdea intake\nLive activity\nExecution activity\n\nTrack research, personas, debate, and execution as they happen.\n\nSTATUS\nReady to start\nNo activity yet\nOnce the run starts, you will see research, persona building, debate, and execution step by step.\nStart research and persona preparation\nDecision metrics\n\nA compact summary to understand the current direction.\n\nWaiting for data",
+      "ts": "2026-03-29T14:49:57.489Z"
+    },
+    {
+      "label": "poll-30s",
+      "url": "http://127.0.0.1:8082/simulate",
+      "title": "ASSET",
+      "hasChatInput": false,
+      "chatInputDisabled": null,
+      "hasSend": false,
+      "sendDisabled": null,
+      "chatMessagesCount": 0,
+      "reasoningMessagesCount": 0,
+      "hasMetricsTotalAgents": false,
+      "hasMetricsAcceptance": false,
+      "hasClarificationBanner": false,
+      "hasResearchReviewBanner": false,
+      "hasRuntimeErrorWords": false,
+      "visibleTabs": [
+        "Back to dashboard",
+        "Log out",
+        "Settings",
+        "Chat",
+        "Reasoning",
+        "Config",
+        "Start research and persona preparation",
+        "Start research and persona preparation"
+      ],
+      "bodyTextSample": "Point of no return\n\nTest your ideas before launching them\n\nBack to dashboard\nLog out\nRealtime: Disconnected\nSettings\nIdle\nIdea evaluation pipeline\nIdea intake\nDark mode\nReady to continue\nChat\nReasoning\nConfig\nIdea intake\nLive activity\nExecution activity\n\nTrack research, personas, debate, and execution as they happen.\n\nSTATUS\nReady to start\nNo activity yet\nOnce the run starts, you will see research, persona building, debate, and execution step by step.\nStart research and persona preparation\nDecision metrics\n\nA compact summary to understand the current direction.\n\nWaiting for data",
+      "ts": "2026-03-29T14:50:02.501Z"
+    },
+    {
+      "label": "poll-35s",
+      "url": "http://127.0.0.1:8082/simulate",
+      "title": "ASSET",
+      "hasChatInput": false,
+      "chatInputDisabled": null,
+      "hasSend": false,
+      "sendDisabled": null,
+      "chatMessagesCount": 0,
+      "reasoningMessagesCount": 0,
+      "hasMetricsTotalAgents": false,
+      "hasMetricsAcceptance": false,
+      "hasClarificationBanner": false,
+      "hasResearchReviewBanner": false,
+      "hasRuntimeErrorWords": false,
+      "visibleTabs": [
+        "Back to dashboard",
+        "Log out",
+        "Settings",
+        "Chat",
+        "Reasoning",
+        "Config",
+        "Start research and persona preparation",
+        "Start research and persona preparation"
+      ],
+      "bodyTextSample": "Point of no return\n\nTest your ideas before launching them\n\nBack to dashboard\nLog out\nRealtime: Disconnected\nSettings\nIdle\nIdea evaluation pipeline\nIdea intake\nDark mode\nReady to continue\nChat\nReasoning\nConfig\nIdea intake\nLive activity\nExecution activity\n\nTrack research, personas, debate, and execution as they happen.\n\nSTATUS\nReady to start\nNo activity yet\nOnce the run starts, you will see research, persona building, debate, and execution step by step.\nStart research and persona preparation\nDecision metrics\n\nA compact summary to understand the current direction.\n\nWaiting for data",
+      "ts": "2026-03-29T14:50:07.505Z"
+    },
+    {
+      "label": "poll-40s",
+      "url": "http://127.0.0.1:8082/simulate",
+      "title": "ASSET",
+      "hasChatInput": false,
+      "chatInputDisabled": null,
+      "hasSend": false,
+      "sendDisabled": null,
+      "chatMessagesCount": 0,
+      "reasoningMessagesCount": 0,
+      "hasMetricsTotalAgents": false,
+      "hasMetricsAcceptance": false,
+      "hasClarificationBanner": false,
+      "hasResearchReviewBanner": false,
+      "hasRuntimeErrorWords": false,
+      "visibleTabs": [
+        "Back to dashboard",
+        "Log out",
+        "Settings",
+        "Chat",
+        "Reasoning",
+        "Config",
+        "Start research and persona preparation",
+        "Start research and persona preparation"
+      ],
+      "bodyTextSample": "Point of no return\n\nTest your ideas before launching them\n\nBack to dashboard\nLog out\nRealtime: Disconnected\nSettings\nIdle\nIdea evaluation pipeline\nIdea intake\nDark mode\nReady to continue\nChat\nReasoning\nConfig\nIdea intake\nLive activity\nExecution activity\n\nTrack research, personas, debate, and execution as they happen.\n\nSTATUS\nReady to start\nNo activity yet\nOnce the run starts, you will see research, persona building, debate, and execution step by step.\nStart research and persona preparation\nDecision metrics\n\nA compact summary to understand the current direction.\n\nWaiting for data",
+      "ts": "2026-03-29T14:50:12.520Z"
+    },
+    {
+      "label": "poll-45s",
+      "url": "http://127.0.0.1:8082/simulate",
+      "title": "ASSET",
+      "hasChatInput": false,
+      "chatInputDisabled": null,
+      "hasSend": false,
+      "sendDisabled": null,
+      "chatMessagesCount": 0,
+      "reasoningMessagesCount": 0,
+      "hasMetricsTotalAgents": false,
+      "hasMetricsAcceptance": false,
+      "hasClarificationBanner": false,
+      "hasResearchReviewBanner": false,
+      "hasRuntimeErrorWords": false,
+      "visibleTabs": [
+        "Back to dashboard",
+        "Log out",
+        "Settings",
+        "Chat",
+        "Reasoning",
+        "Config",
+        "Start research and persona preparation",
+        "Start research and persona preparation"
+      ],
+      "bodyTextSample": "Point of no return\n\nTest your ideas before launching them\n\nBack to dashboard\nLog out\nRealtime: Disconnected\nSettings\nIdle\nIdea evaluation pipeline\nIdea intake\nDark mode\nReady to continue\nChat\nReasoning\nConfig\nIdea intake\nLive activity\nExecution activity\n\nTrack research, personas, debate, and execution as they happen.\n\nSTATUS\nReady to start\nNo activity yet\nOnce the run starts, you will see research, persona building, debate, and execution step by step.\nStart research and persona preparation\nDecision metrics\n\nA compact summary to understand the current direction.\n\nWaiting for data",
+      "ts": "2026-03-29T14:50:17.531Z"
+    }
+  ],
+  "issues": [
+    {
+      "severity": "major",
+      "title": "Step failed: open-simulate",
+      "details": {
+        "error": "page.waitForSelector: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"chat-input\"]') to be visible\u001b[22m\n\n    at D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_chatprobe_8082.js:167:18\n    at async runStep (D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_chatprobe_8082.js:41:5)\n    at async D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_chatprobe_8082.js:164:5"
+      },
+      "step": "open-simulate",
+      "ts": "2026-03-29T14:48:32.145Z"
+    },
+    {
+      "severity": "major",
+      "title": "Step failed: insert-idea-send",
+      "details": {
+        "error": "page.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"chat-input\"]')\u001b[22m\n\n    at D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_chatprobe_8082.js:175:18\n    at runStep (D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_chatprobe_8082.js:41:11)\n    at D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_chatprobe_8082.js:173:11"
+      },
+      "step": "insert-idea-send",
+      "ts": "2026-03-29T14:49:02.235Z"
+    },
+    {
+      "severity": "major",
+      "title": "Step failed: followup-go",
+      "details": {
+        "error": "page.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"chat-input\"]')\u001b[22m\n\n    at D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_chatprobe_8082.js:184:18\n    at runStep (D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_chatprobe_8082.js:41:11)\n    at D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_chatprobe_8082.js:182:11"
+      },
+      "step": "followup-go",
+      "ts": "2026-03-29T14:49:32.336Z"
+    },
+    {
+      "severity": "major",
+      "title": "Step failed: tab-switch-check",
+      "details": {
+        "error": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /Reasoning|����� �������/i }).first()\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"button\" title=\"Reasoning opens after the search stage completes and agent debate starts.\" class=\"flex h-11 items-center justify-center gap-2 rounded-full border text-sm font-semibold transition-all duration-200 border-border/60 bg-background/65 text-muted-foreground hover:border-primary/30 hover:text-foreground cursor-not-allowed opacity-50\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    53 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not enabled\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\n    at clickByName (D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_chatprobe_8082.js:87:17)\n    at async D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_chatprobe_8082.js:202:7\n    at async runStep (D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_chatprobe_8082.js:41:5)\n    at async D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\playwright_chatprobe_8082.js:200:5"
+      },
+      "step": "tab-switch-check",
+      "ts": "2026-03-29T14:50:47.658Z"
+    },
+    {
+      "severity": "critical",
+      "title": "Chat input missing on /simulate",
+      "details": {},
+      "step": "open-simulate",
+      "ts": "2026-03-29T14:50:47.751Z"
+    },
+    {
+      "severity": "major",
+      "title": "Metrics panel not visible during simulation",
+      "details": {
+        "after45": {
+          "label": "poll-45s",
+          "url": "http://127.0.0.1:8082/simulate",
+          "title": "ASSET",
+          "hasChatInput": false,
+          "chatInputDisabled": null,
+          "hasSend": false,
+          "sendDisabled": null,
+          "chatMessagesCount": 0,
+          "reasoningMessagesCount": 0,
+          "hasMetricsTotalAgents": false,
+          "hasMetricsAcceptance": false,
+          "hasClarificationBanner": false,
+          "hasResearchReviewBanner": false,
+          "hasRuntimeErrorWords": false,
+          "visibleTabs": [
+            "Back to dashboard",
+            "Log out",
+            "Settings",
+            "Chat",
+            "Reasoning",
+            "Config",
+            "Start research and persona preparation",
+            "Start research and persona preparation"
+          ],
+          "bodyTextSample": "Point of no return\n\nTest your ideas before launching them\n\nBack to dashboard\nLog out\nRealtime: Disconnected\nSettings\nIdle\nIdea evaluation pipeline\nIdea intake\nDark mode\nReady to continue\nChat\nReasoning\nConfig\nIdea intake\nLive activity\nExecution activity\n\nTrack research, personas, debate, and execution as they happen.\n\nSTATUS\nReady to start\nNo activity yet\nOnce the run starts, you will see research, persona building, debate, and execution step by step.\nStart research and persona preparation\nDecision metrics\n\nA compact summary to understand the current direction.\n\nWaiting for data",
+          "ts": "2026-03-29T14:50:17.531Z"
+        }
+      },
+      "step": "wait-progress-45s",
+      "ts": "2026-03-29T14:50:47.751Z"
+    }
+  ],
+  "consoleErrors": [],
+  "failedRequests": [
+    {
+      "step": "login-admin",
+      "url": "http://127.0.0.1:8000/auth/me",
+      "method": "GET",
+      "failure": {
+        "errorText": "net::ERR_ABORTED"
+      },
+      "ts": "2026-03-29T14:47:45.368Z"
+    }
+  ],
+  "badResponses": [],
+  "screenshots": [
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\_tmp_agent_ui\\playwright-chatprobe-2026-03-29T14-47-21-364Z\\screens\\01-landing.png",
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\_tmp_agent_ui\\playwright-chatprobe-2026-03-29T14-47-21-364Z\\screens\\02-dashboard-after-login.png",
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\_tmp_agent_ui\\playwright-chatprobe-2026-03-29T14-47-21-364Z\\screens\\03-open-simulate-FAILED.png",
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\_tmp_agent_ui\\playwright-chatprobe-2026-03-29T14-47-21-364Z\\screens\\04-insert-idea-send-FAILED.png",
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\_tmp_agent_ui\\playwright-chatprobe-2026-03-29T14-47-21-364Z\\screens\\05-followup-go-FAILED.png",
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\_tmp_agent_ui\\playwright-chatprobe-2026-03-29T14-47-21-364Z\\screens\\06-simulate-after-45s.png",
+    "D:\\projects\\Ai\\AgenticAI_Community_simulator-DEPI\\_tmp_agent_ui\\_tmp_agent_ui\\playwright-chatprobe-2026-03-29T14-47-21-364Z\\screens\\07-tab-switch-check-FAILED.png"
+  ],
+  "finishedAt": "2026-03-29T14:50:47.762Z",
+  "summary": {
+    "steps": 7,
+    "failedSteps": 4,
+    "critical": 1,
+    "major": 5,
+    "minor": 0,
+    "consoleErrors": 0,
+    "failedRequests": 1,
+    "badResponses": 0,
+    "screenshots": 7
+  }
+}
