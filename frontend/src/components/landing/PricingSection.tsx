@@ -120,7 +120,7 @@ export function PricingSection({ onGetStarted }: PricingSectionProps) {
     <section
       id="pricing"
       ref={sectionRef}
-      className="relative py-32 px-6 bg-background overflow-hidden"
+      className="relative py-32 px-6 bg-transparent overflow-hidden"
     >
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-20 blur-3xl pointer-events-none">

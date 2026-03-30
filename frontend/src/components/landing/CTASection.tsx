@@ -52,7 +52,7 @@ export function CTASection({ onGetStarted }: CTASectionProps) {
   return (
     <section
       ref={sectionRef}
-      className="relative py-32 px-6 bg-gradient-to-b from-background to-secondary/20 overflow-hidden"
+      className="relative py-32 px-6 bg-transparent overflow-hidden"
     >
       {/* Background decorations */}
       <div className="absolute inset-0 opacity-5">

@@ -106,7 +106,7 @@ export function SimulationSection() {
     <section
       id="how-it-works"
       ref={sectionRef}
-      className="relative min-h-screen py-24 px-6 bg-gradient-to-b from-background to-secondary/10 overflow-hidden"
+      className="relative min-h-screen py-24 px-6 bg-transparent overflow-hidden"
     >
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 items-center">

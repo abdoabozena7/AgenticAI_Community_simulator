@@ -103,7 +103,7 @@ export function ProblemSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative py-32 px-6 bg-gradient-to-b from-secondary/20 to-background overflow-hidden"
+      className="relative py-32 px-6 bg-transparent overflow-hidden"
     >
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16 problem-title">

@@ -90,7 +90,7 @@ export function FeaturesSection() {
     <section
       id="features"
       ref={sectionRef}
-      className="relative py-32 px-6 bg-gradient-to-b from-secondary/10 via-background to-background"
+      className="relative py-32 px-6 bg-transparent"
     >
       {/* Background dots pattern */}
       <div className="absolute inset-0 opacity-[0.02]">

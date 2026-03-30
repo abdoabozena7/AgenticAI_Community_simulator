@@ -154,7 +154,7 @@ export function ProofMetricsSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative py-24 px-6 bg-gradient-to-b from-background via-secondary/10 to-background"
+      className="relative py-24 px-6 bg-transparent"
     >
       <div className="max-w-6xl mx-auto">
         <div className="proof-reveal text-center mb-12">

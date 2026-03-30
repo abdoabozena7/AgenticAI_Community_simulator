@@ -106,7 +106,7 @@ export function SolutionSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative py-40 px-6 bg-background overflow-hidden"
+      className="relative py-40 px-6 bg-transparent overflow-hidden"
     >
       {/* Decorative particles */}
       {[...Array(6)].map((_, i) => (
