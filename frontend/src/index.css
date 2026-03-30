@@ -181,6 +181,13 @@
 .lang-ar .font-display {
   font-family: 'Readex Pro', 'Cairo', sans-serif;
 }
+
+.hero-title-ar {
+  font-family: 'IBM Plex Sans Arabic', 'Cairo', sans-serif;
+  font-weight: 600;
+  line-height: 1.42;
+  padding-bottom: 0.14em;
+}
 }
 
 @layer components {

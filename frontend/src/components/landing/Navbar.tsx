@@ -11,7 +11,7 @@ interface NavbarProps {
 }
 
 export function Navbar({ onLogin, onRegister }: NavbarProps) {
-  const { t, language, setLanguage } = useLanguage();
+  const { t, language, setLanguage, isRTL } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const navRef = useRef<HTMLElement>(null);
   const [collapseProgress, setCollapseProgress] = useState(0);
@@ -71,6 +71,10 @@ export function Navbar({ onLogin, onRegister }: NavbarProps) {
     marginInlineStart: `${lerp(16, 0).toFixed(1)}px`,
     ...smoothTiming,
   } as const;
+  const actionClusterStyle = {
+    gap: `${lerp(10, 8).toFixed(1)}px`,
+    ...smoothTiming,
+  } as const;
   const iconButtonTone = `rgba(255,255,255,${lerp(0.7, 0.78).toFixed(3)})`;
   const mutedTone = `rgba(255,255,255,${lerp(0.75, 0.78).toFixed(3)})`;
   const dividerTone = `rgba(255,255,255,${lerp(0.15, 0.2).toFixed(3)})`;
@@ -106,7 +110,7 @@ export function Navbar({ onLogin, onRegister }: NavbarProps) {
           style={{ opacity: compactGlowOpacity, ...smoothTiming }}
         />
 
-        <div className="flex items-center gap-3 z-20 shrink-0">
+        <div className={`flex items-center gap-3 z-20 shrink-0 ${isRTL ? 'order-3' : 'order-1'}`}>
           <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center">
             <span className="text-background font-bold text-sm leading-none">AS</span>
           </div>
@@ -114,7 +118,7 @@ export function Navbar({ onLogin, onRegister }: NavbarProps) {
         </div>
 
         <div
-          className="flex flex-1 items-center justify-center transition-[gap,padding] duration-700"
+          className={`flex flex-1 items-center justify-center transition-[gap,padding] duration-700 ${isRTL ? 'order-2' : 'order-2'}`}
           style={centerStyle}
         >
           {[
@@ -133,46 +137,48 @@ export function Navbar({ onLogin, onRegister }: NavbarProps) {
           ))}
         </div>
 
-        <div className="z-10 shrink-0 flex items-center transition-[gap,margin] duration-700" style={actionGroupStyle}>
-          <div className="mx-0.5 h-7 w-px" style={{ backgroundColor: dividerTone }} />
+        <div className={`z-10 shrink-0 flex items-center transition-[gap,margin] duration-700 ${isRTL ? 'order-1 flex-row-reverse' : 'order-3'}`} style={actionGroupStyle}>
+          <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`} style={actionClusterStyle}>
+            <Button
+              onClick={onRegister}
+              className="relative z-10 rounded-full bg-white text-black transition-[padding,height,background-color,font-size,line-height,transform,box-shadow] duration-500 hover:bg-white/90"
+              style={buttonTextStyle}
+            >
+              {t('nav.startFree')}
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={onLogin}
+              className="relative z-10 rounded-full transition-[padding,height,color,background-color,font-size,line-height] duration-500 hover:bg-white/10 hover:text-white"
+              style={{ color: mutedTone, ...buttonTextStyle }}
+            >
+              {t('nav.signIn')}
+            </Button>
+          </div>
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleLanguage}
-            className="relative z-10 h-10 w-10 rounded-full hover:bg-white/10 hover:text-white"
-            style={{ color: iconButtonTone, ...smoothTiming }}
-          >
-            <Languages className="w-4 h-4" />
-          </Button>
+          <div className="mx-1 h-7 w-px" style={{ backgroundColor: dividerTone }} />
 
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            className="relative z-10 h-10 w-10 rounded-full hover:bg-white/10 hover:text-white"
-            style={{ color: iconButtonTone, ...smoothTiming }}
-          >
-            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </Button>
+          <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`} style={actionClusterStyle}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="relative z-10 h-10 w-10 rounded-full hover:bg-white/10 hover:text-white"
+              style={{ color: iconButtonTone, ...smoothTiming }}
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
 
-          <div className="mx-0.5 h-7 w-px" style={{ backgroundColor: dividerTone }} />
-
-          <Button
-            variant="ghost"
-            onClick={onLogin}
-            className="relative z-10 rounded-full transition-[padding,height,color,background-color,font-size,line-height] duration-500 hover:bg-white/10 hover:text-white"
-            style={{ color: mutedTone, ...buttonTextStyle }}
-          >
-            {t('nav.signIn')}
-          </Button>
-          <Button
-            onClick={onRegister}
-            className="relative z-10 rounded-full bg-white text-black transition-[padding,height,background-color,font-size,line-height,transform,box-shadow] duration-500 hover:bg-white/90"
-            style={buttonTextStyle}
-          >
-            {t('nav.startFree')}
-          </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleLanguage}
+              className="relative z-10 h-10 w-10 rounded-full hover:bg-white/10 hover:text-white"
+              style={{ color: iconButtonTone, ...smoothTiming }}
+            >
+              <Languages className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
 

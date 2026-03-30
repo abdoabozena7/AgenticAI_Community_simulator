@@ -17,7 +17,6 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
-  const statsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -45,12 +44,6 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
           { opacity: 0, y: 30 },
           { opacity: 1, y: 0, duration: 0.6 },
           '-=0.4'
-        )
-        .fromTo(
-          statsRef.current?.querySelectorAll('.stat-item'),
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, stagger: 0.1, duration: 0.5 },
-          '-=0.2'
         );
 
       // Floating animation for badge
@@ -106,7 +99,7 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
         />
       </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto text-center">
+      <div className="relative z-10 mx-auto max-w-5xl text-center">
         {/* Badge */}
         <div
           ref={badgeRef}
@@ -117,16 +110,16 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
         {/* Title */}
         <h1
           ref={titleRef}
-          className={`font-bold text-foreground tracking-tight ${
+          className={`${isRTL ? 'hero-title-ar' : 'font-display'} font-semibold text-foreground ${
             isRTL
-              ? 'text-5xl md:text-7xl lg:text-[5.5rem] leading-[1.2] mb-8'
-              : 'text-5xl md:text-7xl lg:text-8xl leading-[1.1] mb-6'
+              ? 'text-5xl md:text-7xl lg:text-[5.5rem] leading-[1.42] tracking-normal mb-8'
+              : 'text-5xl md:text-7xl lg:text-[7.5rem] leading-[1.06] tracking-[-0.04em] mb-6'
           }`}
           style={{ perspective: '1000px' }}
         >
-          <span>{t('hero.title1')}</span>
+          <span className="block">{t('hero.title1')}</span>
           <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-foreground via-foreground/80 to-foreground/40 inline-block">
+          <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-foreground via-foreground/85 to-foreground/55">
             {t('hero.title2')}
           </span>
         </h1>
@@ -168,25 +161,6 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
         </div>
 
         <VideoModal isOpen={isVideoOpen} onClose={() => setIsVideoOpen(false)} />
-
-        {/* Stats */}
-        <div 
-          ref={statsRef}
-          className="flex items-center justify-center gap-8 md:gap-12 mt-16 pt-8"
-        >
-          {[
-            { value: t('hero.stat1'), label: t('hero.stat1Label') },
-            { value: t('hero.stat2'), label: t('hero.stat2Label') },
-            { value: t('hero.stat3'), label: t('hero.stat3Label') },
-          ].map((stat, i) => (
-            <div key={i} className="stat-item text-center group cursor-default px-6 py-4 rounded-xl liquid-glass">
-              <div className="text-2xl md:text-3xl font-bold text-foreground mb-1">
-                {stat.value}
-              </div>
-              <div className="text-sm text-muted-foreground">{stat.label}</div>
-            </div>
-          ))}
-        </div>
       </div>
 
       {/* Scroll indicator */}
