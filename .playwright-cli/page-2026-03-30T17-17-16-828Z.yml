@@ -1,0 +1,328 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e487]:
+    - navigation [ref=e488]:
+      - generic [ref=e489]:
+        - generic [ref=e490]:
+          - generic [ref=e492]: AS
+          - generic [ref=e493]: ASSET
+        - generic [ref=e494]:
+          - link "Features" [ref=e495] [cursor=pointer]:
+            - /url: "#features"
+          - link "How it Works" [ref=e496] [cursor=pointer]:
+            - /url: "#how-it-works"
+          - link "Pricing" [ref=e497] [cursor=pointer]:
+            - /url: "#pricing"
+        - generic [ref=e498]:
+          - button [ref=e500] [cursor=pointer]:
+            - img
+          - button [ref=e501] [cursor=pointer]:
+            - img
+          - button "Sign In" [ref=e503] [cursor=pointer]
+          - button "Start Free" [ref=e504] [cursor=pointer]
+    - generic [ref=e508]:
+      - heading "Test Your Idea Before You Build" [level=1] [ref=e509]:
+        - text: Test Your Idea
+        - generic [ref=e510]: Before You Build
+      - paragraph [ref=e511]: Got an idea in your head? We help you validate it before spending time and money.
+      - generic [ref=e512]:
+        - button "Start Free Trial" [ref=e513] [cursor=pointer]:
+          - text: Start Free Trial
+          - img
+        - button "Watch Demo" [ref=e514] [cursor=pointer]:
+          - img
+          - text: Watch Demo
+      - generic [ref=e515]:
+        - generic [ref=e516]:
+          - generic [ref=e517]: 24+ AI Agents
+          - generic [ref=e518]: Virtual Society
+        - generic [ref=e519]:
+          - generic [ref=e520]: 87%
+          - generic [ref=e521]: Accuracy Rate
+        - generic [ref=e522]:
+          - generic [ref=e523]: < 5min
+          - generic [ref=e524]: Results Time
+    - generic [ref=e529]:
+      - generic [ref=e530]:
+        - text: Measurable Proof
+        - heading "Not Just Another LLM Chat" [level=2] [ref=e531]
+        - paragraph [ref=e532]: These KPIs are designed to show tangible value from simulation reasoning, evidence grounding, and risk discovery.
+      - generic [ref=e533]:
+        - generic [ref=e534]:
+          - generic [ref=e535]:
+            - img [ref=e537]
+            - generic [ref=e547]: points
+          - generic [ref=e548]: "+18"
+          - heading "Reasoning Score" [level=3] [ref=e549]
+          - paragraph [ref=e550]: Higher structured reasoning quality vs plain LLM usage.
+        - generic [ref=e551]:
+          - generic [ref=e552]:
+            - img [ref=e554]
+            - generic [ref=e557]: Evidence-backed
+          - generic [ref=e558]: 72%
+          - heading "Evidence-backed insights" [level=3] [ref=e559]
+          - paragraph [ref=e560]: Most conclusions are tied to verifiable evidence cards.
+        - generic [ref=e561]:
+          - generic [ref=e562]:
+            - img [ref=e564]
+            - generic [ref=e566]: Fatal Risks
+          - generic [ref=e567]: +42%
+          - heading "Critical risk coverage" [level=3] [ref=e568]
+          - paragraph [ref=e569]: Find severe failure conditions before spending money.
+      - generic [ref=e570]:
+        - generic [ref=e571]: "Pilot results: 20 sessions, Jan 2026"
+        - generic [ref=e572]: Compared against a baseline LLM prompt
+      - generic [ref=e573]:
+        - generic [ref=e574]:
+          - img [ref=e575]
+          - generic [ref=e578]:
+            - paragraph [ref=e579]: 35%
+            - paragraph [ref=e580]: Faster decision time
+        - generic [ref=e581]:
+          - img [ref=e582]
+          - generic [ref=e584]:
+            - paragraph [ref=e585]: 94%
+            - paragraph [ref=e586]: Session completion rate
+        - generic [ref=e587]:
+          - img [ref=e588]
+          - generic [ref=e590]:
+            - paragraph [ref=e591]: 4.6/5
+            - paragraph [ref=e592]: Avg helpfulness rating
+        - generic [ref=e593]:
+          - img [ref=e594]
+          - generic [ref=e597]:
+            - paragraph [ref=e598]: "-30%"
+            - paragraph [ref=e599]: Unsupported claims
+      - generic [ref=e600]:
+        - heading "Why these metrics matter" [level=3] [ref=e601]
+        - generic [ref=e602]:
+          - generic [ref=e603]:
+            - img [ref=e604]
+            - paragraph [ref=e608]: "Idea Court: prosecution, defense, and verdict before decisions"
+          - generic [ref=e609]:
+            - img [ref=e610]
+            - paragraph [ref=e613]: Multi-source research, summarization, and location-aware POIs
+          - generic [ref=e614]:
+            - img [ref=e615]
+            - paragraph [ref=e617]: Live metrics to track momentum, confidence, and risks
+    - generic [ref=e619]:
+      - generic [ref=e620]:
+        - text: The Problem
+        - heading "Why Most Ideas Fail" [level=2] [ref=e621]
+        - paragraph [ref=e622]: Generic chatbot replies are not real validation. You need diverse, realistic perspectives.
+      - generic [ref=e623]:
+        - generic [ref=e624]:
+          - img [ref=e626]
+          - heading "No real market feedback" [level=3] [ref=e628]
+          - paragraph [ref=e629]: People often hear what they want, not what the market will actually do.
+        - generic [ref=e630]:
+          - img [ref=e632]
+          - heading "Fear of embarrassment" [level=3] [ref=e635]
+          - paragraph [ref=e636]: Testing in public can be risky before the idea is mature.
+        - generic [ref=e637]:
+          - img [ref=e639]
+          - heading "No diverse perspectives" [level=3] [ref=e644]
+          - paragraph [ref=e645]: You need skeptics, optimists, and pragmatists, not one voice.
+    - generic [ref=e653]:
+      - generic:
+        - img
+        - text: The Solution
+      - generic [ref=e654]:
+        - heading "Meet ASSET" [level=2] [ref=e655]
+        - paragraph [ref=e656]: AI Social Simulation & Evolution Tool
+        - paragraph [ref=e657]: Test ideas in a virtual environment first, then iterate safely.
+    - generic [ref=e662]:
+      - generic [ref=e664]:
+        - generic [ref=e667]:
+          - generic [ref=e668]: Accepted
+          - generic [ref=e670]: Rejected
+          - generic [ref=e672]: Neutral
+        - generic [ref=e674]: "Nodes: 25 • Connections: 44"
+        - generic:
+          - generic:
+            - generic: Node 12 - accepted
+            - generic: I would move forward with this.
+      - generic [ref=e675]:
+        - generic [ref=e676]: How it works
+        - heading "Watch AI Agents Test Your Idea" [level=2] [ref=e677]
+        - paragraph [ref=e678]: A virtual society of AI agents with different backgrounds and personalities.
+        - generic [ref=e679]:
+          - generic [ref=e680] [cursor=pointer]:
+            - generic [ref=e682]: "1"
+            - generic [ref=e683]:
+              - heading "Real Personalities" [level=3] [ref=e684]
+              - paragraph [ref=e685]: Different roles and mindsets for balanced evaluation.
+          - generic [ref=e686] [cursor=pointer]:
+            - generic [ref=e688]: "2"
+            - generic [ref=e689]:
+              - heading "Psychological Traits" [level=3] [ref=e690]
+              - paragraph [ref=e691]: Different optimism, skepticism, and risk tolerance.
+          - generic [ref=e692] [cursor=pointer]:
+            - generic [ref=e694]: "3"
+            - generic [ref=e695]:
+              - heading "Live Debates" [level=3] [ref=e696]
+              - paragraph [ref=e697]: Agents discuss and influence each other in real time.
+          - generic [ref=e698] [cursor=pointer]:
+            - generic [ref=e700]: "4"
+            - generic [ref=e701]:
+              - heading "Real Data Grounding" [level=3] [ref=e702]
+              - paragraph [ref=e703]: Web-grounded context when available.
+    - generic [ref=e707]:
+      - generic [ref=e708]:
+        - text: Features
+        - heading "Everything You Need" [level=2] [ref=e709]
+        - paragraph [ref=e710]: Powerful tools to validate your ideas with confidence.
+      - generic [ref=e711]:
+        - generic [ref=e712] [cursor=pointer]:
+          - img [ref=e714]
+          - heading "Instant Results" [level=3] [ref=e716]
+          - paragraph [ref=e717]: Fast feedback loop.
+        - generic [ref=e718] [cursor=pointer]:
+          - img [ref=e720]
+          - heading "Acceptance Rate" [level=3] [ref=e724]
+          - paragraph [ref=e725]: See likely audience response.
+        - generic [ref=e726] [cursor=pointer]:
+          - img [ref=e728]
+          - heading "Polarization Index" [level=3] [ref=e733]
+          - paragraph [ref=e734]: Measure disagreement and alignment.
+        - generic [ref=e735] [cursor=pointer]:
+          - img [ref=e737]
+          - heading "Deep Analysis" [level=3] [ref=e739]
+          - paragraph [ref=e740]: Strengths, risks, and suggestions.
+        - generic [ref=e741] [cursor=pointer]:
+          - img [ref=e743]
+          - heading "Global Markets" [level=3] [ref=e746]
+          - paragraph [ref=e747]: Explore different regions and contexts.
+        - generic [ref=e748] [cursor=pointer]:
+          - img [ref=e750]
+          - heading "Real-Time Thinking" [level=3] [ref=e757]
+          - paragraph [ref=e758]: Track opinion shifts over time.
+    - generic [ref=e760]:
+      - generic [ref=e761]:
+        - text: Pricing
+        - heading "Start Free Today" [level=2] [ref=e762]
+        - paragraph [ref=e763]: Try it free first.
+      - generic [ref=e764]:
+        - generic [ref=e766]:
+          - img [ref=e768]
+          - heading "Starter" [level=3] [ref=e770]
+          - generic [ref=e771]:
+            - generic [ref=e772]: $0
+            - generic [ref=e773]: /month
+          - paragraph [ref=e774]: Perfect for trying out the platform
+          - list [ref=e775]:
+            - listitem [ref=e776]:
+              - img [ref=e778]
+              - generic [ref=e780]: 3 simulations per day
+            - listitem [ref=e781]:
+              - img [ref=e783]
+              - generic [ref=e785]: 50 AI agents per simulation
+            - listitem [ref=e786]:
+              - img [ref=e788]
+              - generic [ref=e790]: Basic analytics
+            - listitem [ref=e791]:
+              - img [ref=e793]
+              - generic [ref=e795]: Email support
+            - listitem [ref=e796]:
+              - img [ref=e798]
+              - generic [ref=e800]: Community access
+          - button "Start Free" [ref=e801] [cursor=pointer]
+        - generic [ref=e802]:
+          - generic [ref=e804]:
+            - img [ref=e805]
+            - text: Most Popular
+          - generic [ref=e807]:
+            - img [ref=e809]
+            - heading "Pro" [level=3] [ref=e811]
+            - generic [ref=e812]:
+              - generic [ref=e813]: $29
+              - generic [ref=e814]: /month
+            - paragraph [ref=e815]: For serious entrepreneurs and teams
+            - list [ref=e816]:
+              - listitem [ref=e817]:
+                - img [ref=e819]
+                - generic [ref=e821]: Unlimited simulations
+              - listitem [ref=e822]:
+                - img [ref=e824]
+                - generic [ref=e826]: 500 AI agents per simulation
+              - listitem [ref=e827]:
+                - img [ref=e829]
+                - generic [ref=e831]: Advanced analytics & reports
+              - listitem [ref=e832]:
+                - img [ref=e834]
+                - generic [ref=e836]: Priority support
+              - listitem [ref=e837]:
+                - img [ref=e839]
+                - generic [ref=e841]: API access
+              - listitem [ref=e842]:
+                - img [ref=e844]
+                - generic [ref=e846]: Custom agent personas
+            - button "Start 7-Day Trial" [ref=e847] [cursor=pointer]
+        - generic [ref=e849]:
+          - img [ref=e851]
+          - heading "Enterprise" [level=3] [ref=e853]
+          - generic [ref=e855]: Custom
+          - paragraph [ref=e856]: For large organizations
+          - list [ref=e857]:
+            - listitem [ref=e858]:
+              - img [ref=e860]
+              - generic [ref=e862]: Everything in Pro
+            - listitem [ref=e863]:
+              - img [ref=e865]
+              - generic [ref=e867]: Unlimited agents
+            - listitem [ref=e868]:
+              - img [ref=e870]
+              - generic [ref=e872]: White-label solution
+            - listitem [ref=e873]:
+              - img [ref=e875]
+              - generic [ref=e877]: Dedicated account manager
+            - listitem [ref=e878]:
+              - img [ref=e880]
+              - generic [ref=e882]: Custom integrations
+            - listitem [ref=e883]:
+              - img [ref=e885]
+              - generic [ref=e887]: SLA guarantee
+            - listitem [ref=e888]:
+              - img [ref=e890]
+              - generic [ref=e892]: On-premise deployment
+          - button "Contact Sales" [ref=e893] [cursor=pointer]
+      - paragraph [ref=e894]: All plans include a 7-day free trial. No credit card required.
+    - generic [ref=e898]:
+      - img [ref=e901]
+      - heading "Ready to Validate Your Idea?" [level=2] [ref=e906]
+      - paragraph [ref=e907]: Iterate in a safe virtual environment before launch.
+      - button "Try ASSET Free" [ref=e908] [cursor=pointer]:
+        - text: Try ASSET Free
+        - img
+    - contentinfo [ref=e909]:
+      - generic [ref=e910]:
+        - generic [ref=e911]:
+          - generic [ref=e912]:
+            - generic [ref=e914]: AS
+            - generic [ref=e915]: ASSET
+          - navigation [ref=e916]:
+            - link "Features" [ref=e917] [cursor=pointer]:
+              - /url: "#"
+            - link "Pricing" [ref=e918] [cursor=pointer]:
+              - /url: "#"
+            - link "How it Works" [ref=e919] [cursor=pointer]:
+              - /url: "#"
+          - generic [ref=e920]:
+            - link [ref=e921] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e922]
+            - link [ref=e925] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e926]
+            - link [ref=e928] [cursor=pointer]:
+              - /url: "#"
+              - img [ref=e929]
+        - generic [ref=e933]:
+          - paragraph [ref=e934]: © 2024 ASSET. All rights reserved.
+          - generic [ref=e935]:
+            - link "Privacy Policy" [ref=e936] [cursor=pointer]:
+              - /url: "#"
+            - link "Terms of Service" [ref=e937] [cursor=pointer]:
+              - /url: "#"

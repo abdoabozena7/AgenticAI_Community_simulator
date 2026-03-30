@@ -1,0 +1,114 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e972]:
+    - complementary [ref=e973]:
+      - generic [ref=e975]:
+        - img [ref=e977]
+        - generic [ref=e979]: ASSET
+      - navigation [ref=e980]:
+        - button "Home" [ref=e981] [cursor=pointer]:
+          - img [ref=e982]
+          - generic [ref=e985]: Home
+        - button "Simulations" [ref=e986] [cursor=pointer]:
+          - img [ref=e987]
+          - generic [ref=e997]: Simulations
+        - button "Research" [ref=e998] [cursor=pointer]:
+          - img [ref=e999]
+          - generic [ref=e1002]: Research
+        - button "Persona Lab" [ref=e1003] [cursor=pointer]:
+          - img [ref=e1004]
+          - generic [ref=e1006]: Persona Lab
+        - button "Idea Court" [ref=e1007] [cursor=pointer]:
+          - img [ref=e1008]
+          - generic [ref=e1012]: Idea Court
+        - button "Analytics" [ref=e1013] [cursor=pointer]:
+          - img [ref=e1014]
+          - generic [ref=e1016]: Analytics
+        - button "Settings" [ref=e1017] [cursor=pointer]:
+          - img [ref=e1018]
+          - generic [ref=e1021]: Settings
+      - generic [ref=e1023]:
+        - generic [ref=e1024]: U
+        - generic [ref=e1025]:
+          - paragraph [ref=e1026]: user
+          - paragraph [ref=e1027]: Pro Plan
+        - button "Logout" [ref=e1028] [cursor=pointer]:
+          - img [ref=e1029]
+    - main [ref=e1032]:
+      - generic [ref=e1033]:
+        - generic [ref=e1035]:
+          - img [ref=e1036]
+          - textbox "Search..." [ref=e1040]
+        - generic [ref=e1041]:
+          - button [ref=e1042] [cursor=pointer]:
+            - img
+          - button [ref=e1043] [cursor=pointer]:
+            - img
+          - button [ref=e1045] [cursor=pointer]:
+            - img [ref=e1046]
+          - button "New" [ref=e1049] [cursor=pointer]:
+            - img
+            - text: New
+      - generic [ref=e1053]:
+        - generic [ref=e1054]:
+          - generic [ref=e1055]:
+            - generic [ref=e1056]:
+              - generic [ref=e1057]:
+                - img [ref=e1058]
+                - text: Architectural Minimalist
+              - heading "Start a new simulation pipeline" [level=2] [ref=e1060]
+              - paragraph [ref=e1061]: Describe the idea, choose the place and category, then move directly into research or simulation.
+            - generic [ref=e1063]: Dark mode uses black surfaces
+          - generic [ref=e1064]:
+            - generic [ref=e1065]:
+              - text: Your idea
+              - 'textbox "Example: Quick coffee kiosk near a university" [ref=e1066]'
+            - generic [ref=e1067]:
+              - generic [ref=e1068]:
+                - text: Place / area (optional)
+                - generic [ref=e1069]:
+                  - img
+                  - 'textbox "Example: Nasr City, Cairo" [ref=e1070]'
+              - generic [ref=e1071]:
+                - text: Category
+                - combobox [ref=e1072] [cursor=pointer]:
+                  - generic: Technology
+                  - img [ref=e1073]
+            - generic [ref=e1075]: No place is set yet. General ideas will ask for a persona source before simulation starts.
+            - generic [ref=e1076]:
+              - button "Run mandatory pipeline" [disabled]:
+                - img
+                - text: Run mandatory pipeline
+                - img
+              - button "Preview research only" [disabled]:
+                - img
+                - text: Preview research only
+            - generic [ref=e1077]:
+              - button "Choose persona source" [disabled]
+              - button "Open persona lab" [ref=e1078] [cursor=pointer]
+        - complementary [ref=e1079]:
+          - generic [ref=e1080]:
+            - generic [ref=e1081]:
+              - generic [ref=e1082]:
+                - paragraph [ref=e1083]: Persona state
+                - heading "Current draft" [level=3] [ref=e1084]
+              - generic [ref=e1085]: Ready
+            - generic [ref=e1086]:
+              - generic [ref=e1087]:
+                - paragraph [ref=e1088]: Idea length
+                - paragraph [ref=e1089]: No idea yet
+              - generic [ref=e1090]:
+                - paragraph [ref=e1091]: Location
+                - paragraph [ref=e1092]: Not set
+              - generic [ref=e1093]:
+                - paragraph [ref=e1094]: Category
+                - paragraph [ref=e1095]: Technology
+          - generic [ref=e1096]:
+            - generic [ref=e1097]:
+              - img [ref=e1098]
+              - heading "Promo code" [level=3] [ref=e1101]
+            - generic [ref=e1102]:
+              - textbox "Enter promo code" [ref=e1103]
+              - button "Redeem" [ref=e1104] [cursor=pointer]

@@ -1,0 +1,1426 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/pages/AdminDashboard.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=85597f46"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useMemo = __vite__cjsImport3_react["useMemo"]; const useState = __vite__cjsImport3_react["useState"];
+import { motion } from "/node_modules/.vite/deps/framer-motion.js?v=85597f46";
+import { Activity, ArrowLeft, BadgePercent, Coins, RefreshCw, RotateCcw, ShieldCheck, UserCog, Users, Wallet } from "/node_modules/.vite/deps/lucide-react.js?v=85597f46";
+import { useNavigate } from "/node_modules/.vite/deps/react-router-dom.js?v=85597f46";
+import { Button } from "/src/components/ui/button.tsx";
+import { SystemChip, SystemPanel, SystemStat, systemSectionVariants } from "/src/components/system/Architect.tsx";
+import { useLanguage } from "/src/contexts/LanguageContext.tsx";
+import { useTheme } from "/src/contexts/ThemeContext.tsx";
+import { cn } from "/src/lib/utils.ts";
+import { apiService } from "/src/services/api.ts";
+export function AdminControlCenterContent({ embedded = false }) {
+    _s();
+    const navigate = useNavigate();
+    const { language } = useLanguage();
+    const { theme } = useTheme();
+    const isArabic = language === "ar";
+    const [users, setUsers] = useState([]);
+    const [stats, setStats] = useState(null);
+    const [error, setError] = useState(null);
+    const [creditTarget, setCreditTarget] = useState("");
+    const [creditDelta, setCreditDelta] = useState(10);
+    const [creditMessage, setCreditMessage] = useState(null);
+    const [creditBusy, setCreditBusy] = useState(false);
+    const [billing, setBilling] = useState(null);
+    const [billingPrice, setBillingPrice] = useState("0.10");
+    const [billingFreeDailyTokens, setBillingFreeDailyTokens] = useState("2500");
+    const [billingMessage, setBillingMessage] = useState(null);
+    const [billingBusy, setBillingBusy] = useState(false);
+    const [roleTarget, setRoleTarget] = useState("");
+    const [roleValue, setRoleValue] = useState("admin");
+    const [roleMessage, setRoleMessage] = useState(null);
+    const [roleBusy, setRoleBusy] = useState(false);
+    const [usageTarget, setUsageTarget] = useState("");
+    const [usageMessage, setUsageMessage] = useState(null);
+    const [usageBusy, setUsageBusy] = useState(false);
+    const [promoCode, setPromoCode] = useState("");
+    const [promoBonus, setPromoBonus] = useState(5);
+    const [promoMaxUses, setPromoMaxUses] = useState(1);
+    const [promoExpires, setPromoExpires] = useState("");
+    const [promoMessage, setPromoMessage] = useState(null);
+    const [promoBusy, setPromoBusy] = useState(false);
+    const [resetAllDate, setResetAllDate] = useState("");
+    const [resetAllMessage, setResetAllMessage] = useState(null);
+    const [resetAllBusy, setResetAllBusy] = useState(false);
+    const t = (en, ar)=>isArabic ? ar : en;
+    const loadAdminData = async ()=>{
+        setError(null);
+        try {
+            const [usersResponse, statsResponse, billingResponse] = await Promise.all([
+                apiService.listUsers(),
+                apiService.getStats(),
+                apiService.getBillingSettings()
+            ]);
+            setUsers(Array.isArray(usersResponse) ? usersResponse : []);
+            setStats(statsResponse || null);
+            setBilling(billingResponse);
+            setBillingPrice(Number(billingResponse.token_price_per_1k_credits ?? 0).toFixed(2));
+            setBillingFreeDailyTokens(String(billingResponse.free_daily_tokens ?? 0));
+        } catch (e) {
+            setError(e?.message || t("Failed to load control center data.", "فشل تحميل بيانات مركز التحكم."));
+        }
+    };
+    useEffect(()=>{
+        void loadAdminData();
+    }, []);
+    const totalCredits = useMemo(()=>users.reduce((sum, user)=>sum + (Number(user?.credits) || 0), 0), [
+        users
+    ]);
+    const userCount = users.length;
+    const averageCredits = userCount ? totalCredits / userCount : 0;
+    const highestCreditUser = useMemo(()=>users.reduce((top, current)=>{
+            if (!top) return current;
+            return Number(current.credits ?? 0) > Number(top.credits ?? 0) ? current : top;
+        }, null), [
+        users
+    ]);
+    const feedbackItems = [
+        error ? {
+            kind: "error",
+            message: error
+        } : null,
+        billingMessage ? {
+            kind: "success",
+            message: billingMessage
+        } : null,
+        creditMessage ? {
+            kind: "success",
+            message: creditMessage
+        } : null,
+        roleMessage ? {
+            kind: "success",
+            message: roleMessage
+        } : null,
+        usageMessage ? {
+            kind: "success",
+            message: usageMessage
+        } : null,
+        resetAllMessage ? {
+            kind: "success",
+            message: resetAllMessage
+        } : null,
+        promoMessage ? {
+            kind: "success",
+            message: promoMessage
+        } : null
+    ].filter(Boolean);
+    const handleGrantCredits = async ()=>{
+        setCreditMessage(null);
+        setError(null);
+        const target = creditTarget.trim();
+        if (!target) {
+            setCreditMessage(t("Enter a username or user ID.", "أدخل اسم المستخدم أو رقم المستخدم."));
+            return;
+        }
+        const delta = Number(creditDelta);
+        if (!Number.isFinite(delta) || delta === 0) {
+            setCreditMessage(t("Enter a non-zero credit amount.", "أدخل قيمة رصيد غير صفرية."));
+            return;
+        }
+        setCreditBusy(true);
+        try {
+            const payload = /^\d+$/.test(target) ? {
+                user_id: Number(target),
+                delta
+            } : {
+                username: target,
+                delta
+            };
+            const response = await apiService.adjustCredits(payload);
+            setCreditMessage(t(`Credits updated for ${response.username || target}. New balance: ${response.credits}.`, `تم تحديث الرصيد للمستخدم ${response.username || target}. الرصيد الجديد: ${response.credits}.`));
+            setCreditTarget("");
+            await loadAdminData();
+        } catch (e) {
+            setError(e?.message || t("Failed to update credits.", "فشل تحديث الرصيد."));
+        } finally{
+            setCreditBusy(false);
+        }
+    };
+    const handleUpdateBilling = async ()=>{
+        setBillingMessage(null);
+        setError(null);
+        const parsedPrice = Number.parseFloat(billingPrice);
+        const parsedTokens = Number.parseInt(billingFreeDailyTokens, 10);
+        if (!Number.isFinite(parsedPrice) || parsedPrice < 0) {
+            setBillingMessage(t("Enter a valid token price.", "أدخل سعرًا صحيحًا للتوكن."));
+            return;
+        }
+        if (!Number.isFinite(parsedTokens) || parsedTokens < 0) {
+            setBillingMessage(t("Enter a valid free daily token limit.", "أدخل حدًا صحيحًا للتوكنات اليومية."));
+            return;
+        }
+        setBillingBusy(true);
+        try {
+            const payload = {
+                token_price_per_1k_credits: Number(parsedPrice.toFixed(2)),
+                free_daily_tokens: parsedTokens
+            };
+            const response = await apiService.updateBillingSettings(payload);
+            setBilling(response);
+            setBillingPrice(Number(response.token_price_per_1k_credits ?? 0).toFixed(2));
+            setBillingFreeDailyTokens(String(response.free_daily_tokens ?? 0));
+            setBillingMessage(t("Billing policy updated.", "تم تحديث سياسة الفوترة."));
+        } catch (e) {
+            setError(e?.message || t("Failed to update billing settings.", "فشل تحديث إعدادات الفوترة."));
+        } finally{
+            setBillingBusy(false);
+        }
+    };
+    const handleUpdateRole = async ()=>{
+        setRoleMessage(null);
+        setError(null);
+        const target = roleTarget.trim();
+        if (!target) {
+            setRoleMessage(t("Enter a username or user ID.", "أدخل اسم المستخدم أو رقم المستخدم."));
+            return;
+        }
+        setRoleBusy(true);
+        try {
+            const payload = /^\d+$/.test(target) ? {
+                user_id: Number(target),
+                role: roleValue
+            } : {
+                username: target,
+                role: roleValue
+            };
+            const response = await apiService.updateRole(payload);
+            setRoleMessage(t(`Role updated for ${response.username || target}: ${response.role}.`, `تم تحديث الدور للمستخدم ${response.username || target}: ${response.role}.`));
+            setRoleTarget("");
+            await loadAdminData();
+        } catch (e) {
+            setError(e?.message || t("Failed to update role.", "فشل تحديث الدور."));
+        } finally{
+            setRoleBusy(false);
+        }
+    };
+    const handleResetUsage = async ()=>{
+        setUsageMessage(null);
+        setError(null);
+        const target = usageTarget.trim();
+        if (!target) {
+            setUsageMessage(t("Enter a username or user ID.", "أدخل اسم المستخدم أو رقم المستخدم."));
+            return;
+        }
+        setUsageBusy(true);
+        try {
+            const payload = /^\d+$/.test(target) ? {
+                user_id: Number(target)
+            } : {
+                username: target
+            };
+            await apiService.resetUsage(payload);
+            setUsageMessage(t(`Daily usage reset for ${target}.`, `تم تصفير الاستخدام اليومي للمستخدم ${target}.`));
+            setUsageTarget("");
+            await loadAdminData();
+        } catch (e) {
+            setError(e?.message || t("Failed to reset usage.", "فشل تصفير الاستخدام."));
+        } finally{
+            setUsageBusy(false);
+        }
+    };
+    const handleResetAllUsage = async ()=>{
+        setResetAllMessage(null);
+        setError(null);
+        setResetAllBusy(true);
+        try {
+            const date = resetAllDate.trim();
+            await apiService.resetUsage({
+                all_users: true,
+                date: date || undefined
+            });
+            setResetAllMessage(t(`Daily usage reset for all users${date ? ` on ${date}` : ""}.`, `تم تصفير الاستخدام اليومي لكل المستخدمين${date ? ` بتاريخ ${date}` : ""}.`));
+            setResetAllDate("");
+            await loadAdminData();
+        } catch (e) {
+            setError(e?.message || t("Failed to reset all usage.", "فشل تصفير استخدام جميع المستخدمين."));
+        } finally{
+            setResetAllBusy(false);
+        }
+    };
+    const handleCreatePromo = async ()=>{
+        setPromoMessage(null);
+        setError(null);
+        const code = promoCode.trim();
+        if (!code) {
+            setPromoMessage(t("Enter a promo code.", "أدخل كود الخصم."));
+            return;
+        }
+        const bonus = Number(promoBonus);
+        if (!Number.isFinite(bonus) || bonus < 0) {
+            setPromoMessage(t("Enter a valid bonus amount.", "أدخل قيمة مكافأة صحيحة."));
+            return;
+        }
+        const maxUses = Number(promoMaxUses);
+        if (!Number.isFinite(maxUses) || maxUses < 1) {
+            setPromoMessage(t("Enter a valid max uses value.", "أدخل عدد استخدامات صحيح."));
+            return;
+        }
+        setPromoBusy(true);
+        try {
+            const payload = {
+                code,
+                bonus_attempts: bonus,
+                max_uses: maxUses,
+                expires_at: promoExpires.trim() || undefined
+            };
+            const response = await apiService.createPromo(payload);
+            setPromoMessage(t(`Promo code created: ${response.code}.`, `تم إنشاء كود الخصم: ${response.code}.`));
+            setPromoCode("");
+            setPromoExpires("");
+            await loadAdminData();
+        } catch (e) {
+            setError(e?.message || t("Failed to create promo code.", "فشل إنشاء كود الخصم."));
+        } finally{
+            setPromoBusy(false);
+        }
+    };
+    return /*#__PURE__*/ _jsxDEV("div", {
+        dir: isArabic ? "rtl" : "ltr",
+        className: cn("architect-shell", embedded ? "min-h-0" : "min-h-screen", theme === "dark" ? "architect-shell-dark" : "architect-shell-light"),
+        children: /*#__PURE__*/ _jsxDEV("div", {
+            className: cn("mx-auto max-w-[1600px]", embedded ? "px-0 py-0" : "px-6 py-6 sm:px-8 lg:px-14 lg:py-8 2xl:px-24"),
+            children: [
+                /*#__PURE__*/ _jsxDEV(motion.header, {
+                    initial: "hidden",
+                    animate: "visible",
+                    custom: 0,
+                    variants: systemSectionVariants,
+                    className: "architect-hero",
+                    children: /*#__PURE__*/ _jsxDEV("div", {
+                        className: "grid gap-8 xl:grid-cols-[minmax(0,1.25fr)_20rem] xl:items-start",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "mb-5 flex flex-wrap items-center gap-3",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(SystemChip, {
+                                                tone: "primary",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(ShieldCheck, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 362,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    t("Control Center", "مركز التحكم")
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 361,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(SystemChip, {
+                                                tone: "soft",
+                                                children: t("Architectural Minimalist", "النسق المعماري الهادئ")
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 365,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                        lineNumber: 360,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("h1", {
+                                        className: "font-['IBM_Plex_Sans_Arabic','Be_Vietnam_Pro',sans-serif] text-4xl font-semibold leading-[1.18] tracking-[-0.05em] text-[color:var(--architect-ink)] sm:text-5xl",
+                                        children: t("Admin Operations", "عمليات الإدارة")
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                        lineNumber: 370,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "mt-4 max-w-3xl text-base leading-8 text-[color:var(--architect-muted)]",
+                                        children: t("A control room for credit policy, role governance, usage resets, promo campaigns, and live user balance supervision.", "غرفة تشغيل لإدارة سياسة الأرصدة، وصلاحيات الوصول، وتصفير الاستخدام، وحملات الخصم، ومتابعة أرصدة المستخدمين بشكل مباشر.")
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                        lineNumber: 374,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                lineNumber: 359,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "architect-side-note",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "architect-kicker",
+                                        children: t("Quick Actions", "إجراءات سريعة")
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                        lineNumber: 383,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "mt-4 grid gap-3",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                type: "button",
+                                                onClick: ()=>void loadAdminData(),
+                                                className: "architect-button architect-button-primary h-12 justify-center rounded-md px-5",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(RefreshCw, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 390,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    t("Refresh data", "تحديث البيانات")
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 385,
+                                                columnNumber: 17
+                                            }, this),
+                                            !embedded ? /*#__PURE__*/ _jsxDEV(Button, {
+                                                type: "button",
+                                                variant: "outline",
+                                                onClick: ()=>navigate("/dashboard"),
+                                                className: "architect-button architect-button-secondary h-12 justify-center rounded-md px-5",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(ArrowLeft, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 400,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    t("Back to dashboard", "العودة إلى اللوحة")
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 394,
+                                                columnNumber: 19
+                                            }, this) : null
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                        lineNumber: 384,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                lineNumber: 382,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                        lineNumber: 358,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                    lineNumber: 351,
+                    columnNumber: 9
+                }, this),
+                feedbackItems.length ? /*#__PURE__*/ _jsxDEV(motion.section, {
+                    initial: "hidden",
+                    animate: "visible",
+                    custom: 1,
+                    variants: systemSectionVariants,
+                    className: "mt-6 grid gap-3",
+                    children: feedbackItems.map((item, index)=>/*#__PURE__*/ _jsxDEV("div", {
+                            className: cn("architect-feedback", item.kind === "error" ? "architect-feedback-error" : "architect-feedback-success"),
+                            children: item.message
+                        }, `${item.kind}-${index}`, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                            lineNumber: 418,
+                            columnNumber: 15
+                        }, this))
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                    lineNumber: 410,
+                    columnNumber: 11
+                }, this) : null,
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "mt-8 grid gap-8 xl:grid-cols-[minmax(0,1.3fr)_21rem]",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(motion.main, {
+                            initial: "hidden",
+                            animate: "visible",
+                            custom: 2,
+                            variants: systemSectionVariants,
+                            className: "space-y-8",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("section", {
+                                    className: "grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.9fr)]",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "architect-stage-card architect-stage-card-hero",
+                                            children: /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "flex flex-wrap items-start justify-between gap-6",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "max-w-2xl",
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "architect-kicker",
+                                                                children: t("Operational Snapshot", "ملخص تشغيلي")
+                                                            }, void 0, false, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                lineNumber: 443,
+                                                                columnNumber: 21
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                                className: "mt-5 font-['Be_Vietnam_Pro'] text-5xl font-semibold tracking-[-0.06em] text-[color:var(--architect-ink)] sm:text-6xl",
+                                                                children: totalCredits.toFixed(2)
+                                                            }, void 0, false, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                lineNumber: 444,
+                                                                columnNumber: 21
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                className: "mt-3 max-w-xl text-base leading-8 text-[color:var(--architect-muted)]",
+                                                                children: t("Total credit volume currently circulating across the platform.", "إجمالي حجم الأرصدة المتداولة حاليًا عبر المنصة.")
+                                                            }, void 0, false, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                lineNumber: 447,
+                                                                columnNumber: 21
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 442,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "grid min-w-[220px] gap-3 text-sm text-[color:var(--architect-muted)]",
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                                className: "rounded-2xl bg-[color:var(--architect-surface-strong)] px-4 py-4",
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                                        className: "architect-kicker",
+                                                                        children: t("Top balance", "أعلى رصيد")
+                                                                    }, void 0, false, {
+                                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                        lineNumber: 457,
+                                                                        columnNumber: 23
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                                        className: "mt-2 font-medium text-[color:var(--architect-ink)]",
+                                                                        children: highestCreditUser?.username || t("No users", "لا يوجد مستخدمون")
+                                                                    }, void 0, false, {
+                                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                        lineNumber: 458,
+                                                                        columnNumber: 23
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                                        className: "font-['Be_Vietnam_Pro'] text-xl font-semibold text-[color:var(--architect-ink)]",
+                                                                        children: Number(highestCreditUser?.credits ?? 0).toFixed(2)
+                                                                    }, void 0, false, {
+                                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                        lineNumber: 461,
+                                                                        columnNumber: 23
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                lineNumber: 456,
+                                                                columnNumber: 21
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                                className: "rounded-2xl bg-[color:var(--architect-contrast)] px-4 py-4 text-[color:var(--architect-contrast-ink)]",
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                                        className: "text-[11px] uppercase tracking-[0.22em] text-[color:var(--architect-contrast-muted)]",
+                                                                        children: t("Today", "اليوم")
+                                                                    }, void 0, false, {
+                                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                        lineNumber: 466,
+                                                                        columnNumber: 23
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                                        className: "mt-2 font-['Be_Vietnam_Pro'] text-2xl font-semibold",
+                                                                        children: stats?.used_today ?? 0
+                                                                    }, void 0, false, {
+                                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                        lineNumber: 469,
+                                                                        columnNumber: 23
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                lineNumber: 465,
+                                                                columnNumber: 21
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 455,
+                                                        columnNumber: 19
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 441,
+                                                columnNumber: 17
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                            lineNumber: 440,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "grid gap-4 sm:grid-cols-2 lg:grid-cols-1",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(SystemStat, {
+                                                    label: t("Users", "المستخدمون"),
+                                                    value: String(userCount),
+                                                    detail: t("Registered identities under active control.", "الهويات المسجلة تحت نطاق الإدارة الحالية."),
+                                                    tone: "accent"
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                    lineNumber: 478,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(SystemStat, {
+                                                    label: t("Average Credits", "متوسط الأرصدة"),
+                                                    value: averageCredits.toFixed(2),
+                                                    detail: t("Average balance per account.", "متوسط الرصيد لكل حساب داخل النظام."),
+                                                    tone: "success"
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                    lineNumber: 484,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                            lineNumber: 477,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                    lineNumber: 439,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("section", {
+                                    className: "grid gap-4 lg:grid-cols-3",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(SystemStat, {
+                                            label: t("Simulations Today", "محاكيات اليوم"),
+                                            value: String(stats?.used_today ?? 0),
+                                            detail: t("Sessions launched in the current day.", "عدد الجلسات التي بدأت خلال اليوم الحالي.")
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                            lineNumber: 494,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(SystemStat, {
+                                            label: t("Total Simulations", "إجمالي المحاكيات"),
+                                            value: String(stats?.total_simulations ?? 0),
+                                            detail: t("Cumulative simulation runs.", "عدد المحاكيات المنفذة تراكميًا.")
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                            lineNumber: 499,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(SystemStat, {
+                                            label: t("Free Daily Tokens", "التوكنات اليومية المجانية"),
+                                            value: String(billing?.free_daily_tokens ?? 0),
+                                            detail: t("Current allowance before billing applies.", "الحصة الحالية قبل بدء احتساب الفوترة.")
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                            lineNumber: 504,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                    lineNumber: 493,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(SystemPanel, {
+                                    title: t("System Pulse", "نبض النظام"),
+                                    description: t("A concise operator-grade summary of the live usage rhythm and current billing stance.", "ملخص تشغيلي سريع لإيقاع الاستخدام الحالي ووضع الفوترة النشط."),
+                                    icon: Activity,
+                                    children: /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "grid gap-4 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "architect-surface-muted p-5",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                        className: "architect-kicker",
+                                                        children: t("Usage Pattern", "نمط الاستخدام")
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 521,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "mt-4 grid gap-4 sm:grid-cols-2",
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                                        className: "text-sm text-[color:var(--architect-muted)]",
+                                                                        children: t("Started today", "بدأت اليوم")
+                                                                    }, void 0, false, {
+                                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                        lineNumber: 524,
+                                                                        columnNumber: 23
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                                        className: "mt-2 font-['Be_Vietnam_Pro'] text-3xl font-semibold text-[color:var(--architect-ink)]",
+                                                                        children: stats?.used_today ?? 0
+                                                                    }, void 0, false, {
+                                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                        lineNumber: 525,
+                                                                        columnNumber: 23
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                lineNumber: 523,
+                                                                columnNumber: 21
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                                        className: "text-sm text-[color:var(--architect-muted)]",
+                                                                        children: t("Total runs", "إجمالي الجولات")
+                                                                    }, void 0, false, {
+                                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                        lineNumber: 530,
+                                                                        columnNumber: 23
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                                        className: "mt-2 font-['Be_Vietnam_Pro'] text-3xl font-semibold text-[color:var(--architect-ink)]",
+                                                                        children: stats?.total_simulations ?? 0
+                                                                    }, void 0, false, {
+                                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                        lineNumber: 531,
+                                                                        columnNumber: 23
+                                                                    }, this)
+                                                                ]
+                                                            }, void 0, true, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                lineNumber: 529,
+                                                                columnNumber: 21
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 522,
+                                                        columnNumber: 19
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 520,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "architect-surface-soft p-5",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                        className: "architect-kicker",
+                                                        children: t("Current Billing", "الوضع الحالي للفوترة")
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 538,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                        className: "mt-4 text-sm leading-7 text-[color:var(--architect-muted)]",
+                                                        children: t(`${Number(billing?.token_price_per_1k_credits ?? 0).toFixed(2)} credits are billed per 1000 tokens, with ${billing?.free_daily_tokens ?? 0} free tokens issued every day.`, `يتم احتساب ${Number(billing?.token_price_per_1k_credits ?? 0).toFixed(2)} رصيد لكل 1000 توكن، مع ${billing?.free_daily_tokens ?? 0} توكن مجاني يوميًا.`)
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 539,
+                                                        columnNumber: 19
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 537,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                        lineNumber: 519,
+                                        columnNumber: 15
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                    lineNumber: 511,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(SystemPanel, {
+                                    title: t("Users Ledger", "سجل المستخدمين"),
+                                    description: t("A dense but calm list for balances and access roles, with whitespace replacing dividers.", "قائمة تشغيلية كثيفة لكن هادئة للأرصدة والصلاحيات، مع اعتماد المسافات بدل الفواصل التقليدية."),
+                                    icon: Users,
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "mb-5 flex flex-wrap items-center justify-between gap-3",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(SystemChip, {
+                                                    tone: "soft",
+                                                    children: t(`${users.length} records`, `${users.length} سجل`)
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                    lineNumber: 558,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(SystemChip, {
+                                                    tone: "jewel",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(Coins, {
+                                                            className: "h-4 w-4"
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                            lineNumber: 562,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        t(`Total credits ${totalCredits.toFixed(2)}`, `إجمالي الأرصدة ${totalCredits.toFixed(2)}`)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                    lineNumber: 561,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                            lineNumber: 557,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "architect-ledger-shell",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "hidden grid-cols-[72px_minmax(0,1.3fr)_140px_150px] gap-6 px-5 pb-4 text-[11px] uppercase tracking-[0.22em] text-[color:var(--architect-subtle)] md:grid",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV("span", {
+                                                            children: t("ID", "المعرف")
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                            lineNumber: 569,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV("span", {
+                                                            children: t("Username", "اسم المستخدم")
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                            lineNumber: 570,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV("span", {
+                                                            children: t("Role", "الدور")
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                            lineNumber: 571,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV("span", {
+                                                            children: t("Credits", "الرصيد")
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                            lineNumber: 572,
+                                                            columnNumber: 19
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                    lineNumber: 568,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "max-h-[720px] overflow-auto scrollbar-thin pr-1",
+                                                    children: users.length ? /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "grid gap-4",
+                                                        children: users.map((user)=>/*#__PURE__*/ _jsxDEV("article", {
+                                                                className: "architect-ledger-row grid gap-3 px-5 py-4 md:grid-cols-[72px_minmax(0,1.3fr)_140px_150px] md:items-center md:gap-6",
+                                                                children: [
+                                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                                        className: "font-['Be_Vietnam_Pro'] text-sm font-medium text-[color:var(--architect-subtle)]",
+                                                                        children: user.id
+                                                                    }, void 0, false, {
+                                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                        lineNumber: 583,
+                                                                        columnNumber: 27
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                                        children: [
+                                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                                className: "font-medium text-[color:var(--architect-ink)]",
+                                                                                children: user.username
+                                                                            }, void 0, false, {
+                                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                                lineNumber: 587,
+                                                                                columnNumber: 29
+                                                                            }, this),
+                                                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                                                className: "mt-1 text-sm text-[color:var(--architect-muted)]",
+                                                                                children: t("Managed account identity", "هوية مستخدم خاضعة للإدارة")
+                                                                            }, void 0, false, {
+                                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                                lineNumber: 588,
+                                                                                columnNumber: 29
+                                                                            }, this)
+                                                                        ]
+                                                                    }, void 0, true, {
+                                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                        lineNumber: 586,
+                                                                        columnNumber: 27
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                                        children: /*#__PURE__*/ _jsxDEV("span", {
+                                                                            className: "architect-role-pill",
+                                                                            children: user.role
+                                                                        }, void 0, false, {
+                                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                            lineNumber: 593,
+                                                                            columnNumber: 29
+                                                                        }, this)
+                                                                    }, void 0, false, {
+                                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                        lineNumber: 592,
+                                                                        columnNumber: 27
+                                                                    }, this),
+                                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                                        className: "font-['Be_Vietnam_Pro'] text-lg font-semibold tracking-[-0.03em] text-[color:var(--architect-ink)]",
+                                                                        children: Number(user.credits ?? 0).toFixed(2)
+                                                                    }, void 0, false, {
+                                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                        lineNumber: 595,
+                                                                        columnNumber: 27
+                                                                    }, this)
+                                                                ]
+                                                            }, user.id, true, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                                lineNumber: 579,
+                                                                columnNumber: 25
+                                                            }, this))
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 577,
+                                                        columnNumber: 21
+                                                    }, this) : /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "rounded-[28px] bg-[color:var(--architect-surface-2)] px-6 py-12 text-center text-[color:var(--architect-muted)]",
+                                                        children: t("No users available.", "لا يوجد مستخدمون حاليًا.")
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 602,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                    lineNumber: 575,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                            lineNumber: 567,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                    lineNumber: 549,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                            lineNumber: 432,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(motion.aside, {
+                            initial: "hidden",
+                            animate: "visible",
+                            custom: 3,
+                            variants: systemSectionVariants,
+                            className: "architect-rail space-y-4",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(SystemPanel, {
+                                    title: t("Billing Controls", "ضبط الفوترة"),
+                                    description: t("Adjust how token usage converts into credits.", "اضبط طريقة تحويل استهلاك التوكنات إلى أرصدة."),
+                                    icon: Wallet,
+                                    children: /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-3",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "space-y-2",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("label", {
+                                                        className: "architect-label",
+                                                        children: t("Credits per 1000 tokens", "الرصيد لكل 1000 توكن")
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 628,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("input", {
+                                                        type: "number",
+                                                        min: "0",
+                                                        step: "0.01",
+                                                        value: billingPrice,
+                                                        onChange: (e)=>setBillingPrice(e.target.value),
+                                                        className: "architect-input"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 631,
+                                                        columnNumber: 19
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 627,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "space-y-2",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("label", {
+                                                        className: "architect-label",
+                                                        children: t("Free daily tokens", "التوكنات اليومية المجانية")
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 641,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("input", {
+                                                        type: "number",
+                                                        min: "0",
+                                                        step: "1",
+                                                        value: billingFreeDailyTokens,
+                                                        onChange: (e)=>setBillingFreeDailyTokens(e.target.value),
+                                                        className: "architect-input"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 644,
+                                                        columnNumber: 19
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 640,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                type: "button",
+                                                onClick: handleUpdateBilling,
+                                                disabled: billingBusy,
+                                                className: "architect-button architect-button-primary h-12 w-full rounded-md",
+                                                children: billingBusy ? t("Updating...", "جارٍ التحديث...") : t("Update billing", "تحديث الفوترة")
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 653,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                        lineNumber: 626,
+                                        columnNumber: 15
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                    lineNumber: 618,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(SystemPanel, {
+                                    title: t("Credits", "الأرصدة"),
+                                    description: t("Add or deduct balance by username or numeric user ID.", "أضف أو اخصم الرصيد باستخدام اسم المستخدم أو رقم المستخدم."),
+                                    icon: Coins,
+                                    children: /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-3",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("input", {
+                                                type: "text",
+                                                placeholder: t("Username or user ID", "اسم المستخدم أو رقم المستخدم"),
+                                                value: creditTarget,
+                                                onChange: (e)=>setCreditTarget(e.target.value),
+                                                className: "architect-input"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 673,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("input", {
+                                                type: "number",
+                                                step: "0.01",
+                                                value: creditDelta,
+                                                onChange: (e)=>{
+                                                    const value = Number.parseFloat(e.target.value);
+                                                    setCreditDelta(Number.isFinite(value) ? value : 0);
+                                                },
+                                                className: "architect-input"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 680,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                type: "button",
+                                                onClick: handleGrantCredits,
+                                                disabled: creditBusy,
+                                                className: "architect-button architect-button-primary h-12 w-full rounded-md",
+                                                children: creditBusy ? t("Applying...", "جارٍ التطبيق...") : t("Apply credits", "تطبيق الرصيد")
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 690,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                        lineNumber: 672,
+                                        columnNumber: 15
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                    lineNumber: 664,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(SystemPanel, {
+                                    title: t("Roles", "الأدوار"),
+                                    description: t("Change account access levels without leaving the control rail.", "غيّر صلاحيات الحسابات دون مغادرة المسار التشغيلي."),
+                                    icon: UserCog,
+                                    children: /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-3",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("input", {
+                                                type: "text",
+                                                placeholder: t("Username or user ID", "اسم المستخدم أو رقم المستخدم"),
+                                                value: roleTarget,
+                                                onChange: (e)=>setRoleTarget(e.target.value),
+                                                className: "architect-input"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 710,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("select", {
+                                                value: roleValue,
+                                                onChange: (e)=>setRoleValue(e.target.value),
+                                                className: "architect-input",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("option", {
+                                                        value: "admin",
+                                                        children: "admin"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 722,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("option", {
+                                                        value: "developer",
+                                                        children: "developer"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 723,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("option", {
+                                                        value: "user",
+                                                        children: "user"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 724,
+                                                        columnNumber: 19
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 717,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                type: "button",
+                                                onClick: handleUpdateRole,
+                                                disabled: roleBusy,
+                                                className: "architect-button architect-button-secondary h-12 w-full rounded-md",
+                                                children: roleBusy ? t("Updating...", "جارٍ التحديث...") : t("Apply role", "تطبيق الدور")
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 726,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                        lineNumber: 709,
+                                        columnNumber: 15
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                    lineNumber: 701,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(SystemPanel, {
+                                    title: t("Usage Reset", "تصفير الاستخدام"),
+                                    description: t("Reset daily usage counters for one account or the full system.", "أعد تعيين عدادات الاستخدام اليومية لحساب واحد أو للنظام بالكامل."),
+                                    icon: RotateCcw,
+                                    children: /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-3",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("input", {
+                                                type: "text",
+                                                placeholder: t("Username or user ID", "اسم المستخدم أو رقم المستخدم"),
+                                                value: usageTarget,
+                                                onChange: (e)=>setUsageTarget(e.target.value),
+                                                className: "architect-input"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 746,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                type: "button",
+                                                onClick: handleResetUsage,
+                                                disabled: usageBusy,
+                                                className: "architect-button architect-button-primary h-12 w-full rounded-md",
+                                                children: usageBusy ? t("Resetting...", "جارٍ التصفير...") : t("Reset user usage", "تصفير استخدام المستخدم")
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 753,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("input", {
+                                                        type: "date",
+                                                        value: resetAllDate,
+                                                        onChange: (e)=>setResetAllDate(e.target.value),
+                                                        className: "architect-input"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 762,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV(Button, {
+                                                        type: "button",
+                                                        variant: "outline",
+                                                        onClick: handleResetAllUsage,
+                                                        disabled: resetAllBusy,
+                                                        className: "architect-button architect-button-secondary h-12 rounded-md px-4",
+                                                        children: resetAllBusy ? t("Resetting...", "جارٍ التصفير...") : t("Reset all", "تصفير الكل")
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 768,
+                                                        columnNumber: 19
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 761,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                        lineNumber: 745,
+                                        columnNumber: 15
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                    lineNumber: 737,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV(SystemPanel, {
+                                    title: t("Promo Codes", "أكواد الخصم"),
+                                    description: t("Create reusable or one-off campaign codes with optional expiry.", "أنشئ أكواد حملات قابلة لإعادة الاستخدام أو لمرة واحدة مع تاريخ انتهاء اختياري."),
+                                    icon: BadgePercent,
+                                    children: /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-3",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("input", {
+                                                type: "text",
+                                                placeholder: t("Promo code", "كود الخصم"),
+                                                value: promoCode,
+                                                onChange: (e)=>setPromoCode(e.target.value),
+                                                className: "architect-input"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 790,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "grid gap-3 sm:grid-cols-3",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("input", {
+                                                        type: "number",
+                                                        value: promoBonus,
+                                                        onChange: (e)=>setPromoBonus(Number(e.target.value)),
+                                                        className: "architect-input",
+                                                        placeholder: t("Bonus", "المكافأة")
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 798,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("input", {
+                                                        type: "number",
+                                                        value: promoMaxUses,
+                                                        onChange: (e)=>setPromoMaxUses(Number(e.target.value)),
+                                                        className: "architect-input",
+                                                        placeholder: t("Max uses", "العدد")
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 805,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("input", {
+                                                        type: "date",
+                                                        value: promoExpires,
+                                                        onChange: (e)=>setPromoExpires(e.target.value),
+                                                        className: "architect-input"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                        lineNumber: 812,
+                                                        columnNumber: 19
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 797,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                type: "button",
+                                                onClick: handleCreatePromo,
+                                                disabled: promoBusy,
+                                                className: "architect-button architect-button-primary h-12 w-full rounded-md",
+                                                children: promoBusy ? t("Creating...", "جارٍ الإنشاء...") : t("Create promo code", "إنشاء كود خصم")
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                                lineNumber: 819,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                        lineNumber: 789,
+                                        columnNumber: 15
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                    lineNumber: 781,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "architect-premium-note",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("p", {
+                                            className: "architect-kicker",
+                                            children: t("Governance Note", "ملاحظة تشغيلية")
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                            lineNumber: 831,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("p", {
+                                            className: "mt-3 text-sm leading-7 text-[#5d6577]",
+                                            children: t("Risky actions are intentionally isolated in the side rail so the primary stage remains focused on reading and verification before action.", "تم عزل الإجراءات عالية الحساسية في المسار الجانبي حتى تبقى المساحة الرئيسية مخصصة للقراءة والتحقق قبل التنفيذ.")
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                            lineNumber: 832,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                                    lineNumber: 830,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                            lineNumber: 611,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+                    lineNumber: 431,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+            lineNumber: 345,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+        lineNumber: 337,
+        columnNumber: 5
+    }, this);
+}
+_s(AdminControlCenterContent, "pLzOX19zA9bFK9wUcy/k7Fnix9c=", false, function() {
+    return [
+        useNavigate,
+        useLanguage,
+        useTheme
+    ];
+});
+_c = AdminControlCenterContent;
+export default function AdminDashboard() {
+    return /*#__PURE__*/ _jsxDEV(AdminControlCenterContent, {}, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx",
+        lineNumber: 847,
+        columnNumber: 10
+    }, this);
+}
+_c1 = AdminDashboard;
+var _c, _c1;
+$RefreshReg$(_c, "AdminControlCenterContent");
+$RefreshReg$(_c1, "AdminDashboard");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/AdminDashboard.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkFkbWluRGFzaGJvYXJkLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyB1c2VFZmZlY3QsIHVzZU1lbW8sIHVzZVN0YXRlIH0gZnJvbSBcInJlYWN0XCI7XG5pbXBvcnQgeyBtb3Rpb24gfSBmcm9tIFwiZnJhbWVyLW1vdGlvblwiO1xuaW1wb3J0IHtcbiAgQWN0aXZpdHksXG4gIEFycm93TGVmdCxcbiAgQmFkZ2VQZXJjZW50LFxuICBDb2lucyxcbiAgUmVmcmVzaEN3LFxuICBSb3RhdGVDY3csXG4gIFNoaWVsZENoZWNrLFxuICBVc2VyQ29nLFxuICBVc2VycyxcbiAgV2FsbGV0LFxufSBmcm9tIFwibHVjaWRlLXJlYWN0XCI7XG5pbXBvcnQgeyB1c2VOYXZpZ2F0ZSB9IGZyb20gXCJyZWFjdC1yb3V0ZXItZG9tXCI7XG5cbmltcG9ydCB7IEJ1dHRvbiB9IGZyb20gXCJAL2NvbXBvbmVudHMvdWkvYnV0dG9uXCI7XG5pbXBvcnQge1xuICBTeXN0ZW1DaGlwLFxuICBTeXN0ZW1QYW5lbCxcbiAgU3lzdGVtU3RhdCxcbiAgc3lzdGVtU2VjdGlvblZhcmlhbnRzLFxufSBmcm9tIFwiQC9jb21wb25lbnRzL3N5c3RlbS9BcmNoaXRlY3RcIjtcbmltcG9ydCB7IHVzZUxhbmd1YWdlIH0gZnJvbSBcIkAvY29udGV4dHMvTGFuZ3VhZ2VDb250ZXh0XCI7XG5pbXBvcnQgeyB1c2VUaGVtZSB9IGZyb20gXCJAL2NvbnRleHRzL1RoZW1lQ29udGV4dFwiO1xuaW1wb3J0IHsgY24gfSBmcm9tIFwiQC9saWIvdXRpbHNcIjtcbmltcG9ydCB7IGFwaVNlcnZpY2UsIEJpbGxpbmdTZXR0aW5nc1Jlc3BvbnNlIH0gZnJvbSBcIkAvc2VydmljZXMvYXBpXCI7XG5cbnR5cGUgQWRtaW5Vc2VyID0ge1xuICBpZDogbnVtYmVyO1xuICB1c2VybmFtZTogc3RyaW5nO1xuICByb2xlOiBzdHJpbmc7XG4gIGNyZWRpdHM/OiBudW1iZXI7XG59O1xuXG50eXBlIEFkbWluU3RhdHMgPSB7XG4gIHRvdGFsX3NpbXVsYXRpb25zPzogbnVtYmVyO1xuICB1c2VkX3RvZGF5PzogbnVtYmVyO1xufTtcblxudHlwZSBGZWVkYmFja0l0ZW0gPSB7XG4gIGtpbmQ6IFwiZXJyb3JcIiB8IFwic3VjY2Vzc1wiO1xuICBtZXNzYWdlOiBzdHJpbmc7XG59O1xuXG5leHBvcnQgZnVuY3Rpb24gQWRtaW5Db250cm9sQ2VudGVyQ29udGVudCh7IGVtYmVkZGVkID0gZmFsc2UgfTogeyBlbWJlZGRlZD86IGJvb2xlYW4gfSkge1xuICBjb25zdCBuYXZpZ2F0ZSA9IHVzZU5hdmlnYXRlKCk7XG4gIGNvbnN0IHsgbGFuZ3VhZ2UgfSA9IHVzZUxhbmd1YWdlKCk7XG4gIGNvbnN0IHsgdGhlbWUgfSA9IHVzZVRoZW1lKCk7XG4gIGNvbnN0IGlzQXJhYmljID0gbGFuZ3VhZ2UgPT09IFwiYXJcIjtcblxuICBjb25zdCBbdXNlcnMsIHNldFVzZXJzXSA9IHVzZVN0YXRlPEFkbWluVXNlcltdPihbXSk7XG4gIGNvbnN0IFtzdGF0cywgc2V0U3RhdHNdID0gdXNlU3RhdGU8QWRtaW5TdGF0cyB8IG51bGw+KG51bGwpO1xuICBjb25zdCBbZXJyb3IsIHNldEVycm9yXSA9IHVzZVN0YXRlPHN0cmluZyB8IG51bGw+KG51bGwpO1xuXG4gIGNvbnN0IFtjcmVkaXRUYXJnZXQsIHNldENyZWRpdFRhcmdldF0gPSB1c2VTdGF0ZShcIlwiKTtcbiAgY29uc3QgW2NyZWRpdERlbHRhLCBzZXRDcmVkaXREZWx0YV0gPSB1c2VTdGF0ZSgxMCk7XG4gIGNvbnN0IFtjcmVkaXRNZXNzYWdlLCBzZXRDcmVkaXRNZXNzYWdlXSA9IHVzZVN0YXRlPHN0cmluZyB8IG51bGw+KG51bGwpO1xuICBjb25zdCBbY3JlZGl0QnVzeSwgc2V0Q3JlZGl0QnVzeV0gPSB1c2VTdGF0ZShmYWxzZSk7XG5cbiAgY29uc3QgW2JpbGxpbmcsIHNldEJpbGxpbmddID0gdXNlU3RhdGU8QmlsbGluZ1NldHRpbmdzUmVzcG9uc2UgfCBudWxsPihudWxsKTtcbiAgY29uc3QgW2JpbGxpbmdQcmljZSwgc2V0QmlsbGluZ1ByaWNlXSA9IHVzZVN0YXRlKFwiMC4xMFwiKTtcbiAgY29uc3QgW2JpbGxpbmdGcmVlRGFpbHlUb2tlbnMsIHNldEJpbGxpbmdGcmVlRGFpbHlUb2tlbnNdID0gdXNlU3RhdGUoXCIyNTAwXCIpO1xuICBjb25zdCBbYmlsbGluZ01lc3NhZ2UsIHNldEJpbGxpbmdNZXNzYWdlXSA9IHVzZVN0YXRlPHN0cmluZyB8IG51bGw+KG51bGwpO1xuICBjb25zdCBbYmlsbGluZ0J1c3ksIHNldEJpbGxpbmdCdXN5XSA9IHVzZVN0YXRlKGZhbHNlKTtcblxuICBjb25zdCBbcm9sZVRhcmdldCwgc2V0Um9sZVRhcmdldF0gPSB1c2VTdGF0ZShcIlwiKTtcbiAgY29uc3QgW3JvbGVWYWx1ZSwgc2V0Um9sZVZhbHVlXSA9IHVzZVN0YXRlKFwiYWRtaW5cIik7XG4gIGNvbnN0IFtyb2xlTWVzc2FnZSwgc2V0Um9sZU1lc3NhZ2VdID0gdXNlU3RhdGU8c3RyaW5nIHwgbnVsbD4obnVsbCk7XG4gIGNvbnN0IFtyb2xlQnVzeSwgc2V0Um9sZUJ1c3ldID0gdXNlU3RhdGUoZmFsc2UpO1xuXG4gIGNvbnN0IFt1c2FnZVRhcmdldCwgc2V0VXNhZ2VUYXJnZXRdID0gdXNlU3RhdGUoXCJcIik7XG4gIGNvbnN0IFt1c2FnZU1lc3NhZ2UsIHNldFVzYWdlTWVzc2FnZV0gPSB1c2VTdGF0ZTxzdHJpbmcgfCBudWxsPihudWxsKTtcbiAgY29uc3QgW3VzYWdlQnVzeSwgc2V0VXNhZ2VCdXN5XSA9IHVzZVN0YXRlKGZhbHNlKTtcblxuICBjb25zdCBbcHJvbW9Db2RlLCBzZXRQcm9tb0NvZGVdID0gdXNlU3RhdGUoXCJcIik7XG4gIGNvbnN0IFtwcm9tb0JvbnVzLCBzZXRQcm9tb0JvbnVzXSA9IHVzZVN0YXRlKDUpO1xuICBjb25zdCBbcHJvbW9NYXhVc2VzLCBzZXRQcm9tb01heFVzZXNdID0gdXNlU3RhdGUoMSk7XG4gIGNvbnN0IFtwcm9tb0V4cGlyZXMsIHNldFByb21vRXhwaXJlc10gPSB1c2VTdGF0ZShcIlwiKTtcbiAgY29uc3QgW3Byb21vTWVzc2FnZSwgc2V0UHJvbW9NZXNzYWdlXSA9IHVzZVN0YXRlPHN0cmluZyB8IG51bGw+KG51bGwpO1xuICBjb25zdCBbcHJvbW9CdXN5LCBzZXRQcm9tb0J1c3ldID0gdXNlU3RhdGUoZmFsc2UpO1xuXG4gIGNvbnN0IFtyZXNldEFsbERhdGUsIHNldFJlc2V0QWxsRGF0ZV0gPSB1c2VTdGF0ZShcIlwiKTtcbiAgY29uc3QgW3Jlc2V0QWxsTWVzc2FnZSwgc2V0UmVzZXRBbGxNZXNzYWdlXSA9IHVzZVN0YXRlPHN0cmluZyB8IG51bGw+KG51bGwpO1xuICBjb25zdCBbcmVzZXRBbGxCdXN5LCBzZXRSZXNldEFsbEJ1c3ldID0gdXNlU3RhdGUoZmFsc2UpO1xuXG4gIGNvbnN0IHQgPSAoZW46IHN0cmluZywgYXI6IHN0cmluZykgPT4gKGlzQXJhYmljID8gYXIgOiBlbik7XG5cbiAgY29uc3QgbG9hZEFkbWluRGF0YSA9IGFzeW5jICgpID0+IHtcbiAgICBzZXRFcnJvcihudWxsKTtcbiAgICB0cnkge1xuICAgICAgY29uc3QgW3VzZXJzUmVzcG9uc2UsIHN0YXRzUmVzcG9uc2UsIGJpbGxpbmdSZXNwb25zZV0gPSBhd2FpdCBQcm9taXNlLmFsbChbXG4gICAgICAgIGFwaVNlcnZpY2UubGlzdFVzZXJzKCksXG4gICAgICAgIGFwaVNlcnZpY2UuZ2V0U3RhdHMoKSxcbiAgICAgICAgYXBpU2VydmljZS5nZXRCaWxsaW5nU2V0dGluZ3MoKSxcbiAgICAgIF0pO1xuXG4gICAgICBzZXRVc2VycyhBcnJheS5pc0FycmF5KHVzZXJzUmVzcG9uc2UpID8gdXNlcnNSZXNwb25zZSA6IFtdKTtcbiAgICAgIHNldFN0YXRzKHN0YXRzUmVzcG9uc2UgfHwgbnVsbCk7XG4gICAgICBzZXRCaWxsaW5nKGJpbGxpbmdSZXNwb25zZSk7XG4gICAgICBzZXRCaWxsaW5nUHJpY2UoTnVtYmVyKGJpbGxpbmdSZXNwb25zZS50b2tlbl9wcmljZV9wZXJfMWtfY3JlZGl0cyA/PyAwKS50b0ZpeGVkKDIpKTtcbiAgICAgIHNldEJpbGxpbmdGcmVlRGFpbHlUb2tlbnMoU3RyaW5nKGJpbGxpbmdSZXNwb25zZS5mcmVlX2RhaWx5X3Rva2VucyA/PyAwKSk7XG4gICAgfSBjYXRjaCAoZTogYW55KSB7XG4gICAgICBzZXRFcnJvcihlPy5tZXNzYWdlIHx8IHQoXCJGYWlsZWQgdG8gbG9hZCBjb250cm9sIGNlbnRlciBkYXRhLlwiLCBcItmB2LTZhCDYqtit2YXZitmEINio2YrYp9mG2KfYqiDZhdix2YPYsiDYp9mE2KrYrdmD2YUuXCIpKTtcbiAgICB9XG4gIH07XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICB2b2lkIGxvYWRBZG1pbkRhdGEoKTtcbiAgfSwgW10pO1xuXG4gIGNvbnN0IHRvdGFsQ3JlZGl0cyA9IHVzZU1lbW8oXG4gICAgKCkgPT4gdXNlcnMucmVkdWNlKChzdW0sIHVzZXIpID0+IHN1bSArIChOdW1iZXIodXNlcj8uY3JlZGl0cykgfHwgMCksIDApLFxuICAgIFt1c2Vyc10sXG4gICk7XG5cbiAgY29uc3QgdXNlckNvdW50ID0gdXNlcnMubGVuZ3RoO1xuICBjb25zdCBhdmVyYWdlQ3JlZGl0cyA9IHVzZXJDb3VudCA/IHRvdGFsQ3JlZGl0cyAvIHVzZXJDb3VudCA6IDA7XG5cbiAgY29uc3QgaGlnaGVzdENyZWRpdFVzZXIgPSB1c2VNZW1vKFxuICAgICgpID0+XG4gICAgICB1c2Vycy5yZWR1Y2U8QWRtaW5Vc2VyIHwgbnVsbD4oKHRvcCwgY3VycmVudCkgPT4ge1xuICAgICAgICBpZiAoIXRvcCkgcmV0dXJuIGN1cnJlbnQ7XG4gICAgICAgIHJldHVybiBOdW1iZXIoY3VycmVudC5jcmVkaXRzID8/IDApID4gTnVtYmVyKHRvcC5jcmVkaXRzID8/IDApID8gY3VycmVudCA6IHRvcDtcbiAgICAgIH0sIG51bGwpLFxuICAgIFt1c2Vyc10sXG4gICk7XG5cbiAgY29uc3QgZmVlZGJhY2tJdGVtcyA9IFtcbiAgICBlcnJvciA/IHsga2luZDogXCJlcnJvclwiIGFzIGNvbnN0LCBtZXNzYWdlOiBlcnJvciB9IDogbnVsbCxcbiAgICBiaWxsaW5nTWVzc2FnZSA/IHsga2luZDogXCJzdWNjZXNzXCIgYXMgY29uc3QsIG1lc3NhZ2U6IGJpbGxpbmdNZXNzYWdlIH0gOiBudWxsLFxuICAgIGNyZWRpdE1lc3NhZ2UgPyB7IGtpbmQ6IFwic3VjY2Vzc1wiIGFzIGNvbnN0LCBtZXNzYWdlOiBjcmVkaXRNZXNzYWdlIH0gOiBudWxsLFxuICAgIHJvbGVNZXNzYWdlID8geyBraW5kOiBcInN1Y2Nlc3NcIiBhcyBjb25zdCwgbWVzc2FnZTogcm9sZU1lc3NhZ2UgfSA6IG51bGwsXG4gICAgdXNhZ2VNZXNzYWdlID8geyBraW5kOiBcInN1Y2Nlc3NcIiBhcyBjb25zdCwgbWVzc2FnZTogdXNhZ2VNZXNzYWdlIH0gOiBudWxsLFxuICAgIHJlc2V0QWxsTWVzc2FnZSA/IHsga2luZDogXCJzdWNjZXNzXCIgYXMgY29uc3QsIG1lc3NhZ2U6IHJlc2V0QWxsTWVzc2FnZSB9IDogbnVsbCxcbiAgICBwcm9tb01lc3NhZ2UgPyB7IGtpbmQ6IFwic3VjY2Vzc1wiIGFzIGNvbnN0LCBtZXNzYWdlOiBwcm9tb01lc3NhZ2UgfSA6IG51bGwsXG4gIF0uZmlsdGVyKEJvb2xlYW4pIGFzIEZlZWRiYWNrSXRlbVtdO1xuXG4gIGNvbnN0IGhhbmRsZUdyYW50Q3JlZGl0cyA9IGFzeW5jICgpID0+IHtcbiAgICBzZXRDcmVkaXRNZXNzYWdlKG51bGwpO1xuICAgIHNldEVycm9yKG51bGwpO1xuXG4gICAgY29uc3QgdGFyZ2V0ID0gY3JlZGl0VGFyZ2V0LnRyaW0oKTtcbiAgICBpZiAoIXRhcmdldCkge1xuICAgICAgc2V0Q3JlZGl0TWVzc2FnZSh0KFwiRW50ZXIgYSB1c2VybmFtZSBvciB1c2VyIElELlwiLCBcItij2K/YrtmEINin2LPZhSDYp9mE2YXYs9iq2K7Yr9mFINij2Ygg2LHZgtmFINin2YTZhdiz2KrYrtiv2YUuXCIpKTtcbiAgICAgIHJldHVybjtcbiAgICB9XG5cbiAgICBjb25zdCBkZWx0YSA9IE51bWJlcihjcmVkaXREZWx0YSk7XG4gICAgaWYgKCFOdW1iZXIuaXNGaW5pdGUoZGVsdGEpIHx8IGRlbHRhID09PSAwKSB7XG4gICAgICBzZXRDcmVkaXRNZXNzYWdlKHQoXCJFbnRlciBhIG5vbi16ZXJvIGNyZWRpdCBhbW91bnQuXCIsIFwi2KPYr9iu2YQg2YLZitmF2Kkg2LHYtdmK2K8g2LrZitixINi12YHYsdmK2KkuXCIpKTtcbiAgICAgIHJldHVybjtcbiAgICB9XG5cbiAgICBzZXRDcmVkaXRCdXN5KHRydWUpO1xuICAgIHRyeSB7XG4gICAgICBjb25zdCBwYXlsb2FkID0gL15cXGQrJC8udGVzdCh0YXJnZXQpXG4gICAgICAgID8geyB1c2VyX2lkOiBOdW1iZXIodGFyZ2V0KSwgZGVsdGEgfVxuICAgICAgICA6IHsgdXNlcm5hbWU6IHRhcmdldCwgZGVsdGEgfTtcbiAgICAgIGNvbnN0IHJlc3BvbnNlID0gYXdhaXQgYXBpU2VydmljZS5hZGp1c3RDcmVkaXRzKHBheWxvYWQpO1xuICAgICAgc2V0Q3JlZGl0TWVzc2FnZShcbiAgICAgICAgdChcbiAgICAgICAgICBgQ3JlZGl0cyB1cGRhdGVkIGZvciAke3Jlc3BvbnNlLnVzZXJuYW1lIHx8IHRhcmdldH0uIE5ldyBiYWxhbmNlOiAke3Jlc3BvbnNlLmNyZWRpdHN9LmAsXG4gICAgICAgICAgYNiq2YUg2KrYrdiv2YrYqyDYp9mE2LHYtdmK2K8g2YTZhNmF2LPYqtiu2K/ZhSAke3Jlc3BvbnNlLnVzZXJuYW1lIHx8IHRhcmdldH0uINin2YTYsdi12YrYryDYp9mE2KzYr9mK2K86ICR7cmVzcG9uc2UuY3JlZGl0c30uYCxcbiAgICAgICAgKSxcbiAgICAgICk7XG4gICAgICBzZXRDcmVkaXRUYXJnZXQoXCJcIik7XG4gICAgICBhd2FpdCBsb2FkQWRtaW5EYXRhKCk7XG4gICAgfSBjYXRjaCAoZTogYW55KSB7XG4gICAgICBzZXRFcnJvcihlPy5tZXNzYWdlIHx8IHQoXCJGYWlsZWQgdG8gdXBkYXRlIGNyZWRpdHMuXCIsIFwi2YHYtNmEINiq2K3Yr9mK2Ksg2KfZhNix2LXZitivLlwiKSk7XG4gICAgfSBmaW5hbGx5IHtcbiAgICAgIHNldENyZWRpdEJ1c3koZmFsc2UpO1xuICAgIH1cbiAgfTtcblxuICBjb25zdCBoYW5kbGVVcGRhdGVCaWxsaW5nID0gYXN5bmMgKCkgPT4ge1xuICAgIHNldEJpbGxpbmdNZXNzYWdlKG51bGwpO1xuICAgIHNldEVycm9yKG51bGwpO1xuXG4gICAgY29uc3QgcGFyc2VkUHJpY2UgPSBOdW1iZXIucGFyc2VGbG9hdChiaWxsaW5nUHJpY2UpO1xuICAgIGNvbnN0IHBhcnNlZFRva2VucyA9IE51bWJlci5wYXJzZUludChiaWxsaW5nRnJlZURhaWx5VG9rZW5zLCAxMCk7XG5cbiAgICBpZiAoIU51bWJlci5pc0Zpbml0ZShwYXJzZWRQcmljZSkgfHwgcGFyc2VkUHJpY2UgPCAwKSB7XG4gICAgICBzZXRCaWxsaW5nTWVzc2FnZSh0KFwiRW50ZXIgYSB2YWxpZCB0b2tlbiBwcmljZS5cIiwgXCLYo9iv2K7ZhCDYs9i52LHZi9inINi12K3Zitit2YvYpyDZhNmE2KrZiNmD2YYuXCIpKTtcbiAgICAgIHJldHVybjtcbiAgICB9XG5cbiAgICBpZiAoIU51bWJlci5pc0Zpbml0ZShwYXJzZWRUb2tlbnMpIHx8IHBhcnNlZFRva2VucyA8IDApIHtcbiAgICAgIHNldEJpbGxpbmdNZXNzYWdlKHQoXCJFbnRlciBhIHZhbGlkIGZyZWUgZGFpbHkgdG9rZW4gbGltaXQuXCIsIFwi2KPYr9iu2YQg2K3Yr9mL2Kcg2LXYrdmK2K3Zi9inINmE2YTYqtmI2YPZhtin2Kog2KfZhNmK2YjZhdmK2KkuXCIpKTtcbiAgICAgIHJldHVybjtcbiAgICB9XG5cbiAgICBzZXRCaWxsaW5nQnVzeSh0cnVlKTtcbiAgICB0cnkge1xuICAgICAgY29uc3QgcGF5bG9hZDogQmlsbGluZ1NldHRpbmdzUmVzcG9uc2UgPSB7XG4gICAgICAgIHRva2VuX3ByaWNlX3Blcl8xa19jcmVkaXRzOiBOdW1iZXIocGFyc2VkUHJpY2UudG9GaXhlZCgyKSksXG4gICAgICAgIGZyZWVfZGFpbHlfdG9rZW5zOiBwYXJzZWRUb2tlbnMsXG4gICAgICB9O1xuICAgICAgY29uc3QgcmVzcG9uc2UgPSBhd2FpdCBhcGlTZXJ2aWNlLnVwZGF0ZUJpbGxpbmdTZXR0aW5ncyhwYXlsb2FkKTtcbiAgICAgIHNldEJpbGxpbmcocmVzcG9uc2UpO1xuICAgICAgc2V0QmlsbGluZ1ByaWNlKE51bWJlcihyZXNwb25zZS50b2tlbl9wcmljZV9wZXJfMWtfY3JlZGl0cyA/PyAwKS50b0ZpeGVkKDIpKTtcbiAgICAgIHNldEJpbGxpbmdGcmVlRGFpbHlUb2tlbnMoU3RyaW5nKHJlc3BvbnNlLmZyZWVfZGFpbHlfdG9rZW5zID8/IDApKTtcbiAgICAgIHNldEJpbGxpbmdNZXNzYWdlKHQoXCJCaWxsaW5nIHBvbGljeSB1cGRhdGVkLlwiLCBcItiq2YUg2KrYrdiv2YrYqyDYs9mK2KfYs9ipINin2YTZgdmI2KrYsdipLlwiKSk7XG4gICAgfSBjYXRjaCAoZTogYW55KSB7XG4gICAgICBzZXRFcnJvcihlPy5tZXNzYWdlIHx8IHQoXCJGYWlsZWQgdG8gdXBkYXRlIGJpbGxpbmcgc2V0dGluZ3MuXCIsIFwi2YHYtNmEINiq2K3Yr9mK2Ksg2KXYudiv2KfYr9in2Kog2KfZhNmB2YjYqtix2KkuXCIpKTtcbiAgICB9IGZpbmFsbHkge1xuICAgICAgc2V0QmlsbGluZ0J1c3koZmFsc2UpO1xuICAgIH1cbiAgfTtcblxuICBjb25zdCBoYW5kbGVVcGRhdGVSb2xlID0gYXN5bmMgKCkgPT4ge1xuICAgIHNldFJvbGVNZXNzYWdlKG51bGwpO1xuICAgIHNldEVycm9yKG51bGwpO1xuXG4gICAgY29uc3QgdGFyZ2V0ID0gcm9sZVRhcmdldC50cmltKCk7XG4gICAgaWYgKCF0YXJnZXQpIHtcbiAgICAgIHNldFJvbGVNZXNzYWdlKHQoXCJFbnRlciBhIHVzZXJuYW1lIG9yIHVzZXIgSUQuXCIsIFwi2KPYr9iu2YQg2KfYs9mFINin2YTZhdiz2KrYrtiv2YUg2KPZiCDYsdmC2YUg2KfZhNmF2LPYqtiu2K/ZhS5cIikpO1xuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIHNldFJvbGVCdXN5KHRydWUpO1xuICAgIHRyeSB7XG4gICAgICBjb25zdCBwYXlsb2FkID0gL15cXGQrJC8udGVzdCh0YXJnZXQpXG4gICAgICAgID8geyB1c2VyX2lkOiBOdW1iZXIodGFyZ2V0KSwgcm9sZTogcm9sZVZhbHVlIH1cbiAgICAgICAgOiB7IHVzZXJuYW1lOiB0YXJnZXQsIHJvbGU6IHJvbGVWYWx1ZSB9O1xuICAgICAgY29uc3QgcmVzcG9uc2UgPSBhd2FpdCBhcGlTZXJ2aWNlLnVwZGF0ZVJvbGUocGF5bG9hZCk7XG4gICAgICBzZXRSb2xlTWVzc2FnZShcbiAgICAgICAgdChcbiAgICAgICAgICBgUm9sZSB1cGRhdGVkIGZvciAke3Jlc3BvbnNlLnVzZXJuYW1lIHx8IHRhcmdldH06ICR7cmVzcG9uc2Uucm9sZX0uYCxcbiAgICAgICAgICBg2KrZhSDYqtit2K/ZitirINin2YTYr9mI2LEg2YTZhNmF2LPYqtiu2K/ZhSAke3Jlc3BvbnNlLnVzZXJuYW1lIHx8IHRhcmdldH06ICR7cmVzcG9uc2Uucm9sZX0uYCxcbiAgICAgICAgKSxcbiAgICAgICk7XG4gICAgICBzZXRSb2xlVGFyZ2V0KFwiXCIpO1xuICAgICAgYXdhaXQgbG9hZEFkbWluRGF0YSgpO1xuICAgIH0gY2F0Y2ggKGU6IGFueSkge1xuICAgICAgc2V0RXJyb3IoZT8ubWVzc2FnZSB8fCB0KFwiRmFpbGVkIHRvIHVwZGF0ZSByb2xlLlwiLCBcItmB2LTZhCDYqtit2K/ZitirINin2YTYr9mI2LEuXCIpKTtcbiAgICB9IGZpbmFsbHkge1xuICAgICAgc2V0Um9sZUJ1c3koZmFsc2UpO1xuICAgIH1cbiAgfTtcblxuICBjb25zdCBoYW5kbGVSZXNldFVzYWdlID0gYXN5bmMgKCkgPT4ge1xuICAgIHNldFVzYWdlTWVzc2FnZShudWxsKTtcbiAgICBzZXRFcnJvcihudWxsKTtcblxuICAgIGNvbnN0IHRhcmdldCA9IHVzYWdlVGFyZ2V0LnRyaW0oKTtcbiAgICBpZiAoIXRhcmdldCkge1xuICAgICAgc2V0VXNhZ2VNZXNzYWdlKHQoXCJFbnRlciBhIHVzZXJuYW1lIG9yIHVzZXIgSUQuXCIsIFwi2KPYr9iu2YQg2KfYs9mFINin2YTZhdiz2KrYrtiv2YUg2KPZiCDYsdmC2YUg2KfZhNmF2LPYqtiu2K/ZhS5cIikpO1xuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIHNldFVzYWdlQnVzeSh0cnVlKTtcbiAgICB0cnkge1xuICAgICAgY29uc3QgcGF5bG9hZCA9IC9eXFxkKyQvLnRlc3QodGFyZ2V0KVxuICAgICAgICA/IHsgdXNlcl9pZDogTnVtYmVyKHRhcmdldCkgfVxuICAgICAgICA6IHsgdXNlcm5hbWU6IHRhcmdldCB9O1xuICAgICAgYXdhaXQgYXBpU2VydmljZS5yZXNldFVzYWdlKHBheWxvYWQpO1xuICAgICAgc2V0VXNhZ2VNZXNzYWdlKFxuICAgICAgICB0KGBEYWlseSB1c2FnZSByZXNldCBmb3IgJHt0YXJnZXR9LmAsIGDYqtmFINiq2LXZgdmK2LEg2KfZhNin2LPYqtiu2K/Yp9mFINin2YTZitmI2YXZiiDZhNmE2YXYs9iq2K7Yr9mFICR7dGFyZ2V0fS5gKSxcbiAgICAgICk7XG4gICAgICBzZXRVc2FnZVRhcmdldChcIlwiKTtcbiAgICAgIGF3YWl0IGxvYWRBZG1pbkRhdGEoKTtcbiAgICB9IGNhdGNoIChlOiBhbnkpIHtcbiAgICAgIHNldEVycm9yKGU/Lm1lc3NhZ2UgfHwgdChcIkZhaWxlZCB0byByZXNldCB1c2FnZS5cIiwgXCLZgdi02YQg2KrYtdmB2YrYsSDYp9mE2KfYs9iq2K7Yr9in2YUuXCIpKTtcbiAgICB9IGZpbmFsbHkge1xuICAgICAgc2V0VXNhZ2VCdXN5KGZhbHNlKTtcbiAgICB9XG4gIH07XG5cbiAgY29uc3QgaGFuZGxlUmVzZXRBbGxVc2FnZSA9IGFzeW5jICgpID0+IHtcbiAgICBzZXRSZXNldEFsbE1lc3NhZ2UobnVsbCk7XG4gICAgc2V0RXJyb3IobnVsbCk7XG4gICAgc2V0UmVzZXRBbGxCdXN5KHRydWUpO1xuICAgIHRyeSB7XG4gICAgICBjb25zdCBkYXRlID0gcmVzZXRBbGxEYXRlLnRyaW0oKTtcbiAgICAgIGF3YWl0IGFwaVNlcnZpY2UucmVzZXRVc2FnZSh7IGFsbF91c2VyczogdHJ1ZSwgZGF0ZTogZGF0ZSB8fCB1bmRlZmluZWQgfSk7XG4gICAgICBzZXRSZXNldEFsbE1lc3NhZ2UoXG4gICAgICAgIHQoXG4gICAgICAgICAgYERhaWx5IHVzYWdlIHJlc2V0IGZvciBhbGwgdXNlcnMke2RhdGUgPyBgIG9uICR7ZGF0ZX1gIDogXCJcIn0uYCxcbiAgICAgICAgICBg2KrZhSDYqti12YHZitixINin2YTYp9iz2KrYrtiv2KfZhSDYp9mE2YrZiNmF2Yog2YTZg9mEINin2YTZhdiz2KrYrtiv2YXZitmGJHtkYXRlID8gYCDYqNiq2KfYsdmK2K4gJHtkYXRlfWAgOiBcIlwifS5gLFxuICAgICAgICApLFxuICAgICAgKTtcbiAgICAgIHNldFJlc2V0QWxsRGF0ZShcIlwiKTtcbiAgICAgIGF3YWl0IGxvYWRBZG1pbkRhdGEoKTtcbiAgICB9IGNhdGNoIChlOiBhbnkpIHtcbiAgICAgIHNldEVycm9yKGU/Lm1lc3NhZ2UgfHwgdChcIkZhaWxlZCB0byByZXNldCBhbGwgdXNhZ2UuXCIsIFwi2YHYtNmEINiq2LXZgdmK2LEg2KfYs9iq2K7Yr9in2YUg2KzZhdmK2Lkg2KfZhNmF2LPYqtiu2K/ZhdmK2YYuXCIpKTtcbiAgICB9IGZpbmFsbHkge1xuICAgICAgc2V0UmVzZXRBbGxCdXN5KGZhbHNlKTtcbiAgICB9XG4gIH07XG5cbiAgY29uc3QgaGFuZGxlQ3JlYXRlUHJvbW8gPSBhc3luYyAoKSA9PiB7XG4gICAgc2V0UHJvbW9NZXNzYWdlKG51bGwpO1xuICAgIHNldEVycm9yKG51bGwpO1xuXG4gICAgY29uc3QgY29kZSA9IHByb21vQ29kZS50cmltKCk7XG4gICAgaWYgKCFjb2RlKSB7XG4gICAgICBzZXRQcm9tb01lc3NhZ2UodChcIkVudGVyIGEgcHJvbW8gY29kZS5cIiwgXCLYo9iv2K7ZhCDZg9mI2K8g2KfZhNiu2LXZhS5cIikpO1xuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIGNvbnN0IGJvbnVzID0gTnVtYmVyKHByb21vQm9udXMpO1xuICAgIGlmICghTnVtYmVyLmlzRmluaXRlKGJvbnVzKSB8fCBib251cyA8IDApIHtcbiAgICAgIHNldFByb21vTWVzc2FnZSh0KFwiRW50ZXIgYSB2YWxpZCBib251cyBhbW91bnQuXCIsIFwi2KPYr9iu2YQg2YLZitmF2Kkg2YXZg9in2YHYo9ipINi12K3Zitit2KkuXCIpKTtcbiAgICAgIHJldHVybjtcbiAgICB9XG5cbiAgICBjb25zdCBtYXhVc2VzID0gTnVtYmVyKHByb21vTWF4VXNlcyk7XG4gICAgaWYgKCFOdW1iZXIuaXNGaW5pdGUobWF4VXNlcykgfHwgbWF4VXNlcyA8IDEpIHtcbiAgICAgIHNldFByb21vTWVzc2FnZSh0KFwiRW50ZXIgYSB2YWxpZCBtYXggdXNlcyB2YWx1ZS5cIiwgXCLYo9iv2K7ZhCDYudiv2K8g2KfYs9iq2K7Yr9in2YXYp9iqINi12K3ZititLlwiKSk7XG4gICAgICByZXR1cm47XG4gICAgfVxuXG4gICAgc2V0UHJvbW9CdXN5KHRydWUpO1xuICAgIHRyeSB7XG4gICAgICBjb25zdCBwYXlsb2FkID0ge1xuICAgICAgICBjb2RlLFxuICAgICAgICBib251c19hdHRlbXB0czogYm9udXMsXG4gICAgICAgIG1heF91c2VzOiBtYXhVc2VzLFxuICAgICAgICBleHBpcmVzX2F0OiBwcm9tb0V4cGlyZXMudHJpbSgpIHx8IHVuZGVmaW5lZCxcbiAgICAgIH07XG4gICAgICBjb25zdCByZXNwb25zZSA9IGF3YWl0IGFwaVNlcnZpY2UuY3JlYXRlUHJvbW8ocGF5bG9hZCk7XG4gICAgICBzZXRQcm9tb01lc3NhZ2UoXG4gICAgICAgIHQoYFByb21vIGNvZGUgY3JlYXRlZDogJHtyZXNwb25zZS5jb2RlfS5gLCBg2KrZhSDYpdmG2LTYp9ihINmD2YjYryDYp9mE2K7YtdmFOiAke3Jlc3BvbnNlLmNvZGV9LmApLFxuICAgICAgKTtcbiAgICAgIHNldFByb21vQ29kZShcIlwiKTtcbiAgICAgIHNldFByb21vRXhwaXJlcyhcIlwiKTtcbiAgICAgIGF3YWl0IGxvYWRBZG1pbkRhdGEoKTtcbiAgICB9IGNhdGNoIChlOiBhbnkpIHtcbiAgICAgIHNldEVycm9yKGU/Lm1lc3NhZ2UgfHwgdChcIkZhaWxlZCB0byBjcmVhdGUgcHJvbW8gY29kZS5cIiwgXCLZgdi02YQg2KXZhti02KfYoSDZg9mI2K8g2KfZhNiu2LXZhS5cIikpO1xuICAgIH0gZmluYWxseSB7XG4gICAgICBzZXRQcm9tb0J1c3koZmFsc2UpO1xuICAgIH1cbiAgfTtcblxuICByZXR1cm4gKFxuICAgIDxkaXZcbiAgICAgIGRpcj17aXNBcmFiaWMgPyBcInJ0bFwiIDogXCJsdHJcIn1cbiAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgIFwiYXJjaGl0ZWN0LXNoZWxsXCIsXG4gICAgICAgIGVtYmVkZGVkID8gXCJtaW4taC0wXCIgOiBcIm1pbi1oLXNjcmVlblwiLFxuICAgICAgICB0aGVtZSA9PT0gXCJkYXJrXCIgPyBcImFyY2hpdGVjdC1zaGVsbC1kYXJrXCIgOiBcImFyY2hpdGVjdC1zaGVsbC1saWdodFwiLFxuICAgICAgKX1cbiAgICA+XG4gICAgICA8ZGl2XG4gICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgXCJteC1hdXRvIG1heC13LVsxNjAwcHhdXCIsXG4gICAgICAgICAgZW1iZWRkZWQgPyBcInB4LTAgcHktMFwiIDogXCJweC02IHB5LTYgc206cHgtOCBsZzpweC0xNCBsZzpweS04IDJ4bDpweC0yNFwiLFxuICAgICAgICApfVxuICAgICAgPlxuICAgICAgICA8bW90aW9uLmhlYWRlclxuICAgICAgICAgIGluaXRpYWw9XCJoaWRkZW5cIlxuICAgICAgICAgIGFuaW1hdGU9XCJ2aXNpYmxlXCJcbiAgICAgICAgICBjdXN0b209ezB9XG4gICAgICAgICAgdmFyaWFudHM9e3N5c3RlbVNlY3Rpb25WYXJpYW50c31cbiAgICAgICAgICBjbGFzc05hbWU9XCJhcmNoaXRlY3QtaGVyb1wiXG4gICAgICAgID5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImdyaWQgZ2FwLTggeGw6Z3JpZC1jb2xzLVttaW5tYXgoMCwxLjI1ZnIpXzIwcmVtXSB4bDppdGVtcy1zdGFydFwiPlxuICAgICAgICAgICAgPGRpdj5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtYi01IGZsZXggZmxleC13cmFwIGl0ZW1zLWNlbnRlciBnYXAtM1wiPlxuICAgICAgICAgICAgICAgIDxTeXN0ZW1DaGlwIHRvbmU9XCJwcmltYXJ5XCI+XG4gICAgICAgICAgICAgICAgICA8U2hpZWxkQ2hlY2sgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICB7dChcIkNvbnRyb2wgQ2VudGVyXCIsIFwi2YXYsdmD2LIg2KfZhNiq2K3Zg9mFXCIpfVxuICAgICAgICAgICAgICAgIDwvU3lzdGVtQ2hpcD5cbiAgICAgICAgICAgICAgICA8U3lzdGVtQ2hpcCB0b25lPVwic29mdFwiPlxuICAgICAgICAgICAgICAgICAge3QoXCJBcmNoaXRlY3R1cmFsIE1pbmltYWxpc3RcIiwgXCLYp9mE2YbYs9mCINin2YTZhdi52YXYp9ix2Yog2KfZhNmH2KfYr9imXCIpfVxuICAgICAgICAgICAgICAgIDwvU3lzdGVtQ2hpcD5cbiAgICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgICAgPGgxIGNsYXNzTmFtZT1cImZvbnQtWydJQk1fUGxleF9TYW5zX0FyYWJpYycsJ0JlX1ZpZXRuYW1fUHJvJyxzYW5zLXNlcmlmXSB0ZXh0LTR4bCBmb250LXNlbWlib2xkIGxlYWRpbmctWzEuMThdIHRyYWNraW5nLVstMC4wNWVtXSB0ZXh0LVtjb2xvcjp2YXIoLS1hcmNoaXRlY3QtaW5rKV0gc206dGV4dC01eGxcIj5cbiAgICAgICAgICAgICAgICB7dChcIkFkbWluIE9wZXJhdGlvbnNcIiwgXCLYudmF2YTZitin2Kog2KfZhNil2K/Yp9ix2KlcIil9XG4gICAgICAgICAgICAgIDwvaDE+XG5cbiAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwibXQtNCBtYXgtdy0zeGwgdGV4dC1iYXNlIGxlYWRpbmctOCB0ZXh0LVtjb2xvcjp2YXIoLS1hcmNoaXRlY3QtbXV0ZWQpXVwiPlxuICAgICAgICAgICAgICAgIHt0KFxuICAgICAgICAgICAgICAgICAgXCJBIGNvbnRyb2wgcm9vbSBmb3IgY3JlZGl0IHBvbGljeSwgcm9sZSBnb3Zlcm5hbmNlLCB1c2FnZSByZXNldHMsIHByb21vIGNhbXBhaWducywgYW5kIGxpdmUgdXNlciBiYWxhbmNlIHN1cGVydmlzaW9uLlwiLFxuICAgICAgICAgICAgICAgICAgXCLYutix2YHYqSDYqti02LrZitmEINmE2KXYr9in2LHYqSDYs9mK2KfYs9ipINin2YTYo9ix2LXYr9ip2Iwg2YjYtdmE2KfYrdmK2KfYqiDYp9mE2YjYtdmI2YTYjCDZiNiq2LXZgdmK2LEg2KfZhNin2LPYqtiu2K/Yp9mF2Iwg2YjYrdmF2YTYp9iqINin2YTYrti12YXYjCDZiNmF2KrYp9io2LnYqSDYo9ix2LXYr9ipINin2YTZhdiz2KrYrtiv2YXZitmGINio2LTZg9mEINmF2KjYp9i02LEuXCIsXG4gICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LXNpZGUtbm90ZVwiPlxuICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJhcmNoaXRlY3Qta2lja2VyXCI+e3QoXCJRdWljayBBY3Rpb25zXCIsIFwi2KXYrNix2KfYodin2Kog2LPYsdmK2LnYqVwiKX08L3A+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXQtNCBncmlkIGdhcC0zXCI+XG4gICAgICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiB2b2lkIGxvYWRBZG1pbkRhdGEoKX1cbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1idXR0b24gYXJjaGl0ZWN0LWJ1dHRvbi1wcmltYXJ5IGgtMTIganVzdGlmeS1jZW50ZXIgcm91bmRlZC1tZCBweC01XCJcbiAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICA8UmVmcmVzaEN3IGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICAgICAgICAgICAge3QoXCJSZWZyZXNoIGRhdGFcIiwgXCLYqtit2K/ZitirINin2YTYqNmK2KfZhtin2KpcIil9XG4gICAgICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgICAgICAgeyFlbWJlZGRlZCA/IChcbiAgICAgICAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgICAgICAgICAgICAgIHZhcmlhbnQ9XCJvdXRsaW5lXCJcbiAgICAgICAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4gbmF2aWdhdGUoXCIvZGFzaGJvYXJkXCIpfVxuICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJhcmNoaXRlY3QtYnV0dG9uIGFyY2hpdGVjdC1idXR0b24tc2Vjb25kYXJ5IGgtMTIganVzdGlmeS1jZW50ZXIgcm91bmRlZC1tZCBweC01XCJcbiAgICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgICAgPEFycm93TGVmdCBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAgICAgICAge3QoXCJCYWNrIHRvIGRhc2hib2FyZFwiLCBcItin2YTYudmI2K/YqSDYpdmE2Ykg2KfZhNmE2YjYrdipXCIpfVxuICAgICAgICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgICAgICAgKSA6IG51bGx9XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgIDwvbW90aW9uLmhlYWRlcj5cblxuICAgICAgICB7ZmVlZGJhY2tJdGVtcy5sZW5ndGggPyAoXG4gICAgICAgICAgPG1vdGlvbi5zZWN0aW9uXG4gICAgICAgICAgICBpbml0aWFsPVwiaGlkZGVuXCJcbiAgICAgICAgICAgIGFuaW1hdGU9XCJ2aXNpYmxlXCJcbiAgICAgICAgICAgIGN1c3RvbT17MX1cbiAgICAgICAgICAgIHZhcmlhbnRzPXtzeXN0ZW1TZWN0aW9uVmFyaWFudHN9XG4gICAgICAgICAgICBjbGFzc05hbWU9XCJtdC02IGdyaWQgZ2FwLTNcIlxuICAgICAgICAgID5cbiAgICAgICAgICAgIHtmZWVkYmFja0l0ZW1zLm1hcCgoaXRlbSwgaW5kZXgpID0+IChcbiAgICAgICAgICAgICAgPGRpdlxuICAgICAgICAgICAgICAgIGtleT17YCR7aXRlbS5raW5kfS0ke2luZGV4fWB9XG4gICAgICAgICAgICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgICAgICAgICAgIFwiYXJjaGl0ZWN0LWZlZWRiYWNrXCIsXG4gICAgICAgICAgICAgICAgICBpdGVtLmtpbmQgPT09IFwiZXJyb3JcIiA/IFwiYXJjaGl0ZWN0LWZlZWRiYWNrLWVycm9yXCIgOiBcImFyY2hpdGVjdC1mZWVkYmFjay1zdWNjZXNzXCIsXG4gICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgIHtpdGVtLm1lc3NhZ2V9XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgKSl9XG4gICAgICAgICAgPC9tb3Rpb24uc2VjdGlvbj5cbiAgICAgICAgKSA6IG51bGx9XG5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC04IGdyaWQgZ2FwLTggeGw6Z3JpZC1jb2xzLVttaW5tYXgoMCwxLjNmcilfMjFyZW1dXCI+XG4gICAgICAgICAgPG1vdGlvbi5tYWluXG4gICAgICAgICAgICBpbml0aWFsPVwiaGlkZGVuXCJcbiAgICAgICAgICAgIGFuaW1hdGU9XCJ2aXNpYmxlXCJcbiAgICAgICAgICAgIGN1c3RvbT17Mn1cbiAgICAgICAgICAgIHZhcmlhbnRzPXtzeXN0ZW1TZWN0aW9uVmFyaWFudHN9XG4gICAgICAgICAgICBjbGFzc05hbWU9XCJzcGFjZS15LThcIlxuICAgICAgICAgID5cbiAgICAgICAgICAgIDxzZWN0aW9uIGNsYXNzTmFtZT1cImdyaWQgZ2FwLTQgbGc6Z3JpZC1jb2xzLVttaW5tYXgoMCwxLjM1ZnIpX21pbm1heCgwLDAuOWZyKV1cIj5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJhcmNoaXRlY3Qtc3RhZ2UtY2FyZCBhcmNoaXRlY3Qtc3RhZ2UtY2FyZC1oZXJvXCI+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGZsZXgtd3JhcCBpdGVtcy1zdGFydCBqdXN0aWZ5LWJldHdlZW4gZ2FwLTZcIj5cbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibWF4LXctMnhsXCI+XG4gICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1raWNrZXJcIj57dChcIk9wZXJhdGlvbmFsIFNuYXBzaG90XCIsIFwi2YXZhNiu2LUg2KrYtNi62YrZhNmKXCIpfTwvcD5cbiAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC01IGZvbnQtWydCZV9WaWV0bmFtX1BybyddIHRleHQtNXhsIGZvbnQtc2VtaWJvbGQgdHJhY2tpbmctWy0wLjA2ZW1dIHRleHQtW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1pbmspXSBzbTp0ZXh0LTZ4bFwiPlxuICAgICAgICAgICAgICAgICAgICAgIHt0b3RhbENyZWRpdHMudG9GaXhlZCgyKX1cbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cIm10LTMgbWF4LXcteGwgdGV4dC1iYXNlIGxlYWRpbmctOCB0ZXh0LVtjb2xvcjp2YXIoLS1hcmNoaXRlY3QtbXV0ZWQpXVwiPlxuICAgICAgICAgICAgICAgICAgICAgIHt0KFxuICAgICAgICAgICAgICAgICAgICAgICAgXCJUb3RhbCBjcmVkaXQgdm9sdW1lIGN1cnJlbnRseSBjaXJjdWxhdGluZyBhY3Jvc3MgdGhlIHBsYXRmb3JtLlwiLFxuICAgICAgICAgICAgICAgICAgICAgICAgXCLYpdis2YXYp9mE2Yog2K3YrNmFINin2YTYo9ix2LXYr9ipINin2YTZhdiq2K/Yp9mI2YTYqSDYrdin2YTZitmL2Kcg2LnYqNixINin2YTZhdmG2LXYqS5cIixcbiAgICAgICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIG1pbi13LVsyMjBweF0gZ2FwLTMgdGV4dC1zbSB0ZXh0LVtjb2xvcjp2YXIoLS1hcmNoaXRlY3QtbXV0ZWQpXVwiPlxuICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJvdW5kZWQtMnhsIGJnLVtjb2xvcjp2YXIoLS1hcmNoaXRlY3Qtc3VyZmFjZS1zdHJvbmcpXSBweC00IHB5LTRcIj5cbiAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJhcmNoaXRlY3Qta2lja2VyXCI+e3QoXCJUb3AgYmFsYW5jZVwiLCBcItij2LnZhNmJINix2LXZitivXCIpfTwvcD5cbiAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJtdC0yIGZvbnQtbWVkaXVtIHRleHQtW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1pbmspXVwiPlxuICAgICAgICAgICAgICAgICAgICAgICAge2hpZ2hlc3RDcmVkaXRVc2VyPy51c2VybmFtZSB8fCB0KFwiTm8gdXNlcnNcIiwgXCLZhNinINmK2YjYrNivINmF2LPYqtiu2K/ZhdmI2YZcIil9XG4gICAgICAgICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cImZvbnQtWydCZV9WaWV0bmFtX1BybyddIHRleHQteGwgZm9udC1zZW1pYm9sZCB0ZXh0LVtjb2xvcjp2YXIoLS1hcmNoaXRlY3QtaW5rKV1cIj5cbiAgICAgICAgICAgICAgICAgICAgICAgIHtOdW1iZXIoaGlnaGVzdENyZWRpdFVzZXI/LmNyZWRpdHMgPz8gMCkudG9GaXhlZCgyKX1cbiAgICAgICAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJvdW5kZWQtMnhsIGJnLVtjb2xvcjp2YXIoLS1hcmNoaXRlY3QtY29udHJhc3QpXSBweC00IHB5LTQgdGV4dC1bY29sb3I6dmFyKC0tYXJjaGl0ZWN0LWNvbnRyYXN0LWluayldXCI+XG4gICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1bMTFweF0gdXBwZXJjYXNlIHRyYWNraW5nLVswLjIyZW1dIHRleHQtW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1jb250cmFzdC1tdXRlZCldXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICB7dChcIlRvZGF5XCIsIFwi2KfZhNmK2YjZhVwiKX1cbiAgICAgICAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwibXQtMiBmb250LVsnQmVfVmlldG5hbV9Qcm8nXSB0ZXh0LTJ4bCBmb250LXNlbWlib2xkXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICB7c3RhdHM/LnVzZWRfdG9kYXkgPz8gMH1cbiAgICAgICAgICAgICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBnYXAtNCBzbTpncmlkLWNvbHMtMiBsZzpncmlkLWNvbHMtMVwiPlxuICAgICAgICAgICAgICAgIDxTeXN0ZW1TdGF0XG4gICAgICAgICAgICAgICAgICBsYWJlbD17dChcIlVzZXJzXCIsIFwi2KfZhNmF2LPYqtiu2K/ZhdmI2YZcIil9XG4gICAgICAgICAgICAgICAgICB2YWx1ZT17U3RyaW5nKHVzZXJDb3VudCl9XG4gICAgICAgICAgICAgICAgICBkZXRhaWw9e3QoXCJSZWdpc3RlcmVkIGlkZW50aXRpZXMgdW5kZXIgYWN0aXZlIGNvbnRyb2wuXCIsIFwi2KfZhNmH2YjZitin2Kog2KfZhNmF2LPYrNmE2Kkg2KrYrdiqINmG2LfYp9mCINin2YTYpdiv2KfYsdipINin2YTYrdin2YTZitipLlwiKX1cbiAgICAgICAgICAgICAgICAgIHRvbmU9XCJhY2NlbnRcIlxuICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgPFN5c3RlbVN0YXRcbiAgICAgICAgICAgICAgICAgIGxhYmVsPXt0KFwiQXZlcmFnZSBDcmVkaXRzXCIsIFwi2YXYqtmI2LPYtyDYp9mE2KPYsdi12K/YqVwiKX1cbiAgICAgICAgICAgICAgICAgIHZhbHVlPXthdmVyYWdlQ3JlZGl0cy50b0ZpeGVkKDIpfVxuICAgICAgICAgICAgICAgICAgZGV0YWlsPXt0KFwiQXZlcmFnZSBiYWxhbmNlIHBlciBhY2NvdW50LlwiLCBcItmF2KrZiNiz2Lcg2KfZhNix2LXZitivINmE2YPZhCDYrdiz2KfYqCDYr9in2K7ZhCDYp9mE2YbYuNin2YUuXCIpfVxuICAgICAgICAgICAgICAgICAgdG9uZT1cInN1Y2Nlc3NcIlxuICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9zZWN0aW9uPlxuXG4gICAgICAgICAgICA8c2VjdGlvbiBjbGFzc05hbWU9XCJncmlkIGdhcC00IGxnOmdyaWQtY29scy0zXCI+XG4gICAgICAgICAgICAgIDxTeXN0ZW1TdGF0XG4gICAgICAgICAgICAgICAgbGFiZWw9e3QoXCJTaW11bGF0aW9ucyBUb2RheVwiLCBcItmF2K3Yp9mD2YrYp9iqINin2YTZitmI2YVcIil9XG4gICAgICAgICAgICAgICAgdmFsdWU9e1N0cmluZyhzdGF0cz8udXNlZF90b2RheSA/PyAwKX1cbiAgICAgICAgICAgICAgICBkZXRhaWw9e3QoXCJTZXNzaW9ucyBsYXVuY2hlZCBpbiB0aGUgY3VycmVudCBkYXkuXCIsIFwi2LnYr9ivINin2YTYrNmE2LPYp9iqINin2YTYqtmKINio2K/Yo9iqINiu2YTYp9mEINin2YTZitmI2YUg2KfZhNit2KfZhNmKLlwiKX1cbiAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgPFN5c3RlbVN0YXRcbiAgICAgICAgICAgICAgICBsYWJlbD17dChcIlRvdGFsIFNpbXVsYXRpb25zXCIsIFwi2KXYrNmF2KfZhNmKINin2YTZhdit2KfZg9mK2KfYqlwiKX1cbiAgICAgICAgICAgICAgICB2YWx1ZT17U3RyaW5nKHN0YXRzPy50b3RhbF9zaW11bGF0aW9ucyA/PyAwKX1cbiAgICAgICAgICAgICAgICBkZXRhaWw9e3QoXCJDdW11bGF0aXZlIHNpbXVsYXRpb24gcnVucy5cIiwgXCLYudiv2K8g2KfZhNmF2K3Yp9mD2YrYp9iqINin2YTZhdmG2YHYsNipINiq2LHYp9mD2YXZitmL2KcuXCIpfVxuICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICA8U3lzdGVtU3RhdFxuICAgICAgICAgICAgICAgIGxhYmVsPXt0KFwiRnJlZSBEYWlseSBUb2tlbnNcIiwgXCLYp9mE2KrZiNmD2YbYp9iqINin2YTZitmI2YXZitipINin2YTZhdis2KfZhtmK2KlcIil9XG4gICAgICAgICAgICAgICAgdmFsdWU9e1N0cmluZyhiaWxsaW5nPy5mcmVlX2RhaWx5X3Rva2VucyA/PyAwKX1cbiAgICAgICAgICAgICAgICBkZXRhaWw9e3QoXCJDdXJyZW50IGFsbG93YW5jZSBiZWZvcmUgYmlsbGluZyBhcHBsaWVzLlwiLCBcItin2YTYrdi12Kkg2KfZhNit2KfZhNmK2Kkg2YLYqNmEINio2K/YoSDYp9it2KrYs9in2Kgg2KfZhNmB2YjYqtix2KkuXCIpfVxuICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgPC9zZWN0aW9uPlxuXG4gICAgICAgICAgICA8U3lzdGVtUGFuZWxcbiAgICAgICAgICAgICAgdGl0bGU9e3QoXCJTeXN0ZW0gUHVsc2VcIiwgXCLZhtio2LYg2KfZhNmG2LjYp9mFXCIpfVxuICAgICAgICAgICAgICBkZXNjcmlwdGlvbj17dChcbiAgICAgICAgICAgICAgICBcIkEgY29uY2lzZSBvcGVyYXRvci1ncmFkZSBzdW1tYXJ5IG9mIHRoZSBsaXZlIHVzYWdlIHJoeXRobSBhbmQgY3VycmVudCBiaWxsaW5nIHN0YW5jZS5cIixcbiAgICAgICAgICAgICAgICBcItmF2YTYrti1INiq2LTYutmK2YTZiiDYs9ix2YrYuSDZhNil2YrZgtin2Lkg2KfZhNin2LPYqtiu2K/Yp9mFINin2YTYrdin2YTZiiDZiNmI2LbYuSDYp9mE2YHZiNiq2LHYqSDYp9mE2YbYtNi3LlwiLFxuICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICBpY29uPXtBY3Rpdml0eX1cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJncmlkIGdhcC00IG1kOmdyaWQtY29scy1bbWlubWF4KDAsMS4xZnIpX21pbm1heCgwLDAuOWZyKV1cIj5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImFyY2hpdGVjdC1zdXJmYWNlLW11dGVkIHAtNVwiPlxuICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWtpY2tlclwiPnt0KFwiVXNhZ2UgUGF0dGVyblwiLCBcItmG2YXYtyDYp9mE2KfYs9iq2K7Yr9in2YVcIil9PC9wPlxuICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC00IGdyaWQgZ2FwLTQgc206Z3JpZC1jb2xzLTJcIj5cbiAgICAgICAgICAgICAgICAgICAgPGRpdj5cbiAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1tdXRlZCldXCI+e3QoXCJTdGFydGVkIHRvZGF5XCIsIFwi2KjYr9ij2Kog2KfZhNmK2YjZhVwiKX08L3A+XG4gICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwibXQtMiBmb250LVsnQmVfVmlldG5hbV9Qcm8nXSB0ZXh0LTN4bCBmb250LXNlbWlib2xkIHRleHQtW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1pbmspXVwiPlxuICAgICAgICAgICAgICAgICAgICAgICAge3N0YXRzPy51c2VkX3RvZGF5ID8/IDB9XG4gICAgICAgICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgPGRpdj5cbiAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1tdXRlZCldXCI+e3QoXCJUb3RhbCBydW5zXCIsIFwi2KXYrNmF2KfZhNmKINin2YTYrNmI2YTYp9iqXCIpfTwvcD5cbiAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJtdC0yIGZvbnQtWydCZV9WaWV0bmFtX1BybyddIHRleHQtM3hsIGZvbnQtc2VtaWJvbGQgdGV4dC1bY29sb3I6dmFyKC0tYXJjaGl0ZWN0LWluayldXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICB7c3RhdHM/LnRvdGFsX3NpbXVsYXRpb25zID8/IDB9XG4gICAgICAgICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LXN1cmZhY2Utc29mdCBwLTVcIj5cbiAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1raWNrZXJcIj57dChcIkN1cnJlbnQgQmlsbGluZ1wiLCBcItin2YTZiNi22Lkg2KfZhNit2KfZhNmKINmE2YTZgdmI2KrYsdipXCIpfTwvcD5cbiAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cIm10LTQgdGV4dC1zbSBsZWFkaW5nLTcgdGV4dC1bY29sb3I6dmFyKC0tYXJjaGl0ZWN0LW11dGVkKV1cIj5cbiAgICAgICAgICAgICAgICAgICAge3QoXG4gICAgICAgICAgICAgICAgICAgICAgYCR7TnVtYmVyKGJpbGxpbmc/LnRva2VuX3ByaWNlX3Blcl8xa19jcmVkaXRzID8/IDApLnRvRml4ZWQoMil9IGNyZWRpdHMgYXJlIGJpbGxlZCBwZXIgMTAwMCB0b2tlbnMsIHdpdGggJHtiaWxsaW5nPy5mcmVlX2RhaWx5X3Rva2VucyA/PyAwfSBmcmVlIHRva2VucyBpc3N1ZWQgZXZlcnkgZGF5LmAsXG4gICAgICAgICAgICAgICAgICAgICAgYNmK2KrZhSDYp9it2KrYs9in2KggJHtOdW1iZXIoYmlsbGluZz8udG9rZW5fcHJpY2VfcGVyXzFrX2NyZWRpdHMgPz8gMCkudG9GaXhlZCgyKX0g2LHYtdmK2K8g2YTZg9mEIDEwMDAg2KrZiNmD2YbYjCDZhdi5ICR7YmlsbGluZz8uZnJlZV9kYWlseV90b2tlbnMgPz8gMH0g2KrZiNmD2YYg2YXYrNin2YbZiiDZitmI2YXZitmL2KcuYCxcbiAgICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8L1N5c3RlbVBhbmVsPlxuXG4gICAgICAgICAgICA8U3lzdGVtUGFuZWxcbiAgICAgICAgICAgICAgdGl0bGU9e3QoXCJVc2VycyBMZWRnZXJcIiwgXCLYs9is2YQg2KfZhNmF2LPYqtiu2K/ZhdmK2YZcIil9XG4gICAgICAgICAgICAgIGRlc2NyaXB0aW9uPXt0KFxuICAgICAgICAgICAgICAgIFwiQSBkZW5zZSBidXQgY2FsbSBsaXN0IGZvciBiYWxhbmNlcyBhbmQgYWNjZXNzIHJvbGVzLCB3aXRoIHdoaXRlc3BhY2UgcmVwbGFjaW5nIGRpdmlkZXJzLlwiLFxuICAgICAgICAgICAgICAgIFwi2YLYp9im2YXYqSDYqti02LrZitmE2YrYqSDZg9ir2YrZgdipINmE2YPZhiDZh9in2K/YptipINmE2YTYo9ix2LXYr9ipINmI2KfZhNi12YTYp9it2YrYp9iq2Iwg2YXYuSDYp9i52KrZhdin2K8g2KfZhNmF2LPYp9mB2KfYqiDYqNiv2YQg2KfZhNmB2YjYp9i12YQg2KfZhNiq2YLZhNmK2K/ZitipLlwiLFxuICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICBpY29uPXtVc2Vyc31cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtYi01IGZsZXggZmxleC13cmFwIGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW4gZ2FwLTNcIj5cbiAgICAgICAgICAgICAgICA8U3lzdGVtQ2hpcCB0b25lPVwic29mdFwiPlxuICAgICAgICAgICAgICAgICAge3QoYCR7dXNlcnMubGVuZ3RofSByZWNvcmRzYCwgYCR7dXNlcnMubGVuZ3RofSDYs9is2YRgKX1cbiAgICAgICAgICAgICAgICA8L1N5c3RlbUNoaXA+XG4gICAgICAgICAgICAgICAgPFN5c3RlbUNoaXAgdG9uZT1cImpld2VsXCI+XG4gICAgICAgICAgICAgICAgICA8Q29pbnMgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICB7dChgVG90YWwgY3JlZGl0cyAke3RvdGFsQ3JlZGl0cy50b0ZpeGVkKDIpfWAsIGDYpdis2YXYp9mE2Yog2KfZhNij2LHYtdiv2KkgJHt0b3RhbENyZWRpdHMudG9GaXhlZCgyKX1gKX1cbiAgICAgICAgICAgICAgICA8L1N5c3RlbUNoaXA+XG4gICAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWxlZGdlci1zaGVsbFwiPlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiaGlkZGVuIGdyaWQtY29scy1bNzJweF9taW5tYXgoMCwxLjNmcilfMTQwcHhfMTUwcHhdIGdhcC02IHB4LTUgcGItNCB0ZXh0LVsxMXB4XSB1cHBlcmNhc2UgdHJhY2tpbmctWzAuMjJlbV0gdGV4dC1bY29sb3I6dmFyKC0tYXJjaGl0ZWN0LXN1YnRsZSldIG1kOmdyaWRcIj5cbiAgICAgICAgICAgICAgICAgIDxzcGFuPnt0KFwiSURcIiwgXCLYp9mE2YXYudix2YFcIil9PC9zcGFuPlxuICAgICAgICAgICAgICAgICAgPHNwYW4+e3QoXCJVc2VybmFtZVwiLCBcItin2LPZhSDYp9mE2YXYs9iq2K7Yr9mFXCIpfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgIDxzcGFuPnt0KFwiUm9sZVwiLCBcItin2YTYr9mI2LFcIil9PC9zcGFuPlxuICAgICAgICAgICAgICAgICAgPHNwYW4+e3QoXCJDcmVkaXRzXCIsIFwi2KfZhNix2LXZitivXCIpfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibWF4LWgtWzcyMHB4XSBvdmVyZmxvdy1hdXRvIHNjcm9sbGJhci10aGluIHByLTFcIj5cbiAgICAgICAgICAgICAgICAgIHt1c2Vycy5sZW5ndGggPyAoXG4gICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBnYXAtNFwiPlxuICAgICAgICAgICAgICAgICAgICAgIHt1c2Vycy5tYXAoKHVzZXIpID0+IChcbiAgICAgICAgICAgICAgICAgICAgICAgIDxhcnRpY2xlXG4gICAgICAgICAgICAgICAgICAgICAgICAgIGtleT17dXNlci5pZH1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWxlZGdlci1yb3cgZ3JpZCBnYXAtMyBweC01IHB5LTQgbWQ6Z3JpZC1jb2xzLVs3MnB4X21pbm1heCgwLDEuM2ZyKV8xNDBweF8xNTBweF0gbWQ6aXRlbXMtY2VudGVyIG1kOmdhcC02XCJcbiAgICAgICAgICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmb250LVsnQmVfVmlldG5hbV9Qcm8nXSB0ZXh0LXNtIGZvbnQtbWVkaXVtIHRleHQtW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1zdWJ0bGUpXVwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIHt1c2VyLmlkfVxuICAgICAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPGRpdj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJmb250LW1lZGl1bSB0ZXh0LVtjb2xvcjp2YXIoLS1hcmNoaXRlY3QtaW5rKV1cIj57dXNlci51c2VybmFtZX08L3A+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwibXQtMSB0ZXh0LXNtIHRleHQtW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1tdXRlZCldXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICB7dChcIk1hbmFnZWQgYWNjb3VudCBpZGVudGl0eVwiLCBcItmH2YjZitipINmF2LPYqtiu2K/ZhSDYrtin2LbYudipINmE2YTYpdiv2KfYsdipXCIpfVxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LXJvbGUtcGlsbFwiPnt1c2VyLnJvbGV9PC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmb250LVsnQmVfVmlldG5hbV9Qcm8nXSB0ZXh0LWxnIGZvbnQtc2VtaWJvbGQgdHJhY2tpbmctWy0wLjAzZW1dIHRleHQtW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1pbmspXVwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIHtOdW1iZXIodXNlci5jcmVkaXRzID8/IDApLnRvRml4ZWQoMil9XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgICAgPC9hcnRpY2xlPlxuICAgICAgICAgICAgICAgICAgICAgICkpfVxuICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicm91bmRlZC1bMjhweF0gYmctW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1zdXJmYWNlLTIpXSBweC02IHB5LTEyIHRleHQtY2VudGVyIHRleHQtW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1tdXRlZCldXCI+XG4gICAgICAgICAgICAgICAgICAgICAge3QoXCJObyB1c2VycyBhdmFpbGFibGUuXCIsIFwi2YTYpyDZitmI2KzYryDZhdiz2KrYrtiv2YXZiNmGINit2KfZhNmK2YvYpy5cIil9XG4gICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8L1N5c3RlbVBhbmVsPlxuICAgICAgICAgIDwvbW90aW9uLm1haW4+XG5cbiAgICAgICAgICA8bW90aW9uLmFzaWRlXG4gICAgICAgICAgICBpbml0aWFsPVwiaGlkZGVuXCJcbiAgICAgICAgICAgIGFuaW1hdGU9XCJ2aXNpYmxlXCJcbiAgICAgICAgICAgIGN1c3RvbT17M31cbiAgICAgICAgICAgIHZhcmlhbnRzPXtzeXN0ZW1TZWN0aW9uVmFyaWFudHN9XG4gICAgICAgICAgICBjbGFzc05hbWU9XCJhcmNoaXRlY3QtcmFpbCBzcGFjZS15LTRcIlxuICAgICAgICAgID5cbiAgICAgICAgICAgIDxTeXN0ZW1QYW5lbFxuICAgICAgICAgICAgICB0aXRsZT17dChcIkJpbGxpbmcgQ29udHJvbHNcIiwgXCLYttio2Lcg2KfZhNmB2YjYqtix2KlcIil9XG4gICAgICAgICAgICAgIGRlc2NyaXB0aW9uPXt0KFxuICAgICAgICAgICAgICAgIFwiQWRqdXN0IGhvdyB0b2tlbiB1c2FnZSBjb252ZXJ0cyBpbnRvIGNyZWRpdHMuXCIsXG4gICAgICAgICAgICAgICAgXCLYp9i22KjYtyDYt9ix2YrZgtipINiq2K3ZiNmK2YQg2KfYs9iq2YfZhNin2YMg2KfZhNiq2YjZg9mG2KfYqiDYpdmE2Ykg2KPYsdi12K/YqS5cIixcbiAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgaWNvbj17V2FsbGV0fVxuICAgICAgICAgICAgPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktM1wiPlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICAgICAgICA8bGFiZWwgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWxhYmVsXCI+XG4gICAgICAgICAgICAgICAgICAgIHt0KFwiQ3JlZGl0cyBwZXIgMTAwMCB0b2tlbnNcIiwgXCLYp9mE2LHYtdmK2K8g2YTZg9mEIDEwMDAg2KrZiNmD2YZcIil9XG4gICAgICAgICAgICAgICAgICA8L2xhYmVsPlxuICAgICAgICAgICAgICAgICAgPGlucHV0XG4gICAgICAgICAgICAgICAgICAgIHR5cGU9XCJudW1iZXJcIlxuICAgICAgICAgICAgICAgICAgICBtaW49XCIwXCJcbiAgICAgICAgICAgICAgICAgICAgc3RlcD1cIjAuMDFcIlxuICAgICAgICAgICAgICAgICAgICB2YWx1ZT17YmlsbGluZ1ByaWNlfVxuICAgICAgICAgICAgICAgICAgICBvbkNoYW5nZT17KGUpID0+IHNldEJpbGxpbmdQcmljZShlLnRhcmdldC52YWx1ZSl9XG4gICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1pbnB1dFwiXG4gICAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICAgICAgICA8bGFiZWwgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWxhYmVsXCI+XG4gICAgICAgICAgICAgICAgICAgIHt0KFwiRnJlZSBkYWlseSB0b2tlbnNcIiwgXCLYp9mE2KrZiNmD2YbYp9iqINin2YTZitmI2YXZitipINin2YTZhdis2KfZhtmK2KlcIil9XG4gICAgICAgICAgICAgICAgICA8L2xhYmVsPlxuICAgICAgICAgICAgICAgICAgPGlucHV0XG4gICAgICAgICAgICAgICAgICAgIHR5cGU9XCJudW1iZXJcIlxuICAgICAgICAgICAgICAgICAgICBtaW49XCIwXCJcbiAgICAgICAgICAgICAgICAgICAgc3RlcD1cIjFcIlxuICAgICAgICAgICAgICAgICAgICB2YWx1ZT17YmlsbGluZ0ZyZWVEYWlseVRva2Vuc31cbiAgICAgICAgICAgICAgICAgICAgb25DaGFuZ2U9eyhlKSA9PiBzZXRCaWxsaW5nRnJlZURhaWx5VG9rZW5zKGUudGFyZ2V0LnZhbHVlKX1cbiAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWlucHV0XCJcbiAgICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgICAgICAgICAgICBvbkNsaWNrPXtoYW5kbGVVcGRhdGVCaWxsaW5nfVxuICAgICAgICAgICAgICAgICAgZGlzYWJsZWQ9e2JpbGxpbmdCdXN5fVxuICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWJ1dHRvbiBhcmNoaXRlY3QtYnV0dG9uLXByaW1hcnkgaC0xMiB3LWZ1bGwgcm91bmRlZC1tZFwiXG4gICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAge2JpbGxpbmdCdXN5ID8gdChcIlVwZGF0aW5nLi4uXCIsIFwi2KzYp9ix2Y0g2KfZhNiq2K3Yr9mK2KsuLi5cIikgOiB0KFwiVXBkYXRlIGJpbGxpbmdcIiwgXCLYqtit2K/ZitirINin2YTZgdmI2KrYsdipXCIpfVxuICAgICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvU3lzdGVtUGFuZWw+XG5cbiAgICAgICAgICAgIDxTeXN0ZW1QYW5lbFxuICAgICAgICAgICAgICB0aXRsZT17dChcIkNyZWRpdHNcIiwgXCLYp9mE2KPYsdi12K/YqVwiKX1cbiAgICAgICAgICAgICAgZGVzY3JpcHRpb249e3QoXG4gICAgICAgICAgICAgICAgXCJBZGQgb3IgZGVkdWN0IGJhbGFuY2UgYnkgdXNlcm5hbWUgb3IgbnVtZXJpYyB1c2VyIElELlwiLFxuICAgICAgICAgICAgICAgIFwi2KPYttmBINij2Ygg2KfYrti12YUg2KfZhNix2LXZitivINio2KfYs9iq2K7Yr9in2YUg2KfYs9mFINin2YTZhdiz2KrYrtiv2YUg2KPZiCDYsdmC2YUg2KfZhNmF2LPYqtiu2K/ZhS5cIixcbiAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgaWNvbj17Q29pbnN9XG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0zXCI+XG4gICAgICAgICAgICAgICAgPGlucHV0XG4gICAgICAgICAgICAgICAgICB0eXBlPVwidGV4dFwiXG4gICAgICAgICAgICAgICAgICBwbGFjZWhvbGRlcj17dChcIlVzZXJuYW1lIG9yIHVzZXIgSURcIiwgXCLYp9iz2YUg2KfZhNmF2LPYqtiu2K/ZhSDYo9mIINix2YLZhSDYp9mE2YXYs9iq2K7Yr9mFXCIpfVxuICAgICAgICAgICAgICAgICAgdmFsdWU9e2NyZWRpdFRhcmdldH1cbiAgICAgICAgICAgICAgICAgIG9uQ2hhbmdlPXsoZSkgPT4gc2V0Q3JlZGl0VGFyZ2V0KGUudGFyZ2V0LnZhbHVlKX1cbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1pbnB1dFwiXG4gICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICA8aW5wdXRcbiAgICAgICAgICAgICAgICAgIHR5cGU9XCJudW1iZXJcIlxuICAgICAgICAgICAgICAgICAgc3RlcD1cIjAuMDFcIlxuICAgICAgICAgICAgICAgICAgdmFsdWU9e2NyZWRpdERlbHRhfVxuICAgICAgICAgICAgICAgICAgb25DaGFuZ2U9eyhlKSA9PiB7XG4gICAgICAgICAgICAgICAgICAgIGNvbnN0IHZhbHVlID0gTnVtYmVyLnBhcnNlRmxvYXQoZS50YXJnZXQudmFsdWUpO1xuICAgICAgICAgICAgICAgICAgICBzZXRDcmVkaXREZWx0YShOdW1iZXIuaXNGaW5pdGUodmFsdWUpID8gdmFsdWUgOiAwKTtcbiAgICAgICAgICAgICAgICAgIH19XG4gICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJhcmNoaXRlY3QtaW5wdXRcIlxuICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgICAgICAgICAgICBvbkNsaWNrPXtoYW5kbGVHcmFudENyZWRpdHN9XG4gICAgICAgICAgICAgICAgICBkaXNhYmxlZD17Y3JlZGl0QnVzeX1cbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1idXR0b24gYXJjaGl0ZWN0LWJ1dHRvbi1wcmltYXJ5IGgtMTIgdy1mdWxsIHJvdW5kZWQtbWRcIlxuICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgIHtjcmVkaXRCdXN5ID8gdChcIkFwcGx5aW5nLi4uXCIsIFwi2KzYp9ix2Y0g2KfZhNiq2LfYqNmK2YIuLi5cIikgOiB0KFwiQXBwbHkgY3JlZGl0c1wiLCBcItiq2LfYqNmK2YIg2KfZhNix2LXZitivXCIpfVxuICAgICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvU3lzdGVtUGFuZWw+XG5cbiAgICAgICAgICAgIDxTeXN0ZW1QYW5lbFxuICAgICAgICAgICAgICB0aXRsZT17dChcIlJvbGVzXCIsIFwi2KfZhNij2K/ZiNin2LFcIil9XG4gICAgICAgICAgICAgIGRlc2NyaXB0aW9uPXt0KFxuICAgICAgICAgICAgICAgIFwiQ2hhbmdlIGFjY291bnQgYWNjZXNzIGxldmVscyB3aXRob3V0IGxlYXZpbmcgdGhlIGNvbnRyb2wgcmFpbC5cIixcbiAgICAgICAgICAgICAgICBcIti62YrZkdixINi12YTYp9it2YrYp9iqINin2YTYrdiz2KfYqNin2Kog2K/ZiNmGINmF2LrYp9iv2LHYqSDYp9mE2YXYs9in2LEg2KfZhNiq2LTYutmK2YTZii5cIixcbiAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgaWNvbj17VXNlckNvZ31cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTNcIj5cbiAgICAgICAgICAgICAgICA8aW5wdXRcbiAgICAgICAgICAgICAgICAgIHR5cGU9XCJ0ZXh0XCJcbiAgICAgICAgICAgICAgICAgIHBsYWNlaG9sZGVyPXt0KFwiVXNlcm5hbWUgb3IgdXNlciBJRFwiLCBcItin2LPZhSDYp9mE2YXYs9iq2K7Yr9mFINij2Ygg2LHZgtmFINin2YTZhdiz2KrYrtiv2YVcIil9XG4gICAgICAgICAgICAgICAgICB2YWx1ZT17cm9sZVRhcmdldH1cbiAgICAgICAgICAgICAgICAgIG9uQ2hhbmdlPXsoZSkgPT4gc2V0Um9sZVRhcmdldChlLnRhcmdldC52YWx1ZSl9XG4gICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJhcmNoaXRlY3QtaW5wdXRcIlxuICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgPHNlbGVjdFxuICAgICAgICAgICAgICAgICAgdmFsdWU9e3JvbGVWYWx1ZX1cbiAgICAgICAgICAgICAgICAgIG9uQ2hhbmdlPXsoZSkgPT4gc2V0Um9sZVZhbHVlKGUudGFyZ2V0LnZhbHVlKX1cbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1pbnB1dFwiXG4gICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgPG9wdGlvbiB2YWx1ZT1cImFkbWluXCI+YWRtaW48L29wdGlvbj5cbiAgICAgICAgICAgICAgICAgIDxvcHRpb24gdmFsdWU9XCJkZXZlbG9wZXJcIj5kZXZlbG9wZXI8L29wdGlvbj5cbiAgICAgICAgICAgICAgICAgIDxvcHRpb24gdmFsdWU9XCJ1c2VyXCI+dXNlcjwvb3B0aW9uPlxuICAgICAgICAgICAgICAgIDwvc2VsZWN0PlxuICAgICAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgICAgIHR5cGU9XCJidXR0b25cIlxuICAgICAgICAgICAgICAgICAgb25DbGljaz17aGFuZGxlVXBkYXRlUm9sZX1cbiAgICAgICAgICAgICAgICAgIGRpc2FibGVkPXtyb2xlQnVzeX1cbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1idXR0b24gYXJjaGl0ZWN0LWJ1dHRvbi1zZWNvbmRhcnkgaC0xMiB3LWZ1bGwgcm91bmRlZC1tZFwiXG4gICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAge3JvbGVCdXN5ID8gdChcIlVwZGF0aW5nLi4uXCIsIFwi2KzYp9ix2Y0g2KfZhNiq2K3Yr9mK2KsuLi5cIikgOiB0KFwiQXBwbHkgcm9sZVwiLCBcItiq2LfYqNmK2YIg2KfZhNiv2YjYsVwiKX1cbiAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8L1N5c3RlbVBhbmVsPlxuXG4gICAgICAgICAgICA8U3lzdGVtUGFuZWxcbiAgICAgICAgICAgICAgdGl0bGU9e3QoXCJVc2FnZSBSZXNldFwiLCBcItiq2LXZgdmK2LEg2KfZhNin2LPYqtiu2K/Yp9mFXCIpfVxuICAgICAgICAgICAgICBkZXNjcmlwdGlvbj17dChcbiAgICAgICAgICAgICAgICBcIlJlc2V0IGRhaWx5IHVzYWdlIGNvdW50ZXJzIGZvciBvbmUgYWNjb3VudCBvciB0aGUgZnVsbCBzeXN0ZW0uXCIsXG4gICAgICAgICAgICAgICAgXCLYo9i52K8g2KrYudmK2YrZhiDYudiv2KfYr9in2Kog2KfZhNin2LPYqtiu2K/Yp9mFINin2YTZitmI2YXZitipINmE2K3Ys9in2Kgg2YjYp9it2K8g2KPZiCDZhNmE2YbYuNin2YUg2KjYp9mE2YPYp9mF2YQuXCIsXG4gICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgIGljb249e1JvdGF0ZUNjd31cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTNcIj5cbiAgICAgICAgICAgICAgICA8aW5wdXRcbiAgICAgICAgICAgICAgICAgIHR5cGU9XCJ0ZXh0XCJcbiAgICAgICAgICAgICAgICAgIHBsYWNlaG9sZGVyPXt0KFwiVXNlcm5hbWUgb3IgdXNlciBJRFwiLCBcItin2LPZhSDYp9mE2YXYs9iq2K7Yr9mFINij2Ygg2LHZgtmFINin2YTZhdiz2KrYrtiv2YVcIil9XG4gICAgICAgICAgICAgICAgICB2YWx1ZT17dXNhZ2VUYXJnZXR9XG4gICAgICAgICAgICAgICAgICBvbkNoYW5nZT17KGUpID0+IHNldFVzYWdlVGFyZ2V0KGUudGFyZ2V0LnZhbHVlKX1cbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1pbnB1dFwiXG4gICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcbiAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9e2hhbmRsZVJlc2V0VXNhZ2V9XG4gICAgICAgICAgICAgICAgICBkaXNhYmxlZD17dXNhZ2VCdXN5fVxuICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWJ1dHRvbiBhcmNoaXRlY3QtYnV0dG9uLXByaW1hcnkgaC0xMiB3LWZ1bGwgcm91bmRlZC1tZFwiXG4gICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAge3VzYWdlQnVzeSA/IHQoXCJSZXNldHRpbmcuLi5cIiwgXCLYrNin2LHZjSDYp9mE2KrYtdmB2YrYsS4uLlwiKSA6IHQoXCJSZXNldCB1c2VyIHVzYWdlXCIsIFwi2KrYtdmB2YrYsSDYp9iz2KrYrtiv2KfZhSDYp9mE2YXYs9iq2K7Yr9mFXCIpfVxuICAgICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBnYXAtMyBzbTpncmlkLWNvbHMtW21pbm1heCgwLDFmcilfYXV0b11cIj5cbiAgICAgICAgICAgICAgICAgIDxpbnB1dFxuICAgICAgICAgICAgICAgICAgICB0eXBlPVwiZGF0ZVwiXG4gICAgICAgICAgICAgICAgICAgIHZhbHVlPXtyZXNldEFsbERhdGV9XG4gICAgICAgICAgICAgICAgICAgIG9uQ2hhbmdlPXsoZSkgPT4gc2V0UmVzZXRBbGxEYXRlKGUudGFyZ2V0LnZhbHVlKX1cbiAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWlucHV0XCJcbiAgICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgICAgICAgIHR5cGU9XCJidXR0b25cIlxuICAgICAgICAgICAgICAgICAgICB2YXJpYW50PVwib3V0bGluZVwiXG4gICAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9e2hhbmRsZVJlc2V0QWxsVXNhZ2V9XG4gICAgICAgICAgICAgICAgICAgIGRpc2FibGVkPXtyZXNldEFsbEJ1c3l9XG4gICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1idXR0b24gYXJjaGl0ZWN0LWJ1dHRvbi1zZWNvbmRhcnkgaC0xMiByb3VuZGVkLW1kIHB4LTRcIlxuICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICB7cmVzZXRBbGxCdXN5ID8gdChcIlJlc2V0dGluZy4uLlwiLCBcItis2KfYsdmNINin2YTYqti12YHZitixLi4uXCIpIDogdChcIlJlc2V0IGFsbFwiLCBcItiq2LXZgdmK2LEg2KfZhNmD2YRcIil9XG4gICAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8L1N5c3RlbVBhbmVsPlxuXG4gICAgICAgICAgICA8U3lzdGVtUGFuZWxcbiAgICAgICAgICAgICAgdGl0bGU9e3QoXCJQcm9tbyBDb2Rlc1wiLCBcItij2YPZiNin2K8g2KfZhNiu2LXZhVwiKX1cbiAgICAgICAgICAgICAgZGVzY3JpcHRpb249e3QoXG4gICAgICAgICAgICAgICAgXCJDcmVhdGUgcmV1c2FibGUgb3Igb25lLW9mZiBjYW1wYWlnbiBjb2RlcyB3aXRoIG9wdGlvbmFsIGV4cGlyeS5cIixcbiAgICAgICAgICAgICAgICBcItij2YbYtNimINij2YPZiNin2K8g2K3ZhdmE2KfYqiDZgtin2KjZhNipINmE2KXYudin2K/YqSDYp9mE2KfYs9iq2K7Yr9in2YUg2KPZiCDZhNmF2LHYqSDZiNin2K3Yr9ipINmF2Lkg2KrYp9ix2YrYriDYp9mG2KrZh9in2KEg2KfYrtiq2YrYp9ix2YouXCIsXG4gICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgIGljb249e0JhZGdlUGVyY2VudH1cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTNcIj5cbiAgICAgICAgICAgICAgICA8aW5wdXRcbiAgICAgICAgICAgICAgICAgIHR5cGU9XCJ0ZXh0XCJcbiAgICAgICAgICAgICAgICAgIHBsYWNlaG9sZGVyPXt0KFwiUHJvbW8gY29kZVwiLCBcItmD2YjYryDYp9mE2K7YtdmFXCIpfVxuICAgICAgICAgICAgICAgICAgdmFsdWU9e3Byb21vQ29kZX1cbiAgICAgICAgICAgICAgICAgIG9uQ2hhbmdlPXsoZSkgPT4gc2V0UHJvbW9Db2RlKGUudGFyZ2V0LnZhbHVlKX1cbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1pbnB1dFwiXG4gICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImdyaWQgZ2FwLTMgc206Z3JpZC1jb2xzLTNcIj5cbiAgICAgICAgICAgICAgICAgIDxpbnB1dFxuICAgICAgICAgICAgICAgICAgICB0eXBlPVwibnVtYmVyXCJcbiAgICAgICAgICAgICAgICAgICAgdmFsdWU9e3Byb21vQm9udXN9XG4gICAgICAgICAgICAgICAgICAgIG9uQ2hhbmdlPXsoZSkgPT4gc2V0UHJvbW9Cb251cyhOdW1iZXIoZS50YXJnZXQudmFsdWUpKX1cbiAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWlucHV0XCJcbiAgICAgICAgICAgICAgICAgICAgcGxhY2Vob2xkZXI9e3QoXCJCb251c1wiLCBcItin2YTZhdmD2KfZgdij2KlcIil9XG4gICAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICAgICAgPGlucHV0XG4gICAgICAgICAgICAgICAgICAgIHR5cGU9XCJudW1iZXJcIlxuICAgICAgICAgICAgICAgICAgICB2YWx1ZT17cHJvbW9NYXhVc2VzfVxuICAgICAgICAgICAgICAgICAgICBvbkNoYW5nZT17KGUpID0+IHNldFByb21vTWF4VXNlcyhOdW1iZXIoZS50YXJnZXQudmFsdWUpKX1cbiAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWlucHV0XCJcbiAgICAgICAgICAgICAgICAgICAgcGxhY2Vob2xkZXI9e3QoXCJNYXggdXNlc1wiLCBcItin2YTYudiv2K9cIil9XG4gICAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICAgICAgPGlucHV0XG4gICAgICAgICAgICAgICAgICAgIHR5cGU9XCJkYXRlXCJcbiAgICAgICAgICAgICAgICAgICAgdmFsdWU9e3Byb21vRXhwaXJlc31cbiAgICAgICAgICAgICAgICAgICAgb25DaGFuZ2U9eyhlKSA9PiBzZXRQcm9tb0V4cGlyZXMoZS50YXJnZXQudmFsdWUpfVxuICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJhcmNoaXRlY3QtaW5wdXRcIlxuICAgICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcbiAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9e2hhbmRsZUNyZWF0ZVByb21vfVxuICAgICAgICAgICAgICAgICAgZGlzYWJsZWQ9e3Byb21vQnVzeX1cbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1idXR0b24gYXJjaGl0ZWN0LWJ1dHRvbi1wcmltYXJ5IGgtMTIgdy1mdWxsIHJvdW5kZWQtbWRcIlxuICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgIHtwcm9tb0J1c3kgPyB0KFwiQ3JlYXRpbmcuLi5cIiwgXCLYrNin2LHZjSDYp9mE2KXZhti02KfYoS4uLlwiKSA6IHQoXCJDcmVhdGUgcHJvbW8gY29kZVwiLCBcItil2YbYtNin2KEg2YPZiNivINiu2LXZhVwiKX1cbiAgICAgICAgICAgICAgICA8L0J1dHRvbj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8L1N5c3RlbVBhbmVsPlxuXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImFyY2hpdGVjdC1wcmVtaXVtLW5vdGVcIj5cbiAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWtpY2tlclwiPnt0KFwiR292ZXJuYW5jZSBOb3RlXCIsIFwi2YXZhNin2K3YuNipINiq2LTYutmK2YTZitipXCIpfTwvcD5cbiAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwibXQtMyB0ZXh0LXNtIGxlYWRpbmctNyB0ZXh0LVsjNWQ2NTc3XVwiPlxuICAgICAgICAgICAgICAgIHt0KFxuICAgICAgICAgICAgICAgICAgXCJSaXNreSBhY3Rpb25zIGFyZSBpbnRlbnRpb25hbGx5IGlzb2xhdGVkIGluIHRoZSBzaWRlIHJhaWwgc28gdGhlIHByaW1hcnkgc3RhZ2UgcmVtYWlucyBmb2N1c2VkIG9uIHJlYWRpbmcgYW5kIHZlcmlmaWNhdGlvbiBiZWZvcmUgYWN0aW9uLlwiLFxuICAgICAgICAgICAgICAgICAgXCLYqtmFINi52LLZhCDYp9mE2KXYrNix2KfYodin2Kog2LnYp9mE2YrYqSDYp9mE2K3Ys9in2LPZitipINmB2Yog2KfZhNmF2LPYp9ixINin2YTYrNin2YbYqNmKINit2KrZiSDYqtio2YLZiSDYp9mE2YXYs9in2K3YqSDYp9mE2LHYptmK2LPZitipINmF2K7Ytdi12Kkg2YTZhNmC2LHYp9ih2Kkg2YjYp9mE2KrYrdmC2YIg2YLYqNmEINin2YTYqtmG2YHZitiwLlwiLFxuICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvbW90aW9uLmFzaWRlPlxuICAgICAgICA8L2Rpdj5cbiAgICAgIDwvZGl2PlxuICAgIDwvZGl2PlxuICApO1xufVxuXG5leHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBBZG1pbkRhc2hib2FyZCgpIHtcbiAgcmV0dXJuIDxBZG1pbkNvbnRyb2xDZW50ZXJDb250ZW50IC8+O1xufVxuIl0sIm5hbWVzIjpbInVzZUVmZmVjdCIsInVzZU1lbW8iLCJ1c2VTdGF0ZSIsIm1vdGlvbiIsIkFjdGl2aXR5IiwiQXJyb3dMZWZ0IiwiQmFkZ2VQZXJjZW50IiwiQ29pbnMiLCJSZWZyZXNoQ3ciLCJSb3RhdGVDY3ciLCJTaGllbGRDaGVjayIsIlVzZXJDb2ciLCJVc2VycyIsIldhbGxldCIsInVzZU5hdmlnYXRlIiwiQnV0dG9uIiwiU3lzdGVtQ2hpcCIsIlN5c3RlbVBhbmVsIiwiU3lzdGVtU3RhdCIsInN5c3RlbVNlY3Rpb25WYXJpYW50cyIsInVzZUxhbmd1YWdlIiwidXNlVGhlbWUiLCJjbiIsImFwaVNlcnZpY2UiLCJBZG1pbkNvbnRyb2xDZW50ZXJDb250ZW50IiwiZW1iZWRkZWQiLCJuYXZpZ2F0ZSIsImxhbmd1YWdlIiwidGhlbWUiLCJpc0FyYWJpYyIsInVzZXJzIiwic2V0VXNlcnMiLCJzdGF0cyIsInNldFN0YXRzIiwiZXJyb3IiLCJzZXRFcnJvciIsImNyZWRpdFRhcmdldCIsInNldENyZWRpdFRhcmdldCIsImNyZWRpdERlbHRhIiwic2V0Q3JlZGl0RGVsdGEiLCJjcmVkaXRNZXNzYWdlIiwic2V0Q3JlZGl0TWVzc2FnZSIsImNyZWRpdEJ1c3kiLCJzZXRDcmVkaXRCdXN5IiwiYmlsbGluZyIsInNldEJpbGxpbmciLCJiaWxsaW5nUHJpY2UiLCJzZXRCaWxsaW5nUHJpY2UiLCJiaWxsaW5nRnJlZURhaWx5VG9rZW5zIiwic2V0QmlsbGluZ0ZyZWVEYWlseVRva2VucyIsImJpbGxpbmdNZXNzYWdlIiwic2V0QmlsbGluZ01lc3NhZ2UiLCJiaWxsaW5nQnVzeSIsInNldEJpbGxpbmdCdXN5Iiwicm9sZVRhcmdldCIsInNldFJvbGVUYXJnZXQiLCJyb2xlVmFsdWUiLCJzZXRSb2xlVmFsdWUiLCJyb2xlTWVzc2FnZSIsInNldFJvbGVNZXNzYWdlIiwicm9sZUJ1c3kiLCJzZXRSb2xlQnVzeSIsInVzYWdlVGFyZ2V0Iiwic2V0VXNhZ2VUYXJnZXQiLCJ1c2FnZU1lc3NhZ2UiLCJzZXRVc2FnZU1lc3NhZ2UiLCJ1c2FnZUJ1c3kiLCJzZXRVc2FnZUJ1c3kiLCJwcm9tb0NvZGUiLCJzZXRQcm9tb0NvZGUiLCJwcm9tb0JvbnVzIiwic2V0UHJvbW9Cb251cyIsInByb21vTWF4VXNlcyIsInNldFByb21vTWF4VXNlcyIsInByb21vRXhwaXJlcyIsInNldFByb21vRXhwaXJlcyIsInByb21vTWVzc2FnZSIsInNldFByb21vTWVzc2FnZSIsInByb21vQnVzeSIsInNldFByb21vQnVzeSIsInJlc2V0QWxsRGF0ZSIsInNldFJlc2V0QWxsRGF0ZSIsInJlc2V0QWxsTWVzc2FnZSIsInNldFJlc2V0QWxsTWVzc2FnZSIsInJlc2V0QWxsQnVzeSIsInNldFJlc2V0QWxsQnVzeSIsInQiLCJlbiIsImFyIiwibG9hZEFkbWluRGF0YSIsInVzZXJzUmVzcG9uc2UiLCJzdGF0c1Jlc3BvbnNlIiwiYmlsbGluZ1Jlc3BvbnNlIiwiUHJvbWlzZSIsImFsbCIsImxpc3RVc2VycyIsImdldFN0YXRzIiwiZ2V0QmlsbGluZ1NldHRpbmdzIiwiQXJyYXkiLCJpc0FycmF5IiwiTnVtYmVyIiwidG9rZW5fcHJpY2VfcGVyXzFrX2NyZWRpdHMiLCJ0b0ZpeGVkIiwiU3RyaW5nIiwiZnJlZV9kYWlseV90b2tlbnMiLCJlIiwibWVzc2FnZSIsInRvdGFsQ3JlZGl0cyIsInJlZHVjZSIsInN1bSIsInVzZXIiLCJjcmVkaXRzIiwidXNlckNvdW50IiwibGVuZ3RoIiwiYXZlcmFnZUNyZWRpdHMiLCJoaWdoZXN0Q3JlZGl0VXNlciIsInRvcCIsImN1cnJlbnQiLCJmZWVkYmFja0l0ZW1zIiwia2luZCIsImZpbHRlciIsIkJvb2xlYW4iLCJoYW5kbGVHcmFudENyZWRpdHMiLCJ0YXJnZXQiLCJ0cmltIiwiZGVsdGEiLCJpc0Zpbml0ZSIsInBheWxvYWQiLCJ0ZXN0IiwidXNlcl9pZCIsInVzZXJuYW1lIiwicmVzcG9uc2UiLCJhZGp1c3RDcmVkaXRzIiwiaGFuZGxlVXBkYXRlQmlsbGluZyIsInBhcnNlZFByaWNlIiwicGFyc2VGbG9hdCIsInBhcnNlZFRva2VucyIsInBhcnNlSW50IiwidXBkYXRlQmlsbGluZ1NldHRpbmdzIiwiaGFuZGxlVXBkYXRlUm9sZSIsInJvbGUiLCJ1cGRhdGVSb2xlIiwiaGFuZGxlUmVzZXRVc2FnZSIsInJlc2V0VXNhZ2UiLCJoYW5kbGVSZXNldEFsbFVzYWdlIiwiZGF0ZSIsImFsbF91c2VycyIsInVuZGVmaW5lZCIsImhhbmRsZUNyZWF0ZVByb21vIiwiY29kZSIsImJvbnVzIiwibWF4VXNlcyIsImJvbnVzX2F0dGVtcHRzIiwibWF4X3VzZXMiLCJleHBpcmVzX2F0IiwiY3JlYXRlUHJvbW8iLCJkaXYiLCJkaXIiLCJjbGFzc05hbWUiLCJoZWFkZXIiLCJpbml0aWFsIiwiYW5pbWF0ZSIsImN1c3RvbSIsInZhcmlhbnRzIiwidG9uZSIsImgxIiwicCIsInR5cGUiLCJvbkNsaWNrIiwidmFyaWFudCIsInNlY3Rpb24iLCJtYXAiLCJpdGVtIiwiaW5kZXgiLCJtYWluIiwidXNlZF90b2RheSIsImxhYmVsIiwidmFsdWUiLCJkZXRhaWwiLCJ0b3RhbF9zaW11bGF0aW9ucyIsInRpdGxlIiwiZGVzY3JpcHRpb24iLCJpY29uIiwic3BhbiIsImFydGljbGUiLCJpZCIsImFzaWRlIiwiaW5wdXQiLCJtaW4iLCJzdGVwIiwib25DaGFuZ2UiLCJkaXNhYmxlZCIsInBsYWNlaG9sZGVyIiwic2VsZWN0Iiwib3B0aW9uIiwiQWRtaW5EYXNoYm9hcmQiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLFNBQVNBLFNBQVMsRUFBRUMsT0FBTyxFQUFFQyxRQUFRLFFBQVEsUUFBUTtBQUNyRCxTQUFTQyxNQUFNLFFBQVEsZ0JBQWdCO0FBQ3ZDLFNBQ0VDLFFBQVEsRUFDUkMsU0FBUyxFQUNUQyxZQUFZLEVBQ1pDLEtBQUssRUFDTEMsU0FBUyxFQUNUQyxTQUFTLEVBQ1RDLFdBQVcsRUFDWEMsT0FBTyxFQUNQQyxLQUFLLEVBQ0xDLE1BQU0sUUFDRCxlQUFlO0FBQ3RCLFNBQVNDLFdBQVcsUUFBUSxtQkFBbUI7QUFFL0MsU0FBU0MsTUFB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

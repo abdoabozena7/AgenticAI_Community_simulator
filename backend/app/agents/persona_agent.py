@@ -448,20 +448,33 @@ class PersonaAgent(BaseAgent):
             "reusable": True,
         }
 
-        await self.runtime.repository.persist_personas(
-            state.simulation_id,
-            [persona.to_agent_row() for persona in state.personas],
+        has_simulation_row = (
+            await self.runtime.repository.simulation_exists(state.simulation_id)
+            if str(state.simulation_id or "").strip()
+            else False
         )
+
+        if has_simulation_row:
+            await self.runtime.repository.persist_personas(
+                state.simulation_id,
+                [persona.to_agent_row() for persona in state.personas],
+            )
+
         state.refresh_persona_source_resolution()
         state.persona_persistence_completed = True
         blockers = state.validate_pipeline_ready_for_simulation()
+        persistence_detail = (
+            f"Saved {len(state.personas)} personas and shared persona set metadata."
+            if has_simulation_row
+            else f"Saved shared persona set metadata for {len(state.personas)} personas. Simulation agent rows will be created when the simulation starts."
+        )
         state.set_pipeline_step(
             "saving_personas",
             "completed",
             detail=(
-                f"Saved {len(state.personas)} personas and shared persona set metadata."
+                persistence_detail
                 if not blockers
-                else f"Saved {len(state.personas)} personas, but simulation is blocked: {', '.join(blockers)}"
+                else f"{persistence_detail} Simulation is still blocked: {', '.join(blockers)}"
             ),
         )
         await self._publish_persona_event(
@@ -469,15 +482,20 @@ class PersonaAgent(BaseAgent):
             action="persona_persistence_completed",
             status="ok",
             title="Persona asset saved",
-            snippet=f"Saved {len(state.personas)} personas. Shared set: {state.persona_set.get('place_label')}.",
+            snippet=(
+                f"Saved {len(state.personas)} personas. Shared set: {state.persona_set.get('place_label')}."
+                if has_simulation_row
+                else f"Saved shared persona set: {state.persona_set.get('place_label')}. Simulation agent rows are deferred until simulation start."
+            ),
             progress_pct=100,
             meta={
                 "final_persona_count": len(state.personas),
                 "persistence_status": "completed",
                 "persona_set": state.persona_set,
+                "simulation_agent_rows_persisted": has_simulation_row,
             },
         )
-        if memory_provider is not None:
+        if has_simulation_row and memory_provider is not None:
             await memory_provider.ingest_personas(state)
         return state
 

@@ -1,0 +1,1398 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/ChatPanel.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=85597f46"; const useCallback = __vite__cjsImport3_react["useCallback"]; const useEffect = __vite__cjsImport3_react["useEffect"]; const useMemo = __vite__cjsImport3_react["useMemo"]; const useRef = __vite__cjsImport3_react["useRef"]; const useState = __vite__cjsImport3_react["useState"];
+import { Bot, Check, ChevronDown, Loader2, Play, RefreshCcw, Search, Send, Sparkles, TriangleAlert, Wand2, X } from "/node_modules/.vite/deps/lucide-react.js?v=85597f46";
+import { Button } from "/src/components/ui/button.tsx";
+import { Input } from "/src/components/ui/input.tsx";
+import { ReasoningBoard } from "/src/components/chat/ReasoningBoard.tsx";
+import { SearchLivePanel } from "/src/components/chat/SearchLivePanel.tsx";
+import { cn } from "/src/lib/utils.ts";
+const stageLabels = {
+    extracting_schema: {
+        ar: 'نحلل الفكرة ونرتب عناصرها',
+        en: 'Structuring the idea'
+    },
+    detecting_mode: {
+        ar: 'نحدد أفضل مسار للعمل',
+        en: 'Detecting the best flow'
+    },
+    assistant_reply: {
+        ar: 'نحضّر الرد التالي',
+        en: 'Preparing the next reply'
+    },
+    prestart_research: {
+        ar: 'نجمع مصادر من الإنترنت',
+        en: 'Collecting internet sources'
+    },
+    starting_simulation: {
+        ar: 'نبدأ المحاكاة الآن',
+        en: 'Starting the simulation'
+    },
+    checking_session: {
+        ar: 'نتأكد من الجلسة الحالية',
+        en: 'Checking the current session'
+    }
+};
+const yesNoChoice = (items)=>items.length === 2 && items.some((item)=>item.value.toLowerCase() === 'yes') && items.some((item)=>item.value.toLowerCase() === 'no');
+function PromptCard({ title, description, options, selected, onSelect, text, onText, busy, submitLabel, onSubmit, tone = 'info' }) {
+    return /*#__PURE__*/ _jsxDEV("section", {
+        className: cn('rounded-[30px] border p-5', tone === 'warning' ? 'border-amber-400/30 bg-amber-500/10' : 'border-cyan-400/30 bg-cyan-500/10'),
+        children: [
+            /*#__PURE__*/ _jsxDEV("h3", {
+                className: "text-base font-semibold text-foreground",
+                children: title
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                lineNumber: 148,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("p", {
+                className: "mt-2 whitespace-pre-wrap text-sm leading-7 text-foreground/90",
+                children: description
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                lineNumber: 149,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "mt-4 space-y-2",
+                children: options.map((option)=>/*#__PURE__*/ _jsxDEV("button", {
+                        type: "button",
+                        onClick: ()=>onSelect(option.id),
+                        className: cn('w-full rounded-2xl border px-4 py-3 text-start transition', selected === option.id ? 'border-primary/40 bg-primary/10' : 'border-border/60 bg-background/55 hover:border-primary/20'),
+                        children: option.label
+                    }, option.id, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                        lineNumber: 152,
+                        columnNumber: 11
+                    }, this))
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                lineNumber: 150,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Input, {
+                value: text,
+                onChange: (event)=>onText(event.target.value),
+                className: "mt-3 h-12 rounded-2xl border-border/60 bg-background/65 text-base",
+                placeholder: "...",
+                dir: "rtl"
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                lineNumber: 157,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(Button, {
+                type: "button",
+                onClick: onSubmit,
+                disabled: busy || !selected && !text.trim(),
+                className: "mt-3 rounded-2xl",
+                children: [
+                    busy ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                        className: "h-4 w-4 animate-spin"
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                        lineNumber: 159,
+                        columnNumber: 17
+                    }, this) : /*#__PURE__*/ _jsxDEV(Check, {
+                        className: "h-4 w-4"
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                        lineNumber: 159,
+                        columnNumber: 64
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("span", {
+                        children: submitLabel
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                        lineNumber: 160,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                lineNumber: 158,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+        lineNumber: 147,
+        columnNumber: 5
+    }, this);
+}
+_c = PromptCard;
+export function ChatPanel(props) {
+    _s();
+    const { messages, reasoningFeed, highlightReasoningMessageIds = [], onSendMessage, onComposerDraftChange, onSelectOption, isWaitingForCity = false, isWaitingForCountry = false, isWaitingForLocationChoice = false, isThinking = false, showRetry = false, onRetryLlm, onSearchRetry, onSearchUseLlm, canConfirmStart = false, onConfirmStart, quickReplies = [], onQuickReply, simulationStatus = 'idle', simulationError = null, reasoningActive = false, isSummarizing = false, viewMode = 'chat', searchState, uiProgress, searchPanelModel = null, showSearchLivePanel = true, primaryControl = null, pendingClarification = null, canAnswerClarification = false, pendingInputKind = null, clarificationBusy = false, onSubmitClarification, pendingPreflightQuestion = null, preflightRound = 0, preflightMaxRounds = 0, preflightBusy = false, onSubmitPreflight, pendingIdeaConfirmation = null, onConfirmIdeaForStart, pendingResearchReview = null, researchReviewBusy = false, onSubmitResearchReviewAction, postActionsEnabled = false, recommendedPostAction, finalAcceptancePct, postActionBusy = null, postActionResult = null, onRunPostAction, onStartFollowupFromPostAction, onRequestReasoningView, settings } = props;
+    const language = settings.language;
+    const isReasoningView = viewMode === 'reasoning';
+    const listRef = useRef(null);
+    const formRef = useRef(null);
+    const inputRef = useRef(null);
+    const allowAutoFocusRef = useRef(true);
+    const lastMessageIdRef = useRef(null);
+    const [inputValue, setInputValue] = useState('');
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [clarificationChoice, setClarificationChoice] = useState(null);
+    const [clarificationText, setClarificationText] = useState('');
+    const [preflightChoice, setPreflightChoice] = useState(null);
+    const [preflightText, setPreflightText] = useState('');
+    const [reviewSelectedIds, setReviewSelectedIds] = useState([]);
+    const [reviewExtraUrls, setReviewExtraUrls] = useState('');
+    const [reviewQueryRefinement, setReviewQueryRefinement] = useState('');
+    useEffect(()=>{
+        if (!pendingClarification?.questionId) return;
+        setClarificationChoice(null);
+        setClarificationText('');
+    }, [
+        pendingClarification?.questionId
+    ]);
+    useEffect(()=>{
+        if (!pendingPreflightQuestion?.questionId) return;
+        setPreflightChoice(null);
+        setPreflightText('');
+    }, [
+        pendingPreflightQuestion?.questionId
+    ]);
+    useEffect(()=>{
+        if (!pendingResearchReview?.cycleId) return;
+        setReviewSelectedIds(pendingResearchReview.candidateUrls.slice(0, 3).map((item)=>item.id));
+        setReviewExtraUrls('');
+        setReviewQueryRefinement('');
+    }, [
+        pendingResearchReview?.candidateUrls,
+        pendingResearchReview?.cycleId
+    ]);
+    useEffect(()=>{
+        const container = listRef.current;
+        if (container) container.scrollTop = container.scrollHeight;
+    }, [
+        messages,
+        reasoningFeed,
+        isThinking,
+        pendingClarification,
+        pendingPreflightQuestion,
+        pendingResearchReview,
+        pendingIdeaConfirmation
+    ]);
+    useEffect(()=>{
+        const handlePointerDown = (event)=>{
+            const target = event.target;
+            if (formRef.current?.contains(target)) {
+                allowAutoFocusRef.current = true;
+                return;
+            }
+            allowAutoFocusRef.current = false;
+            setMenuOpen(false);
+            if (document.activeElement === inputRef.current) inputRef.current?.blur();
+        };
+        document.addEventListener('pointerdown', handlePointerDown, true);
+        return ()=>document.removeEventListener('pointerdown', handlePointerDown, true);
+    }, []);
+    useEffect(()=>{
+        if (!settings.autoFocusInput || isReasoningView) return;
+        const raf = window.requestAnimationFrame(()=>inputRef.current?.focus());
+        return ()=>window.cancelAnimationFrame(raf);
+    }, [
+        isReasoningView,
+        settings.autoFocusInput
+    ]);
+    useEffect(()=>{
+        if (!settings.autoFocusInput || isReasoningView || !allowAutoFocusRef.current) return;
+        const latest = messages.at(-1)?.id || null;
+        if (!latest || latest === lastMessageIdRef.current) return;
+        lastMessageIdRef.current = latest;
+        const raf = window.requestAnimationFrame(()=>inputRef.current?.focus());
+        return ()=>window.cancelAnimationFrame(raf);
+    }, [
+        isReasoningView,
+        messages,
+        settings.autoFocusInput
+    ]);
+    const inlineStatus = useMemo(()=>{
+        if (searchState?.status === 'searching') return {
+            tone: 'info',
+            label: language === 'ar' ? stageLabels[searchState.stage || 'prestart_research'].ar : stageLabels[searchState.stage || 'prestart_research'].en
+        };
+        if (searchState?.status === 'timeout') return {
+            tone: 'warning',
+            label: language === 'ar' ? 'انتهت مهلة البحث. يمكنك الإعادة أو استخدام البديل المحلي.' : 'Search timed out. Retry or use the local fallback.'
+        };
+        if (searchState?.status === 'error') return {
+            tone: 'error',
+            label: language === 'ar' ? 'تعذر إكمال البحث الحالي.' : 'The current search could not be completed.'
+        };
+        if (uiProgress?.active) return {
+            tone: 'info',
+            label: language === 'ar' ? stageLabels[uiProgress.stage].ar : stageLabels[uiProgress.stage].en
+        };
+        return null;
+    }, [
+        language,
+        searchState,
+        uiProgress
+    ]);
+    const primaryAction = useMemo(()=>{
+        const draft = inputValue.trim();
+        if (draft && canConfirmStart && onConfirmStart) {
+            return {
+                key: 'confirm-start',
+                label: primaryControl?.label || (language === 'ar' ? 'شغّل المسار الإلزامي' : 'Run mandatory pipeline'),
+                description: primaryControl?.description,
+                disabled: primaryControl?.disabled,
+                busy: primaryControl?.busy,
+                tone: primaryControl?.tone === 'warning' ? 'warning' : primaryControl?.tone === 'secondary' ? 'secondary' : 'primary',
+                icon: primaryControl?.busy ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                    className: "h-4 w-4 animate-spin"
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                    lineNumber: 312,
+                    columnNumber: 38
+                }, this) : primaryControl?.icon === 'retry' ? /*#__PURE__*/ _jsxDEV(RefreshCcw, {
+                    className: "h-4 w-4"
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                    lineNumber: 312,
+                    columnNumber: 120
+                }, this) : primaryControl?.icon === 'sparkles' ? /*#__PURE__*/ _jsxDEV(Sparkles, {
+                    className: "h-4 w-4"
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                    lineNumber: 312,
+                    columnNumber: 195
+                }, this) : /*#__PURE__*/ _jsxDEV(Play, {
+                    className: "h-4 w-4"
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                    lineNumber: 312,
+                    columnNumber: 230
+                }, this),
+                onClick: ()=>{
+                    onConfirmStart(draft);
+                }
+            };
+        }
+        if (draft) return {
+            key: 'send',
+            label: language === 'ar' ? 'إرسال الرسالة' : 'Send message',
+            icon: /*#__PURE__*/ _jsxDEV(Send, {
+                className: "h-4 w-4"
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                lineNumber: 316,
+                columnNumber: 105
+            }, this),
+            onClick: ()=>{
+                onSendMessage(draft);
+                setInputValue('');
+                onComposerDraftChange?.('');
+                allowAutoFocusRef.current = true;
+                window.requestAnimationFrame(()=>inputRef.current?.focus());
+            }
+        };
+        if (searchState?.status === 'timeout' && onSearchRetry) return {
+            key: 'retry-search',
+            label: language === 'ar' ? 'إعادة البحث' : 'Retry search',
+            description: language === 'ar' ? 'يمكنك إعادة المحاولة أو استخدام البديل المحلي.' : 'Retry or use the local fallback.',
+            tone: 'warning',
+            icon: /*#__PURE__*/ _jsxDEV(Search, {
+                className: "h-4 w-4"
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                lineNumber: 317,
+                columnNumber: 293
+            }, this),
+            onClick: ()=>onSearchUseLlm ? setMenuOpen((open)=>!open) : onSearchRetry()
+        };
+        if (showRetry && onRetryLlm) return {
+            key: 'fallback',
+            label: language === 'ar' ? 'استخدام بديل LLM' : 'Use LLM fallback',
+            tone: 'warning',
+            icon: /*#__PURE__*/ _jsxDEV(Wand2, {
+                className: "h-4 w-4"
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                lineNumber: 318,
+                columnNumber: 151
+            }, this),
+            onClick: onRetryLlm
+        };
+        if (canConfirmStart && onConfirmStart) return {
+            key: 'start',
+            label: language === 'ar' ? 'شغّل المسار الإلزامي' : 'Run mandatory pipeline',
+            icon: /*#__PURE__*/ _jsxDEV(Play, {
+                className: "h-4 w-4"
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                lineNumber: 319,
+                columnNumber: 151
+            }, this),
+            onClick: onConfirmStart
+        };
+        if (primaryControl?.onClick) return {
+            key: primaryControl.key,
+            label: primaryControl.label,
+            description: primaryControl.description,
+            disabled: primaryControl.disabled,
+            busy: primaryControl.busy,
+            tone: primaryControl.tone === 'warning' ? 'warning' : primaryControl.tone === 'secondary' ? 'secondary' : 'primary',
+            icon: primaryControl.busy ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                className: "h-4 w-4 animate-spin"
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                lineNumber: 327,
+                columnNumber: 35
+            }, this) : primaryControl.icon === 'retry' ? /*#__PURE__*/ _jsxDEV(RefreshCcw, {
+                className: "h-4 w-4"
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                lineNumber: 327,
+                columnNumber: 116
+            }, this) : primaryControl.icon === 'sparkles' ? /*#__PURE__*/ _jsxDEV(Sparkles, {
+                className: "h-4 w-4"
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                lineNumber: 327,
+                columnNumber: 190
+            }, this) : /*#__PURE__*/ _jsxDEV(Play, {
+                className: "h-4 w-4"
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                lineNumber: 327,
+                columnNumber: 225
+            }, this),
+            onClick: primaryControl.onClick
+        };
+        return null;
+    }, [
+        canConfirmStart,
+        inputValue,
+        language,
+        onComposerDraftChange,
+        onConfirmStart,
+        onRetryLlm,
+        onSearchRetry,
+        onSearchUseLlm,
+        onSendMessage,
+        primaryControl,
+        searchState?.status,
+        showRetry
+    ]);
+    const secondaryActions = useMemo(()=>{
+        if (searchState?.status === 'timeout' && onSearchRetry) {
+            const actions = [
+                {
+                    key: 'retry-direct',
+                    label: language === 'ar' ? 'إعادة البحث' : 'Retry search',
+                    icon: /*#__PURE__*/ _jsxDEV(RefreshCcw, {
+                        className: "h-4 w-4"
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                        lineNumber: 335,
+                        columnNumber: 130
+                    }, this),
+                    onClick: ()=>{
+                        onSearchRetry();
+                        setMenuOpen(false);
+                    }
+                }
+            ];
+            if (onSearchUseLlm) actions.push({
+                key: 'fallback-llm',
+                label: language === 'ar' ? 'استخدام البديل المحلي' : 'Use LLM fallback',
+                tone: 'warning',
+                icon: /*#__PURE__*/ _jsxDEV(Wand2, {
+                    className: "h-4 w-4"
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                    lineNumber: 336,
+                    columnNumber: 159
+                }, this),
+                onClick: ()=>{
+                    onSearchUseLlm();
+                    setMenuOpen(false);
+                }
+            });
+            return actions;
+        }
+        if (primaryControl?.secondary?.onClick) return [
+            {
+                key: `${primaryControl.key}-secondary`,
+                label: primaryControl.secondary.label,
+                disabled: primaryControl.secondary.disabled,
+                icon: /*#__PURE__*/ _jsxDEV(RefreshCcw, {
+                    className: "h-4 w-4"
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                    lineNumber: 339,
+                    columnNumber: 185
+                }, this),
+                onClick: ()=>{
+                    primaryControl.secondary?.onClick?.();
+                    setMenuOpen(false);
+                }
+            }
+        ];
+        return [];
+    }, [
+        language,
+        onSearchRetry,
+        onSearchUseLlm,
+        primaryControl,
+        searchState?.status
+    ]);
+    const submitClarification = useCallback(()=>{
+        if (!pendingClarification || !onSubmitClarification) return;
+        const text = clarificationText.trim();
+        if (!clarificationChoice && !text) return;
+        onSubmitClarification({
+            questionId: pendingClarification.questionId,
+            selectedOptionId: clarificationChoice || undefined,
+            customText: text || undefined
+        });
+    }, [
+        clarificationChoice,
+        clarificationText,
+        onSubmitClarification,
+        pendingClarification
+    ]);
+    const submitPreflight = useCallback(()=>{
+        if (!pendingPreflightQuestion || !onSubmitPreflight) return;
+        const text = preflightText.trim();
+        if (!preflightChoice && !text) return;
+        onSubmitPreflight({
+            questionId: pendingPreflightQuestion.questionId,
+            selectedOptionId: preflightChoice || undefined,
+            customText: text || undefined
+        });
+    }, [
+        onSubmitPreflight,
+        pendingPreflightQuestion,
+        preflightChoice,
+        preflightText
+    ]);
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: "flex h-full min-h-0 flex-col",
+        dir: "rtl",
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                ref: listRef,
+                className: "flex-1 space-y-5 overflow-y-auto px-5 py-5 scrollbar-thin",
+                children: [
+                    inlineStatus ? /*#__PURE__*/ _jsxDEV("div", {
+                        className: cn('rounded-[24px] border px-4 py-3 text-sm', inlineStatus.tone === 'warning' && 'border-amber-400/30 bg-amber-500/10 text-amber-100', inlineStatus.tone === 'error' && 'border-rose-400/30 bg-rose-500/10 text-rose-100', inlineStatus.tone === 'info' && 'border-sky-400/25 bg-sky-500/10 text-sky-100'),
+                        children: inlineStatus.label
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                        lineNumber: 360,
+                        columnNumber: 25
+                    }, this) : null,
+                    showSearchLivePanel && searchPanelModel && searchPanelModel.stage !== 'hidden' ? /*#__PURE__*/ _jsxDEV(SearchLivePanel, {
+                        model: searchPanelModel
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                        lineNumber: 361,
+                        columnNumber: 91
+                    }, this) : null,
+                    !isReasoningView && (reasoningActive || reasoningFeed.length > 1) ? /*#__PURE__*/ _jsxDEV("section", {
+                        className: "rounded-[30px] border border-primary/25 bg-primary/10 p-5",
+                        children: /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex items-center justify-between gap-3",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("h3", {
+                                            className: "text-base font-semibold text-foreground",
+                                            children: language === 'ar' ? 'الوكلاء بدأوا يتناقشون الآن' : 'Agents have started debating now'
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                            lineNumber: 362,
+                                            columnNumber: 219
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("p", {
+                                            className: "mt-1 text-sm text-muted-foreground",
+                                            children: language === 'ar' ? 'افتح شاشة النقاش لرؤية الحوار الجماعي بين الوكلاء.' : 'Open the reasoning view to watch the group discussion.'
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                            lineNumber: 362,
+                                            columnNumber: 368
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                    lineNumber: 362,
+                                    columnNumber: 214
+                                }, this),
+                                onRequestReasoningView ? /*#__PURE__*/ _jsxDEV(Button, {
+                                    type: "button",
+                                    onClick: onRequestReasoningView,
+                                    className: "rounded-2xl",
+                                    children: language === 'ar' ? 'مشاهدة النقاش' : 'Open reasoning'
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                    lineNumber: 362,
+                                    columnNumber: 587
+                                }, this) : null
+                            ]
+                        }, void 0, true, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                            lineNumber: 362,
+                            columnNumber: 157
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                        lineNumber: 362,
+                        columnNumber: 78
+                    }, this) : null,
+                    isReasoningView ? /*#__PURE__*/ _jsxDEV(ReasoningBoard, {
+                        language: language,
+                        messages: reasoningFeed,
+                        highlightIds: highlightReasoningMessageIds
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                        lineNumber: 363,
+                        columnNumber: 28
+                    }, this) : /*#__PURE__*/ _jsxDEV(_Fragment, {
+                        children: [
+                            messages.map((message)=>{
+                                const isUser = message.type === 'user';
+                                const authorLabel = isUser ? language === 'ar' ? 'أنت' : 'You' : message.type === 'agent' ? message.agentId || 'Agent' : language === 'ar' ? 'المساعد' : 'Assistant';
+                                return /*#__PURE__*/ _jsxDEV("div", {
+                                    className: cn('flex w-full', isUser ? 'justify-start md:justify-end' : 'justify-start'),
+                                    children: /*#__PURE__*/ _jsxDEV("div", {
+                                        className: cn('w-full max-w-[98%] rounded-[28px] border px-5 py-4 md:max-w-[92%]', isUser ? 'border-primary/25 bg-primary/12' : message.type === 'agent' ? 'border-emerald-400/25 bg-emerald-500/10' : 'border-border/60 bg-background/65'),
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "mb-2 flex items-center gap-2 text-xs text-muted-foreground",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: cn('flex h-8 w-8 items-center justify-center rounded-2xl border', isUser ? 'border-primary/30 bg-primary/10 text-primary' : 'border-border/55 bg-card/80 text-foreground'),
+                                                        children: isUser ? /*#__PURE__*/ _jsxDEV("span", {
+                                                            className: "text-sm font-semibold",
+                                                            children: language === 'ar' ? 'أنت' : 'Me'
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                            lineNumber: 367,
+                                                            columnNumber: 647
+                                                        }, this) : /*#__PURE__*/ _jsxDEV(Bot, {
+                                                            className: "h-4 w-4"
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                            lineNumber: 367,
+                                                            columnNumber: 731
+                                                        }, this)
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 367,
+                                                        columnNumber: 449
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                        className: "font-medium text-foreground/90",
+                                                        children: authorLabel
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 367,
+                                                        columnNumber: 765
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 367,
+                                                columnNumber: 373
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                className: "whitespace-pre-wrap text-[15px] leading-8 text-foreground",
+                                                children: message.content
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 367,
+                                                columnNumber: 840
+                                            }, this),
+                                            message.options?.items?.length ? /*#__PURE__*/ _jsxDEV("div", {
+                                                className: cn('mt-4 gap-3', yesNoChoice(message.options.items) ? 'grid grid-cols-2' : 'grid grid-cols-1'),
+                                                children: message.options.items.map((item)=>/*#__PURE__*/ _jsxDEV("button", {
+                                                        type: "button",
+                                                        onClick: ()=>onSelectOption?.(message.options.field, item.value),
+                                                        className: "rounded-[22px] border border-border/60 bg-card/75 px-4 py-3.5 text-start transition hover:border-primary/35 hover:bg-primary/8",
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                                className: "text-sm font-semibold leading-7 text-foreground",
+                                                                children: yesNoChoice(message.options.items) ? item.value.toLowerCase() === 'yes' ? language === 'ar' ? 'نعم' : 'Yes' : language === 'ar' ? 'لا' : 'No' : item.label
+                                                            }, void 0, false, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                                lineNumber: 367,
+                                                                columnNumber: 1383
+                                                            }, this),
+                                                            item.description ? /*#__PURE__*/ _jsxDEV("div", {
+                                                                className: "mt-1 text-xs leading-6 text-muted-foreground",
+                                                                children: item.description
+                                                            }, void 0, false, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                                lineNumber: 367,
+                                                                columnNumber: 1634
+                                                            }, this) : null
+                                                        ]
+                                                    }, `${message.id}-${item.value}`, true, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 367,
+                                                        columnNumber: 1117
+                                                    }, this))
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 367,
+                                                columnNumber: 968
+                                            }, this) : null
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 367,
+                                        columnNumber: 131
+                                    }, this)
+                                }, message.id, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                    lineNumber: 367,
+                                    columnNumber: 20
+                                }, this);
+                            }),
+                            isThinking ? /*#__PURE__*/ _jsxDEV("div", {
+                                className: "inline-flex items-center gap-2 rounded-full border border-border/55 bg-card/80 px-4 py-2.5 text-sm text-muted-foreground",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Loader2, {
+                                        className: "h-4 w-4 animate-spin"
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 369,
+                                        columnNumber: 163
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        children: language === 'ar' ? 'المساعد يكتب الآن...' : 'Assistant is responding...'
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 369,
+                                        columnNumber: 207
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                lineNumber: 369,
+                                columnNumber: 25
+                            }, this) : null,
+                            simulationError ? /*#__PURE__*/ _jsxDEV("div", {
+                                className: "rounded-[26px] border border-destructive/30 bg-destructive/10 px-5 py-4 text-sm text-foreground",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "mb-1 flex items-center gap-2 font-semibold text-destructive",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(TriangleAlert, {
+                                                className: "h-4 w-4"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 370,
+                                                columnNumber: 220
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                children: language === 'ar' ? 'حدث خطأ أثناء التنفيذ' : 'Execution error'
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 370,
+                                                columnNumber: 257
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 370,
+                                        columnNumber: 143
+                                    }, this),
+                                    simulationError
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                lineNumber: 370,
+                                columnNumber: 30
+                            }, this) : null,
+                            pendingIdeaConfirmation ? /*#__PURE__*/ _jsxDEV("section", {
+                                className: "rounded-[30px] border border-emerald-400/30 bg-emerald-500/10 p-5",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("h3", {
+                                        className: "text-base font-semibold text-foreground",
+                                        children: language === 'ar' ? 'هل هذا هو الوصف النهائي للفكرة؟' : 'Is this the final idea framing?'
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 371,
+                                        columnNumber: 125
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "mt-2 whitespace-pre-wrap text-sm leading-7 text-foreground/90",
+                                        children: pendingIdeaConfirmation.description
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 371,
+                                        columnNumber: 277
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "mt-4 grid grid-cols-2 gap-2",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                type: "button",
+                                                onClick: onConfirmIdeaForStart,
+                                                className: "rounded-2xl",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(Check, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 371,
+                                                        columnNumber: 518
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                        children: language === 'ar' ? 'نعم، ابدأ' : 'Yes, start'
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 371,
+                                                        columnNumber: 547
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 371,
+                                                columnNumber: 440
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                type: "button",
+                                                variant: "outline",
+                                                onClick: ()=>inputRef.current?.focus(),
+                                                className: "rounded-2xl",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(X, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 371,
+                                                        columnNumber: 723
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                        children: language === 'ar' ? 'لا، سأعدل' : 'No, I will edit'
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 371,
+                                                        columnNumber: 748
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 371,
+                                                columnNumber: 617
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 371,
+                                        columnNumber: 395
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                lineNumber: 371,
+                                columnNumber: 38
+                            }, this) : null,
+                            pendingInputKind === 'clarification' && canAnswerClarification && pendingClarification ? /*#__PURE__*/ _jsxDEV(PromptCard, {
+                                title: language === 'ar' ? 'نحتاج توضيحًا قبل المتابعة' : 'Clarification is needed before continuing',
+                                description: pendingClarification.question,
+                                options: pendingClarification.options,
+                                selected: clarificationChoice,
+                                onSelect: setClarificationChoice,
+                                text: clarificationText,
+                                onText: setClarificationText,
+                                busy: clarificationBusy,
+                                submitLabel: language === 'ar' ? 'إرسال التوضيح' : 'Send clarification',
+                                onSubmit: submitClarification
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                lineNumber: 372,
+                                columnNumber: 101
+                            }, this) : null,
+                            pendingPreflightQuestion ? /*#__PURE__*/ _jsxDEV(PromptCard, {
+                                title: language === 'ar' ? `سؤال تمهيدي ${preflightRound}/${preflightMaxRounds}` : `Preflight question ${preflightRound}/${preflightMaxRounds}`,
+                                description: pendingPreflightQuestion.question,
+                                options: pendingPreflightQuestion.options,
+                                selected: preflightChoice,
+                                onSelect: setPreflightChoice,
+                                text: preflightText,
+                                onText: setPreflightText,
+                                busy: preflightBusy,
+                                submitLabel: language === 'ar' ? 'تأكيد الإجابة' : 'Confirm answer',
+                                onSubmit: submitPreflight,
+                                tone: "warning"
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                lineNumber: 373,
+                                columnNumber: 39
+                            }, this) : null,
+                            pendingResearchReview ? /*#__PURE__*/ _jsxDEV("section", {
+                                className: "rounded-[30px] border border-primary/30 bg-primary/8 p-5",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("h3", {
+                                        className: "text-base font-semibold text-foreground",
+                                        children: language === 'ar' ? 'راجع نتائج البحث قبل المتابعة' : 'Review research before continuing'
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 374,
+                                        columnNumber: 114
+                                    }, this),
+                                    pendingResearchReview.gapSummary ? /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "mt-2 text-sm leading-7 text-muted-foreground",
+                                        children: pendingResearchReview.gapSummary
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 374,
+                                        columnNumber: 302
+                                    }, this) : null,
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "mt-4 space-y-2",
+                                        children: pendingResearchReview.candidateUrls.map((item)=>{
+                                            const selected = reviewSelectedIds.includes(item.id);
+                                            return /*#__PURE__*/ _jsxDEV("button", {
+                                                type: "button",
+                                                onClick: ()=>setReviewSelectedIds((prev)=>prev.includes(item.id) ? prev.filter((entry)=>entry !== item.id) : [
+                                                            ...prev,
+                                                            item.id
+                                                        ]),
+                                                className: cn('w-full rounded-2xl border px-4 py-3 text-start transition', selected ? 'border-primary/40 bg-primary/10' : 'border-border/60 bg-background/55'),
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "text-sm font-semibold text-foreground",
+                                                        children: item.title || item.domain || item.url
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 374,
+                                                        columnNumber: 886
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "mt-1 text-xs text-muted-foreground",
+                                                        dir: "ltr",
+                                                        children: item.url
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 374,
+                                                        columnNumber: 986
+                                                    }, this)
+                                                ]
+                                            }, item.id, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 374,
+                                                columnNumber: 554
+                                            }, this);
+                                        })
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 374,
+                                        columnNumber: 408
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(Input, {
+                                        value: reviewQueryRefinement,
+                                        onChange: (event)=>setReviewQueryRefinement(event.target.value),
+                                        className: "mt-3 h-12 rounded-2xl border-border/60 bg-background/65 text-base",
+                                        placeholder: language === 'ar' ? 'تحسين إضافي للاستعلام' : 'Optional query refinement',
+                                        dir: "rtl"
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 374,
+                                        columnNumber: 1084
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(Input, {
+                                        value: reviewExtraUrls,
+                                        onChange: (event)=>setReviewExtraUrls(event.target.value),
+                                        className: "mt-3 h-12 rounded-2xl border-border/60 bg-background/65 text-base",
+                                        placeholder: language === 'ar' ? 'ألصق روابط إضافية مفصولة بفاصلة' : 'Extra URLs separated by comma',
+                                        dir: "ltr"
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 374,
+                                        columnNumber: 1366
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "mt-4 grid gap-2 sm:grid-cols-3",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                type: "button",
+                                                disabled: researchReviewBusy || !reviewSelectedIds.length,
+                                                onClick: ()=>onSubmitResearchReviewAction?.({
+                                                        cycleId: pendingResearchReview.cycleId,
+                                                        action: 'scrape_selected',
+                                                        selectedUrlIds: reviewSelectedIds,
+                                                        addedUrls: reviewExtraUrls.split(',').map((item)=>item.trim()).filter(Boolean),
+                                                        queryRefinement: reviewQueryRefinement.trim() || undefined
+                                                    }),
+                                                className: "rounded-2xl",
+                                                children: [
+                                                    researchReviewBusy ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                                                        className: "h-4 w-4 animate-spin"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 374,
+                                                        columnNumber: 2120
+                                                    }, this) : /*#__PURE__*/ _jsxDEV(Check, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 374,
+                                                        columnNumber: 2167
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                        children: language === 'ar' ? 'استخراج المحدد' : 'Scrape selected'
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 374,
+                                                        columnNumber: 2197
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 374,
+                                                columnNumber: 1698
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                type: "button",
+                                                variant: "outline",
+                                                disabled: researchReviewBusy,
+                                                onClick: ()=>onSubmitResearchReviewAction?.({
+                                                        cycleId: pendingResearchReview.cycleId,
+                                                        action: 'continue_search',
+                                                        addedUrls: reviewExtraUrls.split(',').map((item)=>item.trim()).filter(Boolean),
+                                                        queryRefinement: reviewQueryRefinement.trim() || undefined
+                                                    }),
+                                                className: "rounded-2xl",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(RefreshCcw, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 374,
+                                                        columnNumber: 2631
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                        children: language === 'ar' ? 'وسّع البحث' : 'Continue search'
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 374,
+                                                        columnNumber: 2665
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 374,
+                                                columnNumber: 2277
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                type: "button",
+                                                variant: "ghost",
+                                                disabled: researchReviewBusy,
+                                                onClick: ()=>onSubmitResearchReviewAction?.({
+                                                        cycleId: pendingResearchReview.cycleId,
+                                                        action: 'cancel_review'
+                                                    }),
+                                                className: "rounded-2xl",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(X, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 374,
+                                                        columnNumber: 2949
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                        children: language === 'ar' ? 'إلغاء' : 'Cancel'
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 374,
+                                                        columnNumber: 2974
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 374,
+                                                columnNumber: 2741
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 374,
+                                        columnNumber: 1650
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                lineNumber: 374,
+                                columnNumber: 36
+                            }, this) : null,
+                            postActionsEnabled && onRunPostAction ? /*#__PURE__*/ _jsxDEV("section", {
+                                className: "rounded-[30px] border border-border/60 bg-card/75 p-5",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex flex-wrap items-center justify-between gap-3",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("h3", {
+                                                        className: "text-base font-semibold text-foreground",
+                                                        children: language === 'ar' ? 'الخطوة التالية بعد التقييم' : 'Next step after evaluation'
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 375,
+                                                        columnNumber: 199
+                                                    }, this),
+                                                    typeof finalAcceptancePct === 'number' ? /*#__PURE__*/ _jsxDEV("p", {
+                                                        className: "mt-1 text-sm text-muted-foreground",
+                                                        children: language === 'ar' ? `نسبة القبول الحالية ${Math.round(finalAcceptancePct)}%` : `Current acceptance ${Math.round(finalAcceptancePct)}%`
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 375,
+                                                        columnNumber: 383
+                                                    }, this) : null
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 375,
+                                                columnNumber: 194
+                                            }, this),
+                                            recommendedPostAction ? /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary",
+                                                children: language === 'ar' ? `مقترح: ${recommendedPostAction === 'make_acceptable' ? 'اجعلها مقبولة' : 'أنزلها للعالم'}` : `Suggested: ${recommendedPostAction}`
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 375,
+                                                columnNumber: 612
+                                            }, this) : null
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 375,
+                                        columnNumber: 127
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "mt-4 grid gap-3 sm:grid-cols-2",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                type: "button",
+                                                variant: recommendedPostAction === 'make_acceptable' ? 'default' : 'outline',
+                                                disabled: postActionBusy !== null,
+                                                onClick: ()=>onRunPostAction('make_acceptable'),
+                                                className: "rounded-2xl",
+                                                children: [
+                                                    postActionBusy === 'make_acceptable' ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                                                        className: "h-4 w-4 animate-spin"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 375,
+                                                        columnNumber: 1195
+                                                    }, this) : /*#__PURE__*/ _jsxDEV(Sparkles, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 375,
+                                                        columnNumber: 1242
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                        children: language === 'ar' ? 'اجعلها مقبولة' : 'Make acceptable'
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 375,
+                                                        columnNumber: 1275
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 375,
+                                                columnNumber: 945
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                type: "button",
+                                                variant: recommendedPostAction === 'bring_to_world' ? 'default' : 'outline',
+                                                disabled: postActionBusy !== null,
+                                                onClick: ()=>onRunPostAction('bring_to_world'),
+                                                className: "rounded-2xl",
+                                                children: [
+                                                    postActionBusy === 'bring_to_world' ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                                                        className: "h-4 w-4 animate-spin"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 375,
+                                                        columnNumber: 1601
+                                                    }, this) : /*#__PURE__*/ _jsxDEV(Play, {
+                                                        className: "h-4 w-4"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 375,
+                                                        columnNumber: 1648
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                        children: language === 'ar' ? 'أنزلها للعالم' : 'Bring to world'
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 375,
+                                                        columnNumber: 1677
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 375,
+                                                columnNumber: 1354
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 375,
+                                        columnNumber: 897
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                lineNumber: 375,
+                                columnNumber: 52
+                            }, this) : null,
+                            postActionResult ? /*#__PURE__*/ _jsxDEV("section", {
+                                className: "rounded-[30px] border border-emerald-400/25 bg-emerald-500/8 p-5",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("h3", {
+                                        className: "text-base font-semibold text-foreground",
+                                        children: postActionResult.title
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 376,
+                                        columnNumber: 117
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "mt-2 text-sm leading-7 text-foreground/90",
+                                        children: postActionResult.summary
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 376,
+                                        columnNumber: 202
+                                    }, this),
+                                    onStartFollowupFromPostAction ? /*#__PURE__*/ _jsxDEV(Button, {
+                                        type: "button",
+                                        onClick: onStartFollowupFromPostAction,
+                                        className: "mt-4 rounded-2xl",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Play, {
+                                                className: "h-4 w-4"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 376,
+                                                columnNumber: 413
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                children: language === 'ar' ? 'ابدأ جولة متابعة' : 'Start follow-up run'
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 376,
+                                                columnNumber: 441
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 376,
+                                        columnNumber: 322
+                                    }, this) : null
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                lineNumber: 376,
+                                columnNumber: 31
+                            }, this) : null,
+                            quickReplies.length && !pendingClarification && !pendingPreflightQuestion && !pendingResearchReview ? /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex flex-wrap gap-2",
+                                children: quickReplies.map((reply)=>/*#__PURE__*/ _jsxDEV("button", {
+                                        type: "button",
+                                        onClick: ()=>onQuickReply?.(reply.value),
+                                        className: "rounded-full border border-border/55 bg-card/80 px-4 py-2 text-sm text-foreground transition hover:border-primary/30 hover:bg-primary/8",
+                                        children: reply.label
+                                    }, reply.value, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 377,
+                                        columnNumber: 181
+                                    }, this))
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                lineNumber: 377,
+                                columnNumber: 114
+                            }, this) : null
+                        ]
+                    }, void 0, true)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                lineNumber: 359,
+                columnNumber: 7
+            }, this),
+            !isReasoningView ? /*#__PURE__*/ _jsxDEV("div", {
+                className: "border-t border-border/45 px-5 pb-5 pt-4",
+                children: /*#__PURE__*/ _jsxDEV("form", {
+                    ref: formRef,
+                    onSubmit: (event)=>{
+                        event.preventDefault();
+                        primaryAction?.onClick();
+                    },
+                    className: "relative",
+                    children: /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-end gap-3",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Input, {
+                                ref: inputRef,
+                                value: inputValue,
+                                onChange: (event)=>{
+                                    const nextValue = event.target.value;
+                                    setInputValue(nextValue);
+                                    onComposerDraftChange?.(nextValue);
+                                },
+                                placeholder: language === 'ar' ? 'اكتب رسالتك أو عدّل الفكرة...' : 'Type your message or refine the idea...',
+                                className: "h-14 flex-1 rounded-[24px] border-border/60 bg-card/80 px-5 text-base",
+                                dir: "rtl"
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                lineNumber: 380,
+                                columnNumber: 240
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "relative shrink-0",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Button, {
+                                        type: "submit",
+                                        disabled: !primaryAction || primaryAction.disabled || primaryAction.busy || isThinking || simulationStatus === 'configuring',
+                                        className: cn('h-14 min-w-[180px] rounded-[24px] px-5 transition-all duration-200', primaryAction?.tone === 'warning' && 'bg-amber-500 text-slate-950 hover:bg-amber-400', primaryAction?.tone === 'secondary' && 'bg-secondary text-foreground hover:bg-secondary/85', menuOpen && 'translate-y-[-1px] shadow-[0_12px_32px_-16px_rgba(0,0,0,0.45)]'),
+                                        children: [
+                                            primaryAction?.busy ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                                                className: "h-4 w-4 animate-spin"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 380,
+                                                columnNumber: 1160
+                                            }, this) : primaryAction?.icon,
+                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                children: primaryAction?.label || (language === 'ar' ? 'اكتب رسالة' : 'Write message')
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 380,
+                                                columnNumber: 1227
+                                            }, this),
+                                            secondaryActions.length ? /*#__PURE__*/ _jsxDEV(ChevronDown, {
+                                                className: cn('h-4 w-4 transition-transform', menuOpen && 'rotate-180')
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 380,
+                                                columnNumber: 1345
+                                            }, this) : null
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 380,
+                                        columnNumber: 646
+                                    }, this),
+                                    secondaryActions.length ? /*#__PURE__*/ _jsxDEV("div", {
+                                        className: cn('absolute bottom-[calc(100%+10px)] start-0 w-72 origin-bottom rounded-[24px] border border-border/60 bg-card/95 p-2 shadow-2xl backdrop-blur-xl transition-all duration-200', menuOpen ? 'pointer-events-auto translate-y-0 scale-100 opacity-100' : 'pointer-events-none translate-y-2 scale-95 opacity-0'),
+                                        children: secondaryActions.map((action)=>/*#__PURE__*/ _jsxDEV("button", {
+                                                type: "button",
+                                                disabled: action.disabled,
+                                                onClick: action.onClick,
+                                                className: "flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-start text-sm text-foreground transition hover:bg-primary/8 disabled:opacity-50",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                        className: cn('flex h-9 w-9 items-center justify-center rounded-2xl border', action.tone === 'warning' ? 'border-amber-400/30 bg-amber-500/15 text-amber-300' : 'border-border/60 bg-background/65 text-foreground'),
+                                                        children: action.icon
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 380,
+                                                        columnNumber: 2073
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                        children: action.label
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                        lineNumber: 380,
+                                                        columnNumber: 2313
+                                                    }, this)
+                                                ]
+                                            }, action.key, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                                lineNumber: 380,
+                                                columnNumber: 1832
+                                            }, this))
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                        lineNumber: 380,
+                                        columnNumber: 1477
+                                    }, this) : null
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                                lineNumber: 380,
+                                columnNumber: 611
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                        lineNumber: 380,
+                        columnNumber: 202
+                    }, this)
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                    lineNumber: 380,
+                    columnNumber: 85
+                }, this)
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+                lineNumber: 380,
+                columnNumber: 27
+            }, this) : null
+        ]
+    }, void 0, true, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx",
+        lineNumber: 358,
+        columnNumber: 5
+    }, this);
+}
+_s(ChatPanel, "iFGwr0vdRuPjR2YHM4dj8zXdvwk=");
+_c1 = ChatPanel;
+var _c, _c1;
+$RefreshReg$(_c, "PromptCard");
+$RefreshReg$(_c1, "ChatPanel");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ChatPanel.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkNoYXRQYW5lbC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgdXNlQ2FsbGJhY2ssIHVzZUVmZmVjdCwgdXNlTWVtbywgdXNlUmVmLCB1c2VTdGF0ZSwgdHlwZSBSZWFjdE5vZGUgfSBmcm9tICdyZWFjdCc7XHJcbmltcG9ydCB7IEJvdCwgQ2hlY2ssIENoZXZyb25Eb3duLCBMb2FkZXIyLCBQbGF5LCBSZWZyZXNoQ2N3LCBTZWFyY2gsIFNlbmQsIFNwYXJrbGVzLCBUcmlhbmdsZUFsZXJ0LCBXYW5kMiwgWCB9IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XHJcbmltcG9ydCB7IEJ1dHRvbiB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9idXR0b24nO1xuaW1wb3J0IHsgSW5wdXQgfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvaW5wdXQnO1xuaW1wb3J0IHsgUmVhc29uaW5nQm9hcmQgfSBmcm9tICdAL2NvbXBvbmVudHMvY2hhdC9SZWFzb25pbmdCb2FyZCc7XG5pbXBvcnQgeyBTZWFyY2hMaXZlUGFuZWwgfSBmcm9tICdAL2NvbXBvbmVudHMvY2hhdC9TZWFyY2hMaXZlUGFuZWwnO1xuaW1wb3J0IHR5cGUgeyBTZWFyY2hQYW5lbE1vZGVsIH0gZnJvbSAnQC9saWIvc2VhcmNoUGFuZWxNb2RlbCc7XG5pbXBvcnQge1xyXG4gIENoYXRNZXNzYWdlLFxyXG4gIFBlbmRpbmdDbGFyaWZpY2F0aW9uLFxyXG4gIFBlbmRpbmdJZGVhQ29uZmlybWF0aW9uLFxyXG4gIFBlbmRpbmdSZXNlYXJjaFJldmlldyxcclxuICBQcmVmbGlnaHRRdWVzdGlvbixcclxuICBSZWFzb25pbmdNZXNzYWdlLFxyXG4gIFNpbXVsYXRpb25TdGF0dXMsXHJcbn0gZnJvbSAnQC90eXBlcy9zaW11bGF0aW9uJztcclxuaW1wb3J0IHsgY24gfSBmcm9tICdAL2xpYi91dGlscyc7XHJcblxyXG50eXBlIEJ1c3lTdGFnZSA9XHJcbiAgfCAnZXh0cmFjdGluZ19zY2hlbWEnXHJcbiAgfCAnZGV0ZWN0aW5nX21vZGUnXHJcbiAgfCAnYXNzaXN0YW50X3JlcGx5J1xyXG4gIHwgJ3ByZXN0YXJ0X3Jlc2VhcmNoJ1xyXG4gIHwgJ3N0YXJ0aW5nX3NpbXVsYXRpb24nXHJcbiAgfCAnY2hlY2tpbmdfc2Vzc2lvbic7XHJcblxyXG5pbnRlcmZhY2UgQ2hhdFBhbmVsUHJvcHMge1xuICBtZXNzYWdlczogQ2hhdE1lc3NhZ2VbXTtcclxuICByZWFzb25pbmdGZWVkOiBSZWFzb25pbmdNZXNzYWdlW107XHJcbiAgaGlnaGxpZ2h0UmVhc29uaW5nTWVzc2FnZUlkcz86IHN0cmluZ1tdO1xyXG4gIHJlYXNvbmluZ0RlYnVnPzogeyBpZDogc3RyaW5nOyBhZ2VudFNob3J0SWQ/OiBzdHJpbmc7IHJlYXNvbjogc3RyaW5nOyBzdGFnZT86IHN0cmluZzsgYXR0ZW1wdD86IG51bWJlcjsgcGhhc2U/OiBzdHJpbmc7IHRpbWVzdGFtcDogbnVtYmVyIH1bXTtcclxuICBvblNlbmRNZXNzYWdlOiAobXNnOiBzdHJpbmcpID0+IHZvaWQ7XG4gIG9uQ29tcG9zZXJEcmFmdENoYW5nZT86ICh2YWx1ZTogc3RyaW5nKSA9PiB2b2lkO1xuICBvblNlbGVjdE9wdGlvbj86IChmaWVsZDogc3RyaW5nLCB2YWx1ZTogc3RyaW5nKSA9PiB2b2lkO1xyXG4gIGlzV2FpdGluZ0ZvckNpdHk/OiBib29sZWFuO1xyXG4gIGlzV2FpdGluZ0ZvckNvdW50cnk/OiBib29sZWFuO1xyXG4gIGlzV2FpdGluZ0ZvckxvY2F0aW9uQ2hvaWNlPzogYm9vbGVhbjtcclxuICBpc1RoaW5raW5nPzogYm9vbGVhbjtcclxuICBzaG93UmV0cnk/OiBib29sZWFuO1xyXG4gIG9uUmV0cnlMbG0/OiAoKSA9PiB2b2lkO1xyXG4gIG9uU2VhcmNoUmV0cnk/OiAoKSA9PiB2b2lkO1xyXG4gIG9uU2VhcmNoVXNlTGxtPzogKCkgPT4gdm9pZDtcclxuICBjYW5Db25maXJtU3RhcnQ/OiBib29sZWFuO1xyXG4gIG9uQ29uZmlybVN0YXJ0PzogKGRyYWZ0Pzogc3RyaW5nKSA9PiB2b2lkO1xuICBxdWlja1JlcGxpZXM/OiB7IGxhYmVsOiBzdHJpbmc7IHZhbHVlOiBzdHJpbmcgfVtdO1xyXG4gIG9uUXVpY2tSZXBseT86ICh2YWx1ZTogc3RyaW5nKSA9PiB2b2lkO1xyXG4gIHNpbXVsYXRpb25TdGF0dXM/OiBTaW11bGF0aW9uU3RhdHVzO1xyXG4gIHNpbXVsYXRpb25FcnJvcj86IHN0cmluZyB8IG51bGw7XHJcbiAgcmVhc29uaW5nQWN0aXZlPzogYm9vbGVhbjtcclxuICBpc1N1bW1hcml6aW5nPzogYm9vbGVhbjtcclxuICB2aWV3TW9kZT86ICdjaGF0JyB8ICdyZWFzb25pbmcnO1xuICBzZWFyY2hTdGF0ZT86IHsgc3RhdHVzOiAnaWRsZScgfCAnc2VhcmNoaW5nJyB8ICd0aW1lb3V0JyB8ICdlcnJvcicgfCAnY29tcGxldGUnOyBzdGFnZT86IEJ1c3lTdGFnZTsgdGltZW91dE1zPzogbnVtYmVyOyBlbGFwc2VkTXM/OiBudW1iZXIgfTtcbiAgdWlQcm9ncmVzcz86IHsgYWN0aXZlOiBib29sZWFuOyBzdGFnZTogQnVzeVN0YWdlOyBlbGFwc2VkTXM/OiBudW1iZXI7IHRpbWVvdXRNcz86IG51bWJlciB9O1xuICBzZWFyY2hQYW5lbE1vZGVsPzogU2VhcmNoUGFuZWxNb2RlbCB8IG51bGw7XG4gIHNob3dTZWFyY2hMaXZlUGFuZWw/OiBib29sZWFuO1xuICBwcmltYXJ5Q29udHJvbD86IHtcbiAgICBrZXk6IHN0cmluZztcclxuICAgIGxhYmVsOiBzdHJpbmc7XHJcbiAgICBkZXNjcmlwdGlvbj86IHN0cmluZztcclxuICAgIGRpc2FibGVkPzogYm9vbGVhbjtcclxuICAgIGJ1c3k/OiBib29sZWFuO1xyXG4gICAgdG9uZT86ICdwcmltYXJ5JyB8ICdzZWNvbmRhcnknIHwgJ3dhcm5pbmcnIHwgJ3N1Y2Nlc3MnO1xyXG4gICAgaWNvbj86ICdwbGF5JyB8ICdwYXVzZScgfCAncmV0cnknIHwgJ3NwYXJrbGVzJyB8ICdyZWFzb25pbmcnO1xyXG4gICAgb25DbGljaz86ICgpID0+IHZvaWQ7XHJcbiAgICBzZWNvbmRhcnk/OiB7IGxhYmVsOiBzdHJpbmc7IGRpc2FibGVkPzogYm9vbGVhbjsgb25DbGljaz86ICgpID0+IHZvaWQgfTtcclxuICB9IHwgbnVsbDtcclxuICBwZW5kaW5nQ2xhcmlmaWNhdGlvbj86IFBlbmRpbmdDbGFyaWZpY2F0aW9uIHwgbnVsbDtcbiAgY2FuQW5zd2VyQ2xhcmlmaWNhdGlvbj86IGJvb2xlYW47XG4gIHBlbmRpbmdJbnB1dEtpbmQ/OiBzdHJpbmcgfCBudWxsO1xuICBjbGFyaWZpY2F0aW9uQnVzeT86IGJvb2xlYW47XG4gIG9uU3VibWl0Q2xhcmlmaWNhdGlvbj86IChwYXlsb2FkOiB7IHF1ZXN0aW9uSWQ6IHN0cmluZzsgc2VsZWN0ZWRPcHRpb25JZD86IHN0cmluZzsgY3VzdG9tVGV4dD86IHN0cmluZyB9KSA9PiB2b2lkO1xyXG4gIHBlbmRpbmdQcmVmbGlnaHRRdWVzdGlvbj86IFByZWZsaWdodFF1ZXN0aW9uIHwgbnVsbDtcclxuICBwcmVmbGlnaHRSb3VuZD86IG51bWJlcjtcclxuICBwcmVmbGlnaHRNYXhSb3VuZHM/OiBudW1iZXI7XHJcbiAgcHJlZmxpZ2h0QnVzeT86IGJvb2xlYW47XHJcbiAgb25TdWJtaXRQcmVmbGlnaHQ/OiAocGF5bG9hZDogeyBxdWVzdGlvbklkOiBzdHJpbmc7IHNlbGVjdGVkT3B0aW9uSWQ/OiBzdHJpbmc7IGN1c3RvbVRleHQ/OiBzdHJpbmcgfSkgPT4gdm9pZDtcclxuICBwZW5kaW5nSWRlYUNvbmZpcm1hdGlvbj86IFBlbmRpbmdJZGVhQ29uZmlybWF0aW9uIHwgbnVsbDtcclxuICBvbkNvbmZpcm1JZGVhRm9yU3RhcnQ/OiAoKSA9PiB2b2lkO1xyXG4gIHBlbmRpbmdSZXNlYXJjaFJldmlldz86IFBlbmRpbmdSZXNlYXJjaFJldmlldyB8IG51bGw7XHJcbiAgcmVzZWFyY2hSZXZpZXdCdXN5PzogYm9vbGVhbjtcclxuICBvblN1Ym1pdFJlc2VhcmNoUmV2aWV3QWN0aW9uPzogKHBheWxvYWQ6IHtcclxuICAgIGN5Y2xlSWQ6IHN0cmluZztcclxuICAgIGFjdGlvbjogJ3NjcmFwZV9zZWxlY3RlZCcgfCAnY29udGludWVfc2VhcmNoJyB8ICdjYW5jZWxfcmV2aWV3JztcclxuICAgIHNlbGVjdGVkVXJsSWRzPzogc3RyaW5nW107XHJcbiAgICBhZGRlZFVybHM/OiBzdHJpbmdbXTtcclxuICAgIHF1ZXJ5UmVmaW5lbWVudD86IHN0cmluZztcclxuICB9KSA9PiB2b2lkO1xyXG4gIHBvc3RBY3Rpb25zRW5hYmxlZD86IGJvb2xlYW47XHJcbiAgcmVjb21tZW5kZWRQb3N0QWN0aW9uPzogJ21ha2VfYWNjZXB0YWJsZScgfCAnYnJpbmdfdG9fd29ybGQnO1xyXG4gIGZpbmFsQWNjZXB0YW5jZVBjdD86IG51bWJlcjtcclxuICBwb3N0QWN0aW9uQnVzeT86ICdtYWtlX2FjY2VwdGFibGUnIHwgJ2JyaW5nX3RvX3dvcmxkJyB8IG51bGw7XHJcbiAgcG9zdEFjdGlvblJlc3VsdD86IHsgYWN0aW9uOiAnbWFrZV9hY2NlcHRhYmxlJyB8ICdicmluZ190b193b3JsZCc7IHRpdGxlOiBzdHJpbmc7IHN1bW1hcnk6IHN0cmluZzsgc3RlcHM6IHN0cmluZ1tdOyByaXNrczogc3RyaW5nW107IGtwaXM6IHN0cmluZ1tdOyByZXZpc2VkX2lkZWE/OiBzdHJpbmcgfSB8IG51bGw7XHJcbiAgb25SdW5Qb3N0QWN0aW9uPzogKGFjdGlvbjogJ21ha2VfYWNjZXB0YWJsZScgfCAnYnJpbmdfdG9fd29ybGQnKSA9PiB2b2lkO1xyXG4gIG9uU3RhcnRGb2xsb3d1cEZyb21Qb3N0QWN0aW9uPzogKCkgPT4gdm9pZDtcclxuICBvblJlcXVlc3RSZWFzb25pbmdWaWV3PzogKCkgPT4gdm9pZDtcclxuICBzZXR0aW5nczogeyBsYW5ndWFnZTogJ2FyJyB8ICdlbic7IGF1dG9Gb2N1c0lucHV0PzogYm9vbGVhbiB9O1xyXG59XHJcblxyXG50eXBlIENvbXBvc2VyQWN0aW9uID0ge1xyXG4gIGtleTogc3RyaW5nO1xyXG4gIGxhYmVsOiBzdHJpbmc7XHJcbiAgZGVzY3JpcHRpb24/OiBzdHJpbmc7XHJcbiAgYnVzeT86IGJvb2xlYW47XHJcbiAgZGlzYWJsZWQ/OiBib29sZWFuO1xyXG4gIHRvbmU/OiAncHJpbWFyeScgfCAnc2Vjb25kYXJ5JyB8ICd3YXJuaW5nJztcclxuICBpY29uOiBSZWFjdE5vZGU7XHJcbiAgb25DbGljazogKCkgPT4gdm9pZDtcclxufTtcclxuXHJcbmNvbnN0IHN0YWdlTGFiZWxzOiBSZWNvcmQ8QnVzeVN0YWdlLCB7IGFyOiBzdHJpbmc7IGVuOiBzdHJpbmcgfT4gPSB7XHJcbiAgZXh0cmFjdGluZ19zY2hlbWE6IHsgYXI6ICfZhtit2YTZhCDYp9mE2YHZg9ix2Kkg2YjZhtix2KrYqCDYudmG2KfYtdix2YfYpycsIGVuOiAnU3RydWN0dXJpbmcgdGhlIGlkZWEnIH0sXHJcbiAgZGV0ZWN0aW5nX21vZGU6IHsgYXI6ICfZhtit2K/YryDYo9mB2LbZhCDZhdiz2KfYsSDZhNmE2LnZhdmEJywgZW46ICdEZXRlY3RpbmcgdGhlIGJlc3QgZmxvdycgfSxcclxuICBhc3Npc3RhbnRfcmVwbHk6IHsgYXI6ICfZhtit2LbZkdixINin2YTYsdivINin2YTYqtin2YTZiicsIGVuOiAnUHJlcGFyaW5nIHRoZSBuZXh0IHJlcGx5JyB9LFxyXG4gIHByZXN0YXJ0X3Jlc2VhcmNoOiB7IGFyOiAn2YbYrNmF2Lkg2YXYtdin2K/YsSDZhdmGINin2YTYpdmG2KrYsdmG2KonLCBlbjogJ0NvbGxlY3RpbmcgaW50ZXJuZXQgc291cmNlcycgfSxcclxuICBzdGFydGluZ19zaW11bGF0aW9uOiB7IGFyOiAn2YbYqNiv2KMg2KfZhNmF2K3Yp9mD2KfYqSDYp9mE2KLZhicsIGVuOiAnU3RhcnRpbmcgdGhlIHNpbXVsYXRpb24nIH0sXHJcbiAgY2hlY2tpbmdfc2Vzc2lvbjogeyBhcjogJ9mG2KrYo9mD2K8g2YXZhiDYp9mE2KzZhNiz2Kkg2KfZhNit2KfZhNmK2KknLCBlbjogJ0NoZWNraW5nIHRoZSBjdXJyZW50IHNlc3Npb24nIH0sXHJcbn07XHJcblxyXG5jb25zdCB5ZXNOb0Nob2ljZSA9IChpdGVtczogQ2hhdE1lc3NhZ2VbJ29wdGlvbnMnXVsnaXRlbXMnXSkgPT4gaXRlbXMubGVuZ3RoID09PSAyICYmIGl0ZW1zLnNvbWUoKGl0ZW0pID0+IGl0ZW0udmFsdWUudG9Mb3dlckNhc2UoKSA9PT0gJ3llcycpICYmIGl0ZW1zLnNvbWUoKGl0ZW0pID0+IGl0ZW0udmFsdWUudG9Mb3dlckNhc2UoKSA9PT0gJ25vJyk7XHJcblxyXG5mdW5jdGlvbiBQcm9tcHRDYXJkKHtcclxuICB0aXRsZSxcclxuICBkZXNjcmlwdGlvbixcclxuICBvcHRpb25zLFxyXG4gIHNlbGVjdGVkLFxyXG4gIG9uU2VsZWN0LFxyXG4gIHRleHQsXHJcbiAgb25UZXh0LFxyXG4gIGJ1c3ksXHJcbiAgc3VibWl0TGFiZWwsXHJcbiAgb25TdWJtaXQsXHJcbiAgdG9uZSA9ICdpbmZvJyxcclxufToge1xyXG4gIHRpdGxlOiBzdHJpbmc7XHJcbiAgZGVzY3JpcHRpb246IHN0cmluZztcclxuICBvcHRpb25zOiB7IGlkOiBzdHJpbmc7IGxhYmVsOiBzdHJpbmcgfVtdO1xyXG4gIHNlbGVjdGVkOiBzdHJpbmcgfCBudWxsO1xyXG4gIG9uU2VsZWN0OiAodmFsdWU6IHN0cmluZykgPT4gdm9pZDtcclxuICB0ZXh0OiBzdHJpbmc7XHJcbiAgb25UZXh0OiAodmFsdWU6IHN0cmluZykgPT4gdm9pZDtcclxuICBidXN5PzogYm9vbGVhbjtcclxuICBzdWJtaXRMYWJlbDogc3RyaW5nO1xyXG4gIG9uU3VibWl0OiAoKSA9PiB2b2lkO1xyXG4gIHRvbmU/OiAnaW5mbycgfCAnd2FybmluZyc7XHJcbn0pIHtcclxuICByZXR1cm4gKFxyXG4gICAgPHNlY3Rpb24gY2xhc3NOYW1lPXtjbigncm91bmRlZC1bMzBweF0gYm9yZGVyIHAtNScsIHRvbmUgPT09ICd3YXJuaW5nJyA/ICdib3JkZXItYW1iZXItNDAwLzMwIGJnLWFtYmVyLTUwMC8xMCcgOiAnYm9yZGVyLWN5YW4tNDAwLzMwIGJnLWN5YW4tNTAwLzEwJyl9PlxyXG4gICAgICA8aDMgY2xhc3NOYW1lPVwidGV4dC1iYXNlIGZvbnQtc2VtaWJvbGQgdGV4dC1mb3JlZ3JvdW5kXCI+e3RpdGxlfTwvaDM+XHJcbiAgICAgIDxwIGNsYXNzTmFtZT1cIm10LTIgd2hpdGVzcGFjZS1wcmUtd3JhcCB0ZXh0LXNtIGxlYWRpbmctNyB0ZXh0LWZvcmVncm91bmQvOTBcIj57ZGVzY3JpcHRpb259PC9wPlxyXG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTQgc3BhY2UteS0yXCI+XHJcbiAgICAgICAge29wdGlvbnMubWFwKChvcHRpb24pID0+IChcclxuICAgICAgICAgIDxidXR0b24ga2V5PXtvcHRpb24uaWR9IHR5cGU9XCJidXR0b25cIiBvbkNsaWNrPXsoKSA9PiBvblNlbGVjdChvcHRpb24uaWQpfSBjbGFzc05hbWU9e2NuKCd3LWZ1bGwgcm91bmRlZC0yeGwgYm9yZGVyIHB4LTQgcHktMyB0ZXh0LXN0YXJ0IHRyYW5zaXRpb24nLCBzZWxlY3RlZCA9PT0gb3B0aW9uLmlkID8gJ2JvcmRlci1wcmltYXJ5LzQwIGJnLXByaW1hcnkvMTAnIDogJ2JvcmRlci1ib3JkZXIvNjAgYmctYmFja2dyb3VuZC81NSBob3Zlcjpib3JkZXItcHJpbWFyeS8yMCcpfT5cclxuICAgICAgICAgICAge29wdGlvbi5sYWJlbH1cclxuICAgICAgICAgIDwvYnV0dG9uPlxyXG4gICAgICAgICkpfVxyXG4gICAgICA8L2Rpdj5cclxuICAgICAgPElucHV0IHZhbHVlPXt0ZXh0fSBvbkNoYW5nZT17KGV2ZW50KSA9PiBvblRleHQoZXZlbnQudGFyZ2V0LnZhbHVlKX0gY2xhc3NOYW1lPVwibXQtMyBoLTEyIHJvdW5kZWQtMnhsIGJvcmRlci1ib3JkZXIvNjAgYmctYmFja2dyb3VuZC82NSB0ZXh0LWJhc2VcIiBwbGFjZWhvbGRlcj1cIi4uLlwiIGRpcj1cInJ0bFwiIC8+XHJcbiAgICAgIDxCdXR0b24gdHlwZT1cImJ1dHRvblwiIG9uQ2xpY2s9e29uU3VibWl0fSBkaXNhYmxlZD17YnVzeSB8fCAoIXNlbGVjdGVkICYmICF0ZXh0LnRyaW0oKSl9IGNsYXNzTmFtZT1cIm10LTMgcm91bmRlZC0yeGxcIj5cclxuICAgICAgICB7YnVzeSA/IDxMb2FkZXIyIGNsYXNzTmFtZT1cImgtNCB3LTQgYW5pbWF0ZS1zcGluXCIgLz4gOiA8Q2hlY2sgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+fVxyXG4gICAgICAgIDxzcGFuPntzdWJtaXRMYWJlbH08L3NwYW4+XHJcbiAgICAgIDwvQnV0dG9uPlxyXG4gICAgPC9zZWN0aW9uPlxyXG4gICk7XHJcbn1cclxuXHJcbmV4cG9ydCBmdW5jdGlvbiBDaGF0UGFuZWwocHJvcHM6IENoYXRQYW5lbFByb3BzKSB7XHJcbiAgY29uc3Qge1xyXG4gICAgbWVzc2FnZXMsXHJcbiAgICByZWFzb25pbmdGZWVkLFxyXG4gICAgaGlnaGxpZ2h0UmVhc29uaW5nTWVzc2FnZUlkcyA9IFtdLFxyXG4gICAgb25TZW5kTWVzc2FnZSxcbiAgICBvbkNvbXBvc2VyRHJhZnRDaGFuZ2UsXG4gICAgb25TZWxlY3RPcHRpb24sXHJcbiAgICBpc1dhaXRpbmdGb3JDaXR5ID0gZmFsc2UsXHJcbiAgICBpc1dhaXRpbmdGb3JDb3VudHJ5ID0gZmFsc2UsXHJcbiAgICBpc1dhaXRpbmdGb3JMb2NhdGlvbkNob2ljZSA9IGZhbHNlLFxyXG4gICAgaXNUaGlua2luZyA9IGZhbHNlLFxyXG4gICAgc2hvd1JldHJ5ID0gZmFsc2UsXHJcbiAgICBvblJldHJ5TGxtLFxyXG4gICAgb25TZWFyY2hSZXRyeSxcclxuICAgIG9uU2VhcmNoVXNlTGxtLFxyXG4gICAgY2FuQ29uZmlybVN0YXJ0ID0gZmFsc2UsXHJcbiAgICBvbkNvbmZpcm1TdGFydCxcclxuICAgIHF1aWNrUmVwbGllcyA9IFtdLFxyXG4gICAgb25RdWlja1JlcGx5LFxyXG4gICAgc2ltdWxhdGlvblN0YXR1cyA9ICdpZGxlJyxcclxuICAgIHNpbXVsYXRpb25FcnJvciA9IG51bGwsXHJcbiAgICByZWFzb25pbmdBY3RpdmUgPSBmYWxzZSxcclxuICAgIGlzU3VtbWFyaXppbmcgPSBmYWxzZSxcclxuICAgIHZpZXdNb2RlID0gJ2NoYXQnLFxuICAgIHNlYXJjaFN0YXRlLFxuICAgIHVpUHJvZ3Jlc3MsXG4gICAgc2VhcmNoUGFuZWxNb2RlbCA9IG51bGwsXG4gICAgc2hvd1NlYXJjaExpdmVQYW5lbCA9IHRydWUsXG4gICAgcHJpbWFyeUNvbnRyb2wgPSBudWxsLFxuICBwZW5kaW5nQ2xhcmlmaWNhdGlvbiA9IG51bGwsXG4gIGNhbkFuc3dlckNsYXJpZmljYXRpb24gPSBmYWxzZSxcbiAgcGVuZGluZ0lucHV0S2luZCA9IG51bGwsXG4gIGNsYXJpZmljYXRpb25CdXN5ID0gZmFsc2UsXG4gICAgb25TdWJtaXRDbGFyaWZpY2F0aW9uLFxyXG4gICAgcGVuZGluZ1ByZWZsaWdodFF1ZXN0aW9uID0gbnVsbCxcclxuICAgIHByZWZsaWdodFJvdW5kID0gMCxcclxuICAgIHByZWZsaWdodE1heFJvdW5kcyA9IDAsXHJcbiAgICBwcmVmbGlnaHRCdXN5ID0gZmFsc2UsXHJcbiAgICBvblN1Ym1pdFByZWZsaWdodCxcclxuICAgIHBlbmRpbmdJZGVhQ29uZmlybWF0aW9uID0gbnVsbCxcclxuICAgIG9uQ29uZmlybUlkZWFGb3JTdGFydCxcclxuICAgIHBlbmRpbmdSZXNlYXJjaFJldmlldyA9IG51bGwsXHJcbiAgICByZXNlYXJjaFJldmlld0J1c3kgPSBmYWxzZSxcclxuICAgIG9uU3VibWl0UmVzZWFyY2hSZXZpZXdBY3Rpb24sXHJcbiAgICBwb3N0QWN0aW9uc0VuYWJsZWQgPSBmYWxzZSxcclxuICAgIHJlY29tbWVuZGVkUG9zdEFjdGlvbixcclxuICAgIGZpbmFsQWNjZXB0YW5jZVBjdCxcclxuICAgIHBvc3RBY3Rpb25CdXN5ID0gbnVsbCxcclxuICAgIHBvc3RBY3Rpb25SZXN1bHQgPSBudWxsLFxyXG4gICAgb25SdW5Qb3N0QWN0aW9uLFxyXG4gICAgb25TdGFydEZvbGxvd3VwRnJvbVBvc3RBY3Rpb24sXHJcbiAgICBvblJlcXVlc3RSZWFzb25pbmdWaWV3LFxyXG4gICAgc2V0dGluZ3MsXHJcbiAgfSA9IHByb3BzO1xyXG5cclxuICBjb25zdCBsYW5ndWFnZSA9IHNldHRpbmdzLmxhbmd1YWdlO1xyXG4gIGNvbnN0IGlzUmVhc29uaW5nVmlldyA9IHZpZXdNb2RlID09PSAncmVhc29uaW5nJztcclxuICBjb25zdCBsaXN0UmVmID0gdXNlUmVmPEhUTUxEaXZFbGVtZW50PihudWxsKTtcclxuICBjb25zdCBmb3JtUmVmID0gdXNlUmVmPEhUTUxGb3JtRWxlbWVudD4obnVsbCk7XHJcbiAgY29uc3QgaW5wdXRSZWYgPSB1c2VSZWY8SFRNTElucHV0RWxlbWVudD4obnVsbCk7XHJcbiAgY29uc3QgYWxsb3dBdXRvRm9jdXNSZWYgPSB1c2VSZWYodHJ1ZSk7XHJcbiAgY29uc3QgbGFzdE1lc3NhZ2VJZFJlZiA9IHVzZVJlZjxzdHJpbmcgfCBudWxsPihudWxsKTtcclxuXHJcbiAgY29uc3QgW2lucHV0VmFsdWUsIHNldElucHV0VmFsdWVdID0gdXNlU3RhdGUoJycpO1xyXG4gIGNvbnN0IFttZW51T3Blbiwgc2V0TWVudU9wZW5dID0gdXNlU3RhdGUoZmFsc2UpO1xyXG4gIGNvbnN0IFtjbGFyaWZpY2F0aW9uQ2hvaWNlLCBzZXRDbGFyaWZpY2F0aW9uQ2hvaWNlXSA9IHVzZVN0YXRlPHN0cmluZyB8IG51bGw+KG51bGwpO1xyXG4gIGNvbnN0IFtjbGFyaWZpY2F0aW9uVGV4dCwgc2V0Q2xhcmlmaWNhdGlvblRleHRdID0gdXNlU3RhdGUoJycpO1xyXG4gIGNvbnN0IFtwcmVmbGlnaHRDaG9pY2UsIHNldFByZWZsaWdodENob2ljZV0gPSB1c2VTdGF0ZTxzdHJpbmcgfCBudWxsPihudWxsKTtcclxuICBjb25zdCBbcHJlZmxpZ2h0VGV4dCwgc2V0UHJlZmxpZ2h0VGV4dF0gPSB1c2VTdGF0ZSgnJyk7XHJcbiAgY29uc3QgW3Jldmlld1NlbGVjdGVkSWRzLCBzZXRSZXZpZXdTZWxlY3RlZElkc10gPSB1c2VTdGF0ZTxzdHJpbmdbXT4oW10pO1xyXG4gIGNvbnN0IFtyZXZpZXdFeHRyYVVybHMsIHNldFJldmlld0V4dHJhVXJsc10gPSB1c2VTdGF0ZSgnJyk7XHJcbiAgY29uc3QgW3Jldmlld1F1ZXJ5UmVmaW5lbWVudCwgc2V0UmV2aWV3UXVlcnlSZWZpbmVtZW50XSA9IHVzZVN0YXRlKCcnKTtcclxuXHJcbiAgdXNlRWZmZWN0KCgpID0+IHtcclxuICAgIGlmICghcGVuZGluZ0NsYXJpZmljYXRpb24/LnF1ZXN0aW9uSWQpIHJldHVybjtcclxuICAgIHNldENsYXJpZmljYXRpb25DaG9pY2UobnVsbCk7XHJcbiAgICBzZXRDbGFyaWZpY2F0aW9uVGV4dCgnJyk7XHJcbiAgfSwgW3BlbmRpbmdDbGFyaWZpY2F0aW9uPy5xdWVzdGlvbklkXSk7XHJcblxyXG4gIHVzZUVmZmVjdCgoKSA9PiB7XHJcbiAgICBpZiAoIXBlbmRpbmdQcmVmbGlnaHRRdWVzdGlvbj8ucXVlc3Rpb25JZCkgcmV0dXJuO1xyXG4gICAgc2V0UHJlZmxpZ2h0Q2hvaWNlKG51bGwpO1xyXG4gICAgc2V0UHJlZmxpZ2h0VGV4dCgnJyk7XHJcbiAgfSwgW3BlbmRpbmdQcmVmbGlnaHRRdWVzdGlvbj8ucXVlc3Rpb25JZF0pO1xyXG5cclxuICB1c2VFZmZlY3QoKCkgPT4ge1xyXG4gICAgaWYgKCFwZW5kaW5nUmVzZWFyY2hSZXZpZXc/LmN5Y2xlSWQpIHJldHVybjtcclxuICAgIHNldFJldmlld1NlbGVjdGVkSWRzKHBlbmRpbmdSZXNlYXJjaFJldmlldy5jYW5kaWRhdGVVcmxzLnNsaWNlKDAsIDMpLm1hcCgoaXRlbSkgPT4gaXRlbS5pZCkpO1xyXG4gICAgc2V0UmV2aWV3RXh0cmFVcmxzKCcnKTtcclxuICAgIHNldFJldmlld1F1ZXJ5UmVmaW5lbWVudCgnJyk7XHJcbiAgfSwgW3BlbmRpbmdSZXNlYXJjaFJldmlldz8uY2FuZGlkYXRlVXJscywgcGVuZGluZ1Jlc2VhcmNoUmV2aWV3Py5jeWNsZUlkXSk7XHJcblxyXG4gIHVzZUVmZmVjdCgoKSA9PiB7XHJcbiAgICBjb25zdCBjb250YWluZXIgPSBsaXN0UmVmLmN1cnJlbnQ7XHJcbiAgICBpZiAoY29udGFpbmVyKSBjb250YWluZXIuc2Nyb2xsVG9wID0gY29udGFpbmVyLnNjcm9sbEhlaWdodDtcclxuICB9LCBbbWVzc2FnZXMsIHJlYXNvbmluZ0ZlZWQsIGlzVGhpbmtpbmcsIHBlbmRpbmdDbGFyaWZpY2F0aW9uLCBwZW5kaW5nUHJlZmxpZ2h0UXVlc3Rpb24sIHBlbmRpbmdSZXNlYXJjaFJldmlldywgcGVuZGluZ0lkZWFDb25maXJtYXRpb25dKTtcclxuXHJcbiAgdXNlRWZmZWN0KCgpID0+IHtcclxuICAgIGNvbnN0IGhhbmRsZVBvaW50ZXJEb3duID0gKGV2ZW50OiBQb2ludGVyRXZlbnQpID0+IHtcclxuICAgICAgY29uc3QgdGFyZ2V0ID0gZXZlbnQudGFyZ2V0IGFzIE5vZGU7XHJcbiAgICAgIGlmIChmb3JtUmVmLmN1cnJlbnQ/LmNvbnRhaW5zKHRhcmdldCkpIHtcclxuICAgICAgICBhbGxvd0F1dG9Gb2N1c1JlZi5jdXJyZW50ID0gdHJ1ZTtcclxuICAgICAgICByZXR1cm47XHJcbiAgICAgIH1cclxuICAgICAgYWxsb3dBdXRvRm9jdXNSZWYuY3VycmVudCA9IGZhbHNlO1xyXG4gICAgICBzZXRNZW51T3BlbihmYWxzZSk7XHJcbiAgICAgIGlmIChkb2N1bWVudC5hY3RpdmVFbGVtZW50ID09PSBpbnB1dFJlZi5jdXJyZW50KSBpbnB1dFJlZi5jdXJyZW50Py5ibHVyKCk7XHJcbiAgICB9O1xyXG4gICAgZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcigncG9pbnRlcmRvd24nLCBoYW5kbGVQb2ludGVyRG93biwgdHJ1ZSk7XHJcbiAgICByZXR1cm4gKCkgPT4gZG9jdW1lbnQucmVtb3ZlRXZlbnRMaXN0ZW5lcigncG9pbnRlcmRvd24nLCBoYW5kbGVQb2ludGVyRG93biwgdHJ1ZSk7XHJcbiAgfSwgW10pO1xyXG5cclxuICB1c2VFZmZlY3QoKCkgPT4ge1xyXG4gICAgaWYgKCFzZXR0aW5ncy5hdXRvRm9jdXNJbnB1dCB8fCBpc1JlYXNvbmluZ1ZpZXcpIHJldHVybjtcclxuICAgIGNvbnN0IHJhZiA9IHdpbmRvdy5yZXF1ZXN0QW5pbWF0aW9uRnJhbWUoKCkgPT4gaW5wdXRSZWYuY3VycmVudD8uZm9jdXMoKSk7XHJcbiAgICByZXR1cm4gKCkgPT4gd2luZG93LmNhbmNlbEFuaW1hdGlvbkZyYW1lKHJhZik7XHJcbiAgfSwgW2lzUmVhc29uaW5nVmlldywgc2V0dGluZ3MuYXV0b0ZvY3VzSW5wdXRdKTtcclxuXHJcbiAgdXNlRWZmZWN0KCgpID0+IHtcclxuICAgIGlmICghc2V0dGluZ3MuYXV0b0ZvY3VzSW5wdXQgfHwgaXNSZWFzb25pbmdWaWV3IHx8ICFhbGxvd0F1dG9Gb2N1c1JlZi5jdXJyZW50KSByZXR1cm47XHJcbiAgICBjb25zdCBsYXRlc3QgPSBtZXNzYWdlcy5hdCgtMSk/LmlkIHx8IG51bGw7XHJcbiAgICBpZiAoIWxhdGVzdCB8fCBsYXRlc3QgPT09IGxhc3RNZXNzYWdlSWRSZWYuY3VycmVudCkgcmV0dXJuO1xyXG4gICAgbGFzdE1lc3NhZ2VJZFJlZi5jdXJyZW50ID0gbGF0ZXN0O1xyXG4gICAgY29uc3QgcmFmID0gd2luZG93LnJlcXVlc3RBbmltYXRpb25GcmFtZSgoKSA9PiBpbnB1dFJlZi5jdXJyZW50Py5mb2N1cygpKTtcclxuICAgIHJldHVybiAoKSA9PiB3aW5kb3cuY2FuY2VsQW5pbWF0aW9uRnJhbWUocmFmKTtcclxuICB9LCBbaXNSZWFzb25pbmdWaWV3LCBtZXNzYWdlcywgc2V0dGluZ3MuYXV0b0ZvY3VzSW5wdXRdKTtcclxuXHJcbiAgY29uc3QgaW5saW5lU3RhdHVzID0gdXNlTWVtbygoKSA9PiB7XHJcbiAgICBpZiAoc2VhcmNoU3RhdGU/LnN0YXR1cyA9PT0gJ3NlYXJjaGluZycpIHJldHVybiB7IHRvbmU6ICdpbmZvJyBhcyBjb25zdCwgbGFiZWw6IGxhbmd1YWdlID09PSAnYXInID8gc3RhZ2VMYWJlbHNbc2VhcmNoU3RhdGUuc3RhZ2UgfHwgJ3ByZXN0YXJ0X3Jlc2VhcmNoJ10uYXIgOiBzdGFnZUxhYmVsc1tzZWFyY2hTdGF0ZS5zdGFnZSB8fCAncHJlc3RhcnRfcmVzZWFyY2gnXS5lbiB9O1xyXG4gICAgaWYgKHNlYXJjaFN0YXRlPy5zdGF0dXMgPT09ICd0aW1lb3V0JykgcmV0dXJuIHsgdG9uZTogJ3dhcm5pbmcnIGFzIGNvbnN0LCBsYWJlbDogbGFuZ3VhZ2UgPT09ICdhcicgPyAn2KfZhtiq2YfYqiDZhdmH2YTYqSDYp9mE2KjYrdirLiDZitmF2YPZhtmDINin2YTYpdi52KfYr9ipINij2Ygg2KfYs9iq2K7Yr9in2YUg2KfZhNio2K/ZitmEINin2YTZhdit2YTZii4nIDogJ1NlYXJjaCB0aW1lZCBvdXQuIFJldHJ5IG9yIHVzZSB0aGUgbG9jYWwgZmFsbGJhY2suJyB9O1xyXG4gICAgaWYgKHNlYXJjaFN0YXRlPy5zdGF0dXMgPT09ICdlcnJvcicpIHJldHVybiB7IHRvbmU6ICdlcnJvcicgYXMgY29uc3QsIGxhYmVsOiBsYW5ndWFnZSA9PT0gJ2FyJyA/ICfYqti52LDYsSDYpdmD2YXYp9mEINin2YTYqNit2Ksg2KfZhNit2KfZhNmKLicgOiAnVGhlIGN1cnJlbnQgc2VhcmNoIGNvdWxkIG5vdCBiZSBjb21wbGV0ZWQuJyB9O1xyXG4gICAgaWYgKHVpUHJvZ3Jlc3M/LmFjdGl2ZSkgcmV0dXJuIHsgdG9uZTogJ2luZm8nIGFzIGNvbnN0LCBsYWJlbDogbGFuZ3VhZ2UgPT09ICdhcicgPyBzdGFnZUxhYmVsc1t1aVByb2dyZXNzLnN0YWdlXS5hciA6IHN0YWdlTGFiZWxzW3VpUHJvZ3Jlc3Muc3RhZ2VdLmVuIH07XHJcbiAgICByZXR1cm4gbnVsbDtcclxuICB9LCBbbGFuZ3VhZ2UsIHNlYXJjaFN0YXRlLCB1aVByb2dyZXNzXSk7XHJcblxyXG4gIGNvbnN0IHByaW1hcnlBY3Rpb24gPSB1c2VNZW1vPENvbXBvc2VyQWN0aW9uIHwgbnVsbD4oKCkgPT4ge1xuICAgIGNvbnN0IGRyYWZ0ID0gaW5wdXRWYWx1ZS50cmltKCk7XG4gICAgaWYgKGRyYWZ0ICYmIGNhbkNvbmZpcm1TdGFydCAmJiBvbkNvbmZpcm1TdGFydCkge1xuICAgICAgcmV0dXJuIHtcbiAgICAgICAga2V5OiAnY29uZmlybS1zdGFydCcsXG4gICAgICAgIGxhYmVsOiBwcmltYXJ5Q29udHJvbD8ubGFiZWwgfHwgKGxhbmd1YWdlID09PSAnYXInID8gJ9i02LrZkdmEINin2YTZhdiz2KfYsSDYp9mE2KXZhNiy2KfZhdmKJyA6ICdSdW4gbWFuZGF0b3J5IHBpcGVsaW5lJyksXG4gICAgICAgIGRlc2NyaXB0aW9uOiBwcmltYXJ5Q29udHJvbD8uZGVzY3JpcHRpb24sXG4gICAgICAgIGRpc2FibGVkOiBwcmltYXJ5Q29udHJvbD8uZGlzYWJsZWQsXG4gICAgICAgIGJ1c3k6IHByaW1hcnlDb250cm9sPy5idXN5LFxuICAgICAgICB0b25lOiBwcmltYXJ5Q29udHJvbD8udG9uZSA9PT0gJ3dhcm5pbmcnID8gJ3dhcm5pbmcnIDogcHJpbWFyeUNvbnRyb2w/LnRvbmUgPT09ICdzZWNvbmRhcnknID8gJ3NlY29uZGFyeScgOiAncHJpbWFyeScsXG4gICAgICAgIGljb246IHByaW1hcnlDb250cm9sPy5idXN5ID8gPExvYWRlcjIgY2xhc3NOYW1lPVwiaC00IHctNCBhbmltYXRlLXNwaW5cIiAvPiA6IHByaW1hcnlDb250cm9sPy5pY29uID09PSAncmV0cnknID8gPFJlZnJlc2hDY3cgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+IDogcHJpbWFyeUNvbnRyb2w/Lmljb24gPT09ICdzcGFya2xlcycgPyA8U3BhcmtsZXMgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+IDogPFBsYXkgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+LFxuICAgICAgICBvbkNsaWNrOiAoKSA9PiB7IG9uQ29uZmlybVN0YXJ0KGRyYWZ0KTsgfSxcbiAgICAgIH07XG4gICAgfVxuICAgIGlmIChkcmFmdCkgcmV0dXJuIHsga2V5OiAnc2VuZCcsIGxhYmVsOiBsYW5ndWFnZSA9PT0gJ2FyJyA/ICfYpdix2LPYp9mEINin2YTYsdiz2KfZhNipJyA6ICdTZW5kIG1lc3NhZ2UnLCBpY29uOiA8U2VuZCBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz4sIG9uQ2xpY2s6ICgpID0+IHsgb25TZW5kTWVzc2FnZShkcmFmdCk7IHNldElucHV0VmFsdWUoJycpOyBvbkNvbXBvc2VyRHJhZnRDaGFuZ2U/LignJyk7IGFsbG93QXV0b0ZvY3VzUmVmLmN1cnJlbnQgPSB0cnVlOyB3aW5kb3cucmVxdWVzdEFuaW1hdGlvbkZyYW1lKCgpID0+IGlucHV0UmVmLmN1cnJlbnQ/LmZvY3VzKCkpOyB9IH07XG4gICAgaWYgKHNlYXJjaFN0YXRlPy5zdGF0dXMgPT09ICd0aW1lb3V0JyAmJiBvblNlYXJjaFJldHJ5KSByZXR1cm4geyBrZXk6ICdyZXRyeS1zZWFyY2gnLCBsYWJlbDogbGFuZ3VhZ2UgPT09ICdhcicgPyAn2KXYudin2K/YqSDYp9mE2KjYrdirJyA6ICdSZXRyeSBzZWFyY2gnLCBkZXNjcmlwdGlvbjogbGFuZ3VhZ2UgPT09ICdhcicgPyAn2YrZhdmD2YbZgyDYpdi52KfYr9ipINin2YTZhdit2KfZiNmE2Kkg2KPZiCDYp9iz2KrYrtiv2KfZhSDYp9mE2KjYr9mK2YQg2KfZhNmF2K3ZhNmKLicgOiAnUmV0cnkgb3IgdXNlIHRoZSBsb2NhbCBmYWxsYmFjay4nLCB0b25lOiAnd2FybmluZycsIGljb246IDxTZWFyY2ggY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+LCBvbkNsaWNrOiAoKSA9PiAob25TZWFyY2hVc2VMbG0gPyBzZXRNZW51T3Blbigob3BlbikgPT4gIW9wZW4pIDogb25TZWFyY2hSZXRyeSgpKSB9O1xyXG4gICAgaWYgKHNob3dSZXRyeSAmJiBvblJldHJ5TGxtKSByZXR1cm4geyBrZXk6ICdmYWxsYmFjaycsIGxhYmVsOiBsYW5ndWFnZSA9PT0gJ2FyJyA/ICfYp9iz2KrYrtiv2KfZhSDYqNiv2YrZhCBMTE0nIDogJ1VzZSBMTE0gZmFsbGJhY2snLCB0b25lOiAnd2FybmluZycsIGljb246IDxXYW5kMiBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz4sIG9uQ2xpY2s6IG9uUmV0cnlMbG0gfTtcclxuICAgIGlmIChjYW5Db25maXJtU3RhcnQgJiYgb25Db25maXJtU3RhcnQpIHJldHVybiB7IGtleTogJ3N0YXJ0JywgbGFiZWw6IGxhbmd1YWdlID09PSAnYXInID8gJ9i02LrZkdmEINin2YTZhdiz2KfYsSDYp9mE2KXZhNiy2KfZhdmKJyA6ICdSdW4gbWFuZGF0b3J5IHBpcGVsaW5lJywgaWNvbjogPFBsYXkgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+LCBvbkNsaWNrOiBvbkNvbmZpcm1TdGFydCB9O1xuICAgIGlmIChwcmltYXJ5Q29udHJvbD8ub25DbGljaykgcmV0dXJuIHtcclxuICAgICAga2V5OiBwcmltYXJ5Q29udHJvbC5rZXksXHJcbiAgICAgIGxhYmVsOiBwcmltYXJ5Q29udHJvbC5sYWJlbCxcclxuICAgICAgZGVzY3JpcHRpb246IHByaW1hcnlDb250cm9sLmRlc2NyaXB0aW9uLFxyXG4gICAgICBkaXNhYmxlZDogcHJpbWFyeUNvbnRyb2wuZGlzYWJsZWQsXHJcbiAgICAgIGJ1c3k6IHByaW1hcnlDb250cm9sLmJ1c3ksXHJcbiAgICAgIHRvbmU6IHByaW1hcnlDb250cm9sLnRvbmUgPT09ICd3YXJuaW5nJyA/ICd3YXJuaW5nJyA6IHByaW1hcnlDb250cm9sLnRvbmUgPT09ICdzZWNvbmRhcnknID8gJ3NlY29uZGFyeScgOiAncHJpbWFyeScsXHJcbiAgICAgIGljb246IHByaW1hcnlDb250cm9sLmJ1c3kgPyA8TG9hZGVyMiBjbGFzc05hbWU9XCJoLTQgdy00IGFuaW1hdGUtc3BpblwiIC8+IDogcHJpbWFyeUNvbnRyb2wuaWNvbiA9PT0gJ3JldHJ5JyA/IDxSZWZyZXNoQ2N3IGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPiA6IHByaW1hcnlDb250cm9sLmljb24gPT09ICdzcGFya2xlcycgPyA8U3BhcmtsZXMgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+IDogPFBsYXkgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+LFxyXG4gICAgICBvbkNsaWNrOiBwcmltYXJ5Q29udHJvbC5vbkNsaWNrLFxyXG4gICAgfTtcclxuICAgIHJldHVybiBudWxsO1xyXG4gIH0sIFtjYW5Db25maXJtU3RhcnQsIGlucHV0VmFsdWUsIGxhbmd1YWdlLCBvbkNvbXBvc2VyRHJhZnRDaGFuZ2UsIG9uQ29uZmlybVN0YXJ0LCBvblJldHJ5TGxtLCBvblNlYXJjaFJldHJ5LCBvblNlYXJjaFVzZUxsbSwgb25TZW5kTWVzc2FnZSwgcHJpbWFyeUNvbnRyb2wsIHNlYXJjaFN0YXRlPy5zdGF0dXMsIHNob3dSZXRyeV0pO1xuXHJcbiAgY29uc3Qgc2Vjb25kYXJ5QWN0aW9ucyA9IHVzZU1lbW88Q29tcG9zZXJBY3Rpb25bXT4oKCkgPT4ge1xyXG4gICAgaWYgKHNlYXJjaFN0YXRlPy5zdGF0dXMgPT09ICd0aW1lb3V0JyAmJiBvblNlYXJjaFJldHJ5KSB7XHJcbiAgICAgIGNvbnN0IGFjdGlvbnM6IENvbXBvc2VyQWN0aW9uW10gPSBbeyBrZXk6ICdyZXRyeS1kaXJlY3QnLCBsYWJlbDogbGFuZ3VhZ2UgPT09ICdhcicgPyAn2KXYudin2K/YqSDYp9mE2KjYrdirJyA6ICdSZXRyeSBzZWFyY2gnLCBpY29uOiA8UmVmcmVzaENjdyBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz4sIG9uQ2xpY2s6ICgpID0+IHsgb25TZWFyY2hSZXRyeSgpOyBzZXRNZW51T3BlbihmYWxzZSk7IH0gfV07XHJcbiAgICAgIGlmIChvblNlYXJjaFVzZUxsbSkgYWN0aW9ucy5wdXNoKHsga2V5OiAnZmFsbGJhY2stbGxtJywgbGFiZWw6IGxhbmd1YWdlID09PSAnYXInID8gJ9in2LPYqtiu2K/Yp9mFINin2YTYqNiv2YrZhCDYp9mE2YXYrdmE2YonIDogJ1VzZSBMTE0gZmFsbGJhY2snLCB0b25lOiAnd2FybmluZycsIGljb246IDxXYW5kMiBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz4sIG9uQ2xpY2s6ICgpID0+IHsgb25TZWFyY2hVc2VMbG0oKTsgc2V0TWVudU9wZW4oZmFsc2UpOyB9IH0pO1xyXG4gICAgICByZXR1cm4gYWN0aW9ucztcclxuICAgIH1cclxuICAgIGlmIChwcmltYXJ5Q29udHJvbD8uc2Vjb25kYXJ5Py5vbkNsaWNrKSByZXR1cm4gW3sga2V5OiBgJHtwcmltYXJ5Q29udHJvbC5rZXl9LXNlY29uZGFyeWAsIGxhYmVsOiBwcmltYXJ5Q29udHJvbC5zZWNvbmRhcnkubGFiZWwsIGRpc2FibGVkOiBwcmltYXJ5Q29udHJvbC5zZWNvbmRhcnkuZGlzYWJsZWQsIGljb246IDxSZWZyZXNoQ2N3IGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPiwgb25DbGljazogKCkgPT4geyBwcmltYXJ5Q29udHJvbC5zZWNvbmRhcnk/Lm9uQ2xpY2s/LigpOyBzZXRNZW51T3BlbihmYWxzZSk7IH0gfV07XHJcbiAgICByZXR1cm4gW107XHJcbiAgfSwgW2xhbmd1YWdlLCBvblNlYXJjaFJldHJ5LCBvblNlYXJjaFVzZUxsbSwgcHJpbWFyeUNvbnRyb2wsIHNlYXJjaFN0YXRlPy5zdGF0dXNdKTtcclxuXHJcbiAgY29uc3Qgc3VibWl0Q2xhcmlmaWNhdGlvbiA9IHVzZUNhbGxiYWNrKCgpID0+IHtcclxuICAgIGlmICghcGVuZGluZ0NsYXJpZmljYXRpb24gfHwgIW9uU3VibWl0Q2xhcmlmaWNhdGlvbikgcmV0dXJuO1xyXG4gICAgY29uc3QgdGV4dCA9IGNsYXJpZmljYXRpb25UZXh0LnRyaW0oKTtcclxuICAgIGlmICghY2xhcmlmaWNhdGlvbkNob2ljZSAmJiAhdGV4dCkgcmV0dXJuO1xyXG4gICAgb25TdWJtaXRDbGFyaWZpY2F0aW9uKHsgcXVlc3Rpb25JZDogcGVuZGluZ0NsYXJpZmljYXRpb24ucXVlc3Rpb25JZCwgc2VsZWN0ZWRPcHRpb25JZDogY2xhcmlmaWNhdGlvbkNob2ljZSB8fCB1bmRlZmluZWQsIGN1c3RvbVRleHQ6IHRleHQgfHwgdW5kZWZpbmVkIH0pO1xyXG4gIH0sIFtjbGFyaWZpY2F0aW9uQ2hvaWNlLCBjbGFyaWZpY2F0aW9uVGV4dCwgb25TdWJtaXRDbGFyaWZpY2F0aW9uLCBwZW5kaW5nQ2xhcmlmaWNhdGlvbl0pO1xyXG5cclxuICBjb25zdCBzdWJtaXRQcmVmbGlnaHQgPSB1c2VDYWxsYmFjaygoKSA9PiB7XHJcbiAgICBpZiAoIXBlbmRpbmdQcmVmbGlnaHRRdWVzdGlvbiB8fCAhb25TdWJtaXRQcmVmbGlnaHQpIHJldHVybjtcclxuICAgIGNvbnN0IHRleHQgPSBwcmVmbGlnaHRUZXh0LnRyaW0oKTtcclxuICAgIGlmICghcHJlZmxpZ2h0Q2hvaWNlICYmICF0ZXh0KSByZXR1cm47XHJcbiAgICBvblN1Ym1pdFByZWZsaWdodCh7IHF1ZXN0aW9uSWQ6IHBlbmRpbmdQcmVmbGlnaHRRdWVzdGlvbi5xdWVzdGlvbklkLCBzZWxlY3RlZE9wdGlvbklkOiBwcmVmbGlnaHRDaG9pY2UgfHwgdW5kZWZpbmVkLCBjdXN0b21UZXh0OiB0ZXh0IHx8IHVuZGVmaW5lZCB9KTtcclxuICB9LCBbb25TdWJtaXRQcmVmbGlnaHQsIHBlbmRpbmdQcmVmbGlnaHRRdWVzdGlvbiwgcHJlZmxpZ2h0Q2hvaWNlLCBwcmVmbGlnaHRUZXh0XSk7XHJcblxyXG4gIHJldHVybiAoXHJcbiAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaC1mdWxsIG1pbi1oLTAgZmxleC1jb2xcIiBkaXI9XCJydGxcIj5cclxuICAgICAgPGRpdiByZWY9e2xpc3RSZWZ9IGNsYXNzTmFtZT1cImZsZXgtMSBzcGFjZS15LTUgb3ZlcmZsb3cteS1hdXRvIHB4LTUgcHktNSBzY3JvbGxiYXItdGhpblwiPlxyXG4gICAgICAgIHtpbmxpbmVTdGF0dXMgPyA8ZGl2IGNsYXNzTmFtZT17Y24oJ3JvdW5kZWQtWzI0cHhdIGJvcmRlciBweC00IHB5LTMgdGV4dC1zbScsIGlubGluZVN0YXR1cy50b25lID09PSAnd2FybmluZycgJiYgJ2JvcmRlci1hbWJlci00MDAvMzAgYmctYW1iZXItNTAwLzEwIHRleHQtYW1iZXItMTAwJywgaW5saW5lU3RhdHVzLnRvbmUgPT09ICdlcnJvcicgJiYgJ2JvcmRlci1yb3NlLTQwMC8zMCBiZy1yb3NlLTUwMC8xMCB0ZXh0LXJvc2UtMTAwJywgaW5saW5lU3RhdHVzLnRvbmUgPT09ICdpbmZvJyAmJiAnYm9yZGVyLXNreS00MDAvMjUgYmctc2t5LTUwMC8xMCB0ZXh0LXNreS0xMDAnKX0+e2lubGluZVN0YXR1cy5sYWJlbH08L2Rpdj4gOiBudWxsfVxyXG4gICAgICAgIHtzaG93U2VhcmNoTGl2ZVBhbmVsICYmIHNlYXJjaFBhbmVsTW9kZWwgJiYgc2VhcmNoUGFuZWxNb2RlbC5zdGFnZSAhPT0gJ2hpZGRlbicgPyA8U2VhcmNoTGl2ZVBhbmVsIG1vZGVsPXtzZWFyY2hQYW5lbE1vZGVsfSAvPiA6IG51bGx9XG4gICAgICAgIHshaXNSZWFzb25pbmdWaWV3ICYmIChyZWFzb25pbmdBY3RpdmUgfHwgcmVhc29uaW5nRmVlZC5sZW5ndGggPiAxKSA/IDxzZWN0aW9uIGNsYXNzTmFtZT1cInJvdW5kZWQtWzMwcHhdIGJvcmRlciBib3JkZXItcHJpbWFyeS8yNSBiZy1wcmltYXJ5LzEwIHAtNVwiPjxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIGdhcC0zXCI+PGRpdj48aDMgY2xhc3NOYW1lPVwidGV4dC1iYXNlIGZvbnQtc2VtaWJvbGQgdGV4dC1mb3JlZ3JvdW5kXCI+e2xhbmd1YWdlID09PSAnYXInID8gJ9in2YTZiNmD2YTYp9ihINio2K/Yo9mI2Kcg2YrYqtmG2KfZgti02YjZhiDYp9mE2KLZhicgOiAnQWdlbnRzIGhhdmUgc3RhcnRlZCBkZWJhdGluZyBub3cnfTwvaDM+PHAgY2xhc3NOYW1lPVwibXQtMSB0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPntsYW5ndWFnZSA9PT0gJ2FyJyA/ICfYp9mB2KrYrSDYtNin2LTYqSDYp9mE2YbZgtin2LQg2YTYsdik2YrYqSDYp9mE2K3ZiNin2LEg2KfZhNis2YXYp9i52Yog2KjZitmGINin2YTZiNmD2YTYp9ihLicgOiAnT3BlbiB0aGUgcmVhc29uaW5nIHZpZXcgdG8gd2F0Y2ggdGhlIGdyb3VwIGRpc2N1c3Npb24uJ308L3A+PC9kaXY+e29uUmVxdWVzdFJlYXNvbmluZ1ZpZXcgPyA8QnV0dG9uIHR5cGU9XCJidXR0b25cIiBvbkNsaWNrPXtvblJlcXVlc3RSZWFzb25pbmdWaWV3fSBjbGFzc05hbWU9XCJyb3VuZGVkLTJ4bFwiPntsYW5ndWFnZSA9PT0gJ2FyJyA/ICfZhdi02KfZh9iv2Kkg2KfZhNmG2YLYp9i0JyA6ICdPcGVuIHJlYXNvbmluZyd9PC9CdXR0b24+IDogbnVsbH08L2Rpdj48L3NlY3Rpb24+IDogbnVsbH1cclxuICAgICAgICB7aXNSZWFzb25pbmdWaWV3ID8gPFJlYXNvbmluZ0JvYXJkIGxhbmd1YWdlPXtsYW5ndWFnZX0gbWVzc2FnZXM9e3JlYXNvbmluZ0ZlZWR9IGhpZ2hsaWdodElkcz17aGlnaGxpZ2h0UmVhc29uaW5nTWVzc2FnZUlkc30gLz4gOiA8PlxyXG4gICAgICAgICAge21lc3NhZ2VzLm1hcCgobWVzc2FnZSkgPT4ge1xyXG4gICAgICAgICAgICBjb25zdCBpc1VzZXIgPSBtZXNzYWdlLnR5cGUgPT09ICd1c2VyJztcclxuICAgICAgICAgICAgY29uc3QgYXV0aG9yTGFiZWwgPSBpc1VzZXIgPyAobGFuZ3VhZ2UgPT09ICdhcicgPyAn2KPZhtiqJyA6ICdZb3UnKSA6IG1lc3NhZ2UudHlwZSA9PT0gJ2FnZW50JyA/IChtZXNzYWdlLmFnZW50SWQgfHwgJ0FnZW50JykgOiAobGFuZ3VhZ2UgPT09ICdhcicgPyAn2KfZhNmF2LPYp9i52K8nIDogJ0Fzc2lzdGFudCcpO1xyXG4gICAgICAgICAgICByZXR1cm4gPGRpdiBrZXk9e21lc3NhZ2UuaWR9IGNsYXNzTmFtZT17Y24oJ2ZsZXggdy1mdWxsJywgaXNVc2VyID8gJ2p1c3RpZnktc3RhcnQgbWQ6anVzdGlmeS1lbmQnIDogJ2p1c3RpZnktc3RhcnQnKX0+PGRpdiBjbGFzc05hbWU9e2NuKCd3LWZ1bGwgbWF4LXctWzk4JV0gcm91bmRlZC1bMjhweF0gYm9yZGVyIHB4LTUgcHktNCBtZDptYXgtdy1bOTIlXScsIGlzVXNlciA/ICdib3JkZXItcHJpbWFyeS8yNSBiZy1wcmltYXJ5LzEyJyA6IG1lc3NhZ2UudHlwZSA9PT0gJ2FnZW50JyA/ICdib3JkZXItZW1lcmFsZC00MDAvMjUgYmctZW1lcmFsZC01MDAvMTAnIDogJ2JvcmRlci1ib3JkZXIvNjAgYmctYmFja2dyb3VuZC82NScpfT48ZGl2IGNsYXNzTmFtZT1cIm1iLTIgZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgdGV4dC14cyB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj48ZGl2IGNsYXNzTmFtZT17Y24oJ2ZsZXggaC04IHctOCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgcm91bmRlZC0yeGwgYm9yZGVyJywgaXNVc2VyID8gJ2JvcmRlci1wcmltYXJ5LzMwIGJnLXByaW1hcnkvMTAgdGV4dC1wcmltYXJ5JyA6ICdib3JkZXItYm9yZGVyLzU1IGJnLWNhcmQvODAgdGV4dC1mb3JlZ3JvdW5kJyl9Pntpc1VzZXIgPyA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtc2VtaWJvbGRcIj57bGFuZ3VhZ2UgPT09ICdhcicgPyAn2KPZhtiqJyA6ICdNZSd9PC9zcGFuPiA6IDxCb3QgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+fTwvZGl2PjxzcGFuIGNsYXNzTmFtZT1cImZvbnQtbWVkaXVtIHRleHQtZm9yZWdyb3VuZC85MFwiPnthdXRob3JMYWJlbH08L3NwYW4+PC9kaXY+PHAgY2xhc3NOYW1lPVwid2hpdGVzcGFjZS1wcmUtd3JhcCB0ZXh0LVsxNXB4XSBsZWFkaW5nLTggdGV4dC1mb3JlZ3JvdW5kXCI+e21lc3NhZ2UuY29udGVudH08L3A+e21lc3NhZ2Uub3B0aW9ucz8uaXRlbXM/Lmxlbmd0aCA/IDxkaXYgY2xhc3NOYW1lPXtjbignbXQtNCBnYXAtMycsIHllc05vQ2hvaWNlKG1lc3NhZ2Uub3B0aW9ucy5pdGVtcykgPyAnZ3JpZCBncmlkLWNvbHMtMicgOiAnZ3JpZCBncmlkLWNvbHMtMScpfT57bWVzc2FnZS5vcHRpb25zLml0ZW1zLm1hcCgoaXRlbSkgPT4gPGJ1dHRvbiBrZXk9e2Ake21lc3NhZ2UuaWR9LSR7aXRlbS52YWx1ZX1gfSB0eXBlPVwiYnV0dG9uXCIgb25DbGljaz17KCkgPT4gb25TZWxlY3RPcHRpb24/LihtZXNzYWdlLm9wdGlvbnMhLmZpZWxkLCBpdGVtLnZhbHVlKX0gY2xhc3NOYW1lPVwicm91bmRlZC1bMjJweF0gYm9yZGVyIGJvcmRlci1ib3JkZXIvNjAgYmctY2FyZC83NSBweC00IHB5LTMuNSB0ZXh0LXN0YXJ0IHRyYW5zaXRpb24gaG92ZXI6Ym9yZGVyLXByaW1hcnkvMzUgaG92ZXI6YmctcHJpbWFyeS84XCI+PGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtc2VtaWJvbGQgbGVhZGluZy03IHRleHQtZm9yZWdyb3VuZFwiPnt5ZXNOb0Nob2ljZShtZXNzYWdlLm9wdGlvbnMuaXRlbXMpID8gaXRlbS52YWx1ZS50b0xvd2VyQ2FzZSgpID09PSAneWVzJyA/IChsYW5ndWFnZSA9PT0gJ2FyJyA/ICfZhti52YUnIDogJ1llcycpIDogKGxhbmd1YWdlID09PSAnYXInID8gJ9mE2KcnIDogJ05vJykgOiBpdGVtLmxhYmVsfTwvZGl2PntpdGVtLmRlc2NyaXB0aW9uID8gPGRpdiBjbGFzc05hbWU9XCJtdC0xIHRleHQteHMgbGVhZGluZy02IHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPntpdGVtLmRlc2NyaXB0aW9ufTwvZGl2PiA6IG51bGx9PC9idXR0b24+KX08L2Rpdj4gOiBudWxsfTwvZGl2PjwvZGl2PjtcclxuICAgICAgICAgIH0pfVxyXG4gICAgICAgICAge2lzVGhpbmtpbmcgPyA8ZGl2IGNsYXNzTmFtZT1cImlubGluZS1mbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiByb3VuZGVkLWZ1bGwgYm9yZGVyIGJvcmRlci1ib3JkZXIvNTUgYmctY2FyZC84MCBweC00IHB5LTIuNSB0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPjxMb2FkZXIyIGNsYXNzTmFtZT1cImgtNCB3LTQgYW5pbWF0ZS1zcGluXCIgLz48c3Bhbj57bGFuZ3VhZ2UgPT09ICdhcicgPyAn2KfZhNmF2LPYp9i52K8g2YrZg9iq2Kgg2KfZhNii2YYuLi4nIDogJ0Fzc2lzdGFudCBpcyByZXNwb25kaW5nLi4uJ308L3NwYW4+PC9kaXY+IDogbnVsbH1cclxuICAgICAgICAgIHtzaW11bGF0aW9uRXJyb3IgPyA8ZGl2IGNsYXNzTmFtZT1cInJvdW5kZWQtWzI2cHhdIGJvcmRlciBib3JkZXItZGVzdHJ1Y3RpdmUvMzAgYmctZGVzdHJ1Y3RpdmUvMTAgcHgtNSBweS00IHRleHQtc20gdGV4dC1mb3JlZ3JvdW5kXCI+PGRpdiBjbGFzc05hbWU9XCJtYi0xIGZsZXggaXRlbXMtY2VudGVyIGdhcC0yIGZvbnQtc2VtaWJvbGQgdGV4dC1kZXN0cnVjdGl2ZVwiPjxUcmlhbmdsZUFsZXJ0IGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPjxzcGFuPntsYW5ndWFnZSA9PT0gJ2FyJyA/ICfYrdiv2Ksg2K7Yt9ijINij2KvZhtin2KEg2KfZhNiq2YbZgdmK2LAnIDogJ0V4ZWN1dGlvbiBlcnJvcid9PC9zcGFuPjwvZGl2PntzaW11bGF0aW9uRXJyb3J9PC9kaXY+IDogbnVsbH1cclxuICAgICAgICAgIHtwZW5kaW5nSWRlYUNvbmZpcm1hdGlvbiA/IDxzZWN0aW9uIGNsYXNzTmFtZT1cInJvdW5kZWQtWzMwcHhdIGJvcmRlciBib3JkZXItZW1lcmFsZC00MDAvMzAgYmctZW1lcmFsZC01MDAvMTAgcC01XCI+PGgzIGNsYXNzTmFtZT1cInRleHQtYmFzZSBmb250LXNlbWlib2xkIHRleHQtZm9yZWdyb3VuZFwiPntsYW5ndWFnZSA9PT0gJ2FyJyA/ICfZh9mEINmH2LDYpyDZh9mIINin2YTZiNi12YEg2KfZhNmG2YfYp9im2Yog2YTZhNmB2YPYsdip2J8nIDogJ0lzIHRoaXMgdGhlIGZpbmFsIGlkZWEgZnJhbWluZz8nfTwvaDM+PHAgY2xhc3NOYW1lPVwibXQtMiB3aGl0ZXNwYWNlLXByZS13cmFwIHRleHQtc20gbGVhZGluZy03IHRleHQtZm9yZWdyb3VuZC85MFwiPntwZW5kaW5nSWRlYUNvbmZpcm1hdGlvbi5kZXNjcmlwdGlvbn08L3A+PGRpdiBjbGFzc05hbWU9XCJtdC00IGdyaWQgZ3JpZC1jb2xzLTIgZ2FwLTJcIj48QnV0dG9uIHR5cGU9XCJidXR0b25cIiBvbkNsaWNrPXtvbkNvbmZpcm1JZGVhRm9yU3RhcnR9IGNsYXNzTmFtZT1cInJvdW5kZWQtMnhsXCI+PENoZWNrIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPjxzcGFuPntsYW5ndWFnZSA9PT0gJ2FyJyA/ICfZhti52YXYjCDYp9io2K/YoycgOiAnWWVzLCBzdGFydCd9PC9zcGFuPjwvQnV0dG9uPjxCdXR0b24gdHlwZT1cImJ1dHRvblwiIHZhcmlhbnQ9XCJvdXRsaW5lXCIgb25DbGljaz17KCkgPT4gaW5wdXRSZWYuY3VycmVudD8uZm9jdXMoKX0gY2xhc3NOYW1lPVwicm91bmRlZC0yeGxcIj48WCBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz48c3Bhbj57bGFuZ3VhZ2UgPT09ICdhcicgPyAn2YTYp9iMINiz2KPYudiv2YQnIDogJ05vLCBJIHdpbGwgZWRpdCd9PC9zcGFuPjwvQnV0dG9uPjwvZGl2Pjwvc2VjdGlvbj4gOiBudWxsfVxyXG4gICAgICAgICAge3BlbmRpbmdJbnB1dEtpbmQgPT09ICdjbGFyaWZpY2F0aW9uJyAmJiBjYW5BbnN3ZXJDbGFyaWZpY2F0aW9uICYmIHBlbmRpbmdDbGFyaWZpY2F0aW9uID8gPFByb21wdENhcmQgdGl0bGU9e2xhbmd1YWdlID09PSAnYXInID8gJ9mG2K3Yqtin2Kwg2KrZiNi22YrYrdmL2Kcg2YLYqNmEINin2YTZhdiq2KfYqNi52KknIDogJ0NsYXJpZmljYXRpb24gaXMgbmVlZGVkIGJlZm9yZSBjb250aW51aW5nJ30gZGVzY3JpcHRpb249e3BlbmRpbmdDbGFyaWZpY2F0aW9uLnF1ZXN0aW9ufSBvcHRpb25zPXtwZW5kaW5nQ2xhcmlmaWNhdGlvbi5vcHRpb25zfSBzZWxlY3RlZD17Y2xhcmlmaWNhdGlvbkNob2ljZX0gb25TZWxlY3Q9e3NldENsYXJpZmljYXRpb25DaG9pY2V9IHRleHQ9e2NsYXJpZmljYXRpb25UZXh0fSBvblRleHQ9e3NldENsYXJpZmljYXRpb25UZXh0fSBidXN5PXtjbGFyaWZpY2F0aW9uQnVzeX0gc3VibWl0TGFiZWw9e2xhbmd1YWdlID09PSAnYXInID8gJ9il2LHYs9in2YQg2KfZhNiq2YjYttmK2K0nIDogJ1NlbmQgY2xhcmlmaWNhdGlvbid9IG9uU3VibWl0PXtzdWJtaXRDbGFyaWZpY2F0aW9ufSAvPiA6IG51bGx9XG4gICAgICAgICAge3BlbmRpbmdQcmVmbGlnaHRRdWVzdGlvbiA/IDxQcm9tcHRDYXJkIHRpdGxlPXtsYW5ndWFnZSA9PT0gJ2FyJyA/IGDYs9ik2KfZhCDYqtmF2YfZitiv2YogJHtwcmVmbGlnaHRSb3VuZH0vJHtwcmVmbGlnaHRNYXhSb3VuZHN9YCA6IGBQcmVmbGlnaHQgcXVlc3Rpb24gJHtwcmVmbGlnaHRSb3VuZH0vJHtwcmVmbGlnaHRNYXhSb3VuZHN9YH0gZGVzY3JpcHRpb249e3BlbmRpbmdQcmVmbGlnaHRRdWVzdGlvbi5xdWVzdGlvbn0gb3B0aW9ucz17cGVuZGluZ1ByZWZsaWdodFF1ZXN0aW9uLm9wdGlvbnN9IHNlbGVjdGVkPXtwcmVmbGlnaHRDaG9pY2V9IG9uU2VsZWN0PXtzZXRQcmVmbGlnaHRDaG9pY2V9IHRleHQ9e3ByZWZsaWdodFRleHR9IG9uVGV4dD17c2V0UHJlZmxpZ2h0VGV4dH0gYnVzeT17cHJlZmxpZ2h0QnVzeX0gc3VibWl0TGFiZWw9e2xhbmd1YWdlID09PSAnYXInID8gJ9iq2KPZg9mK2K8g2KfZhNil2KzYp9io2KknIDogJ0NvbmZpcm0gYW5zd2VyJ30gb25TdWJtaXQ9e3N1Ym1pdFByZWZsaWdodH0gdG9uZT1cIndhcm5pbmdcIiAvPiA6IG51bGx9XHJcbiAgICAgICAgICB7cGVuZGluZ1Jlc2VhcmNoUmV2aWV3ID8gPHNlY3Rpb24gY2xhc3NOYW1lPVwicm91bmRlZC1bMzBweF0gYm9yZGVyIGJvcmRlci1wcmltYXJ5LzMwIGJnLXByaW1hcnkvOCBwLTVcIj48aDMgY2xhc3NOYW1lPVwidGV4dC1iYXNlIGZvbnQtc2VtaWJvbGQgdGV4dC1mb3JlZ3JvdW5kXCI+e2xhbmd1YWdlID09PSAnYXInID8gJ9ix2KfYrNi5INmG2KrYp9im2Kwg2KfZhNio2K3YqyDZgtio2YQg2KfZhNmF2KrYp9io2LnYqScgOiAnUmV2aWV3IHJlc2VhcmNoIGJlZm9yZSBjb250aW51aW5nJ308L2gzPntwZW5kaW5nUmVzZWFyY2hSZXZpZXcuZ2FwU3VtbWFyeSA/IDxwIGNsYXNzTmFtZT1cIm10LTIgdGV4dC1zbSBsZWFkaW5nLTcgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+e3BlbmRpbmdSZXNlYXJjaFJldmlldy5nYXBTdW1tYXJ5fTwvcD4gOiBudWxsfTxkaXYgY2xhc3NOYW1lPVwibXQtNCBzcGFjZS15LTJcIj57cGVuZGluZ1Jlc2VhcmNoUmV2aWV3LmNhbmRpZGF0ZVVybHMubWFwKChpdGVtKSA9PiB7IGNvbnN0IHNlbGVjdGVkID0gcmV2aWV3U2VsZWN0ZWRJZHMuaW5jbHVkZXMoaXRlbS5pZCk7IHJldHVybiA8YnV0dG9uIGtleT17aXRlbS5pZH0gdHlwZT1cImJ1dHRvblwiIG9uQ2xpY2s9eygpID0+IHNldFJldmlld1NlbGVjdGVkSWRzKChwcmV2KSA9PiBwcmV2LmluY2x1ZGVzKGl0ZW0uaWQpID8gcHJldi5maWx0ZXIoKGVudHJ5KSA9PiBlbnRyeSAhPT0gaXRlbS5pZCkgOiBbLi4ucHJldiwgaXRlbS5pZF0pfSBjbGFzc05hbWU9e2NuKCd3LWZ1bGwgcm91bmRlZC0yeGwgYm9yZGVyIHB4LTQgcHktMyB0ZXh0LXN0YXJ0IHRyYW5zaXRpb24nLCBzZWxlY3RlZCA/ICdib3JkZXItcHJpbWFyeS80MCBiZy1wcmltYXJ5LzEwJyA6ICdib3JkZXItYm9yZGVyLzYwIGJnLWJhY2tncm91bmQvNTUnKX0+PGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtc2VtaWJvbGQgdGV4dC1mb3JlZ3JvdW5kXCI+e2l0ZW0udGl0bGUgfHwgaXRlbS5kb21haW4gfHwgaXRlbS51cmx9PC9kaXY+PGRpdiBjbGFzc05hbWU9XCJtdC0xIHRleHQteHMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCIgZGlyPVwibHRyXCI+e2l0ZW0udXJsfTwvZGl2PjwvYnV0dG9uPjsgfSl9PC9kaXY+PElucHV0IHZhbHVlPXtyZXZpZXdRdWVyeVJlZmluZW1lbnR9IG9uQ2hhbmdlPXsoZXZlbnQpID0+IHNldFJldmlld1F1ZXJ5UmVmaW5lbWVudChldmVudC50YXJnZXQudmFsdWUpfSBjbGFzc05hbWU9XCJtdC0zIGgtMTIgcm91bmRlZC0yeGwgYm9yZGVyLWJvcmRlci82MCBiZy1iYWNrZ3JvdW5kLzY1IHRleHQtYmFzZVwiIHBsYWNlaG9sZGVyPXtsYW5ndWFnZSA9PT0gJ2FyJyA/ICfYqtit2LPZitmGINil2LbYp9mB2Yog2YTZhNin2LPYqti52YTYp9mFJyA6ICdPcHRpb25hbCBxdWVyeSByZWZpbmVtZW50J30gZGlyPVwicnRsXCIgLz48SW5wdXQgdmFsdWU9e3Jldmlld0V4dHJhVXJsc30gb25DaGFuZ2U9eyhldmVudCkgPT4gc2V0UmV2aWV3RXh0cmFVcmxzKGV2ZW50LnRhcmdldC52YWx1ZSl9IGNsYXNzTmFtZT1cIm10LTMgaC0xMiByb3VuZGVkLTJ4bCBib3JkZXItYm9yZGVyLzYwIGJnLWJhY2tncm91bmQvNjUgdGV4dC1iYXNlXCIgcGxhY2Vob2xkZXI9e2xhbmd1YWdlID09PSAnYXInID8gJ9ij2YTYtdmCINix2YjYp9io2Lcg2KXYttin2YHZitipINmF2YHYtdmI2YTYqSDYqNmB2KfYtdmE2KknIDogJ0V4dHJhIFVSTHMgc2VwYXJhdGVkIGJ5IGNvbW1hJ30gZGlyPVwibHRyXCIgLz48ZGl2IGNsYXNzTmFtZT1cIm10LTQgZ3JpZCBnYXAtMiBzbTpncmlkLWNvbHMtM1wiPjxCdXR0b24gdHlwZT1cImJ1dHRvblwiIGRpc2FibGVkPXtyZXNlYXJjaFJldmlld0J1c3kgfHwgIXJldmlld1NlbGVjdGVkSWRzLmxlbmd0aH0gb25DbGljaz17KCkgPT4gb25TdWJtaXRSZXNlYXJjaFJldmlld0FjdGlvbj8uKHsgY3ljbGVJZDogcGVuZGluZ1Jlc2VhcmNoUmV2aWV3LmN5Y2xlSWQsIGFjdGlvbjogJ3NjcmFwZV9zZWxlY3RlZCcsIHNlbGVjdGVkVXJsSWRzOiByZXZpZXdTZWxlY3RlZElkcywgYWRkZWRVcmxzOiByZXZpZXdFeHRyYVVybHMuc3BsaXQoJywnKS5tYXAoKGl0ZW0pID0+IGl0ZW0udHJpbSgpKS5maWx0ZXIoQm9vbGVhbiksIHF1ZXJ5UmVmaW5lbWVudDogcmV2aWV3UXVlcnlSZWZpbmVtZW50LnRyaW0oKSB8fCB1bmRlZmluZWQgfSl9IGNsYXNzTmFtZT1cInJvdW5kZWQtMnhsXCI+e3Jlc2VhcmNoUmV2aWV3QnVzeSA/IDxMb2FkZXIyIGNsYXNzTmFtZT1cImgtNCB3LTQgYW5pbWF0ZS1zcGluXCIgLz4gOiA8Q2hlY2sgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+fTxzcGFuPntsYW5ndWFnZSA9PT0gJ2FyJyA/ICfYp9iz2KrYrtix2KfYrCDYp9mE2YXYrdiv2K8nIDogJ1NjcmFwZSBzZWxlY3RlZCd9PC9zcGFuPjwvQnV0dG9uPjxCdXR0b24gdHlwZT1cImJ1dHRvblwiIHZhcmlhbnQ9XCJvdXRsaW5lXCIgZGlzYWJsZWQ9e3Jlc2VhcmNoUmV2aWV3QnVzeX0gb25DbGljaz17KCkgPT4gb25TdWJtaXRSZXNlYXJjaFJldmlld0FjdGlvbj8uKHsgY3ljbGVJZDogcGVuZGluZ1Jlc2VhcmNoUmV2aWV3LmN5Y2xlSWQsIGFjdGlvbjogJ2NvbnRpbnVlX3NlYXJjaCcsIGFkZGVkVXJsczogcmV2aWV3RXh0cmFVcmxzLnNwbGl0KCcsJykubWFwKChpdGVtKSA9PiBpdGVtLnRyaW0oKSkuZmlsdGVyKEJvb2xlYW4pLCBxdWVyeVJlZmluZW1lbnQ6IHJldmlld1F1ZXJ5UmVmaW5lbWVudC50cmltKCkgfHwgdW5kZWZpbmVkIH0pfSBjbGFzc05hbWU9XCJyb3VuZGVkLTJ4bFwiPjxSZWZyZXNoQ2N3IGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPjxzcGFuPntsYW5ndWFnZSA9PT0gJ2FyJyA/ICfZiNiz2ZHYuSDYp9mE2KjYrdirJyA6ICdDb250aW51ZSBzZWFyY2gnfTwvc3Bhbj48L0J1dHRvbj48QnV0dG9uIHR5cGU9XCJidXR0b25cIiB2YXJpYW50PVwiZ2hvc3RcIiBkaXNhYmxlZD17cmVzZWFyY2hSZXZpZXdCdXN5fSBvbkNsaWNrPXsoKSA9PiBvblN1Ym1pdFJlc2VhcmNoUmV2aWV3QWN0aW9uPy4oeyBjeWNsZUlkOiBwZW5kaW5nUmVzZWFyY2hSZXZpZXcuY3ljbGVJZCwgYWN0aW9uOiAnY2FuY2VsX3JldmlldycgfSl9IGNsYXNzTmFtZT1cInJvdW5kZWQtMnhsXCI+PFggY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+PHNwYW4+e2xhbmd1YWdlID09PSAnYXInID8gJ9il2YTYutin2KEnIDogJ0NhbmNlbCd9PC9zcGFuPjwvQnV0dG9uPjwvZGl2Pjwvc2VjdGlvbj4gOiBudWxsfVxyXG4gICAgICAgICAge3Bvc3RBY3Rpb25zRW5hYmxlZCAmJiBvblJ1blBvc3RBY3Rpb24gPyA8c2VjdGlvbiBjbGFzc05hbWU9XCJyb3VuZGVkLVszMHB4XSBib3JkZXIgYm9yZGVyLWJvcmRlci82MCBiZy1jYXJkLzc1IHAtNVwiPjxkaXYgY2xhc3NOYW1lPVwiZmxleCBmbGV4LXdyYXAgaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBnYXAtM1wiPjxkaXY+PGgzIGNsYXNzTmFtZT1cInRleHQtYmFzZSBmb250LXNlbWlib2xkIHRleHQtZm9yZWdyb3VuZFwiPntsYW5ndWFnZSA9PT0gJ2FyJyA/ICfYp9mE2K7Yt9mI2Kkg2KfZhNiq2KfZhNmK2Kkg2KjYudivINin2YTYqtmC2YrZitmFJyA6ICdOZXh0IHN0ZXAgYWZ0ZXIgZXZhbHVhdGlvbid9PC9oMz57dHlwZW9mIGZpbmFsQWNjZXB0YW5jZVBjdCA9PT0gJ251bWJlcicgPyA8cCBjbGFzc05hbWU9XCJtdC0xIHRleHQtc20gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+e2xhbmd1YWdlID09PSAnYXInID8gYNmG2LPYqNipINin2YTZgtio2YjZhCDYp9mE2K3Yp9mE2YrYqSAke01hdGgucm91bmQoZmluYWxBY2NlcHRhbmNlUGN0KX0lYCA6IGBDdXJyZW50IGFjY2VwdGFuY2UgJHtNYXRoLnJvdW5kKGZpbmFsQWNjZXB0YW5jZVBjdCl9JWB9PC9wPiA6IG51bGx9PC9kaXY+e3JlY29tbWVuZGVkUG9zdEFjdGlvbiA/IDxkaXYgY2xhc3NOYW1lPVwicm91bmRlZC1mdWxsIGJvcmRlciBib3JkZXItcHJpbWFyeS8yMCBiZy1wcmltYXJ5LzEwIHB4LTMgcHktMSB0ZXh0LXhzIGZvbnQtbWVkaXVtIHRleHQtcHJpbWFyeVwiPntsYW5ndWFnZSA9PT0gJ2FyJyA/IGDZhdmC2KrYsditOiAke3JlY29tbWVuZGVkUG9zdEFjdGlvbiA9PT0gJ21ha2VfYWNjZXB0YWJsZScgPyAn2KfYrNi52YTZh9inINmF2YLYqNmI2YTYqScgOiAn2KPZhtiy2YTZh9inINmE2YTYudin2YTZhSd9YCA6IGBTdWdnZXN0ZWQ6ICR7cmVjb21tZW5kZWRQb3N0QWN0aW9ufWB9PC9kaXY+IDogbnVsbH08L2Rpdj48ZGl2IGNsYXNzTmFtZT1cIm10LTQgZ3JpZCBnYXAtMyBzbTpncmlkLWNvbHMtMlwiPjxCdXR0b24gdHlwZT1cImJ1dHRvblwiIHZhcmlhbnQ9e3JlY29tbWVuZGVkUG9zdEFjdGlvbiA9PT0gJ21ha2VfYWNjZXB0YWJsZScgPyAnZGVmYXVsdCcgOiAnb3V0bGluZSd9IGRpc2FibGVkPXtwb3N0QWN0aW9uQnVzeSAhPT0gbnVsbH0gb25DbGljaz17KCkgPT4gb25SdW5Qb3N0QWN0aW9uKCdtYWtlX2FjY2VwdGFibGUnKX0gY2xhc3NOYW1lPVwicm91bmRlZC0yeGxcIj57cG9zdEFjdGlvbkJ1c3kgPT09ICdtYWtlX2FjY2VwdGFibGUnID8gPExvYWRlcjIgY2xhc3NOYW1lPVwiaC00IHctNCBhbmltYXRlLXNwaW5cIiAvPiA6IDxTcGFya2xlcyBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz59PHNwYW4+e2xhbmd1YWdlID09PSAnYXInID8gJ9in2KzYudmE2YfYpyDZhdmC2KjZiNmE2KknIDogJ01ha2UgYWNjZXB0YWJsZSd9PC9zcGFuPjwvQnV0dG9uPjxCdXR0b24gdHlwZT1cImJ1dHRvblwiIHZhcmlhbnQ9e3JlY29tbWVuZGVkUG9zdEFjdGlvbiA9PT0gJ2JyaW5nX3RvX3dvcmxkJyA/ICdkZWZhdWx0JyA6ICdvdXRsaW5lJ30gZGlzYWJsZWQ9e3Bvc3RBY3Rpb25CdXN5ICE9PSBudWxsfSBvbkNsaWNrPXsoKSA9PiBvblJ1blBvc3RBY3Rpb24oJ2JyaW5nX3RvX3dvcmxkJyl9IGNsYXNzTmFtZT1cInJvdW5kZWQtMnhsXCI+e3Bvc3RBY3Rpb25CdXN5ID09PSAnYnJpbmdfdG9fd29ybGQnID8gPExvYWRlcjIgY2xhc3NOYW1lPVwiaC00IHctNCBhbmltYXRlLXNwaW5cIiAvPiA6IDxQbGF5IGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPn08c3Bhbj57bGFuZ3VhZ2UgPT09ICdhcicgPyAn2KPZhtiy2YTZh9inINmE2YTYudin2YTZhScgOiAnQnJpbmcgdG8gd29ybGQnfTwvc3Bhbj48L0J1dHRvbj48L2Rpdj48L3NlY3Rpb24+IDogbnVsbH1cclxuICAgICAgICAgIHtwb3N0QWN0aW9uUmVzdWx0ID8gPHNlY3Rpb24gY2xhc3NOYW1lPVwicm91bmRlZC1bMzBweF0gYm9yZGVyIGJvcmRlci1lbWVyYWxkLTQwMC8yNSBiZy1lbWVyYWxkLTUwMC84IHAtNVwiPjxoMyBjbGFzc05hbWU9XCJ0ZXh0LWJhc2UgZm9udC1zZW1pYm9sZCB0ZXh0LWZvcmVncm91bmRcIj57cG9zdEFjdGlvblJlc3VsdC50aXRsZX08L2gzPjxwIGNsYXNzTmFtZT1cIm10LTIgdGV4dC1zbSBsZWFkaW5nLTcgdGV4dC1mb3JlZ3JvdW5kLzkwXCI+e3Bvc3RBY3Rpb25SZXN1bHQuc3VtbWFyeX08L3A+e29uU3RhcnRGb2xsb3d1cEZyb21Qb3N0QWN0aW9uID8gPEJ1dHRvbiB0eXBlPVwiYnV0dG9uXCIgb25DbGljaz17b25TdGFydEZvbGxvd3VwRnJvbVBvc3RBY3Rpb259IGNsYXNzTmFtZT1cIm10LTQgcm91bmRlZC0yeGxcIj48UGxheSBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz48c3Bhbj57bGFuZ3VhZ2UgPT09ICdhcicgPyAn2KfYqNiv2KMg2KzZiNmE2Kkg2YXYqtin2KjYudipJyA6ICdTdGFydCBmb2xsb3ctdXAgcnVuJ308L3NwYW4+PC9CdXR0b24+IDogbnVsbH08L3NlY3Rpb24+IDogbnVsbH1cclxuICAgICAgICAgIHtxdWlja1JlcGxpZXMubGVuZ3RoICYmICFwZW5kaW5nQ2xhcmlmaWNhdGlvbiAmJiAhcGVuZGluZ1ByZWZsaWdodFF1ZXN0aW9uICYmICFwZW5kaW5nUmVzZWFyY2hSZXZpZXcgPyA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZmxleC13cmFwIGdhcC0yXCI+e3F1aWNrUmVwbGllcy5tYXAoKHJlcGx5KSA9PiA8YnV0dG9uIGtleT17cmVwbHkudmFsdWV9IHR5cGU9XCJidXR0b25cIiBvbkNsaWNrPXsoKSA9PiBvblF1aWNrUmVwbHk/LihyZXBseS52YWx1ZSl9IGNsYXNzTmFtZT1cInJvdW5kZWQtZnVsbCBib3JkZXIgYm9yZGVyLWJvcmRlci81NSBiZy1jYXJkLzgwIHB4LTQgcHktMiB0ZXh0LXNtIHRleHQtZm9yZWdyb3VuZCB0cmFuc2l0aW9uIGhvdmVyOmJvcmRlci1wcmltYXJ5LzMwIGhvdmVyOmJnLXByaW1hcnkvOFwiPntyZXBseS5sYWJlbH08L2J1dHRvbj4pfTwvZGl2PiA6IG51bGx9XHJcbiAgICAgICAgPC8+fVxyXG4gICAgICA8L2Rpdj5cclxuICAgICAgeyFpc1JlYXNvbmluZ1ZpZXcgPyA8ZGl2IGNsYXNzTmFtZT1cImJvcmRlci10IGJvcmRlci1ib3JkZXIvNDUgcHgtNSBwYi01IHB0LTRcIj48Zm9ybSByZWY9e2Zvcm1SZWZ9IG9uU3VibWl0PXsoZXZlbnQpID0+IHsgZXZlbnQucHJldmVudERlZmF1bHQoKTsgcHJpbWFyeUFjdGlvbj8ub25DbGljaygpOyB9fSBjbGFzc05hbWU9XCJyZWxhdGl2ZVwiPjxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1lbmQgZ2FwLTNcIj48SW5wdXQgcmVmPXtpbnB1dFJlZn0gdmFsdWU9e2lucHV0VmFsdWV9IG9uQ2hhbmdlPXsoZXZlbnQpID0+IHsgY29uc3QgbmV4dFZhbHVlID0gZXZlbnQudGFyZ2V0LnZhbHVlOyBzZXRJbnB1dFZhbHVlKG5leHRWYWx1ZSk7IG9uQ29tcG9zZXJEcmFmdENoYW5nZT8uKG5leHRWYWx1ZSk7IH19IHBsYWNlaG9sZGVyPXtsYW5ndWFnZSA9PT0gJ2FyJyA/ICfYp9mD2KrYqCDYsdiz2KfZhNiq2YMg2KPZiCDYudiv2ZHZhCDYp9mE2YHZg9ix2KkuLi4nIDogJ1R5cGUgeW91ciBtZXNzYWdlIG9yIHJlZmluZSB0aGUgaWRlYS4uLid9IGNsYXNzTmFtZT1cImgtMTQgZmxleC0xIHJvdW5kZWQtWzI0cHhdIGJvcmRlci1ib3JkZXIvNjAgYmctY2FyZC84MCBweC01IHRleHQtYmFzZVwiIGRpcj1cInJ0bFwiIC8+PGRpdiBjbGFzc05hbWU9XCJyZWxhdGl2ZSBzaHJpbmstMFwiPjxCdXR0b24gdHlwZT1cInN1Ym1pdFwiIGRpc2FibGVkPXshcHJpbWFyeUFjdGlvbiB8fCBwcmltYXJ5QWN0aW9uLmRpc2FibGVkIHx8IHByaW1hcnlBY3Rpb24uYnVzeSB8fCBpc1RoaW5raW5nIHx8IHNpbXVsYXRpb25TdGF0dXMgPT09ICdjb25maWd1cmluZyd9IGNsYXNzTmFtZT17Y24oJ2gtMTQgbWluLXctWzE4MHB4XSByb3VuZGVkLVsyNHB4XSBweC01IHRyYW5zaXRpb24tYWxsIGR1cmF0aW9uLTIwMCcsIHByaW1hcnlBY3Rpb24/LnRvbmUgPT09ICd3YXJuaW5nJyAmJiAnYmctYW1iZXItNTAwIHRleHQtc2xhdGUtOTUwIGhvdmVyOmJnLWFtYmVyLTQwMCcsIHByaW1hcnlBY3Rpb24/LnRvbmUgPT09ICdzZWNvbmRhcnknICYmICdiZy1zZWNvbmRhcnkgdGV4dC1mb3JlZ3JvdW5kIGhvdmVyOmJnLXNlY29uZGFyeS84NScsIG1lbnVPcGVuICYmICd0cmFuc2xhdGUteS1bLTFweF0gc2hhZG93LVswXzEycHhfMzJweF8tMTZweF9yZ2JhKDAsMCwwLDAuNDUpXScpfT57cHJpbWFyeUFjdGlvbj8uYnVzeSA/IDxMb2FkZXIyIGNsYXNzTmFtZT1cImgtNCB3LTQgYW5pbWF0ZS1zcGluXCIgLz4gOiBwcmltYXJ5QWN0aW9uPy5pY29ufTxzcGFuPntwcmltYXJ5QWN0aW9uPy5sYWJlbCB8fCAobGFuZ3VhZ2UgPT09ICdhcicgPyAn2KfZg9iq2Kgg2LHYs9in2YTYqScgOiAnV3JpdGUgbWVzc2FnZScpfTwvc3Bhbj57c2Vjb25kYXJ5QWN0aW9ucy5sZW5ndGggPyA8Q2hldnJvbkRvd24gY2xhc3NOYW1lPXtjbignaC00IHctNCB0cmFuc2l0aW9uLXRyYW5zZm9ybScsIG1lbnVPcGVuICYmICdyb3RhdGUtMTgwJyl9IC8+IDogbnVsbH08L0J1dHRvbj57c2Vjb25kYXJ5QWN0aW9ucy5sZW5ndGggPyA8ZGl2IGNsYXNzTmFtZT17Y24oJ2Fic29sdXRlIGJvdHRvbS1bY2FsYygxMDAlKzEwcHgpXSBzdGFydC0wIHctNzIgb3JpZ2luLWJvdHRvbSByb3VuZGVkLVsyNHB4XSBib3JkZXIgYm9yZGVyLWJvcmRlci82MCBiZy1jYXJkLzk1IHAtMiBzaGFkb3ctMnhsIGJhY2tkcm9wLWJsdXIteGwgdHJhbnNpdGlvbi1hbGwgZHVyYXRpb24tMjAwJywgbWVudU9wZW4gPyAncG9pbnRlci1ldmVudHMtYXV0byB0cmFuc2xhdGUteS0wIHNjYWxlLTEwMCBvcGFjaXR5LTEwMCcgOiAncG9pbnRlci1ldmVudHMtbm9uZSB0cmFuc2xhdGUteS0yIHNjYWxlLTk1IG9wYWNpdHktMCcpfT57c2Vjb25kYXJ5QWN0aW9ucy5tYXAoKGFjdGlvbikgPT4gPGJ1dHRvbiBrZXk9e2FjdGlvbi5rZXl9IHR5cGU9XCJidXR0b25cIiBkaXNhYmxlZD17YWN0aW9uLmRpc2FibGVkfSBvbkNsaWNrPXthY3Rpb24ub25DbGlja30gY2xhc3NOYW1lPVwiZmxleCB3LWZ1bGwgaXRlbXMtY2VudGVyIGdhcC0zIHJvdW5kZWQtMnhsIHB4LTMgcHktMyB0ZXh0LXN0YXJ0IHRleHQtc20gdGV4dC1mb3JlZ3JvdW5kIHRyYW5zaXRpb24gaG92ZXI6YmctcHJpbWFyeS84IGRpc2FibGVkOm9wYWNpdHktNTBcIj48c3BhbiBjbGFzc05hbWU9e2NuKCdmbGV4IGgtOSB3LTkgaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIHJvdW5kZWQtMnhsIGJvcmRlcicsIGFjdGlvbi50b25lID09PSAnd2FybmluZycgPyAnYm9yZGVyLWFtYmVyLTQwMC8zMCBiZy1hbWJlci01MDAvMTUgdGV4dC1hbWJlci0zMDAnIDogJ2JvcmRlci1ib3JkZXIvNjAgYmctYmFja2dyb3VuZC82NSB0ZXh0LWZvcmVncm91bmQnKX0+e2FjdGlvbi5pY29ufTwvc3Bhbj48c3Bhbj57YWN0aW9uLmxhYmVsfTwvc3Bhbj48L2J1dHRvbj4pfTwvZGl2PiA6IG51bGx9PC9kaXY+PC9kaXY+PC9mb3JtPjwvZGl2PiA6IG51bGx9XG4gICAgPC9kaXY+XHJcbiAgKTtcclxufVxyXG4iXSwibmFtZXMiOlsidXNlQ2FsbGJhY2siLCJ1c2VFZmZlY3QiLCJ1c2VNZW1vIiwidXNlUmVmIiwidXNlU3RhdGUiLCJCb3QiLCJDaGVjayIsIkNoZXZyb25Eb3duIiwiTG9hZGVyMiIsIlBsYXkiLCJSZWZyZXNoQ2N3IiwiU2VhcmNoIiwiU2VuZCIsIlNwYXJrbGVzIiwiVHJpYW5nbGVBbGVydCIsIldhbmQyIiwiWCIsIkJ1dHRvbiIsIklucHV0IiwiUmVhc29uaW5nQm9hcmQiLCJTZWFyY2hMaXZlUGFuZWwiLCJjbiIsInN0YWdlTGFiZWxzIiwiZXh0cmFjdGluZ19zY2hlbWEiLCJhciIsImVuIiwiZGV0ZWN0aW5nX21vZGUiLCJhc3Npc3RhbnRfcmVwbHkiLCJwcmVzdGFydF9yZXNlYXJjaCIsInN0YXJ0aW5nX3NpbXVsYXRpb24iLCJjaGVja2luZ19zZXNzaW9uIiwieWVzTm9DaG9pY2UiLCJpdGVtcyIsImxlbmd0aCIsInNvbWUiLCJpdGVtIiwidmFsdWUiLCJ0b0xvd2VyQ2FzZSIsIlByb21wdENhcmQiLCJ0aXRsZSIsImRlc2NyaXB0aW9uIiwib3B0aW9ucyIsInNlbGVjdGVkIiwib25TZWxlY3QiLCJ0ZXh0Iiwib25UZXh0IiwiYnVzeSIsInN1Ym1pdExhYmVsIiwib25TdWJtaXQiLCJ0b25lIiwic2VjdGlvbiIsImNsYXNzTmFtZSIsImgzIiwicCIsImRpdiIsIm1hcCIsIm9wdGlvbiIsImJ1dHRvbiIsInR5cGUiLCJvbkNsaWNrIiwiaWQiLCJsYWJlbCIsIm9uQ2hhbmdlIiwiZXZlbnQiLCJ0YXJnZXQiLCJwbGFjZWhvbGRlciIsImRpciIsImRpc2FibGVkIiwidHJpbSIsInNwYW4iLCJDaGF0UGFuZWwiLCJwcm9wcyIsIm1lc3NhZ2VzIiwicmVhc29uaW5nRmVlZCIsImhpZ2hsaWdodFJlYXNvbmluZ01lc3NhZ2VJZHMiLCJvblNlbmRNZXNzYWdlIiwib25Db21wb3NlckRyYWZ0Q2hhbmdlIiwib25TZWxlY3RPcHRpb24iLCJpc1dhaXRpbmdGb3JDaXR5IiwiaXNXYWl0aW5nRm9yQ291bnRyeSIsImlzV2FpdGluZ0ZvckxvY2F0aW9uQ2hvaWNlIiwiaXNUaGlua2luZyIsInNob3dSZXRyeSIsIm9uUmV0cnlMbG0iLCJvblNlYXJjaFJldHJ5Iiwib25TZWFyY2hVc2VMbG0iLCJjYW5Db25maXJtU3RhcnQiLCJvbkNvbmZpcm1TdGFydCIsInF1aWNrUmVwbGllcyIsIm9uUXVpY2tSZXBseSIsInNpbXVsYXRpb25TdGF0dXMiLCJzaW11bGF0aW9uRXJyb3IiLCJyZWFzb25pbmdBY3RpdmUiLCJpc1N1bW1hcml6aW5nIiwidmlld01vZGUiLCJzZWFyY2hTdGF0ZSIsInVpUHJvZ3Jlc3MiLCJzZWFyY2hQYW5lbE1vZGVsIiwic2hvd1NlYXJjaExpdmVQYW5lbCIsInByaW1hcnlDb250cm9sIiwicGVuZGluZ0NsYXJpZmljYXRpb24iLCJjYW5BbnN3ZXJDbGFyaWZpY2F0aW9uIiwicGVuZGluZ0lucHV0S2luZCIsImNsYXJpZmljYXRpb25CdXN5Iiwib25TdWJtaXRDbGFyaWZpY2F0aW9uIiwicGVuZGluZ1ByZWZsaWdodFF1ZXN0aW9uIiwicHJlZmxpZ2h0Um91bmQiLCJwcmVmbGlnaHRNYXhSb3VuZHMiLCJwcmVmbGlnaHRCdXN5Iiwib25TdWJtaXRQcmVmbGlnaHQiLCJwZW5kaW5nSWRlYUNvbmZpcm1hdGlvbiIsIm9uQ29uZmlybUlkZWFGb3JTdGFydCIsInBlbmRpbmdSZXNlYXJjaFJldmlldyIsInJlc2VhcmNoUmV2aWV3QnVzeSIsIm9uU3VibWl0UmVzZWFyY2hSZXZpZXdBY3Rpb24iLCJwb3N0QWN0aW9uc0VuYWJsZWQiLCJyZWNvbW1lbmRlZFBvc3RBY3Rpb24iLCJmaW5hbEFjY2VwdGFuY2VQY3QiLCJwb3N0QWN0aW9uQnVzeSIsInBvc3RBY3Rpb25SZXN1bHQiLCJvblJ1blBvc3RBY3Rpb24iLCJvblN0YXJ0Rm9sbG93dXBGcm9tUG9zdEFjdGlvbiIsIm9uUmVxdWVzdFJlYXNvbmluZ1ZpZXciLCJzZXR0aW5ncyIsImxhbmd1YWdlIiwiaXNSZWFzb25pbmdWaWV3IiwibGlzdFJlZiIsImZvcm1SZWYiLCJpbnB1dFJlZiIsImFsbG93QXV0b0ZvY3VzUmVmIiwibGFzdE1lc3NhZ2VJZFJlZiIsImlucHV0VmFsdWUiLCJzZXRJbnB1dFZhbHVlIiwibWVudU9wZW4iLCJzZXRNZW51T3BlbiIsImNsYXJpZmljYXRpb25DaG9pY2UiLCJzZXRDbGFyaWZpY2F0aW9uQ2hvaWNlIiwiY2xhcmlmaWNhdGlvblRleHQiLCJzZXRDbGFyaWZpY2F0aW9uVGV4dCIsInByZWZsaWdodENob2ljZSIsInNldFByZWZsaWdodENob2ljZSIsInByZWZsaWdodFRleHQiLCJzZXRQcmVmbGlnaHRUZXh0IiwicmV2aWV3U2VsZWN0ZWRJZHMiLCJzZXRSZXZpZXdTZWxlY3RlZElkcyIsInJldmlld0V4dHJhVXJscyIsInNldFJldmlld0V4dHJhVXJscyIsInJldmlld1F1ZXJ5UmVmaW5lbWVudCIsInNldFJldmlld1F1ZXJ5UmVmaW5lbWVudCIsInF1ZXN0aW9uSWQiLCJjeWNsZUlkIiwiY2FuZGlkYXRlVXJscyIsInNsaWNlIiwiY29udGFpbmVyIiwiY3VycmVudCIsInNjcm9sbFRvcCIsInNjcm9sbEhlaWdodCIsImhhbmRsZVBvaW50ZXJEb3duIiwiY29udGFpbnMiLCJkb2N1bWVudCIsImFjdGl2ZUVsZW1lbnQiLCJibHVyIiwiYWRkRXZlbnRMaXN0ZW5lciIsInJlbW92ZUV2ZW50TGlzdGVuZXIiLCJhdXRvRm9jdXNJbnB1dCIsInJhZiIsIndpbmRvdyIsInJlcXVlc3RBbmltYXRpb25GcmFtZSIsImZvY3VzIiwiY2FuY2VsQW5pbWF0aW9uRnJhbWUiLCJsYXRlc3QiLCJhdCIsImlubGluZVN0YXR1cyIsInN0YXR1cyIsInN0YWdlIiwiYWN0aXZlIiwicHJpbWFyeUFjdGlvbiIsImRyYWZ0Iiwia2V5IiwiaWNvbiIsIm9wZW4iLCJzZWNvbmRhcnlBY3Rpb25zIiwiYWN0aW9ucyIsInB1c2giLCJzZWNvbmRhcnkiLCJzdWJtaXRDbGFyaWZpY2F0aW9uIiwic2VsZWN0ZWRPcHRpb25JZCIsInVuZGVmaW5lZCIsImN1c3RvbVRleHQiLCJzdWJtaXRQcmVmbGlnaHQiLCJyZWYiLCJtb2RlbCIsImhpZ2hsaWdodElkcyIsIm1lc3NhZ2UiLCJpc1VzZXIiLCJhdXRob3JMYWJlbCIsImFnZW50SWQiLCJjb250ZW50IiwiZmllbGQiLCJ2YXJpYW50IiwicXVlc3Rpb24iLCJnYXBTdW1tYXJ5IiwiaW5jbHVkZXMiLCJwcmV2IiwiZmlsdGVyIiwiZW50cnkiLCJkb21haW4iLCJ1cmwiLCJhY3Rpb24iLCJzZWxlY3RlZFVybElkcyIsImFkZGVkVXJscyIsInNwbGl0IiwiQm9vbGVhbiIsInF1ZXJ5UmVmaW5lbWVudCIsIk1hdGgiLCJyb3VuZCIsInN1bW1hcnkiLCJyZXBseSIsImZvcm0iLCJwcmV2ZW50RGVmYXVsdCIsIm5leHRWYWx1ZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7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

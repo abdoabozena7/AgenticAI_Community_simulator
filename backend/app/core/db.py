@@ -1134,6 +1134,17 @@ async def fetch_simulation_snapshot(simulation_id: str) -> Optional[Dict[str, An
     }
 
 
+async def simulation_exists(simulation_id: str) -> bool:
+    if not str(simulation_id or "").strip():
+        return False
+    rows = await execute(
+        "SELECT simulation_id FROM simulations WHERE simulation_id=%s LIMIT 1",
+        (simulation_id,),
+        fetch=True,
+    )
+    return bool(rows)
+
+
 async def insert_agents(simulation_id: str, agents: List[Dict[str, Any]]) -> None:
     if not agents:
         return

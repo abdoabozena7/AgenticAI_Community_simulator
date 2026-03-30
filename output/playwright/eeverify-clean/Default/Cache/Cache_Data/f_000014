@@ -1,0 +1,471 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/pages/ResetPasswordPage.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=85597f46"; const useMemo = __vite__cjsImport3_react["useMemo"]; const useState = __vite__cjsImport3_react["useState"];
+import { motion } from "/node_modules/.vite/deps/framer-motion.js?v=85597f46";
+import { ArrowRight, LockKeyhole, ShieldCheck, Sparkles } from "/node_modules/.vite/deps/lucide-react.js?v=85597f46";
+import { useNavigate, useSearchParams } from "/node_modules/.vite/deps/react-router-dom.js?v=85597f46";
+import { Button } from "/src/components/ui/button.tsx";
+import { Input } from "/src/components/ui/input.tsx";
+import { SystemChip, SystemPanel, SystemStat, systemInputClass } from "/src/components/system/Architect.tsx";
+import { useLanguage } from "/src/contexts/LanguageContext.tsx";
+import { useTheme } from "/src/contexts/ThemeContext.tsx";
+import { apiService } from "/src/services/api.ts";
+const authThemeVars = (theme)=>theme === "dark" ? {
+        "--architect-bg": "#050505",
+        "--architect-bg-secondary": "#0b0b0b",
+        "--architect-glow-a": "rgba(255,255,255,0.03)",
+        "--architect-glow-b": "rgba(0,106,97,0.06)",
+        "--architect-ink": "#f4f5f7",
+        "--architect-muted": "#b0b5bf",
+        "--architect-subtle": "#858b96",
+        "--architect-surface-0": "rgba(16,16,16,0.94)",
+        "--architect-surface-1": "#121212",
+        "--architect-surface-2": "#1a1a1a",
+        "--architect-surface-strong": "rgba(24,24,24,0.96)",
+        "--architect-contrast": "#f4f5f7",
+        "--architect-contrast-ink": "#090909",
+        "--architect-contrast-muted": "rgba(9,9,9,0.56)",
+        "--architect-kicker": "#949aa6",
+        "--architect-chip-soft-bg": "#181818",
+        "--architect-chip-soft-ink": "#c8cdd6",
+        "--architect-jewel-bg": "rgba(134,242,228,0.12)",
+        "--architect-jewel-ink": "#86f2e4",
+        "--architect-outline": "rgba(125,129,139,0.38)",
+        "--architect-input-bg": "#101010",
+        "--architect-input-placeholder": "#818794",
+        "--architect-panel-shadow": "inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 40px -32px rgba(0,0,0,0.72)"
+    } : {
+        "--architect-bg": "#f7f9fb",
+        "--architect-bg-secondary": "#eef1f4",
+        "--architect-glow-a": "rgba(16,12,61,0.06)",
+        "--architect-glow-b": "rgba(0,106,97,0.08)",
+        "--architect-ink": "#100c3d",
+        "--architect-muted": "#536073",
+        "--architect-subtle": "#778196",
+        "--architect-surface-0": "rgba(255,255,255,0.92)",
+        "--architect-surface-1": "#f4f6f8",
+        "--architect-surface-2": "#eceef0",
+        "--architect-surface-strong": "rgba(255,255,255,0.78)",
+        "--architect-contrast": "#100c3d",
+        "--architect-contrast-ink": "#ffffff",
+        "--architect-contrast-muted": "rgba(255,255,255,0.55)",
+        "--architect-kicker": "#6f7890",
+        "--architect-chip-soft-bg": "#eceef0",
+        "--architect-chip-soft-ink": "#5d6880",
+        "--architect-jewel-bg": "#86f2e4",
+        "--architect-jewel-ink": "#006f66",
+        "--architect-outline": "rgba(197,198,205,0.45)",
+        "--architect-input-bg": "#ffffff",
+        "--architect-input-placeholder": "#9aa3b4",
+        "--architect-panel-shadow": "inset 0 1px 0 rgba(255,255,255,0.9), 0 18px 34px -30px rgba(16,12,61,0.16)"
+    };
+export default function ResetPasswordPage() {
+    _s();
+    const [params] = useSearchParams();
+    const navigate = useNavigate();
+    const { language } = useLanguage();
+    const { theme } = useTheme();
+    const [password, setPassword] = useState("");
+    const [confirm, setConfirm] = useState("");
+    const [status, setStatus] = useState("idle");
+    const [message, setMessage] = useState("");
+    const isArabic = language === "ar";
+    const t = (en, ar)=>isArabic ? ar : en;
+    const themeVars = useMemo(()=>authThemeVars(theme), [
+        theme
+    ]);
+    const fieldClass = `${systemInputClass} h-12 w-full rounded-xl`;
+    const handleSubmit = async ()=>{
+        const token = params.get("token");
+        if (!token) {
+            setStatus("error");
+            setMessage(t("Reset token missing.", "رمز إعادة التعيين مفقود."));
+            return;
+        }
+        if (!password || password.length < 6) {
+            setStatus("error");
+            setMessage(t("Password must be at least 6 characters.", "يجب أن تكون كلمة المرور 6 أحرف على الأقل."));
+            return;
+        }
+        if (password !== confirm) {
+            setStatus("error");
+            setMessage(t("Passwords do not match.", "كلمتا المرور غير متطابقتين."));
+            return;
+        }
+        setStatus("loading");
+        setMessage("");
+        try {
+            await apiService.resetPassword(token, password);
+            setStatus("success");
+            setMessage(t("Password updated successfully.", "تم تحديث كلمة المرور بنجاح."));
+        } catch (err) {
+            setStatus("error");
+            setMessage(err?.message || t("Password reset failed.", "فشل تحديث كلمة المرور."));
+        }
+    };
+    return /*#__PURE__*/ _jsxDEV("div", {
+        dir: isArabic ? "rtl" : "ltr",
+        className: "architect-shell min-h-screen",
+        style: themeVars,
+        children: /*#__PURE__*/ _jsxDEV("div", {
+            className: "relative isolate min-h-screen overflow-hidden px-4 py-6 sm:px-6 lg:px-8",
+            children: [
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "absolute inset-0 opacity-70",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "absolute left-[-8%] top-[-10%] h-72 w-72 rounded-full bg-[color:var(--architect-glow-a)] blur-3xl"
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                            lineNumber: 118,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "absolute right-[-6%] top-[14%] h-80 w-80 rounded-full bg-[color:var(--architect-glow-b)] blur-3xl"
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                            lineNumber: 119,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "absolute inset-x-0 bottom-[-20%] h-96 bg-gradient-to-t from-transparent to-[color:var(--architect-bg-secondary)]"
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                            lineNumber: 120,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                    lineNumber: 117,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "relative mx-auto grid min-h-[calc(100vh-3rem)] max-w-6xl items-center gap-6 lg:grid-cols-[1.04fr_0.96fr]",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(motion.section, {
+                            initial: {
+                                opacity: 0,
+                                y: 18
+                            },
+                            animate: {
+                                opacity: 1,
+                                y: 0
+                            },
+                            transition: {
+                                duration: 0.45
+                            },
+                            className: "architect-hero hidden h-full flex-col justify-between lg:flex",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "space-y-6",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex flex-wrap items-center gap-3",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(SystemChip, {
+                                                    tone: "primary",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(ShieldCheck, {
+                                                            className: "h-4 w-4"
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                                            lineNumber: 133,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        t("Secure Reset", "إعادة تعيين آمنة")
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                                    lineNumber: 132,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(SystemChip, {
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(Sparkles, {
+                                                            className: "h-4 w-4"
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                                            lineNumber: 137,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        t("Black-first dark mode", "وضع داكن أسود")
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                                    lineNumber: 136,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                            lineNumber: 131,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("h1", {
+                                            className: "font-['IBM_Plex_Sans_Arabic','Be_Vietnam_Pro',sans-serif] text-5xl font-semibold leading-[1.12] tracking-[-0.05em] text-[color:var(--architect-ink)]",
+                                            children: t("Reset your password", "إعادة تعيين كلمة المرور")
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                            lineNumber: 141,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("p", {
+                                            className: "max-w-xl text-base leading-8 text-[color:var(--architect-muted)]",
+                                            children: t("Use the secure link from your email to set a new password and return to the workspace.", "استخدم الرابط الآمن من بريدك الإلكتروني لتعيين كلمة مرور جديدة ثم العودة إلى مساحة العمل.")
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                            lineNumber: 144,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                    lineNumber: 130,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "grid gap-3 sm:grid-cols-2",
+                                    children: [
+                                        {
+                                            label: t("Native RTL", "RTL أصيل"),
+                                            value: "01",
+                                            detail: t("Arabic spacing and flow.", "تباعد وتدفق عربي.")
+                                        },
+                                        {
+                                            label: t("Theme aware", "حسب الثيم"),
+                                            value: "02",
+                                            detail: t("Light and dark tokens.", "تتبع الفاتح والداكن.")
+                                        },
+                                        {
+                                            label: t("Secure flow", "مسار آمن"),
+                                            value: "03",
+                                            detail: t("No blue dark mode.", "بدون أزرق في الداكن.")
+                                        },
+                                        {
+                                            label: t("Fast recovery", "استعادة سريعة"),
+                                            value: "04",
+                                            detail: t("Simple password reset.", "إعادة تعيين بسيطة.")
+                                        }
+                                    ].map((item)=>/*#__PURE__*/ _jsxDEV(SystemStat, {
+                                            label: item.label,
+                                            value: item.value,
+                                            detail: item.detail
+                                        }, item.value, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                            lineNumber: 159,
+                                            columnNumber: 17
+                                        }, this))
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                    lineNumber: 152,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                            lineNumber: 124,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(motion.section, {
+                            initial: {
+                                opacity: 0,
+                                y: 18
+                            },
+                            animate: {
+                                opacity: 1,
+                                y: 0
+                            },
+                            transition: {
+                                duration: 0.45,
+                                delay: 0.06
+                            },
+                            className: "min-w-0",
+                            children: /*#__PURE__*/ _jsxDEV(SystemPanel, {
+                                title: t("Password Reset", "إعادة تعيين كلمة المرور"),
+                                description: t("Set a new password to continue.", "عيّن كلمة مرور جديدة للمتابعة."),
+                                icon: LockKeyhole,
+                                children: /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "space-y-4",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "space-y-2",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("label", {
+                                                    className: "architect-label",
+                                                    htmlFor: "password",
+                                                    children: t("New password", "كلمة المرور الجديدة")
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                                    lineNumber: 177,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(Input, {
+                                                    id: "password",
+                                                    type: "password",
+                                                    placeholder: t("Enter new password", "أدخل كلمة المرور الجديدة"),
+                                                    value: password,
+                                                    onChange: (e)=>setPassword(e.target.value),
+                                                    className: fieldClass
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                                    lineNumber: 180,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                            lineNumber: 176,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "space-y-2",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("label", {
+                                                    className: "architect-label",
+                                                    htmlFor: "confirm",
+                                                    children: t("Confirm password", "تأكيد كلمة المرور")
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                                    lineNumber: 191,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(Input, {
+                                                    id: "confirm",
+                                                    type: "password",
+                                                    placeholder: t("Confirm new password", "أكد كلمة المرور الجديدة"),
+                                                    value: confirm,
+                                                    onChange: (e)=>setConfirm(e.target.value),
+                                                    className: fieldClass
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                                    lineNumber: 194,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                            lineNumber: 190,
+                                            columnNumber: 17
+                                        }, this),
+                                        message ? /*#__PURE__*/ _jsxDEV("div", {
+                                            className: status === "success" ? "architect-feedback architect-feedback-success" : "architect-feedback architect-feedback-error",
+                                            children: message
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                            lineNumber: 205,
+                                            columnNumber: 19
+                                        }, this) : null,
+                                        /*#__PURE__*/ _jsxDEV(Button, {
+                                            onClick: handleSubmit,
+                                            disabled: status === "loading",
+                                            className: "architect-button h-12 w-full rounded-md bg-[color:var(--architect-contrast)] text-[color:var(--architect-contrast-ink)] hover:opacity-95",
+                                            children: [
+                                                status === "loading" ? t("Updating...", "جارٍ التحديث...") : t("Update Password", "تحديث كلمة المرور"),
+                                                /*#__PURE__*/ _jsxDEV(ArrowRight, {
+                                                    className: "h-4 w-4"
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                                    lineNumber: 222,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                            lineNumber: 216,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(Button, {
+                                            variant: "ghost",
+                                            onClick: ()=>navigate("/?auth=login"),
+                                            className: "architect-button h-12 w-full rounded-md text-[color:var(--architect-ink)] hover:bg-[color:var(--architect-surface-2)]",
+                                            children: t("Back to login", "العودة إلى تسجيل الدخول")
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                            lineNumber: 225,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                    lineNumber: 175,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                                lineNumber: 170,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                            lineNumber: 164,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+                    lineNumber: 123,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+            lineNumber: 116,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx",
+        lineNumber: 115,
+        columnNumber: 5
+    }, this);
+}
+_s(ResetPasswordPage, "JEbwt1rJ/hRCOhsUS0ifoKQhTa8=", false, function() {
+    return [
+        useSearchParams,
+        useNavigate,
+        useLanguage,
+        useTheme
+    ];
+});
+_c = ResetPasswordPage;
+var _c;
+$RefreshReg$(_c, "ResetPasswordPage");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/ResetPasswordPage.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlJlc2V0UGFzc3dvcmRQYWdlLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyB1c2VNZW1vLCB1c2VTdGF0ZSB9IGZyb20gXCJyZWFjdFwiO1xuaW1wb3J0IHsgbW90aW9uIH0gZnJvbSBcImZyYW1lci1tb3Rpb25cIjtcbmltcG9ydCB7IEFycm93UmlnaHQsIExvY2tLZXlob2xlLCBTaGllbGRDaGVjaywgU3BhcmtsZXMgfSBmcm9tIFwibHVjaWRlLXJlYWN0XCI7XG5pbXBvcnQgeyB1c2VOYXZpZ2F0ZSwgdXNlU2VhcmNoUGFyYW1zIH0gZnJvbSBcInJlYWN0LXJvdXRlci1kb21cIjtcblxuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSBcIkAvY29tcG9uZW50cy91aS9idXR0b25cIjtcbmltcG9ydCB7IElucHV0IH0gZnJvbSBcIkAvY29tcG9uZW50cy91aS9pbnB1dFwiO1xuaW1wb3J0IHsgU3lzdGVtQ2hpcCwgU3lzdGVtUGFuZWwsIFN5c3RlbVN0YXQsIHN5c3RlbUlucHV0Q2xhc3MgfSBmcm9tIFwiQC9jb21wb25lbnRzL3N5c3RlbS9BcmNoaXRlY3RcIjtcbmltcG9ydCB7IHVzZUxhbmd1YWdlIH0gZnJvbSBcIkAvY29udGV4dHMvTGFuZ3VhZ2VDb250ZXh0XCI7XG5pbXBvcnQgeyB1c2VUaGVtZSB9IGZyb20gXCJAL2NvbnRleHRzL1RoZW1lQ29udGV4dFwiO1xuaW1wb3J0IHsgYXBpU2VydmljZSB9IGZyb20gXCJAL3NlcnZpY2VzL2FwaVwiO1xuXG5jb25zdCBhdXRoVGhlbWVWYXJzID0gKHRoZW1lOiBcImRhcmtcIiB8IFwibGlnaHRcIikgPT5cbiAgdGhlbWUgPT09IFwiZGFya1wiXG4gICAgPyB7XG4gICAgICAgIFwiLS1hcmNoaXRlY3QtYmdcIjogXCIjMDUwNTA1XCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3QtYmctc2Vjb25kYXJ5XCI6IFwiIzBiMGIwYlwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWdsb3ctYVwiOiBcInJnYmEoMjU1LDI1NSwyNTUsMC4wMylcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1nbG93LWJcIjogXCJyZ2JhKDAsMTA2LDk3LDAuMDYpXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3QtaW5rXCI6IFwiI2Y0ZjVmN1wiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LW11dGVkXCI6IFwiI2IwYjViZlwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LXN1YnRsZVwiOiBcIiM4NThiOTZcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1zdXJmYWNlLTBcIjogXCJyZ2JhKDE2LDE2LDE2LDAuOTQpXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3Qtc3VyZmFjZS0xXCI6IFwiIzEyMTIxMlwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LXN1cmZhY2UtMlwiOiBcIiMxYTFhMWFcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1zdXJmYWNlLXN0cm9uZ1wiOiBcInJnYmEoMjQsMjQsMjQsMC45NilcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1jb250cmFzdFwiOiBcIiNmNGY1ZjdcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1jb250cmFzdC1pbmtcIjogXCIjMDkwOTA5XCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3QtY29udHJhc3QtbXV0ZWRcIjogXCJyZ2JhKDksOSw5LDAuNTYpXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3Qta2lja2VyXCI6IFwiIzk0OWFhNlwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWNoaXAtc29mdC1iZ1wiOiBcIiMxODE4MThcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1jaGlwLXNvZnQtaW5rXCI6IFwiI2M4Y2RkNlwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWpld2VsLWJnXCI6IFwicmdiYSgxMzQsMjQyLDIyOCwwLjEyKVwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWpld2VsLWlua1wiOiBcIiM4NmYyZTRcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1vdXRsaW5lXCI6IFwicmdiYSgxMjUsMTI5LDEzOSwwLjM4KVwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWlucHV0LWJnXCI6IFwiIzEwMTAxMFwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWlucHV0LXBsYWNlaG9sZGVyXCI6IFwiIzgxODc5NFwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LXBhbmVsLXNoYWRvd1wiOiBcImluc2V0IDAgMXB4IDAgcmdiYSgyNTUsMjU1LDI1NSwwLjA0KSwgMCAyMHB4IDQwcHggLTMycHggcmdiYSgwLDAsMCwwLjcyKVwiLFxuICAgICAgfVxuICAgIDoge1xuICAgICAgICBcIi0tYXJjaGl0ZWN0LWJnXCI6IFwiI2Y3ZjlmYlwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWJnLXNlY29uZGFyeVwiOiBcIiNlZWYxZjRcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1nbG93LWFcIjogXCJyZ2JhKDE2LDEyLDYxLDAuMDYpXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3QtZ2xvdy1iXCI6IFwicmdiYSgwLDEwNiw5NywwLjA4KVwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWlua1wiOiBcIiMxMDBjM2RcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1tdXRlZFwiOiBcIiM1MzYwNzNcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1zdWJ0bGVcIjogXCIjNzc4MTk2XCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3Qtc3VyZmFjZS0wXCI6IFwicmdiYSgyNTUsMjU1LDI1NSwwLjkyKVwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LXN1cmZhY2UtMVwiOiBcIiNmNGY2ZjhcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1zdXJmYWNlLTJcIjogXCIjZWNlZWYwXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3Qtc3VyZmFjZS1zdHJvbmdcIjogXCJyZ2JhKDI1NSwyNTUsMjU1LDAuNzgpXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3QtY29udHJhc3RcIjogXCIjMTAwYzNkXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3QtY29udHJhc3QtaW5rXCI6IFwiI2ZmZmZmZlwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWNvbnRyYXN0LW11dGVkXCI6IFwicmdiYSgyNTUsMjU1LDI1NSwwLjU1KVwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWtpY2tlclwiOiBcIiM2Zjc4OTBcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1jaGlwLXNvZnQtYmdcIjogXCIjZWNlZWYwXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3QtY2hpcC1zb2Z0LWlua1wiOiBcIiM1ZDY4ODBcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1qZXdlbC1iZ1wiOiBcIiM4NmYyZTRcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1qZXdlbC1pbmtcIjogXCIjMDA2ZjY2XCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3Qtb3V0bGluZVwiOiBcInJnYmEoMTk3LDE5OCwyMDUsMC40NSlcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1pbnB1dC1iZ1wiOiBcIiNmZmZmZmZcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1pbnB1dC1wbGFjZWhvbGRlclwiOiBcIiM5YWEzYjRcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1wYW5lbC1zaGFkb3dcIjogXCJpbnNldCAwIDFweCAwIHJnYmEoMjU1LDI1NSwyNTUsMC45KSwgMCAxOHB4IDM0cHggLTMwcHggcmdiYSgxNiwxMiw2MSwwLjE2KVwiLFxuICAgICAgfTtcblxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gUmVzZXRQYXNzd29yZFBhZ2UoKSB7XG4gIGNvbnN0IFtwYXJhbXNdID0gdXNlU2VhcmNoUGFyYW1zKCk7XG4gIGNvbnN0IG5hdmlnYXRlID0gdXNlTmF2aWdhdGUoKTtcbiAgY29uc3QgeyBsYW5ndWFnZSB9ID0gdXNlTGFuZ3VhZ2UoKTtcbiAgY29uc3QgeyB0aGVtZSB9ID0gdXNlVGhlbWUoKTtcbiAgY29uc3QgW3Bhc3N3b3JkLCBzZXRQYXNzd29yZF0gPSB1c2VTdGF0ZShcIlwiKTtcbiAgY29uc3QgW2NvbmZpcm0sIHNldENvbmZpcm1dID0gdXNlU3RhdGUoXCJcIik7XG4gIGNvbnN0IFtzdGF0dXMsIHNldFN0YXR1c10gPSB1c2VTdGF0ZTxcImlkbGVcIiB8IFwibG9hZGluZ1wiIHwgXCJzdWNjZXNzXCIgfCBcImVycm9yXCI+KFwiaWRsZVwiKTtcbiAgY29uc3QgW21lc3NhZ2UsIHNldE1lc3NhZ2VdID0gdXNlU3RhdGU8c3RyaW5nPihcIlwiKTtcblxuICBjb25zdCBpc0FyYWJpYyA9IGxhbmd1YWdlID09PSBcImFyXCI7XG4gIGNvbnN0IHQgPSAoZW46IHN0cmluZywgYXI6IHN0cmluZykgPT4gKGlzQXJhYmljID8gYXIgOiBlbik7XG4gIGNvbnN0IHRoZW1lVmFycyA9IHVzZU1lbW8oKCkgPT4gYXV0aFRoZW1lVmFycyh0aGVtZSksIFt0aGVtZV0pO1xuICBjb25zdCBmaWVsZENsYXNzID0gYCR7c3lzdGVtSW5wdXRDbGFzc30gaC0xMiB3LWZ1bGwgcm91bmRlZC14bGA7XG5cbiAgY29uc3QgaGFuZGxlU3VibWl0ID0gYXN5bmMgKCkgPT4ge1xuICAgIGNvbnN0IHRva2VuID0gcGFyYW1zLmdldChcInRva2VuXCIpO1xuICAgIGlmICghdG9rZW4pIHtcbiAgICAgIHNldFN0YXR1cyhcImVycm9yXCIpO1xuICAgICAgc2V0TWVzc2FnZSh0KFwiUmVzZXQgdG9rZW4gbWlzc2luZy5cIiwgXCLYsdmF2LIg2KXYudin2K/YqSDYp9mE2KrYudmK2YrZhiDZhdmB2YLZiNivLlwiKSk7XG4gICAgICByZXR1cm47XG4gICAgfVxuXG4gICAgaWYgKCFwYXNzd29yZCB8fCBwYXNzd29yZC5sZW5ndGggPCA2KSB7XG4gICAgICBzZXRTdGF0dXMoXCJlcnJvclwiKTtcbiAgICAgIHNldE1lc3NhZ2UodChcIlBhc3N3b3JkIG11c3QgYmUgYXQgbGVhc3QgNiBjaGFyYWN0ZXJzLlwiLCBcItmK2KzYqCDYo9mGINiq2YPZiNmGINmD2YTZhdipINin2YTZhdix2YjYsSA2INij2K3YsdmBINi52YTZiSDYp9mE2KPZgtmELlwiKSk7XG4gICAgICByZXR1cm47XG4gICAgfVxuXG4gICAgaWYgKHBhc3N3b3JkICE9PSBjb25maXJtKSB7XG4gICAgICBzZXRTdGF0dXMoXCJlcnJvclwiKTtcbiAgICAgIHNldE1lc3NhZ2UodChcIlBhc3N3b3JkcyBkbyBub3QgbWF0Y2guXCIsIFwi2YPZhNmF2KrYpyDYp9mE2YXYsdmI2LEg2LrZitixINmF2KrYt9in2KjZgtiq2YrZhi5cIikpO1xuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIHNldFN0YXR1cyhcImxvYWRpbmdcIik7XG4gICAgc2V0TWVzc2FnZShcIlwiKTtcblxuICAgIHRyeSB7XG4gICAgICBhd2FpdCBhcGlTZXJ2aWNlLnJlc2V0UGFzc3dvcmQodG9rZW4sIHBhc3N3b3JkKTtcbiAgICAgIHNldFN0YXR1cyhcInN1Y2Nlc3NcIik7XG4gICAgICBzZXRNZXNzYWdlKHQoXCJQYXNzd29yZCB1cGRhdGVkIHN1Y2Nlc3NmdWxseS5cIiwgXCLYqtmFINiq2K3Yr9mK2Ksg2YPZhNmF2Kkg2KfZhNmF2LHZiNixINio2YbYrNin2K0uXCIpKTtcbiAgICB9IGNhdGNoIChlcnI6IGFueSkge1xuICAgICAgc2V0U3RhdHVzKFwiZXJyb3JcIik7XG4gICAgICBzZXRNZXNzYWdlKGVycj8ubWVzc2FnZSB8fCB0KFwiUGFzc3dvcmQgcmVzZXQgZmFpbGVkLlwiLCBcItmB2LTZhCDYqtit2K/ZitirINmD2YTZhdipINin2YTZhdix2YjYsS5cIikpO1xuICAgIH1cbiAgfTtcblxuICByZXR1cm4gKFxuICAgIDxkaXYgZGlyPXtpc0FyYWJpYyA/IFwicnRsXCIgOiBcImx0clwifSBjbGFzc05hbWU9XCJhcmNoaXRlY3Qtc2hlbGwgbWluLWgtc2NyZWVuXCIgc3R5bGU9e3RoZW1lVmFycyBhcyBSZWFjdC5DU1NQcm9wZXJ0aWVzfT5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwicmVsYXRpdmUgaXNvbGF0ZSBtaW4taC1zY3JlZW4gb3ZlcmZsb3ctaGlkZGVuIHB4LTQgcHktNiBzbTpweC02IGxnOnB4LThcIj5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJhYnNvbHV0ZSBpbnNldC0wIG9wYWNpdHktNzBcIj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImFic29sdXRlIGxlZnQtWy04JV0gdG9wLVstMTAlXSBoLTcyIHctNzIgcm91bmRlZC1mdWxsIGJnLVtjb2xvcjp2YXIoLS1hcmNoaXRlY3QtZ2xvdy1hKV0gYmx1ci0zeGxcIiAvPlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYWJzb2x1dGUgcmlnaHQtWy02JV0gdG9wLVsxNCVdIGgtODAgdy04MCByb3VuZGVkLWZ1bGwgYmctW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1nbG93LWIpXSBibHVyLTN4bFwiIC8+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJhYnNvbHV0ZSBpbnNldC14LTAgYm90dG9tLVstMjAlXSBoLTk2IGJnLWdyYWRpZW50LXRvLXQgZnJvbS10cmFuc3BhcmVudCB0by1bY29sb3I6dmFyKC0tYXJjaGl0ZWN0LWJnLXNlY29uZGFyeSldXCIgLz5cbiAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJyZWxhdGl2ZSBteC1hdXRvIGdyaWQgbWluLWgtW2NhbGMoMTAwdmgtM3JlbSldIG1heC13LTZ4bCBpdGVtcy1jZW50ZXIgZ2FwLTYgbGc6Z3JpZC1jb2xzLVsxLjA0ZnJfMC45NmZyXVwiPlxuICAgICAgICAgIDxtb3Rpb24uc2VjdGlvblxuICAgICAgICAgICAgaW5pdGlhbD17eyBvcGFjaXR5OiAwLCB5OiAxOCB9fVxuICAgICAgICAgICAgYW5pbWF0ZT17eyBvcGFjaXR5OiAxLCB5OiAwIH19XG4gICAgICAgICAgICB0cmFuc2l0aW9uPXt7IGR1cmF0aW9uOiAwLjQ1IH19XG4gICAgICAgICAgICBjbGFzc05hbWU9XCJhcmNoaXRlY3QtaGVybyBoaWRkZW4gaC1mdWxsIGZsZXgtY29sIGp1c3RpZnktYmV0d2VlbiBsZzpmbGV4XCJcbiAgICAgICAgICA+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktNlwiPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZmxleC13cmFwIGl0ZW1zLWNlbnRlciBnYXAtM1wiPlxuICAgICAgICAgICAgICAgIDxTeXN0ZW1DaGlwIHRvbmU9XCJwcmltYXJ5XCI+XG4gICAgICAgICAgICAgICAgICA8U2hpZWxkQ2hlY2sgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICB7dChcIlNlY3VyZSBSZXNldFwiLCBcItil2LnYp9iv2Kkg2KrYudmK2YrZhiDYotmF2YbYqVwiKX1cbiAgICAgICAgICAgICAgICA8L1N5c3RlbUNoaXA+XG4gICAgICAgICAgICAgICAgPFN5c3RlbUNoaXA+XG4gICAgICAgICAgICAgICAgICA8U3BhcmtsZXMgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICB7dChcIkJsYWNrLWZpcnN0IGRhcmsgbW9kZVwiLCBcItmI2LbYuSDYr9in2YPZhiDYo9iz2YjYr1wiKX1cbiAgICAgICAgICAgICAgICA8L1N5c3RlbUNoaXA+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICA8aDEgY2xhc3NOYW1lPVwiZm9udC1bJ0lCTV9QbGV4X1NhbnNfQXJhYmljJywnQmVfVmlldG5hbV9Qcm8nLHNhbnMtc2VyaWZdIHRleHQtNXhsIGZvbnQtc2VtaWJvbGQgbGVhZGluZy1bMS4xMl0gdHJhY2tpbmctWy0wLjA1ZW1dIHRleHQtW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1pbmspXVwiPlxuICAgICAgICAgICAgICAgIHt0KFwiUmVzZXQgeW91ciBwYXNzd29yZFwiLCBcItil2LnYp9iv2Kkg2KrYudmK2YrZhiDZg9mE2YXYqSDYp9mE2YXYsdmI2LFcIil9XG4gICAgICAgICAgICAgIDwvaDE+XG4gICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cIm1heC13LXhsIHRleHQtYmFzZSBsZWFkaW5nLTggdGV4dC1bY29sb3I6dmFyKC0tYXJjaGl0ZWN0LW11dGVkKV1cIj5cbiAgICAgICAgICAgICAgICB7dChcbiAgICAgICAgICAgICAgICAgIFwiVXNlIHRoZSBzZWN1cmUgbGluayBmcm9tIHlvdXIgZW1haWwgdG8gc2V0IGEgbmV3IHBhc3N3b3JkIGFuZCByZXR1cm4gdG8gdGhlIHdvcmtzcGFjZS5cIixcbiAgICAgICAgICAgICAgICAgIFwi2KfYs9iq2K7Yr9mFINin2YTYsdin2KjYtyDYp9mE2KLZhdmGINmF2YYg2KjYsdmK2K/ZgyDYp9mE2KXZhNmD2KrYsdmI2YbZiiDZhNiq2LnZitmK2YYg2YPZhNmF2Kkg2YXYsdmI2LEg2KzYr9mK2K/YqSDYq9mFINin2YTYudmI2K/YqSDYpdmE2Ykg2YXYs9in2K3YqSDYp9mE2LnZhdmELlwiLFxuICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImdyaWQgZ2FwLTMgc206Z3JpZC1jb2xzLTJcIj5cbiAgICAgICAgICAgICAge1tcbiAgICAgICAgICAgICAgICB7IGxhYmVsOiB0KFwiTmF0aXZlIFJUTFwiLCBcIlJUTCDYo9i12YrZhFwiKSwgdmFsdWU6IFwiMDFcIiwgZGV0YWlsOiB0KFwiQXJhYmljIHNwYWNpbmcgYW5kIGZsb3cuXCIsIFwi2KrYqNin2LnYryDZiNiq2K/ZgdmCINi52LHYqNmKLlwiKSB9LFxuICAgICAgICAgICAgICAgIHsgbGFiZWw6IHQoXCJUaGVtZSBhd2FyZVwiLCBcItit2LPYqCDYp9mE2KvZitmFXCIpLCB2YWx1ZTogXCIwMlwiLCBkZXRhaWw6IHQoXCJMaWdodCBhbmQgZGFyayB0b2tlbnMuXCIsIFwi2KrYqtio2Lkg2KfZhNmB2KfYqtitINmI2KfZhNiv2KfZg9mGLlwiKSB9LFxuICAgICAgICAgICAgICAgIHsgbGFiZWw6IHQoXCJTZWN1cmUgZmxvd1wiLCBcItmF2LPYp9ixINii2YXZhlwiKSwgdmFsdWU6IFwiMDNcIiwgZGV0YWlsOiB0KFwiTm8gYmx1ZSBkYXJrIG1vZGUuXCIsIFwi2KjYr9mI2YYg2KPYstix2YIg2YHZiiDYp9mE2K/Yp9mD2YYuXCIpIH0sXG4gICAgICAgICAgICAgICAgeyBsYWJlbDogdChcIkZhc3QgcmVjb3ZlcnlcIiwgXCLYp9iz2KrYudin2K/YqSDYs9ix2YrYudipXCIpLCB2YWx1ZTogXCIwNFwiLCBkZXRhaWw6IHQoXCJTaW1wbGUgcGFzc3dvcmQgcmVzZXQuXCIsIFwi2KXYudin2K/YqSDYqti52YrZitmGINio2LPZiti32KkuXCIpIH0sXG4gICAgICAgICAgICAgIF0ubWFwKChpdGVtKSA9PiAoXG4gICAgICAgICAgICAgICAgPFN5c3RlbVN0YXQga2V5PXtpdGVtLnZhbHVlfSBsYWJlbD17aXRlbS5sYWJlbH0gdmFsdWU9e2l0ZW0udmFsdWV9IGRldGFpbD17aXRlbS5kZXRhaWx9IC8+XG4gICAgICAgICAgICAgICkpfVxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPC9tb3Rpb24uc2VjdGlvbj5cblxuICAgICAgICAgIDxtb3Rpb24uc2VjdGlvblxuICAgICAgICAgICAgaW5pdGlhbD17eyBvcGFjaXR5OiAwLCB5OiAxOCB9fVxuICAgICAgICAgICAgYW5pbWF0ZT17eyBvcGFjaXR5OiAxLCB5OiAwIH19XG4gICAgICAgICAgICB0cmFuc2l0aW9uPXt7IGR1cmF0aW9uOiAwLjQ1LCBkZWxheTogMC4wNiB9fVxuICAgICAgICAgICAgY2xhc3NOYW1lPVwibWluLXctMFwiXG4gICAgICAgICAgPlxuICAgICAgICAgICAgPFN5c3RlbVBhbmVsXG4gICAgICAgICAgICAgIHRpdGxlPXt0KFwiUGFzc3dvcmQgUmVzZXRcIiwgXCLYpdi52KfYr9ipINiq2LnZitmK2YYg2YPZhNmF2Kkg2KfZhNmF2LHZiNixXCIpfVxuICAgICAgICAgICAgICBkZXNjcmlwdGlvbj17dChcIlNldCBhIG5ldyBwYXNzd29yZCB0byBjb250aW51ZS5cIiwgXCLYudmK2ZHZhiDZg9mE2YXYqSDZhdix2YjYsSDYrNiv2YrYr9ipINmE2YTZhdiq2KfYqNi52KkuXCIpfVxuICAgICAgICAgICAgICBpY29uPXtMb2NrS2V5aG9sZX1cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTRcIj5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgICAgICAgICAgICAgPGxhYmVsIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1sYWJlbFwiIGh0bWxGb3I9XCJwYXNzd29yZFwiPlxuICAgICAgICAgICAgICAgICAgICB7dChcIk5ldyBwYXNzd29yZFwiLCBcItmD2YTZhdipINin2YTZhdix2YjYsSDYp9mE2KzYr9mK2K/YqVwiKX1cbiAgICAgICAgICAgICAgICAgIDwvbGFiZWw+XG4gICAgICAgICAgICAgICAgICA8SW5wdXRcbiAgICAgICAgICAgICAgICAgICAgaWQ9XCJwYXNzd29yZFwiXG4gICAgICAgICAgICAgICAgICAgIHR5cGU9XCJwYXNzd29yZFwiXG4gICAgICAgICAgICAgICAgICAgIHBsYWNlaG9sZGVyPXt0KFwiRW50ZXIgbmV3IHBhc3N3b3JkXCIsIFwi2KPYr9iu2YQg2YPZhNmF2Kkg2KfZhNmF2LHZiNixINin2YTYrNiv2YrYr9ipXCIpfVxuICAgICAgICAgICAgICAgICAgICB2YWx1ZT17cGFzc3dvcmR9XG4gICAgICAgICAgICAgICAgICAgIG9uQ2hhbmdlPXsoZSkgPT4gc2V0UGFzc3dvcmQoZS50YXJnZXQudmFsdWUpfVxuICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2ZpZWxkQ2xhc3N9XG4gICAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTJcIj5cbiAgICAgICAgICAgICAgICAgIDxsYWJlbCBjbGFzc05hbWU9XCJhcmNoaXRlY3QtbGFiZWxcIiBodG1sRm9yPVwiY29uZmlybVwiPlxuICAgICAgICAgICAgICAgICAgICB7dChcIkNvbmZpcm0gcGFzc3dvcmRcIiwgXCLYqtij2YPZitivINmD2YTZhdipINin2YTZhdix2YjYsVwiKX1cbiAgICAgICAgICAgICAgICAgIDwvbGFiZWw+XG4gICAgICAgICAgICAgICAgICA8SW5wdXRcbiAgICAgICAgICAgICAgICAgICAgaWQ9XCJjb25maXJtXCJcbiAgICAgICAgICAgICAgICAgICAgdHlwZT1cInBhc3N3b3JkXCJcbiAgICAgICAgICAgICAgICAgICAgcGxhY2Vob2xkZXI9e3QoXCJDb25maXJtIG5ldyBwYXNzd29yZFwiLCBcItij2YPYryDZg9mE2YXYqSDYp9mE2YXYsdmI2LEg2KfZhNis2K/Zitiv2KlcIil9XG4gICAgICAgICAgICAgICAgICAgIHZhbHVlPXtjb25maXJtfVxuICAgICAgICAgICAgICAgICAgICBvbkNoYW5nZT17KGUpID0+IHNldENvbmZpcm0oZS50YXJnZXQudmFsdWUpfVxuICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2ZpZWxkQ2xhc3N9XG4gICAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICAgICAge21lc3NhZ2UgPyAoXG4gICAgICAgICAgICAgICAgICA8ZGl2XG4gICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17XG4gICAgICAgICAgICAgICAgICAgICAgc3RhdHVzID09PSBcInN1Y2Nlc3NcIlxuICAgICAgICAgICAgICAgICAgICAgICAgPyBcImFyY2hpdGVjdC1mZWVkYmFjayBhcmNoaXRlY3QtZmVlZGJhY2stc3VjY2Vzc1wiXG4gICAgICAgICAgICAgICAgICAgICAgICA6IFwiYXJjaGl0ZWN0LWZlZWRiYWNrIGFyY2hpdGVjdC1mZWVkYmFjay1lcnJvclwiXG4gICAgICAgICAgICAgICAgICAgIH1cbiAgICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgICAge21lc3NhZ2V9XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICApIDogbnVsbH1cblxuICAgICAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9e2hhbmRsZVN1Ym1pdH1cbiAgICAgICAgICAgICAgICAgIGRpc2FibGVkPXtzdGF0dXMgPT09IFwibG9hZGluZ1wifVxuICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWJ1dHRvbiBoLTEyIHctZnVsbCByb3VuZGVkLW1kIGJnLVtjb2xvcjp2YXIoLS1hcmNoaXRlY3QtY29udHJhc3QpXSB0ZXh0LVtjb2xvcjp2YXIoLS1hcmNoaXRlY3QtY29udHJhc3QtaW5rKV0gaG92ZXI6b3BhY2l0eS05NVwiXG4gICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAge3N0YXR1cyA9PT0gXCJsb2FkaW5nXCIgPyB0KFwiVXBkYXRpbmcuLi5cIiwgXCLYrNin2LHZjSDYp9mE2KrYrdiv2YrYqy4uLlwiKSA6IHQoXCJVcGRhdGUgUGFzc3dvcmRcIiwgXCLYqtit2K/ZitirINmD2YTZhdipINin2YTZhdix2YjYsVwiKX1cbiAgICAgICAgICAgICAgICAgIDxBcnJvd1JpZ2h0IGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICAgICAgICAgIDwvQnV0dG9uPlxuXG4gICAgICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICAgICAgdmFyaWFudD1cImdob3N0XCJcbiAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IG5hdmlnYXRlKFwiLz9hdXRoPWxvZ2luXCIpfVxuICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWJ1dHRvbiBoLTEyIHctZnVsbCByb3VuZGVkLW1kIHRleHQtW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1pbmspXSBob3ZlcjpiZy1bY29sb3I6dmFyKC0tYXJjaGl0ZWN0LXN1cmZhY2UtMildXCJcbiAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICB7dChcIkJhY2sgdG8gbG9naW5cIiwgXCLYp9mE2LnZiNiv2Kkg2KXZhNmJINiq2LPYrNmK2YQg2KfZhNiv2K7ZiNmEXCIpfVxuICAgICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvU3lzdGVtUGFuZWw+XG4gICAgICAgICAgPC9tb3Rpb24uc2VjdGlvbj5cbiAgICAgICAgPC9kaXY+XG4gICAgICA8L2Rpdj5cbiAgICA8L2Rpdj5cbiAgKTtcbn1cbiJdLCJuYW1lcyI6WyJ1c2VNZW1vIiwidXNlU3RhdGUiLCJtb3Rpb24iLCJBcnJvd1JpZ2h0IiwiTG9ja0tleWhvbGUiLCJTaGllbGRDaGVjayIsIlNwYXJrbGVzIiwidXNlTmF2aWdhdGUiLCJ1c2VTZWFyY2hQYXJhbXMiLCJCdXR0b24iLCJJbnB1dCIsIlN5c3RlbUNoaXAiLCJTeXN0ZW1QYW5lbCIsIlN5c3RlbVN0YXQiLCJzeXN0ZW1JbnB1dENsYXNzIiwidXNlTGFuZ3VhZ2UiLCJ1c2VUaGVtZSIsImFwaVNlcnZpY2UiLCJhdXRoVGhlbWVWYXJzIiwidGhlbWUiLCJSZXNldFBhc3N3b3JkUGFnZSIsInBhcmFtcyIsIm5hdmlnYXRlIiwibGFuZ3VhZ2UiLCJwYXNzd29yZCIsInNldFBhc3N3b3JkIiwiY29uZmlybSIsInNldENvbmZpcm0iLCJzdGF0dXMiLCJzZXRTdGF0dXMiLCJtZXNzYWdlIiwic2V0TWVzc2FnZSIsImlzQXJhYmljIiwidCIsImVuIiwiYXIiLCJ0aGVtZVZhcnMiLCJmaWVsZENsYXNzIiwiaGFuZGxlU3VibWl0IiwidG9rZW4iLCJnZXQiLCJsZW5ndGgiLCJyZXNldFBhc3N3b3JkIiwiZXJyIiwiZGl2IiwiZGlyIiwiY2xhc3NOYW1lIiwic3R5bGUiLCJzZWN0aW9uIiwiaW5pdGlhbCIsIm9wYWNpdHkiLCJ5IiwiYW5pbWF0ZSIsInRyYW5zaXRpb24iLCJkdXJhdGlvbiIsInRvbmUiLCJoMSIsInAiLCJsYWJlbCIsInZhbHVlIiwiZGV0YWlsIiwibWFwIiwiaXRlbSIsImRlbGF5IiwidGl0bGUiLCJkZXNjcmlwdGlvbiIsImljb24iLCJodG1sRm9yIiwiaWQiLCJ0eXBlIiwicGxhY2Vob2xkZXIiLCJvbkNoYW5nZSIsImUiLCJ0YXJnZXQiLCJvbkNsaWNrIiwiZGlzYWJsZWQiLCJ2YXJpYW50Il0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxTQUFTQSxPQUFPLEVBQUVDLFFBQVEsUUFBUSxRQUFRO0FBQzFDLFNBQVNDLE1BQU0sUUFBUSxnQkFBZ0I7QUFDdkMsU0FBU0MsVUFBVSxFQUFFQyxXQUFXLEVBQUVDLFdBQVcsRUFBRUMsUUFBUSxRQUFRLGVBQWU7QUFDOUUsU0FBU0MsV0FBVyxFQUFFQyxlQUFlLFFBQVEsbUJBQW1CO0FBRWhFLFNBQVNDLE1BQU0sUUFBUSx5QkFBeUI7QUFDaEQsU0FBU0MsS0FBSyxRQUFRLHdCQUF3QjtBQUM5QyxTQUFTQyxVQUFVLEVBQUVDLFdBQVcsRUFBRUMsVUFBVSxFQUFFQyxnQkFBZ0IsUUFBUSxnQ0FBZ0M7QUFDdEcsU0FBU0MsV0FBVyxRQUFRLDZCQUE2QjtBQUN6RCxTQUFTQyxRQUFRLFFBQVEsMEJBQTBCO0FBQ25ELFNBQVNDLFVBQVUsUUFBUSxpQkFBaUI7QUFFNUMsTUFBTUMsZ0JBQWdCLENBQUNDLFFBQ3JCQSxVQUFVLFNBQ047UUFDRSxrQkFBa0I7UUFDbEIsNEJBQTRCO1FBQzVCLHNCQUFzQjtRQUN0QixzQkFBc0I7UUFDdEIsbUJBQW1CO1FBQ25CLHFCQUFxQjtRQUNyQixzQkFBc0I7UUFDdEIseUJBQXlCO1FBQ3pCLHlCQUF5QjtRQUN6Qix5QkFBeUI7UUFDekIsOEJBQThCO1FBQzlCLHdCQUF3QjtRQUN4Qiw0QkFBNEI7UUFDNUIsOEJBQThCO1FBQzlCLHNCQUFzQjtRQUN0Qiw0QkFBNEI7UUFDNUIsNkJBQTZCO1FBQzdCLHdCQUF3QjtRQUN4Qix5QkFBeUI7UUFDekIsdUJBQXVCO1FBQ3ZCLHdCQUF3QjtRQUN4QixpQ0FBaUM7UUFDakMsNEJBQTRCO0lBQzlC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

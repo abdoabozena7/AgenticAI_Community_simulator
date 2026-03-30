@@ -33,7 +33,7 @@ interface GuidedSimulationPanelProps {
   draftInput: GuidedWorkflowDraftContext;
   onDraftChange: (updates: Partial<GuidedWorkflowDraftContext>) => void;
   onChooseScope: (scope: GuidedWorkflowDraftContext['contextScope']) => void;
-  onSubmitSchema: () => void;
+  onSubmitSchema: (draft: GuidedWorkflowDraftContext) => void;
   onSubmitClarifications: (answers: Array<{ questionId: string; answer: string }>) => void;
   onApproveReview: () => void;
   onPauseWorkflow: () => void;
@@ -661,6 +661,7 @@ export function GuidedSimulationPanel({
                     key={option.id}
                     type="button"
                     onClick={() => onChooseScope(option.id)}
+                    disabled={loading}
                     className={cn(
                       'guided-chat-choice-button',
                       draftInput.contextScope === option.id && 'is-selected',
@@ -742,7 +743,7 @@ export function GuidedSimulationPanel({
                         <Button
                           type="button"
                           size="sm"
-                          onClick={onSubmitSchema}
+                          onClick={() => onSubmitSchema(draftInput)}
                           disabled={loading || !activeSchemaStep.ready}
                           className="guided-chat-button guided-chat-button-primary"
                         >
@@ -775,7 +776,7 @@ export function GuidedSimulationPanel({
                       <Button
                         type="button"
                         size="sm"
-                        onClick={onSubmitSchema}
+                          onClick={() => onSubmitSchema(draftInput)}
                         disabled={loading}
                         className="guided-chat-button guided-chat-button-primary"
                       >

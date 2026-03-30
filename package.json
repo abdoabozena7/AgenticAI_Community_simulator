@@ -19,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/abdoabozena7/AgenticAI_Community_simulator-DEPI/issues"
   },
-  "homepage": "https://github.com/abdoabozena7/AgenticAI_Community_simulator-DEPI#readme"
+  "homepage": "https://github.com/abdoabozena7/AgenticAI_Community_simulator-DEPI#readme",
+  "dependencies": {
+    "playwright": "^1.58.2"
+  }
 }

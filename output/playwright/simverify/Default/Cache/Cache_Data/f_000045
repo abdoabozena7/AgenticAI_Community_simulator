@@ -1,0 +1,744 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/chat/SearchLivePanel.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+import { AlertTriangle, Bot, CheckCircle2, ExternalLink, FileSearch, FileText, Globe2, Loader2, Sparkles } from "/node_modules/.vite/deps/lucide-react.js?v=85597f46";
+import { cn } from "/src/lib/utils.ts";
+const stepToneClasses = {
+    pending: 'border-border/60 bg-background/55 text-muted-foreground',
+    running: 'border-cyan-400/35 bg-cyan-500/10 text-cyan-100',
+    completed: 'border-emerald-400/35 bg-emerald-500/10 text-emerald-100',
+    blocked: 'border-amber-400/35 bg-amber-500/10 text-amber-100'
+};
+const noteToneClasses = {
+    info: 'border-sky-400/25 bg-sky-500/8',
+    success: 'border-emerald-400/25 bg-emerald-500/8',
+    warning: 'border-amber-400/30 bg-amber-500/10'
+};
+export function SearchLivePanel({ model }) {
+    if (model.stage === 'hidden') return null;
+    const isArabic = /[\u0600-\u06FF]/.test(model.title + model.subtitle + model.description);
+    return /*#__PURE__*/ _jsxDEV("section", {
+        className: "rounded-[28px] border border-border/60 bg-card/75 p-4 shadow-[0_20px_60px_-34px_rgba(0,0,0,0.6)] backdrop-blur-xl",
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "flex items-start justify-between gap-3",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "space-y-2",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/8 px-3 py-1 text-xs font-semibold text-primary",
+                                children: [
+                                    model.isBusy ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                                        className: "h-3.5 w-3.5 animate-spin"
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                        lineNumber: 42,
+                                        columnNumber: 29
+                                    }, this) : /*#__PURE__*/ _jsxDEV(Globe2, {
+                                        className: "h-3.5 w-3.5"
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                        lineNumber: 42,
+                                        columnNumber: 80
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        children: model.title
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                        lineNumber: 43,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                lineNumber: 41,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("h3", {
+                                        className: "text-base font-semibold text-foreground",
+                                        children: model.subtitle
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                        lineNumber: 46,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "text-sm leading-7 text-muted-foreground",
+                                        children: model.description
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                        lineNumber: 47,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                lineNumber: 45,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                        lineNumber: 40,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "rounded-2xl border border-border/60 bg-background/55 px-3 py-2 text-start",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "text-[11px] uppercase tracking-[0.22em] text-muted-foreground",
+                                children: isArabic ? 'الحالة' : 'Status'
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                lineNumber: 51,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "mt-1 text-sm font-semibold text-foreground",
+                                children: model.statusLabel
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                lineNumber: 54,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                        lineNumber: 50,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                lineNumber: 39,
+                columnNumber: 7
+            }, this),
+            model.pipelineSteps.length ? /*#__PURE__*/ _jsxDEV("div", {
+                className: "mt-4 rounded-[24px] border border-border/50 bg-background/35 p-3",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "mb-3 flex items-center gap-2 text-sm font-semibold text-foreground",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Sparkles, {
+                                className: "h-4 w-4 text-primary"
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                lineNumber: 61,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                children: isArabic ? 'مسار التنفيذ الحالي' : 'Current execution flow'
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                lineNumber: 62,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                        lineNumber: 60,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "grid gap-2",
+                        children: model.pipelineSteps.map((step, index)=>/*#__PURE__*/ _jsxDEV("div", {
+                                className: cn('rounded-2xl border px-3 py-3 transition-colors', stepToneClasses[step.status]),
+                                children: /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-start gap-3",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-black/10",
+                                            children: step.status === 'completed' ? /*#__PURE__*/ _jsxDEV(CheckCircle2, {
+                                                className: "h-4 w-4"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                lineNumber: 73,
+                                                columnNumber: 23
+                                            }, this) : step.status === 'blocked' ? /*#__PURE__*/ _jsxDEV(AlertTriangle, {
+                                                className: "h-4 w-4"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                lineNumber: 75,
+                                                columnNumber: 23
+                                            }, this) : step.status === 'running' ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                                                className: "h-4 w-4 animate-spin"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                lineNumber: 77,
+                                                columnNumber: 23
+                                            }, this) : /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "h-2.5 w-2.5 rounded-full bg-current/70"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                lineNumber: 79,
+                                                columnNumber: 23
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                            lineNumber: 71,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "min-w-0 flex-1",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "text-sm font-semibold",
+                                                    children: step.label
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                    lineNumber: 83,
+                                                    columnNumber: 21
+                                                }, this),
+                                                step.detail ? /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "mt-1 text-xs leading-6 text-current/80",
+                                                    children: step.detail
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                    lineNumber: 84,
+                                                    columnNumber: 36
+                                                }, this) : null
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                            lineNumber: 82,
+                                            columnNumber: 19
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                    lineNumber: 70,
+                                    columnNumber: 17
+                                }, this)
+                            }, `${step.key}-${index}`, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                lineNumber: 66,
+                                columnNumber: 15
+                            }, this))
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                        lineNumber: 64,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                lineNumber: 59,
+                columnNumber: 9
+            }, this) : null,
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "mt-4 space-y-3",
+                children: model.items.length === 0 ? /*#__PURE__*/ _jsxDEV("div", {
+                    className: "rounded-2xl border border-dashed border-border/60 bg-background/35 px-4 py-5 text-sm text-muted-foreground",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "text-sm font-semibold text-foreground",
+                            children: model.emptyTitle
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                            lineNumber: 96,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "mt-2 leading-7",
+                            children: model.emptyDescription
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                            lineNumber: 97,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                    lineNumber: 95,
+                    columnNumber: 11
+                }, this) : model.items.map((item)=>{
+                    if (item.kind === 'summary') {
+                        return /*#__PURE__*/ _jsxDEV("article", {
+                            className: "rounded-2xl border border-border/55 bg-background/55 p-4 transition-colors",
+                            children: /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-start gap-3",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex h-10 w-10 flex-none items-center justify-center overflow-hidden rounded-2xl border border-border/50 bg-card text-muted-foreground",
+                                        children: /*#__PURE__*/ _jsxDEV(FileText, {
+                                            className: "h-4 w-4"
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                            lineNumber: 106,
+                                            columnNumber: 23
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                        lineNumber: 105,
+                                        columnNumber: 21
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "min-w-0 flex-1",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "flex flex-wrap items-start justify-between gap-3",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "truncate text-sm font-semibold text-foreground",
+                                                        children: item.title
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                        lineNumber: 110,
+                                                        columnNumber: 25
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/70 px-2.5 py-1 text-[11px] font-medium text-muted-foreground",
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV(Sparkles, {
+                                                                className: "h-3 w-3"
+                                                            }, void 0, false, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                                lineNumber: 112,
+                                                                columnNumber: 27
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                                children: item.badgeLabel
+                                                            }, void 0, false, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                                lineNumber: 113,
+                                                                columnNumber: 27
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                        lineNumber: 111,
+                                                        columnNumber: 25
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                lineNumber: 109,
+                                                columnNumber: 23
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "mt-3 rounded-xl border border-border/45 bg-card/45 px-3 py-3 leading-7 text-foreground/90",
+                                                children: item.content
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                lineNumber: 116,
+                                                columnNumber: 23
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                        lineNumber: 108,
+                                        columnNumber: 21
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                lineNumber: 104,
+                                columnNumber: 19
+                            }, this)
+                        }, item.id, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                            lineNumber: 103,
+                            columnNumber: 17
+                        }, this);
+                    }
+                    if (item.kind === 'note') {
+                        return /*#__PURE__*/ _jsxDEV("article", {
+                            className: cn('rounded-2xl border p-4 transition-colors', noteToneClasses[item.tone || 'info']),
+                            children: /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-start gap-3",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex h-10 w-10 flex-none items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/10 text-foreground",
+                                        children: item.tone === 'warning' ? /*#__PURE__*/ _jsxDEV(AlertTriangle, {
+                                            className: "h-4 w-4"
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                            lineNumber: 137,
+                                            columnNumber: 25
+                                        }, this) : item.tone === 'success' ? /*#__PURE__*/ _jsxDEV(CheckCircle2, {
+                                            className: "h-4 w-4"
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                            lineNumber: 139,
+                                            columnNumber: 25
+                                        }, this) : /*#__PURE__*/ _jsxDEV(Bot, {
+                                            className: "h-4 w-4"
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                            lineNumber: 141,
+                                            columnNumber: 25
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                        lineNumber: 135,
+                                        columnNumber: 21
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "min-w-0 flex-1",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "flex flex-wrap items-start justify-between gap-3",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "text-sm font-semibold text-foreground",
+                                                        children: item.title
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                        lineNumber: 146,
+                                                        columnNumber: 25
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "inline-flex items-center gap-1 rounded-full border border-white/10 bg-black/10 px-2.5 py-1 text-[11px] font-medium text-foreground/80",
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV(Sparkles, {
+                                                                className: "h-3 w-3"
+                                                            }, void 0, false, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                                lineNumber: 148,
+                                                                columnNumber: 27
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                                children: item.badgeLabel
+                                                            }, void 0, false, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                                lineNumber: 149,
+                                                                columnNumber: 27
+                                                            }, this)
+                                                        ]
+                                                    }, void 0, true, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                        lineNumber: 147,
+                                                        columnNumber: 25
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                lineNumber: 145,
+                                                columnNumber: 23
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "mt-3 text-sm leading-7 text-foreground/90",
+                                                children: item.content
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                lineNumber: 152,
+                                                columnNumber: 23
+                                            }, this),
+                                            item.bullets?.length ? /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "mt-3 space-y-2",
+                                                children: item.bullets.map((bullet, index)=>/*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "rounded-xl border border-white/10 bg-black/10 px-3 py-2 text-xs leading-6 text-foreground/85",
+                                                        children: bullet
+                                                    }, `${item.id}-bullet-${index}`, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                        lineNumber: 156,
+                                                        columnNumber: 29
+                                                    }, this))
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                lineNumber: 154,
+                                                columnNumber: 25
+                                            }, this) : null,
+                                            item.cta ? /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "mt-3 rounded-xl border border-white/10 bg-black/10 px-3 py-2 text-xs leading-6 text-foreground/80",
+                                                children: item.cta
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                lineNumber: 163,
+                                                columnNumber: 25
+                                            }, this) : null
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                        lineNumber: 144,
+                                        columnNumber: 21
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                lineNumber: 134,
+                                columnNumber: 19
+                            }, this)
+                        }, item.id, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                            lineNumber: 127,
+                            columnNumber: 17
+                        }, this);
+                    }
+                    return /*#__PURE__*/ _jsxDEV("article", {
+                        className: cn('rounded-2xl border border-border/55 bg-background/55 p-3 transition-colors', item.kind === 'live_event' && item.highlighted && 'border-primary/30 bg-primary/5'),
+                        children: /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex items-start gap-3",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex h-10 w-10 flex-none items-center justify-center overflow-hidden rounded-2xl border border-border/50 bg-card",
+                                    children: item.faviconUrl ? /*#__PURE__*/ _jsxDEV("img", {
+                                        src: item.faviconUrl,
+                                        alt: item.domain || item.title,
+                                        className: "h-5 w-5 object-contain",
+                                        loading: "lazy"
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                        lineNumber: 184,
+                                        columnNumber: 23
+                                    }, this) : /*#__PURE__*/ _jsxDEV(FileSearch, {
+                                        className: "h-4 w-4 text-muted-foreground"
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                        lineNumber: 191,
+                                        columnNumber: 23
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                    lineNumber: 182,
+                                    columnNumber: 19
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "min-w-0 flex-1",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex flex-wrap items-start justify-between gap-3",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "min-w-0",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV("div", {
+                                                            className: "truncate text-sm font-semibold text-foreground",
+                                                            children: item.title
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                            lineNumber: 198,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV("div", {
+                                                            className: "mt-0.5 flex items-center gap-1 text-xs text-muted-foreground",
+                                                            dir: "ltr",
+                                                            children: [
+                                                                /*#__PURE__*/ _jsxDEV("span", {
+                                                                    className: "truncate",
+                                                                    children: item.url || item.domain
+                                                                }, void 0, false, {
+                                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                                    lineNumber: 200,
+                                                                    columnNumber: 27
+                                                                }, this),
+                                                                'url' in item && item.url ? /*#__PURE__*/ _jsxDEV(ExternalLink, {
+                                                                    className: "h-3 w-3 flex-none"
+                                                                }, void 0, false, {
+                                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                                    lineNumber: 201,
+                                                                    columnNumber: 56
+                                                                }, this) : null
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                            lineNumber: 199,
+                                                            columnNumber: 25
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                    lineNumber: 197,
+                                                    columnNumber: 23
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "inline-flex items-center gap-1 rounded-full border border-border/60 bg-card/70 px-2.5 py-1 text-[11px] font-medium text-muted-foreground",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(Sparkles, {
+                                                            className: "h-3 w-3"
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                            lineNumber: 205,
+                                                            columnNumber: 25
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV("span", {
+                                                            children: item.badgeLabel
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                            lineNumber: 206,
+                                                            columnNumber: 25
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                    lineNumber: 204,
+                                                    columnNumber: 23
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                            lineNumber: 196,
+                                            columnNumber: 21
+                                        }, this),
+                                        item.kind === 'live_event' ? /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "mt-3",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "mb-1 flex items-center justify-between text-[11px] text-muted-foreground",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV("span", {
+                                                            children: isArabic ? 'تقدم الخطوة' : 'Step progress'
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                            lineNumber: 213,
+                                                            columnNumber: 27
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV("span", {
+                                                            children: [
+                                                                item.progress,
+                                                                "%"
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                            lineNumber: 214,
+                                                            columnNumber: 27
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                    lineNumber: 212,
+                                                    columnNumber: 25
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "h-2 overflow-hidden rounded-full bg-secondary/70",
+                                                    children: /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "h-full rounded-full bg-primary transition-all duration-500",
+                                                        style: {
+                                                            width: `${item.progress}%`
+                                                        }
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                        lineNumber: 217,
+                                                        columnNumber: 27
+                                                    }, this)
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                    lineNumber: 216,
+                                                    columnNumber: 25
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                            lineNumber: 211,
+                                            columnNumber: 23
+                                        }, this) : null,
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "mt-3 grid gap-2 text-xs text-muted-foreground sm:grid-cols-[minmax(0,1fr)_auto]",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "rounded-xl border border-border/45 bg-card/45 px-3 py-2 leading-6 text-foreground/85",
+                                                    children: item.preview
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                    lineNumber: 226,
+                                                    columnNumber: 23
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "flex flex-col items-start gap-1 rounded-xl border border-border/45 bg-card/45 px-3 py-2 text-[11px]",
+                                                    children: [
+                                                        'httpStatus' in item && typeof item.httpStatus === 'number' ? /*#__PURE__*/ _jsxDEV("span", {
+                                                            children: `HTTP: ${item.httpStatus}`
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                            lineNumber: 231,
+                                                            columnNumber: 27
+                                                        }, this) : null,
+                                                        'contentChars' in item && typeof item.contentChars === 'number' ? /*#__PURE__*/ _jsxDEV("span", {
+                                                            children: isArabic ? `${item.contentChars} حرف` : `${item.contentChars} chars`
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                            lineNumber: 234,
+                                                            columnNumber: 27
+                                                        }, this) : null,
+                                                        typeof item.relevanceScore === 'number' ? /*#__PURE__*/ _jsxDEV("span", {
+                                                            children: isArabic ? `صلة ${Math.round(item.relevanceScore * 100)}%` : `Relevance ${Math.round(item.relevanceScore * 100)}%`
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                            lineNumber: 237,
+                                                            columnNumber: 27
+                                                        }, this) : null
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                                    lineNumber: 229,
+                                                    columnNumber: 23
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                            lineNumber: 225,
+                                            columnNumber: 21
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                                    lineNumber: 195,
+                                    columnNumber: 19
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                            lineNumber: 181,
+                            columnNumber: 17
+                        }, this)
+                    }, item.id, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                        lineNumber: 174,
+                        columnNumber: 15
+                    }, this);
+                })
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+                lineNumber: 93,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx",
+        lineNumber: 38,
+        columnNumber: 5
+    }, this);
+}
+_c = SearchLivePanel;
+var _c;
+$RefreshReg$(_c, "SearchLivePanel");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/SearchLivePanel.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNlYXJjaExpdmVQYW5lbC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHtcbiAgQWxlcnRUcmlhbmdsZSxcbiAgQm90LFxuICBDaGVja0NpcmNsZTIsXG4gIEV4dGVybmFsTGluayxcbiAgRmlsZVNlYXJjaCxcbiAgRmlsZVRleHQsXG4gIEdsb2JlMixcbiAgTG9hZGVyMixcbiAgU3BhcmtsZXMsXG59IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XG5pbXBvcnQgeyBjbiB9IGZyb20gJ0AvbGliL3V0aWxzJztcbmltcG9ydCB0eXBlIHsgU2VhcmNoUGFuZWxNb2RlbCB9IGZyb20gJ0AvbGliL3NlYXJjaFBhbmVsTW9kZWwnO1xuXG5pbnRlcmZhY2UgU2VhcmNoTGl2ZVBhbmVsUHJvcHMge1xuICBtb2RlbDogU2VhcmNoUGFuZWxNb2RlbDtcbn1cblxuY29uc3Qgc3RlcFRvbmVDbGFzc2VzOiBSZWNvcmQ8J3BlbmRpbmcnIHwgJ3J1bm5pbmcnIHwgJ2NvbXBsZXRlZCcgfCAnYmxvY2tlZCcsIHN0cmluZz4gPSB7XG4gIHBlbmRpbmc6ICdib3JkZXItYm9yZGVyLzYwIGJnLWJhY2tncm91bmQvNTUgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kJyxcbiAgcnVubmluZzogJ2JvcmRlci1jeWFuLTQwMC8zNSBiZy1jeWFuLTUwMC8xMCB0ZXh0LWN5YW4tMTAwJyxcbiAgY29tcGxldGVkOiAnYm9yZGVyLWVtZXJhbGQtNDAwLzM1IGJnLWVtZXJhbGQtNTAwLzEwIHRleHQtZW1lcmFsZC0xMDAnLFxuICBibG9ja2VkOiAnYm9yZGVyLWFtYmVyLTQwMC8zNSBiZy1hbWJlci01MDAvMTAgdGV4dC1hbWJlci0xMDAnLFxufTtcblxuY29uc3Qgbm90ZVRvbmVDbGFzc2VzOiBSZWNvcmQ8J2luZm8nIHwgJ3N1Y2Nlc3MnIHwgJ3dhcm5pbmcnLCBzdHJpbmc+ID0ge1xuICBpbmZvOiAnYm9yZGVyLXNreS00MDAvMjUgYmctc2t5LTUwMC84JyxcbiAgc3VjY2VzczogJ2JvcmRlci1lbWVyYWxkLTQwMC8yNSBiZy1lbWVyYWxkLTUwMC84JyxcbiAgd2FybmluZzogJ2JvcmRlci1hbWJlci00MDAvMzAgYmctYW1iZXItNTAwLzEwJyxcbn07XG5cbmV4cG9ydCBmdW5jdGlvbiBTZWFyY2hMaXZlUGFuZWwoeyBtb2RlbCB9OiBTZWFyY2hMaXZlUGFuZWxQcm9wcykge1xuICBpZiAobW9kZWwuc3RhZ2UgPT09ICdoaWRkZW4nKSByZXR1cm4gbnVsbDtcblxuICBjb25zdCBpc0FyYWJpYyA9IC9bXFx1MDYwMC1cXHUwNkZGXS8udGVzdChtb2RlbC50aXRsZSArIG1vZGVsLnN1YnRpdGxlICsgbW9kZWwuZGVzY3JpcHRpb24pO1xuXG4gIHJldHVybiAoXG4gICAgPHNlY3Rpb24gY2xhc3NOYW1lPVwicm91bmRlZC1bMjhweF0gYm9yZGVyIGJvcmRlci1ib3JkZXIvNjAgYmctY2FyZC83NSBwLTQgc2hhZG93LVswXzIwcHhfNjBweF8tMzRweF9yZ2JhKDAsMCwwLDAuNildIGJhY2tkcm9wLWJsdXIteGxcIj5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1zdGFydCBqdXN0aWZ5LWJldHdlZW4gZ2FwLTNcIj5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTJcIj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImlubGluZS1mbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiByb3VuZGVkLWZ1bGwgYm9yZGVyIGJvcmRlci1wcmltYXJ5LzE1IGJnLXByaW1hcnkvOCBweC0zIHB5LTEgdGV4dC14cyBmb250LXNlbWlib2xkIHRleHQtcHJpbWFyeVwiPlxuICAgICAgICAgICAge21vZGVsLmlzQnVzeSA/IDxMb2FkZXIyIGNsYXNzTmFtZT1cImgtMy41IHctMy41IGFuaW1hdGUtc3BpblwiIC8+IDogPEdsb2JlMiBjbGFzc05hbWU9XCJoLTMuNSB3LTMuNVwiIC8+fVxuICAgICAgICAgICAgPHNwYW4+e21vZGVsLnRpdGxlfTwvc3Bhbj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8ZGl2PlxuICAgICAgICAgICAgPGgzIGNsYXNzTmFtZT1cInRleHQtYmFzZSBmb250LXNlbWlib2xkIHRleHQtZm9yZWdyb3VuZFwiPnttb2RlbC5zdWJ0aXRsZX08L2gzPlxuICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSBsZWFkaW5nLTcgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+e21vZGVsLmRlc2NyaXB0aW9ufTwvcD5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9kaXY+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicm91bmRlZC0yeGwgYm9yZGVyIGJvcmRlci1ib3JkZXIvNjAgYmctYmFja2dyb3VuZC81NSBweC0zIHB5LTIgdGV4dC1zdGFydFwiPlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC1bMTFweF0gdXBwZXJjYXNlIHRyYWNraW5nLVswLjIyZW1dIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAge2lzQXJhYmljID8gJ9in2YTYrdin2YTYqScgOiAnU3RhdHVzJ31cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTEgdGV4dC1zbSBmb250LXNlbWlib2xkIHRleHQtZm9yZWdyb3VuZFwiPnttb2RlbC5zdGF0dXNMYWJlbH08L2Rpdj5cbiAgICAgICAgPC9kaXY+XG4gICAgICA8L2Rpdj5cblxuICAgICAge21vZGVsLnBpcGVsaW5lU3RlcHMubGVuZ3RoID8gKFxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTQgcm91bmRlZC1bMjRweF0gYm9yZGVyIGJvcmRlci1ib3JkZXIvNTAgYmctYmFja2dyb3VuZC8zNSBwLTNcIj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm1iLTMgZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgdGV4dC1zbSBmb250LXNlbWlib2xkIHRleHQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgPFNwYXJrbGVzIGNsYXNzTmFtZT1cImgtNCB3LTQgdGV4dC1wcmltYXJ5XCIgLz5cbiAgICAgICAgICAgIDxzcGFuPntpc0FyYWJpYyA/ICfZhdiz2KfYsSDYp9mE2KrZhtmB2YrYsCDYp9mE2K3Yp9mE2YonIDogJ0N1cnJlbnQgZXhlY3V0aW9uIGZsb3cnfTwvc3Bhbj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImdyaWQgZ2FwLTJcIj5cbiAgICAgICAgICAgIHttb2RlbC5waXBlbGluZVN0ZXBzLm1hcCgoc3RlcCwgaW5kZXgpID0+IChcbiAgICAgICAgICAgICAgPGRpdlxuICAgICAgICAgICAgICAgIGtleT17YCR7c3RlcC5rZXl9LSR7aW5kZXh9YH1cbiAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2NuKCdyb3VuZGVkLTJ4bCBib3JkZXIgcHgtMyBweS0zIHRyYW5zaXRpb24tY29sb3JzJywgc3RlcFRvbmVDbGFzc2VzW3N0ZXAuc3RhdHVzXSl9XG4gICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtc3RhcnQgZ2FwLTNcIj5cbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXQtMC41IGZsZXggaC04IHctOCBzaHJpbmstMCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgcm91bmRlZC0yeGwgYm9yZGVyIGJvcmRlci13aGl0ZS8xMCBiZy1ibGFjay8xMFwiPlxuICAgICAgICAgICAgICAgICAgICB7c3RlcC5zdGF0dXMgPT09ICdjb21wbGV0ZWQnID8gKFxuICAgICAgICAgICAgICAgICAgICAgIDxDaGVja0NpcmNsZTIgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICAgICkgOiBzdGVwLnN0YXR1cyA9PT0gJ2Jsb2NrZWQnID8gKFxuICAgICAgICAgICAgICAgICAgICAgIDxBbGVydFRyaWFuZ2xlIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICAgICAgICAgICAgICApIDogc3RlcC5zdGF0dXMgPT09ICdydW5uaW5nJyA/IChcbiAgICAgICAgICAgICAgICAgICAgICA8TG9hZGVyMiBjbGFzc05hbWU9XCJoLTQgdy00IGFuaW1hdGUtc3BpblwiIC8+XG4gICAgICAgICAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJoLTIuNSB3LTIuNSByb3VuZGVkLWZ1bGwgYmctY3VycmVudC83MFwiIC8+XG4gICAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibWluLXctMCBmbGV4LTFcIj5cbiAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtc2VtaWJvbGRcIj57c3RlcC5sYWJlbH08L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAge3N0ZXAuZGV0YWlsID8gPGRpdiBjbGFzc05hbWU9XCJtdC0xIHRleHQteHMgbGVhZGluZy02IHRleHQtY3VycmVudC84MFwiPntzdGVwLmRldGFpbH08L2Rpdj4gOiBudWxsfVxuICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgKSl9XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgIDwvZGl2PlxuICAgICAgKSA6IG51bGx9XG5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXQtNCBzcGFjZS15LTNcIj5cbiAgICAgICAge21vZGVsLml0ZW1zLmxlbmd0aCA9PT0gMCA/IChcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJvdW5kZWQtMnhsIGJvcmRlciBib3JkZXItZGFzaGVkIGJvcmRlci1ib3JkZXIvNjAgYmctYmFja2dyb3VuZC8zNSBweC00IHB5LTUgdGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC1zbSBmb250LXNlbWlib2xkIHRleHQtZm9yZWdyb3VuZFwiPnttb2RlbC5lbXB0eVRpdGxlfTwvZGl2PlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC0yIGxlYWRpbmctN1wiPnttb2RlbC5lbXB0eURlc2NyaXB0aW9ufTwvZGl2PlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICApIDogKFxuICAgICAgICAgIG1vZGVsLml0ZW1zLm1hcCgoaXRlbSkgPT4ge1xuICAgICAgICAgICAgaWYgKGl0ZW0ua2luZCA9PT0gJ3N1bW1hcnknKSB7XG4gICAgICAgICAgICAgIHJldHVybiAoXG4gICAgICAgICAgICAgICAgPGFydGljbGUga2V5PXtpdGVtLmlkfSBjbGFzc05hbWU9XCJyb3VuZGVkLTJ4bCBib3JkZXIgYm9yZGVyLWJvcmRlci81NSBiZy1iYWNrZ3JvdW5kLzU1IHAtNCB0cmFuc2l0aW9uLWNvbG9yc1wiPlxuICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLXN0YXJ0IGdhcC0zXCI+XG4gICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBoLTEwIHctMTAgZmxleC1ub25lIGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciBvdmVyZmxvdy1oaWRkZW4gcm91bmRlZC0yeGwgYm9yZGVyIGJvcmRlci1ib3JkZXIvNTAgYmctY2FyZCB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICAgICAgICA8RmlsZVRleHQgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm1pbi13LTAgZmxleC0xXCI+XG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGZsZXgtd3JhcCBpdGVtcy1zdGFydCBqdXN0aWZ5LWJldHdlZW4gZ2FwLTNcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidHJ1bmNhdGUgdGV4dC1zbSBmb250LXNlbWlib2xkIHRleHQtZm9yZWdyb3VuZFwiPntpdGVtLnRpdGxlfTwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJpbmxpbmUtZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTEgcm91bmRlZC1mdWxsIGJvcmRlciBib3JkZXItYm9yZGVyLzYwIGJnLWNhcmQvNzAgcHgtMi41IHB5LTEgdGV4dC1bMTFweF0gZm9udC1tZWRpdW0gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxTcGFya2xlcyBjbGFzc05hbWU9XCJoLTMgdy0zXCIgLz5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPHNwYW4+e2l0ZW0uYmFkZ2VMYWJlbH08L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTMgcm91bmRlZC14bCBib3JkZXIgYm9yZGVyLWJvcmRlci80NSBiZy1jYXJkLzQ1IHB4LTMgcHktMyBsZWFkaW5nLTcgdGV4dC1mb3JlZ3JvdW5kLzkwXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICB7aXRlbS5jb250ZW50fVxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDwvYXJ0aWNsZT5cbiAgICAgICAgICAgICAgKTtcbiAgICAgICAgICAgIH1cblxuICAgICAgICAgICAgaWYgKGl0ZW0ua2luZCA9PT0gJ25vdGUnKSB7XG4gICAgICAgICAgICAgIHJldHVybiAoXG4gICAgICAgICAgICAgICAgPGFydGljbGVcbiAgICAgICAgICAgICAgICAgIGtleT17aXRlbS5pZH1cbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgICAgICAgICAgICdyb3VuZGVkLTJ4bCBib3JkZXIgcC00IHRyYW5zaXRpb24tY29sb3JzJyxcbiAgICAgICAgICAgICAgICAgICAgbm90ZVRvbmVDbGFzc2VzW2l0ZW0udG9uZSB8fCAnaW5mbyddLFxuICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtc3RhcnQgZ2FwLTNcIj5cbiAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGgtMTAgdy0xMCBmbGV4LW5vbmUgaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIG92ZXJmbG93LWhpZGRlbiByb3VuZGVkLTJ4bCBib3JkZXIgYm9yZGVyLXdoaXRlLzEwIGJnLWJsYWNrLzEwIHRleHQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgICAgICAgIHtpdGVtLnRvbmUgPT09ICd3YXJuaW5nJyA/IChcbiAgICAgICAgICAgICAgICAgICAgICAgIDxBbGVydFRyaWFuZ2xlIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICAgICAgICAgICAgICAgICkgOiBpdGVtLnRvbmUgPT09ICdzdWNjZXNzJyA/IChcbiAgICAgICAgICAgICAgICAgICAgICAgIDxDaGVja0NpcmNsZTIgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICAgICAgICAgIDxCb3QgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibWluLXctMCBmbGV4LTFcIj5cbiAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZmxleC13cmFwIGl0ZW1zLXN0YXJ0IGp1c3RpZnktYmV0d2VlbiBnYXAtM1wiPlxuICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtc2VtaWJvbGQgdGV4dC1mb3JlZ3JvdW5kXCI+e2l0ZW0udGl0bGV9PC9kaXY+XG4gICAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImlubGluZS1mbGV4IGl0ZW1zLWNlbnRlciBnYXAtMSByb3VuZGVkLWZ1bGwgYm9yZGVyIGJvcmRlci13aGl0ZS8xMCBiZy1ibGFjay8xMCBweC0yLjUgcHktMSB0ZXh0LVsxMXB4XSBmb250LW1lZGl1bSB0ZXh0LWZvcmVncm91bmQvODBcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPFNwYXJrbGVzIGNsYXNzTmFtZT1cImgtMyB3LTNcIiAvPlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8c3Bhbj57aXRlbS5iYWRnZUxhYmVsfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXQtMyB0ZXh0LXNtIGxlYWRpbmctNyB0ZXh0LWZvcmVncm91bmQvOTBcIj57aXRlbS5jb250ZW50fTwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgIHtpdGVtLmJ1bGxldHM/Lmxlbmd0aCA/IChcbiAgICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXQtMyBzcGFjZS15LTJcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAge2l0ZW0uYnVsbGV0cy5tYXAoKGJ1bGxldCwgaW5kZXgpID0+IChcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGtleT17YCR7aXRlbS5pZH0tYnVsbGV0LSR7aW5kZXh9YH0gY2xhc3NOYW1lPVwicm91bmRlZC14bCBib3JkZXIgYm9yZGVyLXdoaXRlLzEwIGJnLWJsYWNrLzEwIHB4LTMgcHktMiB0ZXh0LXhzIGxlYWRpbmctNiB0ZXh0LWZvcmVncm91bmQvODVcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHtidWxsZXR9XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICkpfVxuICAgICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgICAgKSA6IG51bGx9XG4gICAgICAgICAgICAgICAgICAgICAge2l0ZW0uY3RhID8gKFxuICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC0zIHJvdW5kZWQteGwgYm9yZGVyIGJvcmRlci13aGl0ZS8xMCBiZy1ibGFjay8xMCBweC0zIHB5LTIgdGV4dC14cyBsZWFkaW5nLTYgdGV4dC1mb3JlZ3JvdW5kLzgwXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIHtpdGVtLmN0YX1cbiAgICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgICkgOiBudWxsfVxuICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDwvYXJ0aWNsZT5cbiAgICAgICAgICAgICAgKTtcbiAgICAgICAgICAgIH1cblxuICAgICAgICAgICAgcmV0dXJuIChcbiAgICAgICAgICAgICAgPGFydGljbGVcbiAgICAgICAgICAgICAgICBrZXk9e2l0ZW0uaWR9XG4gICAgICAgICAgICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgICAgICAgICAgICdyb3VuZGVkLTJ4bCBib3JkZXIgYm9yZGVyLWJvcmRlci81NSBiZy1iYWNrZ3JvdW5kLzU1IHAtMyB0cmFuc2l0aW9uLWNvbG9ycycsXG4gICAgICAgICAgICAgICAgICBpdGVtLmtpbmQgPT09ICdsaXZlX2V2ZW50JyAmJiBpdGVtLmhpZ2hsaWdodGVkICYmICdib3JkZXItcHJpbWFyeS8zMCBiZy1wcmltYXJ5LzUnLFxuICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtc3RhcnQgZ2FwLTNcIj5cbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBoLTEwIHctMTAgZmxleC1ub25lIGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciBvdmVyZmxvdy1oaWRkZW4gcm91bmRlZC0yeGwgYm9yZGVyIGJvcmRlci1ib3JkZXIvNTAgYmctY2FyZFwiPlxuICAgICAgICAgICAgICAgICAgICB7aXRlbS5mYXZpY29uVXJsID8gKFxuICAgICAgICAgICAgICAgICAgICAgIDxpbWdcbiAgICAgICAgICAgICAgICAgICAgICAgIHNyYz17aXRlbS5mYXZpY29uVXJsfVxuICAgICAgICAgICAgICAgICAgICAgICAgYWx0PXtpdGVtLmRvbWFpbiB8fCBpdGVtLnRpdGxlfVxuICAgICAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiaC01IHctNSBvYmplY3QtY29udGFpblwiXG4gICAgICAgICAgICAgICAgICAgICAgICBsb2FkaW5nPVwibGF6eVwiXG4gICAgICAgICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICAgICAgICA8RmlsZVNlYXJjaCBjbGFzc05hbWU9XCJoLTQgdy00IHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiIC8+XG4gICAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtaW4tdy0wIGZsZXgtMVwiPlxuICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZmxleC13cmFwIGl0ZW1zLXN0YXJ0IGp1c3RpZnktYmV0d2VlbiBnYXAtM1wiPlxuICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibWluLXctMFwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0cnVuY2F0ZSB0ZXh0LXNtIGZvbnQtc2VtaWJvbGQgdGV4dC1mb3JlZ3JvdW5kXCI+e2l0ZW0udGl0bGV9PC9kaXY+XG4gICAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTAuNSBmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMSB0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiIGRpcj1cImx0clwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0cnVuY2F0ZVwiPntpdGVtLnVybCB8fCBpdGVtLmRvbWFpbn08L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIHsndXJsJyBpbiBpdGVtICYmIGl0ZW0udXJsID8gPEV4dGVybmFsTGluayBjbGFzc05hbWU9XCJoLTMgdy0zIGZsZXgtbm9uZVwiIC8+IDogbnVsbH1cbiAgICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiaW5saW5lLWZsZXggaXRlbXMtY2VudGVyIGdhcC0xIHJvdW5kZWQtZnVsbCBib3JkZXIgYm9yZGVyLWJvcmRlci82MCBiZy1jYXJkLzcwIHB4LTIuNSBweS0xIHRleHQtWzExcHhdIGZvbnQtbWVkaXVtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgPFNwYXJrbGVzIGNsYXNzTmFtZT1cImgtMyB3LTNcIiAvPlxuICAgICAgICAgICAgICAgICAgICAgICAgPHNwYW4+e2l0ZW0uYmFkZ2VMYWJlbH08L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICAgICAgICAgIHtpdGVtLmtpbmQgPT09ICdsaXZlX2V2ZW50JyA/IChcbiAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTNcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibWItMSBmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW4gdGV4dC1bMTFweF0gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuPntpc0FyYWJpYyA/ICfYqtmC2K/ZhSDYp9mE2K7Yt9mI2KknIDogJ1N0ZXAgcHJvZ3Jlc3MnfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPHNwYW4+e2l0ZW0ucHJvZ3Jlc3N9JTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJoLTIgb3ZlcmZsb3ctaGlkZGVuIHJvdW5kZWQtZnVsbCBiZy1zZWNvbmRhcnkvNzBcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPGRpdlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT1cImgtZnVsbCByb3VuZGVkLWZ1bGwgYmctcHJpbWFyeSB0cmFuc2l0aW9uLWFsbCBkdXJhdGlvbi01MDBcIlxuICAgICAgICAgICAgICAgICAgICAgICAgICAgIHN0eWxlPXt7IHdpZHRoOiBgJHtpdGVtLnByb2dyZXNzfSVgIH19XG4gICAgICAgICAgICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgKSA6IG51bGx9XG5cbiAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC0zIGdyaWQgZ2FwLTIgdGV4dC14cyB0ZXh0LW11dGVkLWZvcmVncm91bmQgc206Z3JpZC1jb2xzLVttaW5tYXgoMCwxZnIpX2F1dG9dXCI+XG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJyb3VuZGVkLXhsIGJvcmRlciBib3JkZXItYm9yZGVyLzQ1IGJnLWNhcmQvNDUgcHgtMyBweS0yIGxlYWRpbmctNiB0ZXh0LWZvcmVncm91bmQvODVcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgIHtpdGVtLnByZXZpZXd9XG4gICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGZsZXgtY29sIGl0ZW1zLXN0YXJ0IGdhcC0xIHJvdW5kZWQteGwgYm9yZGVyIGJvcmRlci1ib3JkZXIvNDUgYmctY2FyZC80NSBweC0zIHB5LTIgdGV4dC1bMTFweF1cIj5cbiAgICAgICAgICAgICAgICAgICAgICAgIHsnaHR0cFN0YXR1cycgaW4gaXRlbSAmJiB0eXBlb2YgaXRlbS5odHRwU3RhdHVzID09PSAnbnVtYmVyJyA/IChcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPHNwYW4+e2BIVFRQOiAke2l0ZW0uaHR0cFN0YXR1c31gfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgICkgOiBudWxsfVxuICAgICAgICAgICAgICAgICAgICAgICAgeydjb250ZW50Q2hhcnMnIGluIGl0ZW0gJiYgdHlwZW9mIGl0ZW0uY29udGVudENoYXJzID09PSAnbnVtYmVyJyA/IChcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPHNwYW4+e2lzQXJhYmljID8gYCR7aXRlbS5jb250ZW50Q2hhcnN9INit2LHZgWAgOiBgJHtpdGVtLmNvbnRlbnRDaGFyc30gY2hhcnNgfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgICkgOiBudWxsfVxuICAgICAgICAgICAgICAgICAgICAgICAge3R5cGVvZiBpdGVtLnJlbGV2YW5jZVNjb3JlID09PSAnbnVtYmVyJyA/IChcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPHNwYW4+e2lzQXJhYmljID8gYNi12YTYqSAke01hdGgucm91bmQoaXRlbS5yZWxldmFuY2VTY29yZSAqIDEwMCl9JWAgOiBgUmVsZXZhbmNlICR7TWF0aC5yb3VuZChpdGVtLnJlbGV2YW5jZVNjb3JlICogMTAwKX0lYH08L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgICAgICApIDogbnVsbH1cbiAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPC9hcnRpY2xlPlxuICAgICAgICAgICAgKTtcbiAgICAgICAgICB9KVxuICAgICAgICApfVxuICAgICAgPC9kaXY+XG4gICAgPC9zZWN0aW9uPlxuICApO1xufVxuIl0sIm5hbWVzIjpbIkFsZXJ0VHJpYW5nbGUiLCJCb3QiLCJDaGVja0NpcmNsZTIiLCJFeHRlcm5hbExpbmsiLCJGaWxlU2VhcmNoIiwiRmlsZVRleHQiLCJHbG9iZTIiLCJMb2FkZXIyIiwiU3BhcmtsZXMiLCJjbiIsInN0ZXBUb25lQ2xhc3NlcyIsInBlbmRpbmciLCJydW5uaW5nIiwiY29tcGxldGVkIiwiYmxvY2tlZCIsIm5vdGVUb25lQ2xhc3NlcyIsImluZm8iLCJzdWNjZXNzIiwid2FybmluZyIsIlNlYXJjaExpdmVQYW5lbCIsIm1vZGVsIiwic3RhZ2UiLCJpc0FyYWJpYyIsInRlc3QiLCJ0aXRsZSIsInN1YnRpdGxlIiwiZGVzY3JpcHRpb24iLCJzZWN0aW9uIiwiY2xhc3NOYW1lIiwiZGl2IiwiaXNCdXN5Iiwic3BhbiIsImgzIiwicCIsInN0YXR1c0xhYmVsIiwicGlwZWxpbmVTdGVwcyIsImxlbmd0aCIsIm1hcCIsInN0ZXAiLCJpbmRleCIsInN0YXR1cyIsImxhYmVsIiwiZGV0YWlsIiwia2V5IiwiaXRlbXMiLCJlbXB0eVRpdGxlIiwiZW1wdHlEZXNjcmlwdGlvbiIsIml0ZW0iLCJraW5kIiwiYXJ0aWNsZSIsImJhZGdlTGFiZWwiLCJjb250ZW50IiwiaWQiLCJ0b25lIiwiYnVsbGV0cyIsImJ1bGxldCIsImN0YSIsImhpZ2hsaWdodGVkIiwiZmF2aWNvblVybCIsImltZyIsInNyYyIsImFsdCIsImRvbWFpbiIsImxvYWRpbmciLCJkaXIiLCJ1cmwiLCJwcm9ncmVzcyIsInN0eWxlIiwid2lkdGgiLCJwcmV2aWV3IiwiaHR0cFN0YXR1cyIsImNvbnRlbnRDaGFycyIsInJlbGV2YW5jZVNjb3JlIiwiTWF0aCIsInJvdW5kIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLFNBQ0VBLGFBQWEsRUFDYkMsR0FBRyxFQUNIQyxZQUFZLEVBQ1pDLFlBQVksRUFDWkMsVUFBVSxFQUNWQyxRQUFRLEVBQ1JDLE1BQU0sRUFDTkMsT0FBTyxFQUNQQyxRQUFRLFFBQ0gsZUFBZTtBQUN0QixTQUFTQyxFQUFFLFFBQVEsY0FBYztBQU9qQyxNQUFNQyxrQkFBbUY7SUFDdkZDLFNBQVM7SUFDVEMsU0FBUztJQUNUQyxXQUFXO0lBQ1hDLFNBQVM7QUFDWDtBQUVBLE1BQU1DLGtCQUFrRTtJQUN0RUMsTUFBTTtJQUNOQyxTQUFTO0lBQ1RDLFNBQVM7QUFDWDtBQUVBLE9BQU8sU0FBU0MsZ0JBQWdCLEVBQUVDLEtBQUssRUFBd0I7SUFDN0QsSUFBSUEsTUFBTUMsS0FBSyxLQUFLLFVBQVUsT0FBTztJQUVyQyxNQUFNQyxXQUFXLGtCQUFrQkMsSUFBSSxDQUFDSCxNQUFNSSxLQUFLLEdBQUdKLE1BQU1LLFFBQVEsR0FBR0wsTUFBTU0sV0FBVztJQUV4RixxQkFDRSxRQUFDQztRQUFRQyxXQUFVOzswQkFDakIsUUFBQ0M7Z0JBQUlELFdBQVU7O2tDQUNiLFFBQUNDO3dCQUFJRCxXQUFVOzswQ0FDYixRQUFDQztnQ0FBSUQsV0FBVTs7b0NBQ1pSLE1BQU1VLE1BQU0saUJBQUcsUUFBQ3ZCO3dDQUFRcUIsV0FB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

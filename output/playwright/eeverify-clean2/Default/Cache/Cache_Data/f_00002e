@@ -1,0 +1,270 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/landing/SolutionSection.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/SolutionSection.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=85597f46"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useRef = __vite__cjsImport3_react["useRef"];
+import { gsap } from "/node_modules/.vite/deps/gsap.js?v=85597f46";
+import { ScrollTrigger } from "/node_modules/.vite/deps/gsap_ScrollTrigger.js?v=85597f46";
+import { Sparkles } from "/node_modules/.vite/deps/lucide-react.js?v=85597f46";
+import { useLanguage } from "/src/contexts/LanguageContext.tsx";
+gsap.registerPlugin(ScrollTrigger);
+export function SolutionSection() {
+    _s();
+    const { t } = useLanguage();
+    const sectionRef = useRef(null);
+    const textRef = useRef(null);
+    const badgeRef = useRef(null);
+    useEffect(()=>{
+        const ctx = gsap.context(()=>{
+            // Badge with crazy spiral entrance
+            gsap.fromTo(badgeRef.current, {
+                scale: 0,
+                rotate: 720,
+                opacity: 0
+            }, {
+                scale: 1,
+                rotate: 0,
+                opacity: 1,
+                duration: 1.2,
+                ease: 'elastic.out(1, 0.3)',
+                scrollTrigger: {
+                    trigger: sectionRef.current,
+                    start: 'top 70%'
+                }
+            });
+            // Text reveal with wave effect - each element comes from different direction
+            const textElements = textRef.current?.querySelectorAll('.reveal-text');
+            if (textElements) {
+                textElements.forEach((el, i)=>{
+                    const directions = [
+                        {
+                            x: -200,
+                            y: 0,
+                            rotate: -15
+                        },
+                        {
+                            x: 200,
+                            y: 0,
+                            rotate: 15
+                        },
+                        {
+                            x: 0,
+                            y: 100,
+                            rotate: 0
+                        }
+                    ];
+                    const dir = directions[i % 3];
+                    gsap.fromTo(el, {
+                        opacity: 0,
+                        x: dir.x,
+                        y: dir.y,
+                        rotate: dir.rotate,
+                        scale: 0.8
+                    }, {
+                        opacity: 1,
+                        x: 0,
+                        y: 0,
+                        rotate: 0,
+                        scale: 1,
+                        duration: 1,
+                        ease: 'power4.out',
+                        scrollTrigger: {
+                            trigger: textRef.current,
+                            start: 'top 75%'
+                        },
+                        delay: i * 0.15
+                    });
+                });
+            }
+            // Floating particles with more chaotic movement
+            const particles = sectionRef.current?.querySelectorAll('.particle');
+            if (particles) {
+                particles.forEach((particle, i)=>{
+                    // Initial burst animation
+                    gsap.fromTo(particle, {
+                        scale: 0,
+                        opacity: 0
+                    }, {
+                        scale: 1,
+                        opacity: 0.5,
+                        duration: 0.5,
+                        ease: 'back.out(2)',
+                        scrollTrigger: {
+                            trigger: sectionRef.current,
+                            start: 'top 70%'
+                        },
+                        delay: i * 0.1
+                    });
+                    // Continuous floating
+                    gsap.to(particle, {
+                        y: 'random(-50, 50)',
+                        x: 'random(-40, 40)',
+                        rotation: 'random(-180, 180)',
+                        scale: 'random(0.5, 1.5)',
+                        duration: 'random(4, 7)',
+                        repeat: -1,
+                        yoyo: true,
+                        ease: 'sine.inOut',
+                        delay: i * 0.3
+                    });
+                });
+            }
+        }, sectionRef);
+        return ()=>ctx.revert();
+    }, []);
+    return /*#__PURE__*/ _jsxDEV("section", {
+        ref: sectionRef,
+        className: "relative py-40 px-6 bg-background overflow-hidden",
+        children: [
+            [
+                ...Array(6)
+            ].map((_, i)=>/*#__PURE__*/ _jsxDEV("div", {
+                    className: "particle absolute w-2 h-2 rounded-full opacity-30",
+                    style: {
+                        background: `rgb(var(--rgb-${[
+                            'cyan',
+                            'magenta',
+                            'yellow'
+                        ][i % 3]}))`,
+                        top: `${20 + i * 12}%`,
+                        left: `${10 + i * 15}%`
+                    }
+                }, i, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/SolutionSection.tsx",
+                    lineNumber: 113,
+                    columnNumber: 9
+                }, this)),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "max-w-4xl mx-auto text-center relative z-10",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        ref: badgeRef,
+                        className: "inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-foreground text-background text-sm font-semibold mb-8 rgb-shadow",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Sparkles, {
+                                className: "w-4 h-4"
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/SolutionSection.tsx",
+                                lineNumber: 130,
+                                columnNumber: 11
+                            }, this),
+                            t('solution.tag')
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/SolutionSection.tsx",
+                        lineNumber: 126,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        ref: textRef,
+                        style: {
+                            perspective: '1000px'
+                        },
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("h2", {
+                                className: "reveal-text text-5xl md:text-7xl font-bold text-foreground mb-4",
+                                children: t('solution.title')
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/SolutionSection.tsx",
+                                lineNumber: 135,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("p", {
+                                className: "reveal-text text-xl md:text-2xl text-muted-foreground mb-6",
+                                children: t('solution.subtitle')
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/SolutionSection.tsx",
+                                lineNumber: 138,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("p", {
+                                className: "reveal-text text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed",
+                                children: t('solution.desc')
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/SolutionSection.tsx",
+                                lineNumber: 141,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/SolutionSection.tsx",
+                        lineNumber: 134,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "mt-16 h-1 w-48 mx-auto rounded-full overflow-hidden",
+                        children: /*#__PURE__*/ _jsxDEV("div", {
+                            className: "w-full h-full",
+                            style: {
+                                background: 'var(--gradient-rgb)',
+                                backgroundSize: '200% 100%',
+                                animation: 'rgb-shift 3s linear infinite'
+                            }
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/SolutionSection.tsx",
+                            lineNumber: 148,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/SolutionSection.tsx",
+                        lineNumber: 147,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/SolutionSection.tsx",
+                lineNumber: 124,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/SolutionSection.tsx",
+        lineNumber: 107,
+        columnNumber: 5
+    }, this);
+}
+_s(SolutionSection, "qaTQWQ+hzLDgQUZvv6JKZEc3kwk=", false, function() {
+    return [
+        useLanguage
+    ];
+});
+_c = SolutionSection;
+var _c;
+$RefreshReg$(_c, "SolutionSection");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/SolutionSection.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/SolutionSection.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlNvbHV0aW9uU2VjdGlvbi50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgdXNlRWZmZWN0LCB1c2VSZWYgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBnc2FwIH0gZnJvbSAnZ3NhcCc7XG5pbXBvcnQgeyBTY3JvbGxUcmlnZ2VyIH0gZnJvbSAnZ3NhcC9TY3JvbGxUcmlnZ2VyJztcbmltcG9ydCB7IFNwYXJrbGVzIH0gZnJvbSAnbHVjaWRlLXJlYWN0JztcbmltcG9ydCB7IHVzZUxhbmd1YWdlIH0gZnJvbSAnQC9jb250ZXh0cy9MYW5ndWFnZUNvbnRleHQnO1xuXG5nc2FwLnJlZ2lzdGVyUGx1Z2luKFNjcm9sbFRyaWdnZXIpO1xuXG5leHBvcnQgZnVuY3Rpb24gU29sdXRpb25TZWN0aW9uKCkge1xuICBjb25zdCB7IHQgfSA9IHVzZUxhbmd1YWdlKCk7XG4gIGNvbnN0IHNlY3Rpb25SZWYgPSB1c2VSZWY8SFRNTERpdkVsZW1lbnQ+KG51bGwpO1xuICBjb25zdCB0ZXh0UmVmID0gdXNlUmVmPEhUTUxEaXZFbGVtZW50PihudWxsKTtcbiAgY29uc3QgYmFkZ2VSZWYgPSB1c2VSZWY8SFRNTERpdkVsZW1lbnQ+KG51bGwpO1xuXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgY29uc3QgY3R4ID0gZ3NhcC5jb250ZXh0KCgpID0+IHtcbiAgICAgIC8vIEJhZGdlIHdpdGggY3Jhenkgc3BpcmFsIGVudHJhbmNlXG4gICAgICBnc2FwLmZyb21UbyhcbiAgICAgICAgYmFkZ2VSZWYuY3VycmVudCxcbiAgICAgICAgeyBzY2FsZTogMCwgcm90YXRlOiA3MjAsIG9wYWNpdHk6IDAgfSxcbiAgICAgICAge1xuICAgICAgICAgIHNjYWxlOiAxLFxuICAgICAgICAgIHJvdGF0ZTogMCxcbiAgICAgICAgICBvcGFjaXR5OiAxLFxuICAgICAgICAgIGR1cmF0aW9uOiAxLjIsXG4gICAgICAgICAgZWFzZTogJ2VsYXN0aWMub3V0KDEsIDAuMyknLFxuICAgICAgICAgIHNjcm9sbFRyaWdnZXI6IHtcbiAgICAgICAgICAgIHRyaWdnZXI6IHNlY3Rpb25SZWYuY3VycmVudCxcbiAgICAgICAgICAgIHN0YXJ0OiAndG9wIDcwJScsXG4gICAgICAgICAgfSxcbiAgICAgICAgfVxuICAgICAgKTtcblxuICAgICAgLy8gVGV4dCByZXZlYWwgd2l0aCB3YXZlIGVmZmVjdCAtIGVhY2ggZWxlbWVudCBjb21lcyBmcm9tIGRpZmZlcmVudCBkaXJlY3Rpb25cbiAgICAgIGNvbnN0IHRleHRFbGVtZW50cyA9IHRleHRSZWYuY3VycmVudD8ucXVlcnlTZWxlY3RvckFsbCgnLnJldmVhbC10ZXh0Jyk7XG4gICAgICBpZiAodGV4dEVsZW1lbnRzKSB7XG4gICAgICAgIHRleHRFbGVtZW50cy5mb3JFYWNoKChlbCwgaSkgPT4ge1xuICAgICAgICAgIGNvbnN0IGRpcmVjdGlvbnMgPSBbXG4gICAgICAgICAgICB7IHg6IC0yMDAsIHk6IDAsIHJvdGF0ZTogLTE1IH0sXG4gICAgICAgICAgICB7IHg6IDIwMCwgeTogMCwgcm90YXRlOiAxNSB9LFxuICAgICAgICAgICAgeyB4OiAwLCB5OiAxMDAsIHJvdGF0ZTogMCB9LFxuICAgICAgICAgIF07XG4gICAgICAgICAgY29uc3QgZGlyID0gZGlyZWN0aW9uc1tpICUgM107XG4gICAgICAgICAgXG4gICAgICAgICAgZ3NhcC5mcm9tVG8oXG4gICAgICAgICAgICBlbCxcbiAgICAgICAgICAgIHsgb3BhY2l0eTogMCwgeDogZGlyLngsIHk6IGRpci55LCByb3RhdGU6IGRpci5yb3RhdGUsIHNjYWxlOiAwLjggfSxcbiAgICAgICAgICAgIHtcbiAgICAgICAgICAgICAgb3BhY2l0eTogMSxcbiAgICAgICAgICAgICAgeDogMCxcbiAgICAgICAgICAgICAgeTogMCxcbiAgICAgICAgICAgICAgcm90YXRlOiAwLFxuICAgICAgICAgICAgICBzY2FsZTogMSxcbiAgICAgICAgICAgICAgZHVyYXRpb246IDEsXG4gICAgICAgICAgICAgIGVhc2U6ICdwb3dlcjQub3V0JyxcbiAgICAgICAgICAgICAgc2Nyb2xsVHJpZ2dlcjoge1xuICAgICAgICAgICAgICAgIHRyaWdnZXI6IHRleHRSZWYuY3VycmVudCxcbiAgICAgICAgICAgICAgICBzdGFydDogJ3RvcCA3NSUnLFxuICAgICAgICAgICAgICB9LFxuICAgICAgICAgICAgICBkZWxheTogaSAqIDAuMTUsXG4gICAgICAgICAgICB9XG4gICAgICAgICAgKTtcbiAgICAgICAgfSk7XG4gICAgICB9XG5cbiAgICAgIC8vIEZsb2F0aW5nIHBhcnRpY2xlcyB3aXRoIG1vcmUgY2hhb3RpYyBtb3ZlbWVudFxuICAgICAgY29uc3QgcGFydGljbGVzID0gc2VjdGlvblJlZi5jdXJyZW50Py5xdWVyeVNlbGVjdG9yQWxsKCcucGFydGljbGUnKTtcbiAgICAgIGlmIChwYXJ0aWNsZXMpIHtcbiAgICAgICAgcGFydGljbGVzLmZvckVhY2goKHBhcnRpY2xlLCBpKSA9PiB7XG4gICAgICAgICAgLy8gSW5pdGlhbCBidXJzdCBhbmltYXRpb25cbiAgICAgICAgICBnc2FwLmZyb21UbyhcbiAgICAgICAgICAgIHBhcnRpY2xlLFxuICAgICAgICAgICAgeyBzY2FsZTogMCwgb3BhY2l0eTogMCB9LFxuICAgICAgICAgICAge1xuICAgICAgICAgICAgICBzY2FsZTogMSxcbiAgICAgICAgICAgICAgb3BhY2l0eTogMC41LFxuICAgICAgICAgICAgICBkdXJhdGlvbjogMC41LFxuICAgICAgICAgICAgICBlYXNlOiAnYmFjay5vdXQoMiknLFxuICAgICAgICAgICAgICBzY3JvbGxUcmlnZ2VyOiB7XG4gICAgICAgICAgICAgICAgdHJpZ2dlcjogc2VjdGlvblJlZi5jdXJyZW50LFxuICAgICAgICAgICAgICAgIHN0YXJ0OiAndG9wIDcwJScsXG4gICAgICAgICAgICAgIH0sXG4gICAgICAgICAgICAgIGRlbGF5OiBpICogMC4xLFxuICAgICAgICAgICAgfVxuICAgICAgICAgICk7XG4gICAgICAgICAgXG4gICAgICAgICAgLy8gQ29udGludW91cyBmbG9hdGluZ1xuICAgICAgICAgIGdzYXAudG8ocGFydGljbGUsIHtcbiAgICAgICAgICAgIHk6ICdyYW5kb20oLTUwLCA1MCknLFxuICAgICAgICAgICAgeDogJ3JhbmRvbSgtNDAsIDQwKScsXG4gICAgICAgICAgICByb3RhdGlvbjogJ3JhbmRvbSgtMTgwLCAxODApJyxcbiAgICAgICAgICAgIHNjYWxlOiAncmFuZG9tKDAuNSwgMS41KScsXG4gICAgICAgICAgICBkdXJhdGlvbjogJ3JhbmRvbSg0LCA3KScsXG4gICAgICAgICAgICByZXBlYXQ6IC0xLFxuICAgICAgICAgICAgeW95bzogdHJ1ZSxcbiAgICAgICAgICAgIGVhc2U6ICdzaW5lLmluT3V0JyxcbiAgICAgICAgICAgIGRlbGF5OiBpICogMC4zLFxuICAgICAgICAgIH0pO1xuICAgICAgICB9KTtcbiAgICAgIH1cbiAgICB9LCBzZWN0aW9uUmVmKTtcblxuICAgIHJldHVybiAoKSA9PiBjdHgucmV2ZXJ0KCk7XG4gIH0sIFtdKTtcblxuICByZXR1cm4gKFxuICAgIDxzZWN0aW9uXG4gICAgICByZWY9e3NlY3Rpb25SZWZ9XG4gICAgICBjbGFzc05hbWU9XCJyZWxhdGl2ZSBweS00MCBweC02IGJnLWJhY2tncm91bmQgb3ZlcmZsb3ctaGlkZGVuXCJcbiAgICA+XG4gICAgICB7LyogRGVjb3JhdGl2ZSBwYXJ0aWNsZXMgKi99XG4gICAgICB7Wy4uLkFycmF5KDYpXS5tYXAoKF8sIGkpID0+IChcbiAgICAgICAgPGRpdlxuICAgICAgICAgIGtleT17aX1cbiAgICAgICAgICBjbGFzc05hbWU9XCJwYXJ0aWNsZSBhYnNvbHV0ZSB3LTIgaC0yIHJvdW5kZWQtZnVsbCBvcGFjaXR5LTMwXCJcbiAgICAgICAgICBzdHlsZT17e1xuICAgICAgICAgICAgYmFja2dyb3VuZDogYHJnYih2YXIoLS1yZ2ItJHtbJ2N5YW4nLCAnbWFnZW50YScsICd5ZWxsb3cnXVtpICUgM119KSlgLFxuICAgICAgICAgICAgdG9wOiBgJHsyMCArIGkgKiAxMn0lYCxcbiAgICAgICAgICAgIGxlZnQ6IGAkezEwICsgaSAqIDE1fSVgLFxuICAgICAgICAgIH19XG4gICAgICAgIC8+XG4gICAgICApKX1cblxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJtYXgtdy00eGwgbXgtYXV0byB0ZXh0LWNlbnRlciByZWxhdGl2ZSB6LTEwXCI+XG4gICAgICAgIHsvKiBCYWRnZSAqL31cbiAgICAgICAgPGRpdlxuICAgICAgICAgIHJlZj17YmFkZ2VSZWZ9XG4gICAgICAgICAgY2xhc3NOYW1lPVwiaW5saW5lLWZsZXggaXRlbXMtY2VudGVyIGdhcC0yIHB4LTUgcHktMi41IHJvdW5kZWQtZnVsbCBiZy1mb3JlZ3JvdW5kIHRleHQtYmFja2dyb3VuZCB0ZXh0LXNtIGZvbnQtc2VtaWJvbGQgbWItOCByZ2Itc2hhZG93XCJcbiAgICAgICAgPlxuICAgICAgICAgIDxTcGFya2xlcyBjbGFzc05hbWU9XCJ3LTQgaC00XCIgLz5cbiAgICAgICAgICB7dCgnc29sdXRpb24udGFnJyl9XG4gICAgICAgIDwvZGl2PlxuXG4gICAgICAgIDxkaXYgcmVmPXt0ZXh0UmVmfSBzdHlsZT17eyBwZXJzcGVjdGl2ZTogJzEwMDBweCcgfX0+XG4gICAgICAgICAgPGgyIGNsYXNzTmFtZT1cInJldmVhbC10ZXh0IHRleHQtNXhsIG1kOnRleHQtN3hsIGZvbnQtYm9sZCB0ZXh0LWZvcmVncm91bmQgbWItNFwiPlxuICAgICAgICAgICAge3QoJ3NvbHV0aW9uLnRpdGxlJyl9XG4gICAgICAgICAgPC9oMj5cbiAgICAgICAgICA8cCBjbGFzc05hbWU9XCJyZXZlYWwtdGV4dCB0ZXh0LXhsIG1kOnRleHQtMnhsIHRleHQtbXV0ZWQtZm9yZWdyb3VuZCBtYi02XCI+XG4gICAgICAgICAgICB7dCgnc29sdXRpb24uc3VidGl0bGUnKX1cbiAgICAgICAgICA8L3A+XG4gICAgICAgICAgPHAgY2xhc3NOYW1lPVwicmV2ZWFsLXRleHQgdGV4dC1sZyB0ZXh0LW11dGVkLWZvcmVncm91bmQgbWF4LXctMnhsIG14LWF1dG8gbGVhZGluZy1yZWxheGVkXCI+XG4gICAgICAgICAgICB7dCgnc29sdXRpb24uZGVzYycpfVxuICAgICAgICAgIDwvcD5cbiAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgey8qIFJHQiBsaW5lIGRlY29yYXRpb24gKi99XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXQtMTYgaC0xIHctNDggbXgtYXV0byByb3VuZGVkLWZ1bGwgb3ZlcmZsb3ctaGlkZGVuXCI+XG4gICAgICAgICAgPGRpdlxuICAgICAgICAgICAgY2xhc3NOYW1lPVwidy1mdWxsIGgtZnVsbFwiXG4gICAgICAgICAgICBzdHlsZT17e1xuICAgICAgICAgICAgICBiYWNrZ3JvdW5kOiAndmFyKC0tZ3JhZGllbnQtcmdiKScsXG4gICAgICAgICAgICAgIGJhY2tncm91bmRTaXplOiAnMjAwJSAxMDAlJyxcbiAgICAgICAgICAgICAgYW5pbWF0aW9uOiAncmdiLXNoaWZ0IDNzIGxpbmVhciBpbmZpbml0ZScsXG4gICAgICAgICAgICB9fVxuICAgICAgICAgIC8+XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9kaXY+XG4gICAgPC9zZWN0aW9uPlxuICApO1xufVxuIl0sIm5hbWVzIjpbInVzZUVmZmVjdCIsInVzZVJlZiIsImdzYXAiLCJTY3JvbGxUcmlnZ2VyIiwiU3BhcmtsZXMiLCJ1c2VMYW5ndWFnZSIsInJlZ2lzdGVyUGx1Z2luIiwiU29sdXRpb25TZWN0aW9uIiwidCIsInNlY3Rpb25SZWYiLCJ0ZXh0UmVmIiwiYmFkZ2VSZWYiLCJjdHgiLCJjb250ZXh0IiwiZnJvbVRvIiwiY3VycmVudCIsInNjYWxlIiwicm90YXRlIiwib3BhY2l0eSIsImR1cmF0aW9uIiwiZWFzZSIsInNjcm9sbFRyaWdnZXIiLCJ0cmlnZ2VyIiwic3RhcnQiLCJ0ZXh0RWxlbWVudHMiLCJxdWVyeVNlbGVjdG9yQWxsIiwiZm9yRWFjaCIsImVsIiwiaSIsImRpcmVjdGlvbnMiLCJ4IiwieSIsImRpciIsImRlbGF5IiwicGFydGljbGVzIiwicGFydGljbGUiLCJ0byIsInJvdGF0aW9uIiwicmVwZWF0IiwieW95byIsInJldmVydCIsInNlY3Rpb24iLCJyZWYiLCJjbGFzc05hbWUiLCJBcnJheSIsIm1hcCIsIl8iLCJkaXYiLCJzdHlsZSIsImJhY2tncm91bmQiLCJ0b3AiLCJsZWZ0IiwicGVyc3BlY3RpdmUiLCJoMiIsInAiLCJiYWNrZ3JvdW5kU2l6ZSIsImFuaW1hdGlvbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsU0FBU0EsU0FBUyxFQUFFQyxNQUFNLFFBQVEsUUFBUTtBQUMxQyxTQUFTQyxJQUFJLFFBQVEsT0FBTztBQUM1QixTQUFTQyxhQUFhLFFBQVEscUJBQXFCO0FBQ25ELFNBQVNDLFFBQVEsUUFBUSxlQUFlO0FBQ3hDLFNBQVNDLFdBQVcsUUFBUSw2QkFBNkI7QUFFekRILEtBQUtJLGNBQWMsQ0FBQ0g7QUFFcEIsT0FBTyxTQUFTSTs7SUFDZCxNQUFNLEVBQUVDLENBQUMsRUFBRSxHQUFHSDtJQUNkLE1BQU1JLGFBQWFSLE9BQXVCO0lBQzFDLE1BQU1TLFVBQVVULE9BQXVCO0lBQ3ZDLE1BQU1VLFdBQVdWLE9BQXVCO0lBRXhDRCxVQUFVO1FBQ1IsTUFBTVksTUFBTVYsS0FBS1csT0FBTyxDQUFDO1lBQ3ZCLG1DQUFtQztZQUNuQ1gsS0FBS1ksTUFBTSxDQUNUSCxTQUFTSSxPQUFPLEVBQ2hCO2dCQUFFQyxPQUFPO2dCQUFHQyxRQUFRO2dCQUFLQyxTQUFTO1lBQUUsR0FDcEM7Z0JBQ0VGLE9BQU87Z0JBQ1BDLFFBQVE7Z0JBQ1JDLFNBQVM7Z0JBQ1RDLFVBQVU7Z0JBQ1ZDLE1BQU07Z0JBQ05DLGVBQWU7b0JBQ2JDLFNBQVNiLFdBQVdNLE9BQU87b0JBQzNCUSxPQUFPO2dCQUNUO1lBQ0Y7WUFHRiw2RUFBNkU7WUFDN0UsTUFBTUMsZUFBZWQsUUFBUUssT0FBTyxFQUFFVSxpQkFBaUI7WUFDdkQsSUFBSUQsY0FBYztnQkFDaEJBLGFBQWFFLE9BQU8sQ0FBQyxDQUFDQyxJ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

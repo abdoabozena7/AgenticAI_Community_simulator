@@ -1,0 +1,225 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/ui/select.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=85597f46"; const React = ((m) => m?.__esModule ? m : { ...typeof m === "object" && !Array.isArray(m) || typeof m === "function" ? m : {}, default: m })(__vite__cjsImport3_react);
+import * as SelectPrimitive from "/node_modules/.vite/deps/@radix-ui_react-select.js?v=85597f46";
+import { Check, ChevronDown, ChevronUp } from "/node_modules/.vite/deps/lucide-react.js?v=85597f46";
+import { cn } from "/src/lib/utils.ts";
+const Select = SelectPrimitive.Root;
+const SelectGroup = SelectPrimitive.Group;
+const SelectValue = SelectPrimitive.Value;
+const SelectTrigger = /*#__PURE__*/ React.forwardRef(_c = ({ className, children, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(SelectPrimitive.Trigger, {
+        ref: ref,
+        className: cn("flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1", className),
+        ...props,
+        children: [
+            children,
+            /*#__PURE__*/ _jsxDEV(SelectPrimitive.Icon, {
+                asChild: true,
+                children: /*#__PURE__*/ _jsxDEV(ChevronDown, {
+                    className: "h-4 w-4 opacity-50"
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+                    lineNumber: 27,
+                    columnNumber: 7
+                }, this)
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+                lineNumber: 26,
+                columnNumber: 5
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+        lineNumber: 17,
+        columnNumber: 3
+    }, this));
+_c1 = SelectTrigger;
+SelectTrigger.displayName = SelectPrimitive.Trigger.displayName;
+const SelectScrollUpButton = /*#__PURE__*/ React.forwardRef(({ className, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(SelectPrimitive.ScrollUpButton, {
+        ref: ref,
+        className: cn("flex cursor-default items-center justify-center py-1", className),
+        ...props,
+        children: /*#__PURE__*/ _jsxDEV(ChevronUp, {
+            className: "h-4 w-4"
+        }, void 0, false, {
+            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+            lineNumber: 42,
+            columnNumber: 5
+        }, this)
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+        lineNumber: 37,
+        columnNumber: 3
+    }, this));
+_c2 = SelectScrollUpButton;
+SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName;
+const SelectScrollDownButton = /*#__PURE__*/ React.forwardRef(({ className, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(SelectPrimitive.ScrollDownButton, {
+        ref: ref,
+        className: cn("flex cursor-default items-center justify-center py-1", className),
+        ...props,
+        children: /*#__PURE__*/ _jsxDEV(ChevronDown, {
+            className: "h-4 w-4"
+        }, void 0, false, {
+            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+            lineNumber: 56,
+            columnNumber: 5
+        }, this)
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+        lineNumber: 51,
+        columnNumber: 3
+    }, this));
+_c3 = SelectScrollDownButton;
+SelectScrollDownButton.displayName = SelectPrimitive.ScrollDownButton.displayName;
+const SelectContent = /*#__PURE__*/ React.forwardRef(_c4 = ({ className, children, position = "popper", ...props }, ref)=>/*#__PURE__*/ _jsxDEV(SelectPrimitive.Portal, {
+        children: /*#__PURE__*/ _jsxDEV(SelectPrimitive.Content, {
+            ref: ref,
+            className: cn("relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2", position === "popper" && "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1", className),
+            position: position,
+            ...props,
+            children: [
+                /*#__PURE__*/ _jsxDEV(SelectScrollUpButton, {}, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+                    lineNumber: 77,
+                    columnNumber: 7
+                }, this),
+                /*#__PURE__*/ _jsxDEV(SelectPrimitive.Viewport, {
+                    className: cn("p-1", position === "popper" && "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"),
+                    children: children
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+                    lineNumber: 78,
+                    columnNumber: 7
+                }, this),
+                /*#__PURE__*/ _jsxDEV(SelectScrollDownButton, {}, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+                    lineNumber: 87,
+                    columnNumber: 7
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+            lineNumber: 66,
+            columnNumber: 5
+        }, this)
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+        lineNumber: 65,
+        columnNumber: 3
+    }, this));
+_c5 = SelectContent;
+SelectContent.displayName = SelectPrimitive.Content.displayName;
+const SelectLabel = /*#__PURE__*/ React.forwardRef(_c6 = ({ className, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(SelectPrimitive.Label, {
+        ref: ref,
+        className: cn("py-1.5 pl-8 pr-2 text-sm font-semibold", className),
+        ...props
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+        lineNumber: 97,
+        columnNumber: 3
+    }, this));
+_c7 = SelectLabel;
+SelectLabel.displayName = SelectPrimitive.Label.displayName;
+const SelectItem = /*#__PURE__*/ React.forwardRef(_c8 = ({ className, children, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(SelectPrimitive.Item, {
+        ref: ref,
+        className: cn("relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 focus:bg-accent focus:text-accent-foreground", className),
+        ...props,
+        children: [
+            /*#__PURE__*/ _jsxDEV("span", {
+                className: "absolute left-2 flex h-3.5 w-3.5 items-center justify-center",
+                children: /*#__PURE__*/ _jsxDEV(SelectPrimitive.ItemIndicator, {
+                    children: /*#__PURE__*/ _jsxDEV(Check, {
+                        className: "h-4 w-4"
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+                        lineNumber: 115,
+                        columnNumber: 9
+                    }, this)
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+                    lineNumber: 114,
+                    columnNumber: 7
+                }, this)
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+                lineNumber: 113,
+                columnNumber: 5
+            }, this),
+            /*#__PURE__*/ _jsxDEV(SelectPrimitive.ItemText, {
+                children: children
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+                lineNumber: 119,
+                columnNumber: 5
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+        lineNumber: 105,
+        columnNumber: 3
+    }, this));
+_c9 = SelectItem;
+SelectItem.displayName = SelectPrimitive.Item.displayName;
+const SelectSeparator = /*#__PURE__*/ React.forwardRef(_c10 = ({ className, ...props }, ref)=>/*#__PURE__*/ _jsxDEV(SelectPrimitive.Separator, {
+        ref: ref,
+        className: cn("-mx-1 my-1 h-px bg-muted", className),
+        ...props
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx",
+        lineNumber: 128,
+        columnNumber: 3
+    }, this));
+_c11 = SelectSeparator;
+SelectSeparator.displayName = SelectPrimitive.Separator.displayName;
+export { Select, SelectGroup, SelectValue, SelectTrigger, SelectContent, SelectLabel, SelectItem, SelectSeparator, SelectScrollUpButton, SelectScrollDownButton };
+var _c, _c1, _c2, _c3, _c4, _c5, _c6, _c7, _c8, _c9, _c10, _c11;
+$RefreshReg$(_c, "SelectTrigger$React.forwardRef");
+$RefreshReg$(_c1, "SelectTrigger");
+$RefreshReg$(_c2, "SelectScrollUpButton");
+$RefreshReg$(_c3, "SelectScrollDownButton");
+$RefreshReg$(_c4, "SelectContent$React.forwardRef");
+$RefreshReg$(_c5, "SelectContent");
+$RefreshReg$(_c6, "SelectLabel$React.forwardRef");
+$RefreshReg$(_c7, "SelectLabel");
+$RefreshReg$(_c8, "SelectItem$React.forwardRef");
+$RefreshReg$(_c9, "SelectItem");
+$RefreshReg$(_c10, "SelectSeparator$React.forwardRef");
+$RefreshReg$(_c11, "SelectSeparator");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/ui/select.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNlbGVjdC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0ICogYXMgUmVhY3QgZnJvbSBcInJlYWN0XCI7XG5pbXBvcnQgKiBhcyBTZWxlY3RQcmltaXRpdmUgZnJvbSBcIkByYWRpeC11aS9yZWFjdC1zZWxlY3RcIjtcbmltcG9ydCB7IENoZWNrLCBDaGV2cm9uRG93biwgQ2hldnJvblVwIH0gZnJvbSBcImx1Y2lkZS1yZWFjdFwiO1xuXG5pbXBvcnQgeyBjbiB9IGZyb20gXCJAL2xpYi91dGlsc1wiO1xuXG5jb25zdCBTZWxlY3QgPSBTZWxlY3RQcmltaXRpdmUuUm9vdDtcblxuY29uc3QgU2VsZWN0R3JvdXAgPSBTZWxlY3RQcmltaXRpdmUuR3JvdXA7XG5cbmNvbnN0IFNlbGVjdFZhbHVlID0gU2VsZWN0UHJpbWl0aXZlLlZhbHVlO1xuXG5jb25zdCBTZWxlY3RUcmlnZ2VyID0gUmVhY3QuZm9yd2FyZFJlZjxcbiAgUmVhY3QuRWxlbWVudFJlZjx0eXBlb2YgU2VsZWN0UHJpbWl0aXZlLlRyaWdnZXI+LFxuICBSZWFjdC5Db21wb25lbnRQcm9wc1dpdGhvdXRSZWY8dHlwZW9mIFNlbGVjdFByaW1pdGl2ZS5UcmlnZ2VyPlxuPigoeyBjbGFzc05hbWUsIGNoaWxkcmVuLCAuLi5wcm9wcyB9LCByZWYpID0+IChcbiAgPFNlbGVjdFByaW1pdGl2ZS5UcmlnZ2VyXG4gICAgcmVmPXtyZWZ9XG4gICAgY2xhc3NOYW1lPXtjbihcbiAgICAgIFwiZmxleCBoLTEwIHctZnVsbCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIHJvdW5kZWQtbWQgYm9yZGVyIGJvcmRlci1pbnB1dCBiZy1iYWNrZ3JvdW5kIHB4LTMgcHktMiB0ZXh0LXNtIHJpbmctb2Zmc2V0LWJhY2tncm91bmQgcGxhY2Vob2xkZXI6dGV4dC1tdXRlZC1mb3JlZ3JvdW5kIGZvY3VzOm91dGxpbmUtbm9uZSBmb2N1czpyaW5nLTIgZm9jdXM6cmluZy1yaW5nIGZvY3VzOnJpbmctb2Zmc2V0LTIgZGlzYWJsZWQ6Y3Vyc29yLW5vdC1hbGxvd2VkIGRpc2FibGVkOm9wYWNpdHktNTAgWyY+c3Bhbl06bGluZS1jbGFtcC0xXCIsXG4gICAgICBjbGFzc05hbWUsXG4gICAgKX1cbiAgICB7Li4ucHJvcHN9XG4gID5cbiAgICB7Y2hpbGRyZW59XG4gICAgPFNlbGVjdFByaW1pdGl2ZS5JY29uIGFzQ2hpbGQ+XG4gICAgICA8Q2hldnJvbkRvd24gY2xhc3NOYW1lPVwiaC00IHctNCBvcGFjaXR5LTUwXCIgLz5cbiAgICA8L1NlbGVjdFByaW1pdGl2ZS5JY29uPlxuICA8L1NlbGVjdFByaW1pdGl2ZS5UcmlnZ2VyPlxuKSk7XG5TZWxlY3RUcmlnZ2VyLmRpc3BsYXlOYW1lID0gU2VsZWN0UHJpbWl0aXZlLlRyaWdnZXIuZGlzcGxheU5hbWU7XG5cbmNvbnN0IFNlbGVjdFNjcm9sbFVwQnV0dG9uID0gUmVhY3QuZm9yd2FyZFJlZjxcbiAgUmVhY3QuRWxlbWVudFJlZjx0eXBlb2YgU2VsZWN0UHJpbWl0aXZlLlNjcm9sbFVwQnV0dG9uPixcbiAgUmVhY3QuQ29tcG9uZW50UHJvcHNXaXRob3V0UmVmPHR5cGVvZiBTZWxlY3RQcmltaXRpdmUuU2Nyb2xsVXBCdXR0b24+XG4+KCh7IGNsYXNzTmFtZSwgLi4ucHJvcHMgfSwgcmVmKSA9PiAoXG4gIDxTZWxlY3RQcmltaXRpdmUuU2Nyb2xsVXBCdXR0b25cbiAgICByZWY9e3JlZn1cbiAgICBjbGFzc05hbWU9e2NuKFwiZmxleCBjdXJzb3ItZGVmYXVsdCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgcHktMVwiLCBjbGFzc05hbWUpfVxuICAgIHsuLi5wcm9wc31cbiAgPlxuICAgIDxDaGV2cm9uVXAgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gIDwvU2VsZWN0UHJpbWl0aXZlLlNjcm9sbFVwQnV0dG9uPlxuKSk7XG5TZWxlY3RTY3JvbGxVcEJ1dHRvbi5kaXNwbGF5TmFtZSA9IFNlbGVjdFByaW1pdGl2ZS5TY3JvbGxVcEJ1dHRvbi5kaXNwbGF5TmFtZTtcblxuY29uc3QgU2VsZWN0U2Nyb2xsRG93bkJ1dHRvbiA9IFJlYWN0LmZvcndhcmRSZWY8XG4gIFJlYWN0LkVsZW1lbnRSZWY8dHlwZW9mIFNlbGVjdFByaW1pdGl2ZS5TY3JvbGxEb3duQnV0dG9uPixcbiAgUmVhY3QuQ29tcG9uZW50UHJvcHNXaXRob3V0UmVmPHR5cGVvZiBTZWxlY3RQcmltaXRpdmUuU2Nyb2xsRG93bkJ1dHRvbj5cbj4oKHsgY2xhc3NOYW1lLCAuLi5wcm9wcyB9LCByZWYpID0+IChcbiAgPFNlbGVjdFByaW1pdGl2ZS5TY3JvbGxEb3duQnV0dG9uXG4gICAgcmVmPXtyZWZ9XG4gICAgY2xhc3NOYW1lPXtjbihcImZsZXggY3Vyc29yLWRlZmF1bHQgaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIHB5LTFcIiwgY2xhc3NOYW1lKX1cbiAgICB7Li4ucHJvcHN9XG4gID5cbiAgICA8Q2hldnJvbkRvd24gY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gIDwvU2VsZWN0UHJpbWl0aXZlLlNjcm9sbERvd25CdXR0b24+XG4pKTtcblNlbGVjdFNjcm9sbERvd25CdXR0b24uZGlzcGxheU5hbWUgPSBTZWxlY3RQcmltaXRpdmUuU2Nyb2xsRG93bkJ1dHRvbi5kaXNwbGF5TmFtZTtcblxuY29uc3QgU2VsZWN0Q29udGVudCA9IFJlYWN0LmZvcndhcmRSZWY8XG4gIFJlYWN0LkVsZW1lbnRSZWY8dHlwZW9mIFNlbGVjdFByaW1pdGl2ZS5Db250ZW50PixcbiAgUmVhY3QuQ29tcG9uZW50UHJvcHNXaXRob3V0UmVmPHR5cGVvZiBTZWxlY3RQcmltaXRpdmUuQ29udGVudD5cbj4oKHsgY2xhc3NOYW1lLCBjaGlsZHJlbiwgcG9zaXRpb24gPSBcInBvcHBlclwiLCAuLi5wcm9wcyB9LCByZWYpID0+IChcbiAgPFNlbGVjdFByaW1pdGl2ZS5Qb3J0YWw+XG4gICAgPFNlbGVjdFByaW1pdGl2ZS5Db250ZW50XG4gICAgICByZWY9e3JlZn1cbiAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgIFwicmVsYXRpdmUgei01MCBtYXgtaC05NiBtaW4tdy1bOHJlbV0gb3ZlcmZsb3ctaGlkZGVuIHJvdW5kZWQtbWQgYm9yZGVyIGJnLXBvcG92ZXIgdGV4dC1wb3BvdmVyLWZvcmVncm91bmQgc2hhZG93LW1kIGRhdGEtW3N0YXRlPW9wZW5dOmFuaW1hdGUtaW4gZGF0YS1bc3RhdGU9Y2xvc2VkXTphbmltYXRlLW91dCBkYXRhLVtzdGF0ZT1jbG9zZWRdOmZhZGUtb3V0LTAgZGF0YS1bc3RhdGU9b3Blbl06ZmFkZS1pbi0wIGRhdGEtW3N0YXRlPWNsb3NlZF06em9vbS1vdXQtOTUgZGF0YS1bc3RhdGU9b3Blbl06em9vbS1pbi05NSBkYXRhLVtzaWRlPWJvdHRvbV06c2xpZGUtaW4tZnJvbS10b3AtMiBkYXRhLVtzaWRlPWxlZnRdOnNsaWRlLWluLWZyb20tcmlnaHQtMiBkYXRhLVtzaWRlPXJpZ2h0XTpzbGlkZS1pbi1mcm9tLWxlZnQtMiBkYXRhLVtzaWRlPXRvcF06c2xpZGUtaW4tZnJvbS1ib3R0b20tMlwiLFxuICAgICAgICBwb3NpdGlvbiA9PT0gXCJwb3BwZXJcIiAmJlxuICAgICAgICAgIFwiZGF0YS1bc2lkZT1ib3R0b21dOnRyYW5zbGF0ZS15LTEgZGF0YS1bc2lkZT1sZWZ0XTotdHJhbnNsYXRlLXgtMSBkYXRhLVtzaWRlPXJpZ2h0XTp0cmFuc2xhdGUteC0xIGRhdGEtW3NpZGU9dG9wXTotdHJhbnNsYXRlLXktMVwiLFxuICAgICAgICBjbGFzc05hbWUsXG4gICAgICApfVxuICAgICAgcG9zaXRpb249e3Bvc2l0aW9ufVxuICAgICAgey4uLnByb3BzfVxuICAgID5cbiAgICAgIDxTZWxlY3RTY3JvbGxVcEJ1dHRvbiAvPlxuICAgICAgPFNlbGVjdFByaW1pdGl2ZS5WaWV3cG9ydFxuICAgICAgICBjbGFzc05hbWU9e2NuKFxuICAgICAgICAgIFwicC0xXCIsXG4gICAgICAgICAgcG9zaXRpb24gPT09IFwicG9wcGVyXCIgJiZcbiAgICAgICAgICAgIFwiaC1bdmFyKC0tcmFkaXgtc2VsZWN0LXRyaWdnZXItaGVpZ2h0KV0gdy1mdWxsIG1pbi13LVt2YXIoLS1yYWRpeC1zZWxlY3QtdHJpZ2dlci13aWR0aCldXCIsXG4gICAgICAgICl9XG4gICAgICA+XG4gICAgICAgIHtjaGlsZHJlbn1cbiAgICAgIDwvU2VsZWN0UHJpbWl0aXZlLlZpZXdwb3J0PlxuICAgICAgPFNlbGVjdFNjcm9sbERvd25CdXR0b24gLz5cbiAgICA8L1NlbGVjdFByaW1pdGl2ZS5Db250ZW50PlxuICA8L1NlbGVjdFByaW1pdGl2ZS5Qb3J0YWw+XG4pKTtcblNlbGVjdENvbnRlbnQuZGlzcGxheU5hbWUgPSBTZWxlY3RQcmltaXRpdmUuQ29udGVudC5kaXNwbGF5TmFtZTtcblxuY29uc3QgU2VsZWN0TGFiZWwgPSBSZWFjdC5mb3J3YXJkUmVmPFxuICBSZWFjdC5FbGVtZW50UmVmPHR5cGVvZiBTZWxlY3RQcmltaXRpdmUuTGFiZWw+LFxuICBSZWFjdC5Db21wb25lbnRQcm9wc1dpdGhvdXRSZWY8dHlwZW9mIFNlbGVjdFByaW1pdGl2ZS5MYWJlbD5cbj4oKHsgY2xhc3NOYW1lLCAuLi5wcm9wcyB9LCByZWYpID0+IChcbiAgPFNlbGVjdFByaW1pdGl2ZS5MYWJlbCByZWY9e3JlZn0gY2xhc3NOYW1lPXtjbihcInB5LTEuNSBwbC04IHByLTIgdGV4dC1zbSBmb250LXNlbWlib2xkXCIsIGNsYXNzTmFtZSl9IHsuLi5wcm9wc30gLz5cbikpO1xuU2VsZWN0TGFiZWwuZGlzcGxheU5hbWUgPSBTZWxlY3RQcmltaXRpdmUuTGFiZWwuZGlzcGxheU5hbWU7XG5cbmNvbnN0IFNlbGVjdEl0ZW0gPSBSZWFjdC5mb3J3YXJkUmVmPFxuICBSZWFjdC5FbGVtZW50UmVmPHR5cGVvZiBTZWxlY3RQcmltaXRpdmUuSXRlbT4sXG4gIFJlYWN0LkNvbXBvbmVudFByb3BzV2l0aG91dFJlZjx0eXBlb2YgU2VsZWN0UHJpbWl0aXZlLkl0ZW0+XG4+KCh7IGNsYXNzTmFtZSwgY2hpbGRyZW4sIC4uLnByb3BzIH0sIHJlZikgPT4gKFxuICA8U2VsZWN0UHJpbWl0aXZlLkl0ZW1cbiAgICByZWY9e3JlZn1cbiAgICBjbGFzc05hbWU9e2NuKFxuICAgICAgXCJyZWxhdGl2ZSBmbGV4IHctZnVsbCBjdXJzb3ItZGVmYXVsdCBzZWxlY3Qtbm9uZSBpdGVtcy1jZW50ZXIgcm91bmRlZC1zbSBweS0xLjUgcGwtOCBwci0yIHRleHQtc20gb3V0bGluZS1ub25lIGRhdGEtW2Rpc2FibGVkXTpwb2ludGVyLWV2ZW50cy1ub25lIGRhdGEtW2Rpc2FibGVkXTpvcGFjaXR5LTUwIGZvY3VzOmJnLWFjY2VudCBmb2N1czp0ZXh0LWFjY2VudC1mb3JlZ3JvdW5kXCIsXG4gICAgICBjbGFzc05hbWUsXG4gICAgKX1cbiAgICB7Li4ucHJvcHN9XG4gID5cbiAgICA8c3BhbiBjbGFzc05hbWU9XCJhYnNvbHV0ZSBsZWZ0LTIgZmxleCBoLTMuNSB3LTMuNSBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXJcIj5cbiAgICAgIDxTZWxlY3RQcmltaXRpdmUuSXRlbUluZGljYXRvcj5cbiAgICAgICAgPENoZWNrIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgPC9TZWxlY3RQcmltaXRpdmUuSXRlbUluZGljYXRvcj5cbiAgICA8L3NwYW4+XG5cbiAgICA8U2VsZWN0UHJpbWl0aXZlLkl0ZW1UZXh0PntjaGlsZHJlbn08L1NlbGVjdFByaW1pdGl2ZS5JdGVtVGV4dD5cbiAgPC9TZWxlY3RQcmltaXRpdmUuSXRlbT5cbikpO1xuU2VsZWN0SXRlbS5kaXNwbGF5TmFtZSA9IFNlbGVjdFByaW1pdGl2ZS5JdGVtLmRpc3BsYXlOYW1lO1xuXG5jb25zdCBTZWxlY3RTZXBhcmF0b3IgPSBSZWFjdC5mb3J3YXJkUmVmPFxuICBSZWFjdC5FbGVtZW50UmVmPHR5cGVvZiBTZWxlY3RQcmltaXRpdmUuU2VwYXJhdG9yPixcbiAgUmVhY3QuQ29tcG9uZW50UHJvcHNXaXRob3V0UmVmPHR5cGVvZiBTZWxlY3RQcmltaXRpdmUuU2VwYXJhdG9yPlxuPigoeyBjbGFzc05hbWUsIC4uLnByb3BzIH0sIHJlZikgPT4gKFxuICA8U2VsZWN0UHJpbWl0aXZlLlNlcGFyYXRvciByZWY9e3JlZn0gY2xhc3NOYW1lPXtjbihcIi1teC0xIG15LTEgaC1weCBiZy1tdXRlZFwiLCBjbGFzc05hbWUpfSB7Li4ucHJvcHN9IC8+XG4pKTtcblNlbGVjdFNlcGFyYXRvci5kaXNwbGF5TmFtZSA9IFNlbGVjdFByaW1pdGl2ZS5TZXBhcmF0b3IuZGlzcGxheU5hbWU7XG5cbmV4cG9ydCB7XG4gIFNlbGVjdCxcbiAgU2VsZWN0R3JvdXAsXG4gIFNlbGVjdFZhbHVlLFxuICBTZWxlY3RUcmlnZ2VyLFxuICBTZWxlY3RDb250ZW50LFxuICBTZWxlY3RMYWJlbCxcbiAgU2VsZWN0SXRlbSxcbiAgU2VsZWN0U2VwYXJhdG9yLFxuICBTZWxlY3RTY3JvbGxVcEJ1dHRvbixcbiAgU2VsZWN0U2Nyb2xsRG93bkJ1dHRvbixcbn07XG4iXSwibmFtZXMiOlsiUmVhY3QiLCJTZWxlY3RQcmltaXRpdmUiLCJDaGVjayIsIkNoZXZyb25Eb3duIiwiQ2hldnJvblVwIiwiY24iLCJTZWxlY3QiLCJSb290IiwiU2VsZWN0R3JvdXAiLCJHcm91cCIsIlNlbGVjdFZhbHVlIiwiVmFsdWUiLCJTZWxlY3RUcmlnZ2VyIiwiZm9yd2FyZFJlZiIsImNsYXNzTmFtZSIsImNoaWxkcmVuIiwicHJvcHMiLCJyZWYiLCJUcmlnZ2VyIiwiSWNvbiIsImFzQ2hpbGQiLCJkaXNwbGF5TmFtZSIsIlNlbGVjdFNjcm9sbFVwQnV0dG9uIiwiU2Nyb2xsVXBCdXR0b24iLCJTZWxlY3RTY3JvbGxEb3duQnV0dG9uIiwiU2Nyb2xsRG93bkJ1dHRvbiIsIlNlbGVjdENvbnRlbnQiLCJwb3NpdGlvbiIsIlBvcnRhbCIsIkNvbnRlbnQiLCJWaWV3cG9ydCIsIlNlbGVjdExhYmVsIiwiTGFiZWwiLCJTZWxlY3RJdGVtIiwiSXRlbSIsInNwYW4iLCJJdGVtSW5kaWNhdG9yIiwiSXRlbVRleHQiLCJTZWxlY3RTZXBhcmF0b3IiLCJT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

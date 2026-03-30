@@ -1,0 +1,814 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/dashboard/ResearchTab.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=85597f46"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useMemo = __vite__cjsImport3_react["useMemo"]; const useState = __vite__cjsImport3_react["useState"];
+import { motion } from "/node_modules/.vite/deps/framer-motion.js?v=85597f46";
+import { CheckCircle, ChevronRight, CreditCard, ExternalLink, FileText, Globe, Loader2, MapPin, Play, Search } from "/node_modules/.vite/deps/lucide-react.js?v=85597f46";
+import { Badge } from "/src/components/ui/badge.tsx";
+import { Button } from "/src/components/ui/button.tsx";
+import { Skeleton } from "/src/components/ui/skeleton.tsx";
+import { useLanguage } from "/src/contexts/LanguageContext.tsx";
+import { useTheme } from "/src/contexts/ThemeContext.tsx";
+import { cn } from "/src/lib/utils.ts";
+export default function ResearchTab({ loading, result, query, onStartSimulation }) {
+    _s();
+    const { isRTL } = useLanguage();
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+    const [steps, setSteps] = useState([]);
+    const [currentStep, setCurrentStep] = useState(0);
+    const stepTemplates = useMemo(()=>{
+        const q = query || (isRTL ? 'الفكرة' : 'your idea');
+        return [
+            {
+                id: 1,
+                icon: Search,
+                title: `Searching about "${q}"`,
+                titleAr: `البحث عن "${q}"`,
+                status: 'pending'
+            },
+            {
+                id: 2,
+                icon: Globe,
+                title: 'Collecting sources',
+                titleAr: 'جمع المصادر',
+                status: 'pending'
+            },
+            {
+                id: 3,
+                icon: FileText,
+                title: 'Summarizing insights',
+                titleAr: 'تلخيص النتائج',
+                status: 'pending'
+            },
+            {
+                id: 4,
+                icon: CreditCard,
+                title: 'Creating evidence cards',
+                titleAr: 'إنشاء بطاقات الأدلة',
+                status: 'pending'
+            },
+            {
+                id: 5,
+                icon: MapPin,
+                title: 'Map analysis',
+                titleAr: 'تحليل الخريطة',
+                status: 'pending'
+            },
+            {
+                id: 6,
+                icon: CheckCircle,
+                title: 'Research complete',
+                titleAr: 'اكتمل البحث',
+                status: 'pending'
+            }
+        ];
+    }, [
+        query,
+        isRTL
+    ]);
+    useEffect(()=>{
+        setSteps(stepTemplates);
+        setCurrentStep(0);
+    }, [
+        stepTemplates
+    ]);
+    useEffect(()=>{
+        if (!loading) {
+            if (result) setSteps((prev)=>prev.map((step)=>({
+                        ...step,
+                        status: 'done'
+                    })));
+            return;
+        }
+        if (currentStep >= stepTemplates.length) return;
+        const t1 = window.setTimeout(()=>{
+            setSteps((prev)=>prev.map((s, i)=>i === currentStep ? {
+                        ...s,
+                        status: 'running'
+                    } : s));
+        }, 250);
+        const t2 = window.setTimeout(()=>{
+            setSteps((prev)=>prev.map((s, i)=>i === currentStep ? {
+                        ...s,
+                        status: 'done'
+                    } : s));
+            setCurrentStep((prev)=>prev + 1);
+        }, 1200);
+        return ()=>{
+            window.clearTimeout(t1);
+            window.clearTimeout(t2);
+        };
+    }, [
+        currentStep,
+        loading,
+        stepTemplates.length,
+        result
+    ]);
+    const structured = result?.structured || result?.search?.structured;
+    const evidenceCards = (result?.evidence_cards?.length ? result.evidence_cards : structured?.evidence_cards) || [];
+    const sources = result?.search?.results || [];
+    const firstSource = sources[0];
+    const mapCenter = useMemo(()=>{
+        const center = result?.map?.center;
+        if (center && Number.isFinite(center.lat) && Number.isFinite(center.lon)) return center;
+        const marker = (result?.map?.markers || []).find((item)=>Number.isFinite(item.lat) && Number.isFinite(item.lon));
+        return marker ? {
+            lat: marker.lat,
+            lon: marker.lon
+        } : null;
+    }, [
+        result?.map
+    ]);
+    const osmEmbedUrl = useMemo(()=>{
+        if (!mapCenter) return 'https://www.openstreetmap.org/export/embed.html?bbox=-180%2C-85%2C180%2C85&layer=mapnik';
+        const lat = Math.max(-85, Math.min(85, mapCenter.lat));
+        const lon = Math.max(-180, Math.min(180, mapCenter.lon));
+        const bbox = `${lon - 0.03},${lat - 0.02},${lon + 0.03},${lat + 0.02}`;
+        const marker = `${lat},${lon}`;
+        return `https://www.openstreetmap.org/export/embed.html?bbox=${encodeURIComponent(bbox)}&layer=mapnik&marker=${encodeURIComponent(marker)}`;
+    }, [
+        mapCenter
+    ]);
+    const osmPageUrl = useMemo(()=>{
+        if (!mapCenter) return null;
+        return `https://www.openstreetmap.org/?mlat=${mapCenter.lat}&mlon=${mapCenter.lon}#map=14/${mapCenter.lat}/${mapCenter.lon}`;
+    }, [
+        mapCenter
+    ]);
+    const pageClass = cn('architect-shell rounded-[32px] p-4 md:p-6', isDark ? 'architect-shell-dark bg-black text-white' : 'architect-shell-light bg-[#f5f2ea] text-slate-900');
+    const panelClass = cn('rounded-[28px] p-5 shadow-[0_24px_60px_-36px_rgba(0,0,0,0.35)]', isDark ? 'bg-zinc-950/90 text-white ring-1 ring-white/5' : 'bg-white/90 text-slate-900 ring-1 ring-black/5');
+    const surfaceClass = isDark ? 'bg-white/5 text-white/80 ring-1 ring-white/10' : 'bg-slate-50 text-slate-900 ring-1 ring-black/5';
+    const mutedClass = isDark ? 'text-white/60' : 'text-slate-600';
+    const strongClass = isDark ? 'text-white' : 'text-slate-900';
+    const linkClass = isDark ? 'text-emerald-300 hover:text-emerald-200' : 'text-emerald-700 hover:text-emerald-800';
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: pageClass,
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "mb-5 flex flex-wrap items-end justify-between gap-4",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "space-y-1",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: cn('inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs tracking-[0.22em] uppercase', isDark ? 'bg-white/5 text-white/60' : 'bg-slate-100 text-slate-600'),
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Search, {
+                                        className: "h-3.5 w-3.5"
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                        lineNumber: 139,
+                                        columnNumber: 13
+                                    }, this),
+                                    isRTL ? 'البحث والمرجع' : 'Research and reference'
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                lineNumber: 138,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("h1", {
+                                className: cn('text-2xl md:text-3xl font-semibold tracking-tight', strongClass),
+                                children: isRTL ? 'بحث الوكلاء' : 'Agent Research'
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                lineNumber: 142,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("p", {
+                                className: cn('max-w-2xl text-sm md:text-base leading-7', mutedClass),
+                                children: isRTL ? 'تابع مراحل البحث خطوة بخطوة داخل مساحة عمل هادئة وواضحة.' : 'Track the research pipeline step by step inside a calm, readable workspace.'
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                lineNumber: 145,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                        lineNumber: 137,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center gap-2",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Badge, {
+                                variant: "outline",
+                                className: cn('px-3 py-1.5 text-xs font-medium', isDark ? 'border-white/10 bg-white/5 text-white' : 'border-black/10 bg-white text-slate-800'),
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Loader2, {
+                                        className: cn('mr-2 h-4 w-4', loading ? 'animate-spin' : '')
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                        lineNumber: 155,
+                                        columnNumber: 13
+                                    }, this),
+                                    loading ? isRTL ? 'جارٍ التنفيذ...' : 'Processing...' : isRTL ? 'مكتمل' : 'Complete'
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                lineNumber: 151,
+                                columnNumber: 11
+                            }, this),
+                            result && onStartSimulation && /*#__PURE__*/ _jsxDEV(Button, {
+                                onClick: onStartSimulation,
+                                size: "sm",
+                                className: cn('architect-button-primary h-10 px-4', isDark ? 'bg-white text-black hover:bg-white/90' : 'bg-slate-950 text-white hover:bg-slate-800'),
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Play, {
+                                        className: "mr-2 h-4 w-4"
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                        lineNumber: 164,
+                                        columnNumber: 15
+                                    }, this),
+                                    isRTL ? 'انتقل إلى المحاكاة' : 'Continue to simulation'
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                lineNumber: 159,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                        lineNumber: 150,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                lineNumber: 136,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "grid gap-5 lg:grid-cols-[0.84fr_1.08fr_0.88fr]",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("section", {
+                        className: panelClass,
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center justify-between",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("h3", {
+                                        className: cn('text-lg font-semibold', strongClass),
+                                        children: isRTL ? 'الجدول الزمني' : 'Timeline'
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                        lineNumber: 174,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        className: cn('text-xs uppercase tracking-[0.18em]', mutedClass),
+                                        children: [
+                                            steps.length,
+                                            " steps"
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                        lineNumber: 175,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                lineNumber: 173,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "mt-4 space-y-3",
+                                children: steps.map((step, idx)=>/*#__PURE__*/ _jsxDEV(motion.div, {
+                                        initial: {
+                                            opacity: 0,
+                                            y: 8
+                                        },
+                                        animate: {
+                                            opacity: 1,
+                                            y: 0
+                                        },
+                                        transition: {
+                                            delay: idx * 0.04
+                                        },
+                                        className: cn('flex items-start gap-3 rounded-2xl px-4 py-3 transition-colors', step.status === 'running' ? isDark ? 'bg-white/10 ring-1 ring-white/10' : 'bg-slate-100 ring-1 ring-black/5' : step.status === 'done' ? isDark ? 'bg-emerald-500/10' : 'bg-emerald-50' : isDark ? 'bg-white/5' : 'bg-slate-50'),
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: cn('mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl', step.status === 'running' ? isDark ? 'bg-white/10' : 'bg-slate-200' : step.status === 'done' ? isDark ? 'bg-emerald-500/10' : 'bg-emerald-100' : isDark ? 'bg-white/5' : 'bg-white'),
+                                                children: step.status === 'running' ? /*#__PURE__*/ _jsxDEV(Loader2, {
+                                                    className: cn('h-4 w-4 animate-spin', isDark ? 'text-white' : 'text-slate-900')
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                    lineNumber: 216,
+                                                    columnNumber: 21
+                                                }, this) : step.status === 'done' ? /*#__PURE__*/ _jsxDEV(CheckCircle, {
+                                                    className: "h-4 w-4 text-emerald-500"
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                    lineNumber: 218,
+                                                    columnNumber: 21
+                                                }, this) : /*#__PURE__*/ _jsxDEV(step.icon, {
+                                                    className: cn('h-4 w-4', mutedClass)
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                    lineNumber: 220,
+                                                    columnNumber: 21
+                                                }, this)
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                lineNumber: 199,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                className: cn('text-sm leading-6', step.status === 'done' ? strongClass : mutedClass),
+                                                children: isRTL ? step.titleAr : step.title
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                lineNumber: 223,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, step.id, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                        lineNumber: 179,
+                                        columnNumber: 15
+                                    }, this))
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                lineNumber: 177,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                        lineNumber: 172,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("section", {
+                        className: panelClass,
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center justify-between gap-3",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                className: cn('text-xs uppercase tracking-[0.18em]', mutedClass),
+                                                children: isRTL ? 'النتيجة الحالية' : 'Current result'
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                lineNumber: 232,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("h3", {
+                                                className: cn('mt-1 text-lg font-semibold', strongClass),
+                                                children: firstSource ? firstSource.title || (isRTL ? 'نتيجة البحث' : 'Search result') : isRTL ? 'لا توجد نتائج بعد' : 'No results yet'
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                lineNumber: 233,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                        lineNumber: 231,
+                                        columnNumber: 13
+                                    }, this),
+                                    firstSource ? /*#__PURE__*/ _jsxDEV(Badge, {
+                                        className: cn('px-3 py-1 text-xs', isDark ? 'bg-white/5 text-white' : 'bg-slate-100 text-slate-700'),
+                                        children: isRTL ? 'مصدر رئيسي' : 'Primary source'
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                        lineNumber: 235,
+                                        columnNumber: 28
+                                    }, this) : null
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                lineNumber: 230,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "mt-4 space-y-4",
+                                children: loading && !result ? /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "space-y-3",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                            className: cn('h-6 w-3/4', isDark ? 'bg-white/10' : 'bg-slate-200')
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                            lineNumber: 241,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                            className: cn('h-4 w-1/2', isDark ? 'bg-white/10' : 'bg-slate-200')
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                            lineNumber: 242,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(Skeleton, {
+                                            className: cn('h-24 w-full rounded-2xl', isDark ? 'bg-white/10' : 'bg-slate-200')
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                            lineNumber: 243,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                    lineNumber: 240,
+                                    columnNumber: 15
+                                }, this) : firstSource ? /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("a", {
+                                            href: firstSource.url,
+                                            target: "_blank",
+                                            rel: "noreferrer",
+                                            className: cn('inline-flex items-center gap-1 text-sm break-all', linkClass),
+                                            children: [
+                                                firstSource.url,
+                                                /*#__PURE__*/ _jsxDEV(ExternalLink, {
+                                                    className: "h-3.5 w-3.5"
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                    lineNumber: 249,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                            lineNumber: 247,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("p", {
+                                            className: cn('text-sm leading-7 whitespace-pre-line', mutedClass),
+                                            children: structured?.summary || firstSource.snippet || (isRTL ? 'لا يوجد ملخص متاح بعد.' : 'No summary available yet.')
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                            lineNumber: 251,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: cn('grid gap-3 rounded-2xl p-4 md:grid-cols-2', surfaceClass),
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV("p", {
+                                                            className: cn('text-xs uppercase tracking-[0.18em]', mutedClass),
+                                                            children: isRTL ? 'العنوان' : 'Title'
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                            lineNumber: 256,
+                                                            columnNumber: 21
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV("p", {
+                                                            className: cn('mt-1 text-sm font-medium leading-6', strongClass),
+                                                            children: firstSource.title || (isRTL ? 'غير متوفر' : 'Unavailable')
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                            lineNumber: 257,
+                                                            columnNumber: 21
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                    lineNumber: 255,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV("p", {
+                                                            className: cn('text-xs uppercase tracking-[0.18em]', mutedClass),
+                                                            children: isRTL ? 'نوع السطح' : 'Surface'
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                            lineNumber: 260,
+                                                            columnNumber: 21
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV("p", {
+                                                            className: cn('mt-1 text-sm font-medium leading-6', strongClass),
+                                                            children: isRTL ? 'أسطح هادئة ومتدرجة' : 'Quiet layered surfaces'
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                            lineNumber: 261,
+                                                            columnNumber: 21
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                    lineNumber: 259,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                            lineNumber: 254,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true) : /*#__PURE__*/ _jsxDEV("p", {
+                                    className: cn('text-sm leading-7', mutedClass),
+                                    children: isRTL ? 'ابدأ البحث من الصفحة الرئيسية.' : 'Start research from Home.'
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                    lineNumber: 266,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                lineNumber: 238,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                        lineNumber: 229,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("aside", {
+                        className: "space-y-5",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("section", {
+                                className: panelClass,
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex items-center gap-2",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(CreditCard, {
+                                                className: cn('h-4 w-4', isDark ? 'text-emerald-300' : 'text-emerald-700')
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                lineNumber: 274,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("h3", {
+                                                className: cn('text-lg font-semibold', strongClass),
+                                                children: isRTL ? 'الأدلة' : 'Evidence'
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                lineNumber: 275,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                        lineNumber: 273,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "mt-4 space-y-3",
+                                        children: evidenceCards.length ? evidenceCards.map((ev, i)=>/*#__PURE__*/ _jsxDEV("div", {
+                                                className: cn('rounded-2xl p-4', surfaceClass),
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(Badge, {
+                                                        variant: "outline",
+                                                        className: cn('mb-2 text-[11px] uppercase tracking-[0.18em]', isDark ? 'border-white/10 bg-white/5 text-white' : 'border-black/10 bg-white text-slate-700'),
+                                                        children: `E${i + 1}`
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                        lineNumber: 281,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("p", {
+                                                        className: cn('text-sm leading-6', strongClass),
+                                                        children: ev
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                        lineNumber: 284,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                ]
+                                            }, `${ev}-${i}`, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                lineNumber: 280,
+                                                columnNumber: 19
+                                            }, this)) : /*#__PURE__*/ _jsxDEV("p", {
+                                            className: cn('text-sm leading-7', mutedClass),
+                                            children: isRTL ? 'لا توجد بطاقات أدلة حتى الآن.' : 'No evidence cards yet.'
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                            lineNumber: 288,
+                                            columnNumber: 17
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                        lineNumber: 277,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                lineNumber: 272,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("section", {
+                                className: panelClass,
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex items-center gap-2",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Globe, {
+                                                className: cn('h-4 w-4', isDark ? 'text-white/80' : 'text-slate-700')
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                lineNumber: 295,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("h3", {
+                                                className: cn('text-lg font-semibold', strongClass),
+                                                children: isRTL ? 'المصادر' : 'Sources'
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                lineNumber: 296,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                        lineNumber: 294,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "mt-4 space-y-2",
+                                        children: sources.length ? sources.map((src, i)=>/*#__PURE__*/ _jsxDEV("a", {
+                                                href: src.url,
+                                                target: "_blank",
+                                                rel: "noreferrer",
+                                                className: cn('flex items-center gap-2 rounded-2xl px-3 py-2 text-sm transition-colors', isDark ? 'bg-white/5 text-white/75 hover:bg-white/10' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'),
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV(ChevronRight, {
+                                                        className: "h-3.5 w-3.5 shrink-0"
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                        lineNumber: 302,
+                                                        columnNumber: 21
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                        className: "min-w-0 flex-1 truncate",
+                                                        children: src.title || src.url
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                        lineNumber: 303,
+                                                        columnNumber: 21
+                                                    }, this)
+                                                ]
+                                            }, `${src.url}-${i}`, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                lineNumber: 301,
+                                                columnNumber: 19
+                                            }, this)) : /*#__PURE__*/ _jsxDEV("p", {
+                                            className: cn('text-sm leading-7', mutedClass),
+                                            children: isRTL ? 'لا توجد مصادر بعد.' : 'No sources yet.'
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                            lineNumber: 307,
+                                            columnNumber: 17
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                        lineNumber: 298,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                lineNumber: 293,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("section", {
+                                className: panelClass,
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex items-center gap-2",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(MapPin, {
+                                                className: cn('h-4 w-4', isDark ? 'text-emerald-300' : 'text-emerald-700')
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                lineNumber: 314,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("h3", {
+                                                className: cn('text-lg font-semibold', strongClass),
+                                                children: isRTL ? 'تحليل الخريطة' : 'Map Analysis'
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                lineNumber: 315,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                        lineNumber: 313,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: cn('mt-4 aspect-video overflow-hidden rounded-2xl', surfaceClass),
+                                        children: /*#__PURE__*/ _jsxDEV("iframe", {
+                                            title: "OpenStreetMap area analysis",
+                                            src: osmEmbedUrl,
+                                            className: "h-full w-full border-0",
+                                            loading: "lazy",
+                                            referrerPolicy: "no-referrer-when-downgrade"
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                            lineNumber: 318,
+                                            columnNumber: 15
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                        lineNumber: 317,
+                                        columnNumber: 13
+                                    }, this),
+                                    osmPageUrl && /*#__PURE__*/ _jsxDEV("a", {
+                                        href: osmPageUrl,
+                                        target: "_blank",
+                                        rel: "noreferrer",
+                                        className: cn('mt-3 inline-flex items-center gap-1 text-sm', linkClass),
+                                        children: [
+                                            isRTL ? 'افتح الخريطة في تبويب جديد' : 'Open map in new tab',
+                                            /*#__PURE__*/ _jsxDEV(ExternalLink, {
+                                                className: "h-3.5 w-3.5"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                                lineNumber: 329,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                        lineNumber: 327,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                                lineNumber: 312,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                        lineNumber: 271,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+                lineNumber: 171,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx",
+        lineNumber: 135,
+        columnNumber: 5
+    }, this);
+}
+_s(ResearchTab, "K8Cqo/q/SQLdJv4yd+SMC8+OH1Q=", false, function() {
+    return [
+        useLanguage,
+        useTheme
+    ];
+});
+_c = ResearchTab;
+var _c;
+$RefreshReg$(_c, "ResearchTab");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/ResearchTab.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlJlc2VhcmNoVGFiLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyB1c2VFZmZlY3QsIHVzZU1lbW8sIHVzZVN0YXRlIH0gZnJvbSAncmVhY3QnO1xuaW1wb3J0IHsgbW90aW9uIH0gZnJvbSAnZnJhbWVyLW1vdGlvbic7XG5pbXBvcnQge1xuICBDaGVja0NpcmNsZSxcbiAgQ2hldnJvblJpZ2h0LFxuICBDcmVkaXRDYXJkLFxuICBFeHRlcm5hbExpbmssXG4gIEZpbGVUZXh0LFxuICBHbG9iZSxcbiAgTG9hZGVyMixcbiAgTWFwUGluLFxuICBQbGF5LFxuICBTZWFyY2gsXG59IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XG5pbXBvcnQgeyBCYWRnZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9iYWRnZSc7XG5pbXBvcnQgeyBCdXR0b24gfSBmcm9tICdAL2NvbXBvbmVudHMvdWkvYnV0dG9uJztcbmltcG9ydCB7IFNrZWxldG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL3NrZWxldG9uJztcbmltcG9ydCB7IHVzZUxhbmd1YWdlIH0gZnJvbSAnQC9jb250ZXh0cy9MYW5ndWFnZUNvbnRleHQnO1xuaW1wb3J0IHsgdXNlVGhlbWUgfSBmcm9tICdAL2NvbnRleHRzL1RoZW1lQ29udGV4dCc7XG5pbXBvcnQgeyBjbiB9IGZyb20gJ0AvbGliL3V0aWxzJztcbmltcG9ydCB0eXBlIHsgU2VhcmNoUmVzcG9uc2UsIFNlYXJjaFN0cnVjdHVyZWQgfSBmcm9tICdAL3NlcnZpY2VzL2FwaSc7XG5cbmludGVyZmFjZSBSZXNlYXJjaFJlc3VsdCB7XG4gIHNlYXJjaDogU2VhcmNoUmVzcG9uc2U7XG4gIG1hcD86IHtcbiAgICBjb3VudHM/OiBSZWNvcmQ8c3RyaW5nLCBudW1iZXI+O1xuICAgIG1hcmtlcnM/OiB7IGxhdDogbnVtYmVyOyBsb246IG51bWJlcjsgbmFtZTogc3RyaW5nOyB0YWc6IHN0cmluZyB9W107XG4gICAgY2VudGVyPzogeyBsYXQ6IG51bWJlcjsgbG9uOiBudW1iZXIgfTtcbiAgICB0YWdzPzogc3RyaW5nW107XG4gIH07XG4gIHN0cnVjdHVyZWQ/OiBTZWFyY2hTdHJ1Y3R1cmVkO1xuICBldmlkZW5jZV9jYXJkcz86IHN0cmluZ1tdO1xufVxuXG5pbnRlcmZhY2UgVGltZWxpbmVTdGVwIHtcbiAgaWQ6IG51bWJlcjtcbiAgaWNvbjogdHlwZW9mIFNlYXJjaDtcbiAgdGl0bGU6IHN0cmluZztcbiAgdGl0bGVBcjogc3RyaW5nO1xuICBzdGF0dXM6ICdwZW5kaW5nJyB8ICdydW5uaW5nJyB8ICdkb25lJztcbn1cblxuaW50ZXJmYWNlIFJlc2VhcmNoVGFiUHJvcHMge1xuICBsb2FkaW5nOiBib29sZWFuO1xuICByZXN1bHQ6IFJlc2VhcmNoUmVzdWx0IHwgbnVsbDtcbiAgcXVlcnk/OiBzdHJpbmc7XG4gIG9uU3RhcnRTaW11bGF0aW9uPzogKCkgPT4gdm9pZDtcbn1cblxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gUmVzZWFyY2hUYWIoeyBsb2FkaW5nLCByZXN1bHQsIHF1ZXJ5LCBvblN0YXJ0U2ltdWxhdGlvbiB9OiBSZXNlYXJjaFRhYlByb3BzKSB7XG4gIGNvbnN0IHsgaXNSVEwgfSA9IHVzZUxhbmd1YWdlKCk7XG4gIGNvbnN0IHsgdGhlbWUgfSA9IHVzZVRoZW1lKCk7XG4gIGNvbnN0IGlzRGFyayA9IHRoZW1lID09PSAnZGFyayc7XG4gIGNvbnN0IFtzdGVwcywgc2V0U3RlcHNdID0gdXNlU3RhdGU8VGltZWxpbmVTdGVwW10+KFtdKTtcbiAgY29uc3QgW2N1cnJlbnRTdGVwLCBzZXRDdXJyZW50U3RlcF0gPSB1c2VTdGF0ZSgwKTtcblxuICBjb25zdCBzdGVwVGVtcGxhdGVzID0gdXNlTWVtbygoKSA9PiB7XG4gICAgY29uc3QgcSA9IHF1ZXJ5IHx8IChpc1JUTCA/ICfYp9mE2YHZg9ix2KknIDogJ3lvdXIgaWRlYScpO1xuICAgIHJldHVybiBbXG4gICAgICB7IGlkOiAxLCBpY29uOiBTZWFyY2gsIHRpdGxlOiBgU2VhcmNoaW5nIGFib3V0IFwiJHtxfVwiYCwgdGl0bGVBcjogYNin2YTYqNit2Ksg2LnZhiBcIiR7cX1cImAsIHN0YXR1czogJ3BlbmRpbmcnIGFzIGNvbnN0IH0sXG4gICAgICB7IGlkOiAyLCBpY29uOiBHbG9iZSwgdGl0bGU6ICdDb2xsZWN0aW5nIHNvdXJjZXMnLCB0aXRsZUFyOiAn2KzZhdi5INin2YTZhdi12KfYr9ixJywgc3RhdHVzOiAncGVuZGluZycgYXMgY29uc3QgfSxcbiAgICAgIHsgaWQ6IDMsIGljb246IEZpbGVUZXh0LCB0aXRsZTogJ1N1bW1hcml6aW5nIGluc2lnaHRzJywgdGl0bGVBcjogJ9iq2YTYrtmK2LUg2KfZhNmG2KrYp9im2KwnLCBzdGF0dXM6ICdwZW5kaW5nJyBhcyBjb25zdCB9LFxuICAgICAgeyBpZDogNCwgaWNvbjogQ3JlZGl0Q2FyZCwgdGl0bGU6ICdDcmVhdGluZyBldmlkZW5jZSBjYXJkcycsIHRpdGxlQXI6ICfYpdmG2LTYp9ihINio2LfYp9mC2KfYqiDYp9mE2KPYr9mE2KknLCBzdGF0dXM6ICdwZW5kaW5nJyBhcyBjb25zdCB9LFxuICAgICAgeyBpZDogNSwgaWNvbjogTWFwUGluLCB0aXRsZTogJ01hcCBhbmFseXNpcycsIHRpdGxlQXI6ICfYqtit2YTZitmEINin2YTYrtix2YrYt9ipJywgc3RhdHVzOiAncGVuZGluZycgYXMgY29uc3QgfSxcbiAgICAgIHsgaWQ6IDYsIGljb246IENoZWNrQ2lyY2xlLCB0aXRsZTogJ1Jlc2VhcmNoIGNvbXBsZXRlJywgdGl0bGVBcjogJ9in2YPYqtmF2YQg2KfZhNio2K3YqycsIHN0YXR1czogJ3BlbmRpbmcnIGFzIGNvbnN0IH0sXG4gICAgXTtcbiAgfSwgW3F1ZXJ5LCBpc1JUTF0pO1xuXG4gIHVzZUVmZmVjdCgoKSA9PiB7XG4gICAgc2V0U3RlcHMoc3RlcFRlbXBsYXRlcyk7XG4gICAgc2V0Q3VycmVudFN0ZXAoMCk7XG4gIH0sIFtzdGVwVGVtcGxhdGVzXSk7XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICBpZiAoIWxvYWRpbmcpIHtcbiAgICAgIGlmIChyZXN1bHQpIHNldFN0ZXBzKChwcmV2KSA9PiBwcmV2Lm1hcCgoc3RlcCkgPT4gKHsgLi4uc3RlcCwgc3RhdHVzOiAnZG9uZScgfSkpKTtcbiAgICAgIHJldHVybjtcbiAgICB9XG4gICAgaWYgKGN1cnJlbnRTdGVwID49IHN0ZXBUZW1wbGF0ZXMubGVuZ3RoKSByZXR1cm47XG5cbiAgICBjb25zdCB0MSA9IHdpbmRvdy5zZXRUaW1lb3V0KCgpID0+IHtcbiAgICAgIHNldFN0ZXBzKChwcmV2KSA9PiBwcmV2Lm1hcCgocywgaSkgPT4gKGkgPT09IGN1cnJlbnRTdGVwID8geyAuLi5zLCBzdGF0dXM6ICdydW5uaW5nJyB9IDogcykpKTtcbiAgICB9LCAyNTApO1xuICAgIGNvbnN0IHQyID0gd2luZG93LnNldFRpbWVvdXQoKCkgPT4ge1xuICAgICAgc2V0U3RlcHMoKHByZXYpID0+IHByZXYubWFwKChzLCBpKSA9PiAoaSA9PT0gY3VycmVudFN0ZXAgPyB7IC4uLnMsIHN0YXR1czogJ2RvbmUnIH0gOiBzKSkpO1xuICAgICAgc2V0Q3VycmVudFN0ZXAoKHByZXYpID0+IHByZXYgKyAxKTtcbiAgICB9LCAxMjAwKTtcblxuICAgIHJldHVybiAoKSA9PiB7XG4gICAgICB3aW5kb3cuY2xlYXJUaW1lb3V0KHQxKTtcbiAgICAgIHdpbmRvdy5jbGVhclRpbWVvdXQodDIpO1xuICAgIH07XG4gIH0sIFtjdXJyZW50U3RlcCwgbG9hZGluZywgc3RlcFRlbXBsYXRlcy5sZW5ndGgsIHJlc3VsdF0pO1xuXG4gIGNvbnN0IHN0cnVjdHVyZWQgPSByZXN1bHQ/LnN0cnVjdHVyZWQgfHwgcmVzdWx0Py5zZWFyY2g/LnN0cnVjdHVyZWQ7XG4gIGNvbnN0IGV2aWRlbmNlQ2FyZHMgPSAocmVzdWx0Py5ldmlkZW5jZV9jYXJkcz8ubGVuZ3RoID8gcmVzdWx0LmV2aWRlbmNlX2NhcmRzIDogc3RydWN0dXJlZD8uZXZpZGVuY2VfY2FyZHMpIHx8IFtdO1xuICBjb25zdCBzb3VyY2VzID0gcmVzdWx0Py5zZWFyY2g/LnJlc3VsdHMgfHwgW107XG4gIGNvbnN0IGZpcnN0U291cmNlID0gc291cmNlc1swXTtcblxuICBjb25zdCBtYXBDZW50ZXIgPSB1c2VNZW1vKCgpID0+IHtcbiAgICBjb25zdCBjZW50ZXIgPSByZXN1bHQ/Lm1hcD8uY2VudGVyO1xuICAgIGlmIChjZW50ZXIgJiYgTnVtYmVyLmlzRmluaXRlKGNlbnRlci5sYXQpICYmIE51bWJlci5pc0Zpbml0ZShjZW50ZXIubG9uKSkgcmV0dXJuIGNlbnRlcjtcbiAgICBjb25zdCBtYXJrZXIgPSAocmVzdWx0Py5tYXA/Lm1hcmtlcnMgfHwgW10pLmZpbmQoKGl0ZW0pID0+IE51bWJlci5pc0Zpbml0ZShpdGVtLmxhdCkgJiYgTnVtYmVyLmlzRmluaXRlKGl0ZW0ubG9uKSk7XG4gICAgcmV0dXJuIG1hcmtlciA/IHsgbGF0OiBtYXJrZXIubGF0LCBsb246IG1hcmtlci5sb24gfSA6IG51bGw7XG4gIH0sIFtyZXN1bHQ/Lm1hcF0pO1xuXG4gIGNvbnN0IG9zbUVtYmVkVXJsID0gdXNlTWVtbygoKSA9PiB7XG4gICAgaWYgKCFtYXBDZW50ZXIpIHJldHVybiAnaHR0cHM6Ly93d3cub3BlbnN0cmVldG1hcC5vcmcvZXhwb3J0L2VtYmVkLmh0bWw/YmJveD0tMTgwJTJDLTg1JTJDMTgwJTJDODUmbGF5ZXI9bWFwbmlrJztcbiAgICBjb25zdCBsYXQgPSBNYXRoLm1heCgtODUsIE1hdGgubWluKDg1LCBtYXBDZW50ZXIubGF0KSk7XG4gICAgY29uc3QgbG9uID0gTWF0aC5tYXgoLTE4MCwgTWF0aC5taW4oMTgwLCBtYXBDZW50ZXIubG9uKSk7XG4gICAgY29uc3QgYmJveCA9IGAke2xvbiAtIDAuMDN9LCR7bGF0IC0gMC4wMn0sJHtsb24gKyAwLjAzfSwke2xhdCArIDAuMDJ9YDtcbiAgICBjb25zdCBtYXJrZXIgPSBgJHtsYXR9LCR7bG9ufWA7XG4gICAgcmV0dXJuIGBodHRwczovL3d3dy5vcGVuc3RyZWV0bWFwLm9yZy9leHBvcnQvZW1iZWQuaHRtbD9iYm94PSR7ZW5jb2RlVVJJQ29tcG9uZW50KGJib3gpfSZsYXllcj1tYXBuaWsmbWFya2VyPSR7ZW5jb2RlVVJJQ29tcG9uZW50KG1hcmtlcil9YDtcbiAgfSwgW21hcENlbnRlcl0pO1xuXG4gIGNvbnN0IG9zbVBhZ2VVcmwgPSB1c2VNZW1vKCgpID0+IHtcbiAgICBpZiAoIW1hcENlbnRlcikgcmV0dXJuIG51bGw7XG4gICAgcmV0dXJuIGBodHRwczovL3d3dy5vcGVuc3RyZWV0bWFwLm9yZy8/bWxhdD0ke21hcENlbnRlci5sYXR9Jm1sb249JHttYXBDZW50ZXIubG9ufSNtYXA9MTQvJHttYXBDZW50ZXIubGF0fS8ke21hcENlbnRlci5sb259YDtcbiAgfSwgW21hcENlbnRlcl0pO1xuXG4gIGNvbnN0IHBhZ2VDbGFzcyA9IGNuKFxuICAgICdhcmNoaXRlY3Qtc2hlbGwgcm91bmRlZC1bMzJweF0gcC00IG1kOnAtNicsXG4gICAgaXNEYXJrID8gJ2FyY2hpdGVjdC1zaGVsbC1kYXJrIGJnLWJsYWNrIHRleHQtd2hpdGUnIDogJ2FyY2hpdGVjdC1zaGVsbC1saWdodCBiZy1bI2Y1ZjJlYV0gdGV4dC1zbGF0ZS05MDAnLFxuICApO1xuICBjb25zdCBwYW5lbENsYXNzID0gY24oXG4gICAgJ3JvdW5kZWQtWzI4cHhdIHAtNSBzaGFkb3ctWzBfMjRweF82MHB4Xy0zNnB4X3JnYmEoMCwwLDAsMC4zNSldJyxcbiAgICBpc0RhcmsgPyAnYmctemluYy05NTAvOTAgdGV4dC13aGl0ZSByaW5nLTEgcmluZy13aGl0ZS81JyA6ICdiZy13aGl0ZS85MCB0ZXh0LXNsYXRlLTkwMCByaW5nLTEgcmluZy1ibGFjay81JyxcbiAgKTtcbiAgY29uc3Qgc3VyZmFjZUNsYXNzID0gaXNEYXJrID8gJ2JnLXdoaXRlLzUgdGV4dC13aGl0ZS84MCByaW5nLTEgcmluZy13aGl0ZS8xMCcgOiAnYmctc2xhdGUtNTAgdGV4dC1zbGF0ZS05MDAgcmluZy0xIHJpbmctYmxhY2svNSc7XG4gIGNvbnN0IG11dGVkQ2xhc3MgPSBpc0RhcmsgPyAndGV4dC13aGl0ZS82MCcgOiAndGV4dC1zbGF0ZS02MDAnO1xuICBjb25zdCBzdHJvbmdDbGFzcyA9IGlzRGFyayA/ICd0ZXh0LXdoaXRlJyA6ICd0ZXh0LXNsYXRlLTkwMCc7XG4gIGNvbnN0IGxpbmtDbGFzcyA9IGlzRGFyayA/ICd0ZXh0LWVtZXJhbGQtMzAwIGhvdmVyOnRleHQtZW1lcmFsZC0yMDAnIDogJ3RleHQtZW1lcmFsZC03MDAgaG92ZXI6dGV4dC1lbWVyYWxkLTgwMCc7XG5cbiAgcmV0dXJuIChcbiAgICA8ZGl2IGNsYXNzTmFtZT17cGFnZUNsYXNzfT5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwibWItNSBmbGV4IGZsZXgtd3JhcCBpdGVtcy1lbmQganVzdGlmeS1iZXR3ZWVuIGdhcC00XCI+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0xXCI+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17Y24oJ2lubGluZS1mbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiByb3VuZGVkLWZ1bGwgcHgtMyBweS0xIHRleHQteHMgdHJhY2tpbmctWzAuMjJlbV0gdXBwZXJjYXNlJywgaXNEYXJrID8gJ2JnLXdoaXRlLzUgdGV4dC13aGl0ZS82MCcgOiAnYmctc2xhdGUtMTAwIHRleHQtc2xhdGUtNjAwJyl9PlxuICAgICAgICAgICAgPFNlYXJjaCBjbGFzc05hbWU9XCJoLTMuNSB3LTMuNVwiIC8+XG4gICAgICAgICAgICB7aXNSVEwgPyAn2KfZhNio2K3YqyDZiNin2YTZhdix2KzYuScgOiAnUmVzZWFyY2ggYW5kIHJlZmVyZW5jZSd9XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPGgxIGNsYXNzTmFtZT17Y24oJ3RleHQtMnhsIG1kOnRleHQtM3hsIGZvbnQtc2VtaWJvbGQgdHJhY2tpbmctdGlnaHQnLCBzdHJvbmdDbGFzcyl9PlxuICAgICAgICAgICAge2lzUlRMID8gJ9io2K3YqyDYp9mE2YjZg9mE2KfYoScgOiAnQWdlbnQgUmVzZWFyY2gnfVxuICAgICAgICAgIDwvaDE+XG4gICAgICAgICAgPHAgY2xhc3NOYW1lPXtjbignbWF4LXctMnhsIHRleHQtc20gbWQ6dGV4dC1iYXNlIGxlYWRpbmctNycsIG11dGVkQ2xhc3MpfT5cbiAgICAgICAgICAgIHtpc1JUTCA/ICfYqtin2KjYuSDZhdix2KfYrdmEINin2YTYqNit2Ksg2K7Yt9mI2Kkg2KjYrti32YjYqSDYr9in2K7ZhCDZhdiz2KfYrdipINi52YXZhCDZh9in2K/YptipINmI2YjYp9i22K3YqS4nIDogJ1RyYWNrIHRoZSByZXNlYXJjaCBwaXBlbGluZSBzdGVwIGJ5IHN0ZXAgaW5zaWRlIGEgY2FsbSwgcmVhZGFibGUgd29ya3NwYWNlLid9XG4gICAgICAgICAgPC9wPlxuICAgICAgICA8L2Rpdj5cblxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgPEJhZGdlXG4gICAgICAgICAgICB2YXJpYW50PVwib3V0bGluZVwiXG4gICAgICAgICAgICBjbGFzc05hbWU9e2NuKCdweC0zIHB5LTEuNSB0ZXh0LXhzIGZvbnQtbWVkaXVtJywgaXNEYXJrID8gJ2JvcmRlci13aGl0ZS8xMCBiZy13aGl0ZS81IHRleHQtd2hpdGUnIDogJ2JvcmRlci1ibGFjay8xMCBiZy13aGl0ZSB0ZXh0LXNsYXRlLTgwMCcpfVxuICAgICAgICAgID5cbiAgICAgICAgICAgIDxMb2FkZXIyIGNsYXNzTmFtZT17Y24oJ21yLTIgaC00IHctNCcsIGxvYWRpbmcgPyAnYW5pbWF0ZS1zcGluJyA6ICcnKX0gLz5cbiAgICAgICAgICAgIHtsb2FkaW5nID8gKGlzUlRMID8gJ9is2KfYsdmNINin2YTYqtmG2YHZitiwLi4uJyA6ICdQcm9jZXNzaW5nLi4uJykgOiBpc1JUTCA/ICfZhdmD2KrZhdmEJyA6ICdDb21wbGV0ZSd9XG4gICAgICAgICAgPC9CYWRnZT5cbiAgICAgICAgICB7cmVzdWx0ICYmIG9uU3RhcnRTaW11bGF0aW9uICYmIChcbiAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgb25DbGljaz17b25TdGFydFNpbXVsYXRpb259XG4gICAgICAgICAgICAgIHNpemU9XCJzbVwiXG4gICAgICAgICAgICAgIGNsYXNzTmFtZT17Y24oJ2FyY2hpdGVjdC1idXR0b24tcHJpbWFyeSBoLTEwIHB4LTQnLCBpc0RhcmsgPyAnYmctd2hpdGUgdGV4dC1ibGFjayBob3ZlcjpiZy13aGl0ZS85MCcgOiAnYmctc2xhdGUtOTUwIHRleHQtd2hpdGUgaG92ZXI6Ymctc2xhdGUtODAwJyl9XG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIDxQbGF5IGNsYXNzTmFtZT1cIm1yLTIgaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgIHtpc1JUTCA/ICfYp9mG2KrZgtmEINil2YTZiSDYp9mE2YXYrdin2YPYp9ipJyA6ICdDb250aW51ZSB0byBzaW11bGF0aW9uJ31cbiAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICl9XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9kaXY+XG5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBnYXAtNSBsZzpncmlkLWNvbHMtWzAuODRmcl8xLjA4ZnJfMC44OGZyXVwiPlxuICAgICAgICA8c2VjdGlvbiBjbGFzc05hbWU9e3BhbmVsQ2xhc3N9PlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuXCI+XG4gICAgICAgICAgICA8aDMgY2xhc3NOYW1lPXtjbigndGV4dC1sZyBmb250LXNlbWlib2xkJywgc3Ryb25nQ2xhc3MpfT57aXNSVEwgPyAn2KfZhNis2K/ZiNmEINin2YTYstmF2YbZiicgOiAnVGltZWxpbmUnfTwvaDM+XG4gICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9e2NuKCd0ZXh0LXhzIHVwcGVyY2FzZSB0cmFja2luZy1bMC4xOGVtXScsIG11dGVkQ2xhc3MpfT57c3RlcHMubGVuZ3RofSBzdGVwczwvc3Bhbj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTQgc3BhY2UteS0zXCI+XG4gICAgICAgICAgICB7c3RlcHMubWFwKChzdGVwLCBpZHgpID0+IChcbiAgICAgICAgICAgICAgPG1vdGlvbi5kaXZcbiAgICAgICAgICAgICAgICBrZXk9e3N0ZXAuaWR9XG4gICAgICAgICAgICAgICAgaW5pdGlhbD17eyBvcGFjaXR5OiAwLCB5OiA4IH19XG4gICAgICAgICAgICAgICAgYW5pbWF0ZT17eyBvcGFjaXR5OiAxLCB5OiAwIH19XG4gICAgICAgICAgICAgICAgdHJhbnNpdGlvbj17eyBkZWxheTogaWR4ICogMC4wNCB9fVxuICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgICAgICAgICAnZmxleCBpdGVtcy1zdGFydCBnYXAtMyByb3VuZGVkLTJ4bCBweC00IHB5LTMgdHJhbnNpdGlvbi1jb2xvcnMnLFxuICAgICAgICAgICAgICAgICAgc3RlcC5zdGF0dXMgPT09ICdydW5uaW5nJ1xuICAgICAgICAgICAgICAgICAgICA/IGlzRGFya1xuICAgICAgICAgICAgICAgICAgICAgID8gJ2JnLXdoaXRlLzEwIHJpbmctMSByaW5nLXdoaXRlLzEwJ1xuICAgICAgICAgICAgICAgICAgICAgIDogJ2JnLXNsYXRlLTEwMCByaW5nLTEgcmluZy1ibGFjay81J1xuICAgICAgICAgICAgICAgICAgICA6IHN0ZXAuc3RhdHVzID09PSAnZG9uZSdcbiAgICAgICAgICAgICAgICAgICAgICA/IGlzRGFya1xuICAgICAgICAgICAgICAgICAgICAgICAgPyAnYmctZW1lcmFsZC01MDAvMTAnXG4gICAgICAgICAgICAgICAgICAgICAgICA6ICdiZy1lbWVyYWxkLTUwJ1xuICAgICAgICAgICAgICAgICAgICAgIDogaXNEYXJrXG4gICAgICAgICAgICAgICAgICAgICAgICA/ICdiZy13aGl0ZS81J1xuICAgICAgICAgICAgICAgICAgICAgICAgOiAnYmctc2xhdGUtNTAnLFxuICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICA8ZGl2XG4gICAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2NuKFxuICAgICAgICAgICAgICAgICAgICAnbXQtMC41IGZsZXggaC05IHctOSBzaHJpbmstMCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgcm91bmRlZC14bCcsXG4gICAgICAgICAgICAgICAgICAgIHN0ZXAuc3RhdHVzID09PSAncnVubmluZydcbiAgICAgICAgICAgICAgICAgICAgICA/IGlzRGFya1xuICAgICAgICAgICAgICAgICAgICAgICAgPyAnYmctd2hpdGUvMTAnXG4gICAgICAgICAgICAgICAgICAgICAgICA6ICdiZy1zbGF0ZS0yMDAnXG4gICAgICAgICAgICAgICAgICAgICAgOiBzdGVwLnN0YXR1cyA9PT0gJ2RvbmUnXG4gICAgICAgICAgICAgICAgICAgICAgICA/IGlzRGFya1xuICAgICAgICAgICAgICAgICAgICAgICAgICA/ICdiZy1lbWVyYWxkLTUwMC8xMCdcbiAgICAgICAgICAgICAgICAgICAgICAgICAgOiAnYmctZW1lcmFsZC0xMDAnXG4gICAgICAgICAgICAgICAgICAgICAgICA6IGlzRGFya1xuICAgICAgICAgICAgICAgICAgICAgICAgICA/ICdiZy13aGl0ZS81J1xuICAgICAgICAgICAgICAgICAgICAgICAgICA6ICdiZy13aGl0ZScsXG4gICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgIHtzdGVwLnN0YXR1cyA9PT0gJ3J1bm5pbmcnID8gKFxuICAgICAgICAgICAgICAgICAgICA8TG9hZGVyMiBjbGFzc05hbWU9e2NuKCdoLTQgdy00IGFuaW1hdGUtc3BpbicsIGlzRGFyayA/ICd0ZXh0LXdoaXRlJyA6ICd0ZXh0LXNsYXRlLTkwMCcpfSAvPlxuICAgICAgICAgICAgICAgICAgKSA6IHN0ZXAuc3RhdHVzID09PSAnZG9uZScgPyAoXG4gICAgICAgICAgICAgICAgICAgIDxDaGVja0NpcmNsZSBjbGFzc05hbWU9XCJoLTQgdy00IHRleHQtZW1lcmFsZC01MDBcIiAvPlxuICAgICAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICAgICAgPHN0ZXAuaWNvbiBjbGFzc05hbWU9e2NuKCdoLTQgdy00JywgbXV0ZWRDbGFzcyl9IC8+XG4gICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT17Y24oJ3RleHQtc20gbGVhZGluZy02Jywgc3RlcC5zdGF0dXMgPT09ICdkb25lJyA/IHN0cm9uZ0NsYXNzIDogbXV0ZWRDbGFzcyl9Pntpc1JUTCA/IHN0ZXAudGl0bGVBciA6IHN0ZXAudGl0bGV9PC9wPlxuICAgICAgICAgICAgICA8L21vdGlvbi5kaXY+XG4gICAgICAgICAgICApKX1cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9zZWN0aW9uPlxuXG4gICAgICAgIDxzZWN0aW9uIGNsYXNzTmFtZT17cGFuZWxDbGFzc30+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW4gZ2FwLTNcIj5cbiAgICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT17Y24oJ3RleHQteHMgdXBwZXJjYXNlIHRyYWNraW5nLVswLjE4ZW1dJywgbXV0ZWRDbGFzcyl9Pntpc1JUTCA/ICfYp9mE2YbYqtmK2KzYqSDYp9mE2K3Yp9mE2YrYqScgOiAnQ3VycmVudCByZXN1bHQnfTwvcD5cbiAgICAgICAgICAgICAgPGgzIGNsYXNzTmFtZT17Y24oJ210LTEgdGV4dC1sZyBmb250LXNlbWlib2xkJywgc3Ryb25nQ2xhc3MpfT57Zmlyc3RTb3VyY2UgPyBmaXJzdFNvdXJjZS50aXRsZSB8fCAoaXNSVEwgPyAn2YbYqtmK2KzYqSDYp9mE2KjYrdirJyA6ICdTZWFyY2ggcmVzdWx0JykgOiBpc1JUTCA/ICfZhNinINiq2YjYrNivINmG2KrYp9im2Kwg2KjYudivJyA6ICdObyByZXN1bHRzIHlldCd9PC9oMz5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAge2ZpcnN0U291cmNlID8gPEJhZGdlIGNsYXNzTmFtZT17Y24oJ3B4LTMgcHktMSB0ZXh0LXhzJywgaXNEYXJrID8gJ2JnLXdoaXRlLzUgdGV4dC13aGl0ZScgOiAnYmctc2xhdGUtMTAwIHRleHQtc2xhdGUtNzAwJyl9Pntpc1JUTCA/ICfZhdi12K/YsSDYsdim2YrYs9mKJyA6ICdQcmltYXJ5IHNvdXJjZSd9PC9CYWRnZT4gOiBudWxsfVxuICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC00IHNwYWNlLXktNFwiPlxuICAgICAgICAgICAge2xvYWRpbmcgJiYgIXJlc3VsdCA/IChcbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJzcGFjZS15LTNcIj5cbiAgICAgICAgICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPXtjbignaC02IHctMy80JywgaXNEYXJrID8gJ2JnLXdoaXRlLzEwJyA6ICdiZy1zbGF0ZS0yMDAnKX0gLz5cbiAgICAgICAgICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPXtjbignaC00IHctMS8yJywgaXNEYXJrID8gJ2JnLXdoaXRlLzEwJyA6ICdiZy1zbGF0ZS0yMDAnKX0gLz5cbiAgICAgICAgICAgICAgICA8U2tlbGV0b24gY2xhc3NOYW1lPXtjbignaC0yNCB3LWZ1bGwgcm91bmRlZC0yeGwnLCBpc0RhcmsgPyAnYmctd2hpdGUvMTAnIDogJ2JnLXNsYXRlLTIwMCcpfSAvPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICkgOiBmaXJzdFNvdXJjZSA/IChcbiAgICAgICAgICAgICAgPD5cbiAgICAgICAgICAgICAgICA8YSBocmVmPXtmaXJzdFNvdXJjZS51cmx9IHRhcmdldD1cIl9ibGFua1wiIHJlbD1cIm5vcmVmZXJyZXJcIiBjbGFzc05hbWU9e2NuKCdpbmxpbmUtZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTEgdGV4dC1zbSBicmVhay1hbGwnLCBsaW5rQ2xhc3MpfT5cbiAgICAgICAgICAgICAgICAgIHtmaXJzdFNvdXJjZS51cmx9XG4gICAgICAgICAgICAgICAgICA8RXh0ZXJuYWxMaW5rIGNsYXNzTmFtZT1cImgtMy41IHctMy41XCIgLz5cbiAgICAgICAgICAgICAgICA8L2E+XG4gICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPXtjbigndGV4dC1zbSBsZWFkaW5nLTcgd2hpdGVzcGFjZS1wcmUtbGluZScsIG11dGVkQ2xhc3MpfT5cbiAgICAgICAgICAgICAgICAgIHtzdHJ1Y3R1cmVkPy5zdW1tYXJ5IHx8IGZpcnN0U291cmNlLnNuaXBwZXQgfHwgKGlzUlRMID8gJ9mE2Kcg2YrZiNis2K8g2YXZhNiu2LUg2YXYqtin2K0g2KjYudivLicgOiAnTm8gc3VtbWFyeSBhdmFpbGFibGUgeWV0LicpfVxuICAgICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17Y24oJ2dyaWQgZ2FwLTMgcm91bmRlZC0yeGwgcC00IG1kOmdyaWQtY29scy0yJywgc3VyZmFjZUNsYXNzKX0+XG4gICAgICAgICAgICAgICAgICA8ZGl2PlxuICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9e2NuKCd0ZXh0LXhzIHVwcGVyY2FzZSB0cmFja2luZy1bMC4xOGVtXScsIG11dGVkQ2xhc3MpfT57aXNSVEwgPyAn2KfZhNi52YbZiNin2YYnIDogJ1RpdGxlJ308L3A+XG4gICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT17Y24oJ210LTEgdGV4dC1zbSBmb250LW1lZGl1bSBsZWFkaW5nLTYnLCBzdHJvbmdDbGFzcyl9PntmaXJzdFNvdXJjZS50aXRsZSB8fCAoaXNSVEwgPyAn2LrZitixINmF2KrZiNmB2LEnIDogJ1VuYXZhaWxhYmxlJyl9PC9wPlxuICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICA8ZGl2PlxuICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9e2NuKCd0ZXh0LXhzIHVwcGVyY2FzZSB0cmFja2luZy1bMC4xOGVtXScsIG11dGVkQ2xhc3MpfT57aXNSVEwgPyAn2YbZiNi5INin2YTYs9i32K0nIDogJ1N1cmZhY2UnfTwvcD5cbiAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPXtjbignbXQtMSB0ZXh0LXNtIGZvbnQtbWVkaXVtIGxlYWRpbmctNicsIHN0cm9uZ0NsYXNzKX0+e2lzUlRMID8gJ9ij2LPYt9itINmH2KfYr9im2Kkg2YjZhdiq2K/Ysdis2KknIDogJ1F1aWV0IGxheWVyZWQgc3VyZmFjZXMnfTwvcD5cbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICA8Lz5cbiAgICAgICAgICAgICkgOiAoXG4gICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT17Y24oJ3RleHQtc20gbGVhZGluZy03JywgbXV0ZWRDbGFzcyl9Pntpc1JUTCA/ICfYp9io2K/YoyDYp9mE2KjYrdirINmF2YYg2KfZhNi12YHYrdipINin2YTYsdim2YrYs9mK2KkuJyA6ICdTdGFydCByZXNlYXJjaCBmcm9tIEhvbWUuJ308L3A+XG4gICAgICAgICAgICApfVxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICA8L3NlY3Rpb24+XG5cbiAgICAgICAgPGFzaWRlIGNsYXNzTmFtZT1cInNwYWNlLXktNVwiPlxuICAgICAgICAgIDxzZWN0aW9uIGNsYXNzTmFtZT17cGFuZWxDbGFzc30+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICAgIDxDcmVkaXRDYXJkIGNsYXNzTmFtZT17Y24oJ2gtNCB3LTQnLCBpc0RhcmsgPyAndGV4dC1lbWVyYWxkLTMwMCcgOiAndGV4dC1lbWVyYWxkLTcwMCcpfSAvPlxuICAgICAgICAgICAgICA8aDMgY2xhc3NOYW1lPXtjbigndGV4dC1sZyBmb250LXNlbWlib2xkJywgc3Ryb25nQ2xhc3MpfT57aXNSVEwgPyAn2KfZhNij2K/ZhNipJyA6ICdFdmlkZW5jZSd9PC9oMz5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC00IHNwYWNlLXktM1wiPlxuICAgICAgICAgICAgICB7ZXZpZGVuY2VDYXJkcy5sZW5ndGggPyAoXG4gICAgICAgICAgICAgICAgZXZpZGVuY2VDYXJkcy5tYXAoKGV2LCBpKSA9PiAoXG4gICAgICAgICAgICAgICAgICA8ZGl2IGtleT17YCR7ZXZ9LSR7aX1gfSBjbGFzc05hbWU9e2NuKCdyb3VuZGVkLTJ4bCBwLTQnLCBzdXJmYWNlQ2xhc3MpfT5cbiAgICAgICAgICAgICAgICAgICAgPEJhZGdlIHZhcmlhbnQ9XCJvdXRsaW5lXCIgY2xhc3NOYW1lPXtjbignbWItMiB0ZXh0LVsxMXB4XSB1cHBlcmNhc2UgdHJhY2tpbmctWzAuMThlbV0nLCBpc0RhcmsgPyAnYm9yZGVyLXdoaXRlLzEwIGJnLXdoaXRlLzUgdGV4dC13aGl0ZScgOiAnYm9yZGVyLWJsYWNrLzEwIGJnLXdoaXRlIHRleHQtc2xhdGUtNzAwJyl9PlxuICAgICAgICAgICAgICAgICAgICAgIHtgRSR7aSArIDF9YH1cbiAgICAgICAgICAgICAgICAgICAgPC9CYWRnZT5cbiAgICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPXtjbigndGV4dC1zbSBsZWFkaW5nLTYnLCBzdHJvbmdDbGFzcyl9Pntldn08L3A+XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICApKVxuICAgICAgICAgICAgICApIDogKFxuICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT17Y24oJ3RleHQtc20gbGVhZGluZy03JywgbXV0ZWRDbGFzcyl9Pntpc1JUTCA/ICfZhNinINiq2YjYrNivINio2LfYp9mC2KfYqiDYo9iv2YTYqSDYrdiq2Ykg2KfZhNii2YYuJyA6ICdObyBldmlkZW5jZSBjYXJkcyB5ZXQuJ308L3A+XG4gICAgICAgICAgICAgICl9XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8L3NlY3Rpb24+XG5cbiAgICAgICAgICA8c2VjdGlvbiBjbGFzc05hbWU9e3BhbmVsQ2xhc3N9PlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgICAgICA8R2xvYmUgY2xhc3NOYW1lPXtjbignaC00IHctNCcsIGlzRGFyayA/ICd0ZXh0LXdoaXRlLzgwJyA6ICd0ZXh0LXNsYXRlLTcwMCcpfSAvPlxuICAgICAgICAgICAgICA8aDMgY2xhc3NOYW1lPXtjbigndGV4dC1sZyBmb250LXNlbWlib2xkJywgc3Ryb25nQ2xhc3MpfT57aXNSVEwgPyAn2KfZhNmF2LXYp9iv2LEnIDogJ1NvdXJjZXMnfTwvaDM+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXQtNCBzcGFjZS15LTJcIj5cbiAgICAgICAgICAgICAge3NvdXJjZXMubGVuZ3RoID8gKFxuICAgICAgICAgICAgICAgIHNvdXJjZXMubWFwKChzcmMsIGkpID0+IChcbiAgICAgICAgICAgICAgICAgIDxhIGtleT17YCR7c3JjLnVybH0tJHtpfWB9IGhyZWY9e3NyYy51cmx9IHRhcmdldD1cIl9ibGFua1wiIHJlbD1cIm5vcmVmZXJyZXJcIiBjbGFzc05hbWU9e2NuKCdmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiByb3VuZGVkLTJ4bCBweC0zIHB5LTIgdGV4dC1zbSB0cmFuc2l0aW9uLWNvbG9ycycsIGlzRGFyayA/ICdiZy13aGl0ZS81IHRleHQtd2hpdGUvNzUgaG92ZXI6Ymctd2hpdGUvMTAnIDogJ2JnLXNsYXRlLTUwIHRleHQtc2xhdGUtNzAwIGhvdmVyOmJnLXNsYXRlLTEwMCcpfT5cbiAgICAgICAgICAgICAgICAgICAgPENoZXZyb25SaWdodCBjbGFzc05hbWU9XCJoLTMuNSB3LTMuNSBzaHJpbmstMFwiIC8+XG4gICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cIm1pbi13LTAgZmxleC0xIHRydW5jYXRlXCI+e3NyYy50aXRsZSB8fCBzcmMudXJsfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgIDwvYT5cbiAgICAgICAgICAgICAgICApKVxuICAgICAgICAgICAgICApIDogKFxuICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT17Y24oJ3RleHQtc20gbGVhZGluZy03JywgbXV0ZWRDbGFzcyl9Pntpc1JUTCA/ICfZhNinINiq2YjYrNivINmF2LXYp9iv2LEg2KjYudivLicgOiAnTm8gc291cmNlcyB5ZXQuJ308L3A+XG4gICAgICAgICAgICAgICl9XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8L3NlY3Rpb24+XG5cbiAgICAgICAgICA8c2VjdGlvbiBjbGFzc05hbWU9e3BhbmVsQ2xhc3N9PlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgICAgICA8TWFwUGluIGNsYXNzTmFtZT17Y24oJ2gtNCB3LTQnLCBpc0RhcmsgPyAndGV4dC1lbWVyYWxkLTMwMCcgOiAndGV4dC1lbWVyYWxkLTcwMCcpfSAvPlxuICAgICAgICAgICAgICA8aDMgY2xhc3NOYW1lPXtjbigndGV4dC1sZyBmb250LXNlbWlib2xkJywgc3Ryb25nQ2xhc3MpfT57aXNSVEwgPyAn2KrYrdmE2YrZhCDYp9mE2K7YsdmK2LfYqScgOiAnTWFwIEFuYWx5c2lzJ308L2gzPlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17Y24oJ210LTQgYXNwZWN0LXZpZGVvIG92ZXJmbG93LWhpZGRlbiByb3VuZGVkLTJ4bCcsIHN1cmZhY2VDbGFzcyl9PlxuICAgICAgICAgICAgICA8aWZyYW1lXG4gICAgICAgICAgICAgICAgdGl0bGU9XCJPcGVuU3RyZWV0TWFwIGFyZWEgYW5hbHlzaXNcIlxuICAgICAgICAgICAgICAgIHNyYz17b3NtRW1iZWRVcmx9XG4gICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiaC1mdWxsIHctZnVsbCBib3JkZXItMFwiXG4gICAgICAgICAgICAgICAgbG9hZGluZz1cImxhenlcIlxuICAgICAgICAgICAgICAgIHJlZmVycmVyUG9saWN5PVwibm8tcmVmZXJyZXItd2hlbi1kb3duZ3JhZGVcIlxuICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICB7b3NtUGFnZVVybCAmJiAoXG4gICAgICAgICAgICAgIDxhIGhyZWY9e29zbVBhZ2VVcmx9IHRhcmdldD1cIl9ibGFua1wiIHJlbD1cIm5vcmVmZXJyZXJcIiBjbGFzc05hbWU9e2NuKCdtdC0zIGlubGluZS1mbGV4IGl0ZW1zLWNlbnRlciBnYXAtMSB0ZXh0LXNtJywgbGlua0NsYXNzKX0+XG4gICAgICAgICAgICAgICAge2lzUlRMID8gJ9in2YHYqtitINin2YTYrtix2YrYt9ipINmB2Yog2KrYqNmI2YrYqCDYrNiv2YrYrycgOiAnT3BlbiBtYXAgaW4gbmV3IHRhYid9XG4gICAgICAgICAgICAgICAgPEV4dGVybmFsTGluayBjbGFzc05hbWU9XCJoLTMuNSB3LTMuNVwiIC8+XG4gICAgICAgICAgICAgIDwvYT5cbiAgICAgICAgICAgICl9XG4gICAgICAgICAgPC9zZWN0aW9uPlxuICAgICAgICA8L2FzaWRlPlxuICAgICAgPC9kaXY+XG4gICAgPC9kaXY+XG4gICk7XG59XG4iXSwibmFtZXMiOlsidXNlRWZmZWN0IiwidXNlTWVtbyIsInVzZVN0YXRlIiwibW90aW9uIiwiQ2hlY2tDaXJjbGUiLCJDaGV2cm9uUmlnaHQiLCJDcmVkaXRDYXJkIiwiRXh0ZXJuYWxMaW5rIiwiRmlsZVRleHQiLCJHbG9iZSIsIkxvYWRlcjIiLCJNYXBQaW4iLCJQbGF5IiwiU2VhcmNoIiwiQmFkZ2UiLCJCdXR0b24iLCJTa2VsZXRvbiIsInVzZUxhbmd1YWdlIiwidXNlVGhlbWUiLCJjbiIsIlJlc2VhcmNoVGFiIiwibG9hZGluZyIsInJlc3VsdCIsInF1ZXJ5Iiwib25TdGFydFNpbXVsYXRpb24iLCJpc1JUTCIsInRoZW1lIiwiaXNEYXJrIiwic3RlcHMiLCJzZXRTdGVwcyIsImN1cnJlbnRTdGVwIiwic2V0Q3VycmVudFN0ZXAiLCJzdGVwVGVtcGxhdGVzIiwicSIsImlkIiwiaWNvbiIsInRpdGxlIiwidGl0bGVBciIsInN0YXR1cyIsInByZXYiLCJtYXAiLCJzdGVwIiwibGVuZ3RoIiwidDEiLCJ3aW5kb3ciLCJzZXRUaW1lb3V0IiwicyIsImkiLCJ0MiIsImNsZWFyVGltZW91dCIsInN0cnVjdHVyZWQiLCJzZWFyY2giLCJldmlkZW5jZUNhcmRzIiwiZXZpZGVuY2VfY2FyZHMiLCJzb3VyY2VzIiwicmVzdWx0cyIsImZpcnN0U291cmNlIiwibWFwQ2VudGVyIiwiY2VudGVyIiwiTnVtYmVyIiwiaXNGaW5pdGUiLCJsYXQiLCJsb24iLCJtYXJrZXIiLCJtYXJrZXJzIiwiZmluZCIsIml0ZW0iLCJvc21FbWJlZFVybCIsIk1hdGgiLCJtYXgiLCJtaW4iLCJiYm94IiwiZW5jb2RlVVJJQ29tcG9uZW50Iiwib3NtUGFnZVVybCIsInBhZ2VDbGFzcyIsInBhbmVsQ2xhc3MiLCJzdXJmYWNlQ2xhc3MiLCJtdXRlZENsYXNzIiwic3Ryb25nQ2xhc3MiLCJsaW5rQ2xhc3MiLCJkaXYiLCJjbGFzc05hbWUiLCJoMSIsInAiLCJ2YXJpYW50Iiwib25DbGljayIsInNpemUiLCJzZWN0aW9uIiwiaDMiLCJzcGFuIiwiaWR4IiwiaW5pdGlhbCIsIm9wYWNpdHkiLCJ5IiwiYW5pbWF0ZSIsInRyYW5zaXRpb24iLCJkZWxheSIsImEiLCJocmVmIiwidXJsIiwidGFyZ2V0IiwicmVsIiwic3VtbWFyeSIsInNuaXBwZXQiLCJhc2lkZSIsImV2Iiwic3JjIiwiaWZyYW1lIiwicmVmZXJyZXJQb2xpY3kiXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLFNBQVNBLFNB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

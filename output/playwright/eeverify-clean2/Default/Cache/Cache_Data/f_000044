@@ -1,0 +1,275 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/chat/ReasoningBoard.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+import { MessageSquareQuote, Sparkles } from "/node_modules/.vite/deps/lucide-react.js?v=85597f46";
+import { cn } from "/src/lib/utils.ts";
+const formatTime = (timestamp, language)=>{
+    if (!timestamp) return '';
+    try {
+        return new Intl.DateTimeFormat(language === 'ar' ? 'ar-EG' : 'en-US', {
+            hour: 'numeric',
+            minute: '2-digit'
+        }).format(new Date(timestamp));
+    } catch  {
+        return '';
+    }
+};
+const buildAgentSides = (messages)=>{
+    const sideByAgent = new Map();
+    let nextSide = 'right';
+    for (const item of messages){
+        if (!sideByAgent.has(item.agentId)) {
+            sideByAgent.set(item.agentId, nextSide);
+            nextSide = nextSide === 'right' ? 'left' : 'right';
+        }
+    }
+    return sideByAgent;
+};
+export function ReasoningBoard({ language, messages, highlightIds = [], emptyHint }) {
+    const sideByAgent = buildAgentSides(messages);
+    const highlighted = new Set(highlightIds);
+    const sortedMessages = [
+        ...messages
+    ].sort((left, right)=>(left.timestamp || 0) - (right.timestamp || 0));
+    if (!sortedMessages.length) {
+        return /*#__PURE__*/ _jsxDEV("div", {
+            className: "rounded-[28px] border border-dashed border-border/60 bg-card/55 px-5 py-8 text-center text-sm text-muted-foreground",
+            children: [
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-border/60 bg-background/70",
+                    children: /*#__PURE__*/ _jsxDEV(MessageSquareQuote, {
+                        className: "h-5 w-5"
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                        lineNumber: 52,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                    lineNumber: 51,
+                    columnNumber: 9
+                }, this),
+                emptyHint || (language === 'ar' ? 'عندما يبدأ النقاش ستظهر رسائل الوكلاء هنا.' : 'Agent discussion will appear here once debate starts.')
+            ]
+        }, void 0, true, {
+            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+            lineNumber: 50,
+            columnNumber: 7
+        }, this);
+    }
+    return /*#__PURE__*/ _jsxDEV("section", {
+        className: "rounded-[28px] border border-border/60 bg-card/75 p-4 backdrop-blur-xl",
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "mb-4 flex items-center justify-between gap-3",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/8 px-3 py-1 text-xs font-semibold text-primary",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Sparkles, {
+                                        className: "h-3.5 w-3.5"
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                                        lineNumber: 64,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        children: language === 'ar' ? 'نقاش الوكلاء' : 'Agent discussion'
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                                        lineNumber: 65,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                                lineNumber: 63,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("h3", {
+                                className: "mt-2 text-lg font-semibold text-foreground",
+                                children: language === 'ar' ? 'الوكلاء بدأوا يتناقشون الآن' : 'The agents are debating now'
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                                lineNumber: 67,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                        lineNumber: 62,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "rounded-2xl border border-border/55 bg-background/55 px-3 py-2 text-sm text-muted-foreground",
+                        children: language === 'ar' ? `${sortedMessages.length} رسالة` : `${sortedMessages.length} messages`
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                        lineNumber: 71,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                lineNumber: 61,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "space-y-3",
+                children: sortedMessages.map((message)=>{
+                    const side = sideByAgent.get(message.agentId) || 'right';
+                    const label = message.agentLabel || message.agentShortId || message.agentId;
+                    const isHighlighted = highlighted.has(message.id);
+                    return /*#__PURE__*/ _jsxDEV("div", {
+                        className: cn('flex w-full', side === 'right' ? 'justify-end' : 'justify-start'),
+                        children: /*#__PURE__*/ _jsxDEV("article", {
+                            className: cn('max-w-[88%] rounded-[24px] border px-4 py-3 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.55)] md:max-w-[72%]', side === 'right' ? 'border-primary/25 bg-primary/10' : 'border-border/60 bg-background/65', isHighlighted && 'ring-2 ring-primary/50'),
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "mb-2 flex items-center justify-between gap-3",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "text-sm font-semibold text-foreground",
+                                                    children: label
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                                                    lineNumber: 101,
+                                                    columnNumber: 21
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "text-[11px] text-muted-foreground",
+                                                    children: message.archetype || (language === 'ar' ? 'وكيل' : 'Agent')
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                                                    lineNumber: 102,
+                                                    columnNumber: 21
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                                            lineNumber: 100,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "text-[11px] text-muted-foreground",
+                                            children: formatTime(message.timestamp, language)
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                                            lineNumber: 106,
+                                            columnNumber: 19
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                                    lineNumber: 99,
+                                    columnNumber: 17
+                                }, this),
+                                message.replyToAgentId || message.replyToShortId ? /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "mb-2 rounded-2xl border border-border/50 bg-card/60 px-3 py-2 text-[11px] text-muted-foreground",
+                                    children: language === 'ar' ? `يرد على ${message.replyToShortId || message.replyToAgentId}` : `Replying to ${message.replyToShortId || message.replyToAgentId}`
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                                    lineNumber: 112,
+                                    columnNumber: 19
+                                }, this) : null,
+                                /*#__PURE__*/ _jsxDEV("p", {
+                                    className: "whitespace-pre-wrap text-sm leading-7 text-foreground/92",
+                                    children: message.message
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                                    lineNumber: 119,
+                                    columnNumber: 17
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "mt-3 flex flex-wrap gap-2 text-[11px] text-muted-foreground",
+                                    children: [
+                                        message.phase ? /*#__PURE__*/ _jsxDEV("span", {
+                                            className: "rounded-full border border-border/55 bg-card/60 px-2.5 py-1",
+                                            children: language === 'ar' ? `المرحلة: ${message.phase}` : `Phase: ${message.phase}`
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                                            lineNumber: 125,
+                                            columnNumber: 21
+                                        }, this) : null,
+                                        message.stanceAfter ? /*#__PURE__*/ _jsxDEV("span", {
+                                            className: "rounded-full border border-border/55 bg-card/60 px-2.5 py-1",
+                                            children: language === 'ar' ? `الموقف: ${message.stanceAfter}` : `Stance: ${message.stanceAfter}`
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                                            lineNumber: 130,
+                                            columnNumber: 21
+                                        }, this) : null
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                                    lineNumber: 123,
+                                    columnNumber: 17
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                            lineNumber: 90,
+                            columnNumber: 15
+                        }, this)
+                    }, message.id, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                        lineNumber: 83,
+                        columnNumber: 13
+                    }, this);
+                })
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+                lineNumber: 76,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx",
+        lineNumber: 60,
+        columnNumber: 5
+    }, this);
+}
+_c = ReasoningBoard;
+var _c;
+$RefreshReg$(_c, "ReasoningBoard");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/chat/ReasoningBoard.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlJlYXNvbmluZ0JvYXJkLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBNZXNzYWdlU3F1YXJlUXVvdGUsIFNwYXJrbGVzIH0gZnJvbSAnbHVjaWRlLXJlYWN0JztcbmltcG9ydCB7IGNuIH0gZnJvbSAnQC9saWIvdXRpbHMnO1xuaW1wb3J0IHsgUmVhc29uaW5nTWVzc2FnZSB9IGZyb20gJ0AvdHlwZXMvc2ltdWxhdGlvbic7XG5cbmludGVyZmFjZSBSZWFzb25pbmdCb2FyZFByb3BzIHtcbiAgbGFuZ3VhZ2U6ICdhcicgfCAnZW4nO1xuICBtZXNzYWdlczogUmVhc29uaW5nTWVzc2FnZVtdO1xuICBoaWdobGlnaHRJZHM/OiBzdHJpbmdbXTtcbiAgZW1wdHlIaW50Pzogc3RyaW5nO1xufVxuXG5jb25zdCBmb3JtYXRUaW1lID0gKHRpbWVzdGFtcD86IG51bWJlciwgbGFuZ3VhZ2U/OiAnYXInIHwgJ2VuJykgPT4ge1xuICBpZiAoIXRpbWVzdGFtcCkgcmV0dXJuICcnO1xuICB0cnkge1xuICAgIHJldHVybiBuZXcgSW50bC5EYXRlVGltZUZvcm1hdChsYW5ndWFnZSA9PT0gJ2FyJyA/ICdhci1FRycgOiAnZW4tVVMnLCB7XG4gICAgICBob3VyOiAnbnVtZXJpYycsXG4gICAgICBtaW51dGU6ICcyLWRpZ2l0JyxcbiAgICB9KS5mb3JtYXQobmV3IERhdGUodGltZXN0YW1wKSk7XG4gIH0gY2F0Y2gge1xuICAgIHJldHVybiAnJztcbiAgfVxufTtcblxuY29uc3QgYnVpbGRBZ2VudFNpZGVzID0gKG1lc3NhZ2VzOiBSZWFzb25pbmdNZXNzYWdlW10pID0+IHtcbiAgY29uc3Qgc2lkZUJ5QWdlbnQgPSBuZXcgTWFwPHN0cmluZywgJ2xlZnQnIHwgJ3JpZ2h0Jz4oKTtcbiAgbGV0IG5leHRTaWRlOiAnbGVmdCcgfCAncmlnaHQnID0gJ3JpZ2h0JztcblxuICBmb3IgKGNvbnN0IGl0ZW0gb2YgbWVzc2FnZXMpIHtcbiAgICBpZiAoIXNpZGVCeUFnZW50LmhhcyhpdGVtLmFnZW50SWQpKSB7XG4gICAgICBzaWRlQnlBZ2VudC5zZXQoaXRlbS5hZ2VudElkLCBuZXh0U2lkZSk7XG4gICAgICBuZXh0U2lkZSA9IG5leHRTaWRlID09PSAncmlnaHQnID8gJ2xlZnQnIDogJ3JpZ2h0JztcbiAgICB9XG4gIH1cblxuICByZXR1cm4gc2lkZUJ5QWdlbnQ7XG59O1xuXG5leHBvcnQgZnVuY3Rpb24gUmVhc29uaW5nQm9hcmQoe1xuICBsYW5ndWFnZSxcbiAgbWVzc2FnZXMsXG4gIGhpZ2hsaWdodElkcyA9IFtdLFxuICBlbXB0eUhpbnQsXG59OiBSZWFzb25pbmdCb2FyZFByb3BzKSB7XG4gIGNvbnN0IHNpZGVCeUFnZW50ID0gYnVpbGRBZ2VudFNpZGVzKG1lc3NhZ2VzKTtcbiAgY29uc3QgaGlnaGxpZ2h0ZWQgPSBuZXcgU2V0KGhpZ2hsaWdodElkcyk7XG4gIGNvbnN0IHNvcnRlZE1lc3NhZ2VzID0gWy4uLm1lc3NhZ2VzXS5zb3J0KChsZWZ0LCByaWdodCkgPT4gKGxlZnQudGltZXN0YW1wIHx8IDApIC0gKHJpZ2h0LnRpbWVzdGFtcCB8fCAwKSk7XG5cbiAgaWYgKCFzb3J0ZWRNZXNzYWdlcy5sZW5ndGgpIHtcbiAgICByZXR1cm4gKFxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJyb3VuZGVkLVsyOHB4XSBib3JkZXIgYm9yZGVyLWRhc2hlZCBib3JkZXItYm9yZGVyLzYwIGJnLWNhcmQvNTUgcHgtNSBweS04IHRleHQtY2VudGVyIHRleHQtc20gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXgtYXV0byBtYi0zIGZsZXggaC0xMiB3LTEyIGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciByb3VuZGVkLWZ1bGwgYm9yZGVyIGJvcmRlci1ib3JkZXIvNjAgYmctYmFja2dyb3VuZC83MFwiPlxuICAgICAgICAgIDxNZXNzYWdlU3F1YXJlUXVvdGUgY2xhc3NOYW1lPVwiaC01IHctNVwiIC8+XG4gICAgICAgIDwvZGl2PlxuICAgICAgICB7ZW1wdHlIaW50IHx8IChsYW5ndWFnZSA9PT0gJ2FyJyA/ICfYudmG2K/ZhdinINmK2KjYr9ijINin2YTZhtmC2KfYtCDYs9iq2LjZh9ixINix2LPYp9im2YQg2KfZhNmI2YPZhNin2KEg2YfZhtinLicgOiAnQWdlbnQgZGlzY3Vzc2lvbiB3aWxsIGFwcGVhciBoZXJlIG9uY2UgZGViYXRlIHN0YXJ0cy4nKX1cbiAgICAgIDwvZGl2PlxuICAgICk7XG4gIH1cblxuICByZXR1cm4gKFxuICAgIDxzZWN0aW9uIGNsYXNzTmFtZT1cInJvdW5kZWQtWzI4cHhdIGJvcmRlciBib3JkZXItYm9yZGVyLzYwIGJnLWNhcmQvNzUgcC00IGJhY2tkcm9wLWJsdXIteGxcIj5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwibWItNCBmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW4gZ2FwLTNcIj5cbiAgICAgICAgPGRpdj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImlubGluZS1mbGV4IGl0ZW1zLWNlbnRlciBnYXAtMiByb3VuZGVkLWZ1bGwgYm9yZGVyIGJvcmRlci1wcmltYXJ5LzE1IGJnLXByaW1hcnkvOCBweC0zIHB5LTEgdGV4dC14cyBmb250LXNlbWlib2xkIHRleHQtcHJpbWFyeVwiPlxuICAgICAgICAgICAgPFNwYXJrbGVzIGNsYXNzTmFtZT1cImgtMy41IHctMy41XCIgLz5cbiAgICAgICAgICAgIDxzcGFuPntsYW5ndWFnZSA9PT0gJ2FyJyA/ICfZhtmC2KfYtCDYp9mE2YjZg9mE2KfYoScgOiAnQWdlbnQgZGlzY3Vzc2lvbid9PC9zcGFuPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDxoMyBjbGFzc05hbWU9XCJtdC0yIHRleHQtbGcgZm9udC1zZW1pYm9sZCB0ZXh0LWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgIHtsYW5ndWFnZSA9PT0gJ2FyJyA/ICfYp9mE2YjZg9mE2KfYoSDYqNiv2KPZiNinINmK2KrZhtin2YLYtNmI2YYg2KfZhNii2YYnIDogJ1RoZSBhZ2VudHMgYXJlIGRlYmF0aW5nIG5vdyd9XG4gICAgICAgICAgPC9oMz5cbiAgICAgICAgPC9kaXY+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwicm91bmRlZC0yeGwgYm9yZGVyIGJvcmRlci1ib3JkZXIvNTUgYmctYmFja2dyb3VuZC81NSBweC0zIHB5LTIgdGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICB7bGFuZ3VhZ2UgPT09ICdhcicgPyBgJHtzb3J0ZWRNZXNzYWdlcy5sZW5ndGh9INix2LPYp9mE2KlgIDogYCR7c29ydGVkTWVzc2FnZXMubGVuZ3RofSBtZXNzYWdlc2B9XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9kaXY+XG5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0zXCI+XG4gICAgICAgIHtzb3J0ZWRNZXNzYWdlcy5tYXAoKG1lc3NhZ2UpID0+IHtcbiAgICAgICAgICBjb25zdCBzaWRlID0gc2lkZUJ5QWdlbnQuZ2V0KG1lc3NhZ2UuYWdlbnRJZCkgfHwgJ3JpZ2h0JztcbiAgICAgICAgICBjb25zdCBsYWJlbCA9IG1lc3NhZ2UuYWdlbnRMYWJlbCB8fCBtZXNzYWdlLmFnZW50U2hvcnRJZCB8fCBtZXNzYWdlLmFnZW50SWQ7XG4gICAgICAgICAgY29uc3QgaXNIaWdobGlnaHRlZCA9IGhpZ2hsaWdodGVkLmhhcyhtZXNzYWdlLmlkKTtcblxuICAgICAgICAgIHJldHVybiAoXG4gICAgICAgICAgICA8ZGl2XG4gICAgICAgICAgICAgIGtleT17bWVzc2FnZS5pZH1cbiAgICAgICAgICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgICAgICAgICAnZmxleCB3LWZ1bGwnLFxuICAgICAgICAgICAgICAgIHNpZGUgPT09ICdyaWdodCcgPyAnanVzdGlmeS1lbmQnIDogJ2p1c3RpZnktc3RhcnQnLFxuICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgPlxuICAgICAgICAgICAgICA8YXJ0aWNsZVxuICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgICAgICAgICAnbWF4LXctWzg4JV0gcm91bmRlZC1bMjRweF0gYm9yZGVyIHB4LTQgcHktMyBzaGFkb3ctWzBfMThweF80MHB4Xy0yOHB4X3JnYmEoMCwwLDAsMC41NSldIG1kOm1heC13LVs3MiVdJyxcbiAgICAgICAgICAgICAgICAgIHNpZGUgPT09ICdyaWdodCdcbiAgICAgICAgICAgICAgICAgICAgPyAnYm9yZGVyLXByaW1hcnkvMjUgYmctcHJpbWFyeS8xMCdcbiAgICAgICAgICAgICAgICAgICAgOiAnYm9yZGVyLWJvcmRlci82MCBiZy1iYWNrZ3JvdW5kLzY1JyxcbiAgICAgICAgICAgICAgICAgIGlzSGlnaGxpZ2h0ZWQgJiYgJ3JpbmctMiByaW5nLXByaW1hcnkvNTAnLFxuICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm1iLTIgZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIGdhcC0zXCI+XG4gICAgICAgICAgICAgICAgICA8ZGl2PlxuICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtc20gZm9udC1zZW1pYm9sZCB0ZXh0LWZvcmVncm91bmRcIj57bGFiZWx9PC9kaXY+XG4gICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC1bMTFweF0gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAgICAgICAge21lc3NhZ2UuYXJjaGV0eXBlIHx8IChsYW5ndWFnZSA9PT0gJ2FyJyA/ICfZiNmD2YrZhCcgOiAnQWdlbnQnKX1cbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC1bMTFweF0gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAgICAgIHtmb3JtYXRUaW1lKG1lc3NhZ2UudGltZXN0YW1wLCBsYW5ndWFnZSl9XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgICAgIHttZXNzYWdlLnJlcGx5VG9BZ2VudElkIHx8IG1lc3NhZ2UucmVwbHlUb1Nob3J0SWQgPyAoXG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm1iLTIgcm91bmRlZC0yeGwgYm9yZGVyIGJvcmRlci1ib3JkZXIvNTAgYmctY2FyZC82MCBweC0zIHB5LTIgdGV4dC1bMTFweF0gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAgICAgIHtsYW5ndWFnZSA9PT0gJ2FyJ1xuICAgICAgICAgICAgICAgICAgICAgID8gYNmK2LHYryDYudmE2YkgJHttZXNzYWdlLnJlcGx5VG9TaG9ydElkIHx8IG1lc3NhZ2UucmVwbHlUb0FnZW50SWR9YFxuICAgICAgICAgICAgICAgICAgICAgIDogYFJlcGx5aW5nIHRvICR7bWVzc2FnZS5yZXBseVRvU2hvcnRJZCB8fCBtZXNzYWdlLnJlcGx5VG9BZ2VudElkfWB9XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICApIDogbnVsbH1cblxuICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cIndoaXRlc3BhY2UtcHJlLXdyYXAgdGV4dC1zbSBsZWFkaW5nLTcgdGV4dC1mb3JlZ3JvdW5kLzkyXCI+XG4gICAgICAgICAgICAgICAgICB7bWVzc2FnZS5tZXNzYWdlfVxuICAgICAgICAgICAgICAgIDwvcD5cblxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXQtMyBmbGV4IGZsZXgtd3JhcCBnYXAtMiB0ZXh0LVsxMXB4XSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICAgIHttZXNzYWdlLnBoYXNlID8gKFxuICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJyb3VuZGVkLWZ1bGwgYm9yZGVyIGJvcmRlci1ib3JkZXIvNTUgYmctY2FyZC82MCBweC0yLjUgcHktMVwiPlxuICAgICAgICAgICAgICAgICAgICAgIHtsYW5ndWFnZSA9PT0gJ2FyJyA/IGDYp9mE2YXYsdit2YTYqTogJHttZXNzYWdlLnBoYXNlfWAgOiBgUGhhc2U6ICR7bWVzc2FnZS5waGFzZX1gfVxuICAgICAgICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICAgICAgICApIDogbnVsbH1cbiAgICAgICAgICAgICAgICAgIHttZXNzYWdlLnN0YW5jZUFmdGVyID8gKFxuICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJyb3VuZGVkLWZ1bGwgYm9yZGVyIGJvcmRlci1ib3JkZXIvNTUgYmctY2FyZC82MCBweC0yLjUgcHktMVwiPlxuICAgICAgICAgICAgICAgICAgICAgIHtsYW5ndWFnZSA9PT0gJ2FyJyA/IGDYp9mE2YXZiNmC2YE6ICR7bWVzc2FnZS5zdGFuY2VBZnRlcn1gIDogYFN0YW5jZTogJHttZXNzYWdlLnN0YW5jZUFmdGVyfWB9XG4gICAgICAgICAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICkgOiBudWxsfVxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICA8L2FydGljbGU+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICApO1xuICAgICAgICB9KX1cbiAgICAgIDwvZGl2PlxuICAgIDwvc2VjdGlvbj5cbiAgKTtcbn1cbiJdLCJuYW1lcyI6WyJNZXNzYWdlU3F1YXJlUXVvdGUiLCJTcGFya2xlcyIsImNuIiwiZm9ybWF0VGltZSIsInRpbWVzdGFtcCIsImxhbmd1YWdlIiwiSW50bCIsIkRhdGVUaW1lRm9ybWF0IiwiaG91ciIsIm1pbnV0ZSIsImZvcm1hdCIsIkRhdGUiLCJidWlsZEFnZW50U2lkZXMiLCJtZXNzYWdlcyIsInNpZGVCeUFnZW50IiwiTWFwIiwibmV4dFNpZGUiLCJpdGVtIiwiaGFzIiwiYWdlbnRJZCIsInNldCIsIlJlYXNvbmluZ0JvYXJkIiwiaGlnaGxpZ2h0SWRzIiwiZW1wdHlIaW50IiwiaGlnaGxpZ2h0ZWQiLCJTZXQiLCJzb3J0ZWRNZXNzYWdlcyIsInNvcnQiLCJsZWZ0IiwicmlnaHQiLCJsZW5ndGgiLCJkaXYiLCJjbGFzc05hbWUiLCJzZWN0aW9uIiwic3BhbiIsImgzIiwibWFwIiwibWVzc2FnZSIsInNpZGUiLCJnZXQiLCJsYWJlbCIsImFnZW50TGFiZWwiLCJhZ2VudFNob3J0SWQiLCJpc0hpZ2hsaWdodGVkIiwiaWQiLCJhcnRpY2xlIiwiYXJjaGV0eXBlIiwicmVwbHlUb0FnZW50SWQiLCJyZXBseVRvU2hvcnRJZCIsInAiLCJwaGFzZSIsInN0YW5jZUFmdGVyIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLFNBQVNBLGtCQUFrQixFQUFFQyxRQUFRLFFBQVEsZUFBZTtBQUM1RCxTQUFTQyxFQUFFLFFBQVEsY0FBYztBQVVqQyxNQUFNQyxhQUFhLENBQUNDLFdBQW9CQztJQUN0QyxJQUFJLENBQUNELFdBQVcsT0FBTztJQUN2QixJQUFJO1FBQ0YsT0FBTyxJQUFJRSxLQUFLQyxjQUFjLENBQUNGLGFBQWEsT0FBTyxVQUFVLFNBQVM7WUFDcEVHLE1BQU07WUFDTkMsUUFBUTtRQUNWLEdBQUdDLE1BQU0sQ0FBQyxJQUFJQyxLQUFLUDtJQUNyQixFQUFFLE9BQU07UUFDTixPQUFPO0lBQ1Q7QUFDRjtBQUVBLE1BQU1RLGtCQUFrQixDQUFDQztJQUN2QixNQUFNQyxjQUFjLElBQUlDO0lBQ3hCLElBQUlDLFdBQTZCO0lBRWpDLEtBQUssTUFBTUMsUUFBUUosU0FBVTtRQUMzQixJQUFJLENBQUNDLFlBQVlJLEdBQUcsQ0FBQ0QsS0FBS0UsT0FBTyxHQUFHO1lBQ2xDTCxZQUFZTSxHQUFHLENBQUNILEtBQUtFLE9BQU8sRUFBRUg7WUFDOUJBLFdBQVdBLGFBQWEsVUFBVSxTQUFTO1FBQzdDO0lBQ0Y7SUFFQSxP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

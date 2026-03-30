@@ -1,0 +1,102 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - img [ref=e10]
+          - generic [ref=e13]:
+            - heading "Point of no return" [level=1] [ref=e14]:
+              - generic [ref=e15]: Point of no return
+            - paragraph [ref=e16]: Test your ideas before launching them
+        - generic [ref=e17]:
+          - button "Back to dashboard" [ref=e18] [cursor=pointer]
+          - button "Log out" [ref=e19] [cursor=pointer]
+          - generic [ref=e20]:
+            - img [ref=e21]
+            - generic [ref=e28]: "Realtime: Disconnected"
+          - button "Settings" [ref=e29] [cursor=pointer]:
+            - img [ref=e30]
+            - text: Settings
+          - generic [ref=e35]: Idle
+    - generic [ref=e37]:
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - generic [ref=e40]:
+            - heading "Idea evaluation pipeline" [level=1] [ref=e41]
+            - generic [ref=e42]: Idea intake
+            - generic [ref=e43]:
+              - img [ref=e44]
+              - generic [ref=e46]: Dark mode
+          - generic [ref=e49]: Ready to continue
+        - generic [ref=e50]:
+          - button "Chat" [ref=e51] [cursor=pointer]:
+            - img [ref=e52]
+            - generic [ref=e54]: Chat
+          - button "Reasoning" [disabled] [ref=e55]:
+            - img [ref=e56]
+            - generic [ref=e66]: Reasoning
+          - button "Config" [ref=e67] [cursor=pointer]:
+            - img [ref=e68]
+            - generic [ref=e70]: Config
+      - generic [ref=e80]: Idea intake
+    - generic [ref=e83]:
+      - generic [ref=e89]:
+        - generic [ref=e90]:
+          - generic [ref=e91]:
+            - generic [ref=e92]:
+              - img [ref=e93]
+              - generic [ref=e98]: Live activity
+            - generic [ref=e99]:
+              - heading "Execution activity" [level=3] [ref=e100]
+              - paragraph [ref=e101]: Track research, personas, debate, and execution as they happen.
+          - generic [ref=e102]:
+            - generic [ref=e103]: Status
+            - generic [ref=e104]: Ready to start
+        - generic [ref=e106]:
+          - generic [ref=e107]: No activity yet
+          - generic [ref=e108]: Once the run starts, you will see research, persona building, debate, and execution step by step.
+      - separator [ref=e109]:
+        - img [ref=e111]
+      - generic [ref=e149]:
+        - generic [ref=e150]:
+          - list "Conversation progress" [ref=e151]:
+            - listitem [ref=e152]:
+              - generic [ref=e154]: Context scope
+            - listitem [ref=e155]:
+              - generic [ref=e157]: Schema intake
+            - listitem [ref=e158]:
+              - generic [ref=e160]: Smart clarification
+            - listitem [ref=e161]:
+              - generic [ref=e163]: Idea research
+            - listitem [ref=e164]:
+              - generic [ref=e166]: Persona synthesis
+            - listitem [ref=e167]:
+              - generic [ref=e169]: Review
+            - listitem [ref=e170]:
+              - generic [ref=e172]: Ready to start
+          - status [ref=e173]:
+            - generic [ref=e174]: "Now in: Context scope"
+            - generic [ref=e175]: "Current: Context scope • ETA: ~1 min"
+        - generic [ref=e176]:
+          - generic [ref=e182]:
+            - generic [ref=e183]: GuideAgent
+            - generic [ref=e184]: Simulation guide
+          - generic [ref=e188]: Choose the context scope first
+        - generic [ref=e192]:
+          - button "Pause" [disabled]:
+            - img
+            - text: Pause
+          - button "Reasoning (0)" [ref=e193] [cursor=pointer]:
+            - img
+            - text: Reasoning (0)
+          - button "Correction" [ref=e194] [cursor=pointer]
+      - separator [ref=e131]:
+        - img [ref=e133]
+      - generic [ref=e143]:
+        - generic [ref=e144]:
+          - heading "Decision metrics" [level=2] [ref=e145]
+          - paragraph [ref=e146]: A compact summary to understand the current direction.
+        - generic [ref=e148]: Waiting for data

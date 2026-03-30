@@ -1,0 +1,299 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/simulation/ChatPrimitives.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+import { cn } from "/src/lib/utils.ts";
+export function ChatShell({ className, children }) {
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: cn('chat-shell', className),
+        children: children
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+        lineNumber: 18,
+        columnNumber: 5
+    }, this);
+}
+_c = ChatShell;
+export function ChatTopProgress({ steps, headline, detail, className }) {
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: cn('chat-top-progress', className),
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "chat-top-progress-track",
+                role: "list",
+                "aria-label": "Conversation progress",
+                children: steps.map((step)=>/*#__PURE__*/ _jsxDEV("div", {
+                        role: "listitem",
+                        className: cn('chat-top-progress-step', step.state === 'completed' && 'is-completed', step.state === 'current' && 'is-current'),
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: "chat-top-progress-dot",
+                                "aria-hidden": "true"
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                                lineNumber: 48,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: "chat-top-progress-label",
+                                children: step.label
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                                lineNumber: 49,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, step.key, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                        lineNumber: 39,
+                        columnNumber: 11
+                    }, this))
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                lineNumber: 37,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "chat-top-progress-meta",
+                role: "status",
+                "aria-live": "polite",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "chat-top-progress-headline",
+                        children: headline
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                        lineNumber: 54,
+                        columnNumber: 9
+                    }, this),
+                    detail ? /*#__PURE__*/ _jsxDEV("div", {
+                        className: "chat-top-progress-detail",
+                        children: detail
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                        lineNumber: 55,
+                        columnNumber: 19
+                    }, this) : null
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                lineNumber: 53,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+        lineNumber: 36,
+        columnNumber: 5
+    }, this);
+}
+_c1 = ChatTopProgress;
+export function ChatBubble({ side = 'assistant', tone = 'default', kicker, meta, className, bubbleClassName, children }) {
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: cn('message message-compact', side === 'user' ? 'user' : 'bot', className),
+        children: /*#__PURE__*/ _jsxDEV("div", {
+            className: cn('bubble bubble-compact chat-bubble-shell', tone === 'interactive' && 'chat-bubble-interactive', tone === 'research' && 'chat-bubble-research', tone === 'success' && 'chat-bubble-success', tone === 'warning' && 'chat-bubble-warning', tone === 'muted' && 'chat-bubble-muted', bubbleClassName),
+            children: [
+                kicker ? /*#__PURE__*/ _jsxDEV("div", {
+                    className: "chat-bubble-kicker",
+                    children: kicker
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                    lineNumber: 91,
+                    columnNumber: 19
+                }, this) : null,
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "chat-bubble-body",
+                    children: children
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                    lineNumber: 92,
+                    columnNumber: 9
+                }, this),
+                meta ? /*#__PURE__*/ _jsxDEV("div", {
+                    className: "chat-bubble-meta",
+                    children: meta
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                    lineNumber: 93,
+                    columnNumber: 17
+                }, this) : null
+            ]
+        }, void 0, true, {
+            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+            lineNumber: 80,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+        lineNumber: 79,
+        columnNumber: 5
+    }, this);
+}
+_c2 = ChatBubble;
+export function ChatActionRow({ className, children }) {
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: cn('chat-action-row', className),
+        children: children
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+        lineNumber: 106,
+        columnNumber: 10
+    }, this);
+}
+_c3 = ChatActionRow;
+export function ChatOptionChips({ className, children }) {
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: cn('chat-option-chips', className),
+        children: children
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+        lineNumber: 116,
+        columnNumber: 10
+    }, this);
+}
+_c4 = ChatOptionChips;
+export function ChatOptionChip({ selected = false, disabled = false, className, children, onClick }) {
+    return /*#__PURE__*/ _jsxDEV("button", {
+        type: "button",
+        onClick: onClick,
+        disabled: disabled,
+        className: cn('chat-option-chip', selected && 'is-selected', className),
+        children: children
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+        lineNumber: 133,
+        columnNumber: 5
+    }, this);
+}
+_c5 = ChatOptionChip;
+export function ChatInlineSection({ title, description, className, children }) {
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: cn('chat-inline-section', className),
+        children: [
+            title || description ? /*#__PURE__*/ _jsxDEV("div", {
+                className: "chat-inline-section-header",
+                children: [
+                    title ? /*#__PURE__*/ _jsxDEV("div", {
+                        className: "chat-inline-section-title",
+                        children: title
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                        lineNumber: 159,
+                        columnNumber: 20
+                    }, this) : null,
+                    description ? /*#__PURE__*/ _jsxDEV("div", {
+                        className: "chat-inline-section-description",
+                        children: description
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                        lineNumber: 160,
+                        columnNumber: 26
+                    }, this) : null
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                lineNumber: 158,
+                columnNumber: 9
+            }, this) : null,
+            children
+        ]
+    }, void 0, true, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+        lineNumber: 156,
+        columnNumber: 5
+    }, this);
+}
+_c6 = ChatInlineSection;
+export function ReasoningDebugDrawer({ title, open, onToggle, children }) {
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: "reasoning-debug-drawer",
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "reasoning-debug-header",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "reasoning-debug-title",
+                        children: title
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                        lineNumber: 182,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("button", {
+                        type: "button",
+                        onClick: onToggle,
+                        className: "reasoning-debug-toggle",
+                        children: open ? 'Hide' : 'Show'
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                        lineNumber: 183,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                lineNumber: 181,
+                columnNumber: 7
+            }, this),
+            open ? /*#__PURE__*/ _jsxDEV("div", {
+                className: "reasoning-debug-body",
+                children: children
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+                lineNumber: 187,
+                columnNumber: 15
+            }, this) : null
+        ]
+    }, void 0, true, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx",
+        lineNumber: 180,
+        columnNumber: 5
+    }, this);
+}
+_c7 = ReasoningDebugDrawer;
+var _c, _c1, _c2, _c3, _c4, _c5, _c6, _c7;
+$RefreshReg$(_c, "ChatShell");
+$RefreshReg$(_c1, "ChatTopProgress");
+$RefreshReg$(_c2, "ChatBubble");
+$RefreshReg$(_c3, "ChatActionRow");
+$RefreshReg$(_c4, "ChatOptionChips");
+$RefreshReg$(_c5, "ChatOptionChip");
+$RefreshReg$(_c6, "ChatInlineSection");
+$RefreshReg$(_c7, "ReasoningDebugDrawer");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/simulation/ChatPrimitives.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkNoYXRQcmltaXRpdmVzLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgdHlwZSB7IFJlYWN0Tm9kZSB9IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IGNuIH0gZnJvbSAnQC9saWIvdXRpbHMnO1xuXG5leHBvcnQgdHlwZSBDaGF0UHJvZ3Jlc3NTdGVwID0ge1xuICBrZXk6IHN0cmluZztcbiAgbGFiZWw6IHN0cmluZztcbiAgc3RhdGU6ICdjb21wbGV0ZWQnIHwgJ2N1cnJlbnQnIHwgJ3VwY29taW5nJztcbn07XG5cbmV4cG9ydCBmdW5jdGlvbiBDaGF0U2hlbGwoe1xuICBjbGFzc05hbWUsXG4gIGNoaWxkcmVuLFxufToge1xuICBjbGFzc05hbWU/OiBzdHJpbmc7XG4gIGNoaWxkcmVuOiBSZWFjdE5vZGU7XG59KSB7XG4gIHJldHVybiAoXG4gICAgPGRpdiBjbGFzc05hbWU9e2NuKCdjaGF0LXNoZWxsJywgY2xhc3NOYW1lKX0+XG4gICAgICB7Y2hpbGRyZW59XG4gICAgPC9kaXY+XG4gICk7XG59XG5cbmV4cG9ydCBmdW5jdGlvbiBDaGF0VG9wUHJvZ3Jlc3Moe1xuICBzdGVwcyxcbiAgaGVhZGxpbmUsXG4gIGRldGFpbCxcbiAgY2xhc3NOYW1lLFxufToge1xuICBzdGVwczogQ2hhdFByb2dyZXNzU3RlcFtdO1xuICBoZWFkbGluZTogc3RyaW5nO1xuICBkZXRhaWw/OiBzdHJpbmc7XG4gIGNsYXNzTmFtZT86IHN0cmluZztcbn0pIHtcbiAgcmV0dXJuIChcbiAgICA8ZGl2IGNsYXNzTmFtZT17Y24oJ2NoYXQtdG9wLXByb2dyZXNzJywgY2xhc3NOYW1lKX0+XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImNoYXQtdG9wLXByb2dyZXNzLXRyYWNrXCIgcm9sZT1cImxpc3RcIiBhcmlhLWxhYmVsPVwiQ29udmVyc2F0aW9uIHByb2dyZXNzXCI+XG4gICAgICAgIHtzdGVwcy5tYXAoKHN0ZXApID0+IChcbiAgICAgICAgICA8ZGl2XG4gICAgICAgICAgICBrZXk9e3N0ZXAua2V5fVxuICAgICAgICAgICAgcm9sZT1cImxpc3RpdGVtXCJcbiAgICAgICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgICAgICdjaGF0LXRvcC1wcm9ncmVzcy1zdGVwJyxcbiAgICAgICAgICAgICAgc3RlcC5zdGF0ZSA9PT0gJ2NvbXBsZXRlZCcgJiYgJ2lzLWNvbXBsZXRlZCcsXG4gICAgICAgICAgICAgIHN0ZXAuc3RhdGUgPT09ICdjdXJyZW50JyAmJiAnaXMtY3VycmVudCcsXG4gICAgICAgICAgICApfVxuICAgICAgICAgID5cbiAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImNoYXQtdG9wLXByb2dyZXNzLWRvdFwiIGFyaWEtaGlkZGVuPVwidHJ1ZVwiIC8+XG4gICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJjaGF0LXRvcC1wcm9ncmVzcy1sYWJlbFwiPntzdGVwLmxhYmVsfTwvc3Bhbj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgKSl9XG4gICAgICA8L2Rpdj5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwiY2hhdC10b3AtcHJvZ3Jlc3MtbWV0YVwiIHJvbGU9XCJzdGF0dXNcIiBhcmlhLWxpdmU9XCJwb2xpdGVcIj5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJjaGF0LXRvcC1wcm9ncmVzcy1oZWFkbGluZVwiPntoZWFkbGluZX08L2Rpdj5cbiAgICAgICAge2RldGFpbCA/IDxkaXYgY2xhc3NOYW1lPVwiY2hhdC10b3AtcHJvZ3Jlc3MtZGV0YWlsXCI+e2RldGFpbH08L2Rpdj4gOiBudWxsfVxuICAgICAgPC9kaXY+XG4gICAgPC9kaXY+XG4gICk7XG59XG5cbmV4cG9ydCBmdW5jdGlvbiBDaGF0QnViYmxlKHtcbiAgc2lkZSA9ICdhc3Npc3RhbnQnLFxuICB0b25lID0gJ2RlZmF1bHQnLFxuICBraWNrZXIsXG4gIG1ldGEsXG4gIGNsYXNzTmFtZSxcbiAgYnViYmxlQ2xhc3NOYW1lLFxuICBjaGlsZHJlbixcbn06IHtcbiAgc2lkZT86ICdhc3Npc3RhbnQnIHwgJ3VzZXInO1xuICB0b25lPzogJ2RlZmF1bHQnIHwgJ2ludGVyYWN0aXZlJyB8ICdyZXNlYXJjaCcgfCAnc3VjY2VzcycgfCAnd2FybmluZycgfCAnbXV0ZWQnO1xuICBraWNrZXI/OiBSZWFjdE5vZGU7XG4gIG1ldGE/OiBSZWFjdE5vZGU7XG4gIGNsYXNzTmFtZT86IHN0cmluZztcbiAgYnViYmxlQ2xhc3NOYW1lPzogc3RyaW5nO1xuICBjaGlsZHJlbjogUmVhY3ROb2RlO1xufSkge1xuICByZXR1cm4gKFxuICAgIDxkaXYgY2xhc3NOYW1lPXtjbignbWVzc2FnZSBtZXNzYWdlLWNvbXBhY3QnLCBzaWRlID09PSAndXNlcicgPyAndXNlcicgOiAnYm90JywgY2xhc3NOYW1lKX0+XG4gICAgICA8ZGl2XG4gICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgJ2J1YmJsZSBidWJibGUtY29tcGFjdCBjaGF0LWJ1YmJsZS1zaGVsbCcsXG4gICAgICAgICAgdG9uZSA9PT0gJ2ludGVyYWN0aXZlJyAmJiAnY2hhdC1idWJibGUtaW50ZXJhY3RpdmUnLFxuICAgICAgICAgIHRvbmUgPT09ICdyZXNlYXJjaCcgJiYgJ2NoYXQtYnViYmxlLXJlc2VhcmNoJyxcbiAgICAgICAgICB0b25lID09PSAnc3VjY2VzcycgJiYgJ2NoYXQtYnViYmxlLXN1Y2Nlc3MnLFxuICAgICAgICAgIHRvbmUgPT09ICd3YXJuaW5nJyAmJiAnY2hhdC1idWJibGUtd2FybmluZycsXG4gICAgICAgICAgdG9uZSA9PT0gJ211dGVkJyAmJiAnY2hhdC1idWJibGUtbXV0ZWQnLFxuICAgICAgICAgIGJ1YmJsZUNsYXNzTmFtZSxcbiAgICAgICAgKX1cbiAgICAgID5cbiAgICAgICAge2tpY2tlciA/IDxkaXYgY2xhc3NOYW1lPVwiY2hhdC1idWJibGUta2lja2VyXCI+e2tpY2tlcn08L2Rpdj4gOiBudWxsfVxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImNoYXQtYnViYmxlLWJvZHlcIj57Y2hpbGRyZW59PC9kaXY+XG4gICAgICAgIHttZXRhID8gPGRpdiBjbGFzc05hbWU9XCJjaGF0LWJ1YmJsZS1tZXRhXCI+e21ldGF9PC9kaXY+IDogbnVsbH1cbiAgICAgIDwvZGl2PlxuICAgIDwvZGl2PlxuICApO1xufVxuXG5leHBvcnQgZnVuY3Rpb24gQ2hhdEFjdGlvblJvdyh7XG4gIGNsYXNzTmFtZSxcbiAgY2hpbGRyZW4sXG59OiB7XG4gIGNsYXNzTmFtZT86IHN0cmluZztcbiAgY2hpbGRyZW46IFJlYWN0Tm9kZTtcbn0pIHtcbiAgcmV0dXJuIDxkaXYgY2xhc3NOYW1lPXtjbignY2hhdC1hY3Rpb24tcm93JywgY2xhc3NOYW1lKX0+e2NoaWxkcmVufTwvZGl2Pjtcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIENoYXRPcHRpb25DaGlwcyh7XG4gIGNsYXNzTmFtZSxcbiAgY2hpbGRyZW4sXG59OiB7XG4gIGNsYXNzTmFtZT86IHN0cmluZztcbiAgY2hpbGRyZW46IFJlYWN0Tm9kZTtcbn0pIHtcbiAgcmV0dXJuIDxkaXYgY2xhc3NOYW1lPXtjbignY2hhdC1vcHRpb24tY2hpcHMnLCBjbGFzc05hbWUpfT57Y2hpbGRyZW59PC9kaXY+O1xufVxuXG5leHBvcnQgZnVuY3Rpb24gQ2hhdE9wdGlvbkNoaXAoe1xuICBzZWxlY3RlZCA9IGZhbHNlLFxuICBkaXNhYmxlZCA9IGZhbHNlLFxuICBjbGFzc05hbWUsXG4gIGNoaWxkcmVuLFxuICBvbkNsaWNrLFxufToge1xuICBzZWxlY3RlZD86IGJvb2xlYW47XG4gIGRpc2FibGVkPzogYm9vbGVhbjtcbiAgY2xhc3NOYW1lPzogc3RyaW5nO1xuICBjaGlsZHJlbjogUmVhY3ROb2RlO1xuICBvbkNsaWNrPzogKCkgPT4gdm9pZDtcbn0pIHtcbiAgcmV0dXJuIChcbiAgICA8YnV0dG9uXG4gICAgICB0eXBlPVwiYnV0dG9uXCJcbiAgICAgIG9uQ2xpY2s9e29uQ2xpY2t9XG4gICAgICBkaXNhYmxlZD17ZGlzYWJsZWR9XG4gICAgICBjbGFzc05hbWU9e2NuKCdjaGF0LW9wdGlvbi1jaGlwJywgc2VsZWN0ZWQgJiYgJ2lzLXNlbGVjdGVkJywgY2xhc3NOYW1lKX1cbiAgICA+XG4gICAgICB7Y2hpbGRyZW59XG4gICAgPC9idXR0b24+XG4gICk7XG59XG5cbmV4cG9ydCBmdW5jdGlvbiBDaGF0SW5saW5lU2VjdGlvbih7XG4gIHRpdGxlLFxuICBkZXNjcmlwdGlvbixcbiAgY2xhc3NOYW1lLFxuICBjaGlsZHJlbixcbn06IHtcbiAgdGl0bGU/OiBSZWFjdE5vZGU7XG4gIGRlc2NyaXB0aW9uPzogUmVhY3ROb2RlO1xuICBjbGFzc05hbWU/OiBzdHJpbmc7XG4gIGNoaWxkcmVuOiBSZWFjdE5vZGU7XG59KSB7XG4gIHJldHVybiAoXG4gICAgPGRpdiBjbGFzc05hbWU9e2NuKCdjaGF0LWlubGluZS1zZWN0aW9uJywgY2xhc3NOYW1lKX0+XG4gICAgICB7dGl0bGUgfHwgZGVzY3JpcHRpb24gPyAoXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiY2hhdC1pbmxpbmUtc2VjdGlvbi1oZWFkZXJcIj5cbiAgICAgICAgICB7dGl0bGUgPyA8ZGl2IGNsYXNzTmFtZT1cImNoYXQtaW5saW5lLXNlY3Rpb24tdGl0bGVcIj57dGl0bGV9PC9kaXY+IDogbnVsbH1cbiAgICAgICAgICB7ZGVzY3JpcHRpb24gPyA8ZGl2IGNsYXNzTmFtZT1cImNoYXQtaW5saW5lLXNlY3Rpb24tZGVzY3JpcHRpb25cIj57ZGVzY3JpcHRpb259PC9kaXY+IDogbnVsbH1cbiAgICAgICAgPC9kaXY+XG4gICAgICApIDogbnVsbH1cbiAgICAgIHtjaGlsZHJlbn1cbiAgICA8L2Rpdj5cbiAgKTtcbn1cblxuZXhwb3J0IGZ1bmN0aW9uIFJlYXNvbmluZ0RlYnVnRHJhd2VyKHtcbiAgdGl0bGUsXG4gIG9wZW4sXG4gIG9uVG9nZ2xlLFxuICBjaGlsZHJlbixcbn06IHtcbiAgdGl0bGU6IFJlYWN0Tm9kZTtcbiAgb3BlbjogYm9vbGVhbjtcbiAgb25Ub2dnbGU6ICgpID0+IHZvaWQ7XG4gIGNoaWxkcmVuOiBSZWFjdE5vZGU7XG59KSB7XG4gIHJldHVybiAoXG4gICAgPGRpdiBjbGFzc05hbWU9XCJyZWFzb25pbmctZGVidWctZHJhd2VyXCI+XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cInJlYXNvbmluZy1kZWJ1Zy1oZWFkZXJcIj5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJyZWFzb25pbmctZGVidWctdGl0bGVcIj57dGl0bGV9PC9kaXY+XG4gICAgICAgIDxidXR0b24gdHlwZT1cImJ1dHRvblwiIG9uQ2xpY2s9e29uVG9nZ2xlfSBjbGFzc05hbWU9XCJyZWFzb25pbmctZGVidWctdG9nZ2xlXCI+XG4gICAgICAgICAge29wZW4gPyAnSGlkZScgOiAnU2hvdyd9XG4gICAgICAgIDwvYnV0dG9uPlxuICAgICAgPC9kaXY+XG4gICAgICB7b3BlbiA/IDxkaXYgY2xhc3NOYW1lPVwicmVhc29uaW5nLWRlYnVnLWJvZHlcIj57Y2hpbGRyZW59PC9kaXY+IDogbnVsbH1cbiAgICA8L2Rpdj5cbiAgKTtcbn1cbiJdLCJuYW1lcyI6WyJjbiIsIkNoYXRTaGVsbCIsImNsYXNzTmFtZSIsImNoaWxkcmVuIiwiZGl2IiwiQ2hhdFRvcFByb2dyZXNzIiwic3RlcHMiLCJoZWFkbGluZSIsImRldGFpbCIsInJvbGUiLCJhcmlhLWxhYmVsIiwibWFwIiwic3RlcCIsInN0YXRlIiwic3BhbiIsImFyaWEtaGlkZGVuIiwibGFiZWwiLCJrZXkiLCJhcmlhLWxpdmUiLCJDaGF0QnViYmxlIiwic2lkZSIsInRvbmUiLCJraWNrZXIiLCJtZXRhIiwiYnViYmxlQ2xhc3NOYW1lIiwiQ2hhdEFjdGlvblJvdyIsIkNoYXRPcHRpb25DaGlwcyIsIkNoYXRPcHRpb25DaGlwIiwic2VsZWN0ZWQiLCJkaXNhYmxlZCIsIm9uQ2xpY2siLCJidXR0b24iLCJ0eXBlIiwiQ2hhdElubGluZVNlY3Rpb24iLCJ0aXRsZSIsImRlc2NyaXB0aW9uIiwiUmVhc29uaW5nRGVidWdEcmF3ZXIiLCJvcGVuIiwib25Ub2dnbGUiXSwibWFwcGlu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

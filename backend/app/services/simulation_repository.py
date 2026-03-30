@@ -72,6 +72,9 @@ class SimulationRepository:
     async def persist_personas(self, simulation_id: str, agents: List[Dict[str, Any]]) -> None:
         await db_core.insert_agents(simulation_id, agents)
 
+    async def simulation_exists(self, simulation_id: str) -> bool:
+        return await db_core.simulation_exists(simulation_id)
+
     async def update_persona_state(
         self,
         *,

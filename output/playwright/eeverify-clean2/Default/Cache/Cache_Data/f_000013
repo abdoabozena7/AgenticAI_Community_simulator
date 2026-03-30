@@ -1,0 +1,407 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/pages/VerifyEmailPage.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=85597f46"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useMemo = __vite__cjsImport3_react["useMemo"]; const useState = __vite__cjsImport3_react["useState"];
+import { motion } from "/node_modules/.vite/deps/framer-motion.js?v=85597f46";
+import { ArrowRight, BadgeCheck, ShieldCheck, Sparkles } from "/node_modules/.vite/deps/lucide-react.js?v=85597f46";
+import { useNavigate, useSearchParams } from "/node_modules/.vite/deps/react-router-dom.js?v=85597f46";
+import { Button } from "/src/components/ui/button.tsx";
+import { SystemChip, SystemPanel, SystemStat } from "/src/components/system/Architect.tsx";
+import { useLanguage } from "/src/contexts/LanguageContext.tsx";
+import { useTheme } from "/src/contexts/ThemeContext.tsx";
+import { apiService } from "/src/services/api.ts";
+const authThemeVars = (theme)=>theme === "dark" ? {
+        "--architect-bg": "#050505",
+        "--architect-bg-secondary": "#0b0b0b",
+        "--architect-glow-a": "rgba(255,255,255,0.03)",
+        "--architect-glow-b": "rgba(0,106,97,0.06)",
+        "--architect-ink": "#f4f5f7",
+        "--architect-muted": "#b0b5bf",
+        "--architect-subtle": "#858b96",
+        "--architect-surface-0": "rgba(16,16,16,0.94)",
+        "--architect-surface-1": "#121212",
+        "--architect-surface-2": "#1a1a1a",
+        "--architect-surface-strong": "rgba(24,24,24,0.96)",
+        "--architect-contrast": "#f4f5f7",
+        "--architect-contrast-ink": "#090909",
+        "--architect-contrast-muted": "rgba(9,9,9,0.56)",
+        "--architect-kicker": "#949aa6",
+        "--architect-chip-soft-bg": "#181818",
+        "--architect-chip-soft-ink": "#c8cdd6",
+        "--architect-jewel-bg": "rgba(134,242,228,0.12)",
+        "--architect-jewel-ink": "#86f2e4",
+        "--architect-outline": "rgba(125,129,139,0.38)",
+        "--architect-input-bg": "#101010",
+        "--architect-input-placeholder": "#818794",
+        "--architect-panel-shadow": "inset 0 1px 0 rgba(255,255,255,0.04), 0 20px 40px -32px rgba(0,0,0,0.72)"
+    } : {
+        "--architect-bg": "#f7f9fb",
+        "--architect-bg-secondary": "#eef1f4",
+        "--architect-glow-a": "rgba(16,12,61,0.06)",
+        "--architect-glow-b": "rgba(0,106,97,0.08)",
+        "--architect-ink": "#100c3d",
+        "--architect-muted": "#536073",
+        "--architect-subtle": "#778196",
+        "--architect-surface-0": "rgba(255,255,255,0.92)",
+        "--architect-surface-1": "#f4f6f8",
+        "--architect-surface-2": "#eceef0",
+        "--architect-surface-strong": "rgba(255,255,255,0.78)",
+        "--architect-contrast": "#100c3d",
+        "--architect-contrast-ink": "#ffffff",
+        "--architect-contrast-muted": "rgba(255,255,255,0.55)",
+        "--architect-kicker": "#6f7890",
+        "--architect-chip-soft-bg": "#eceef0",
+        "--architect-chip-soft-ink": "#5d6880",
+        "--architect-jewel-bg": "#86f2e4",
+        "--architect-jewel-ink": "#006f66",
+        "--architect-outline": "rgba(197,198,205,0.45)",
+        "--architect-input-bg": "#ffffff",
+        "--architect-input-placeholder": "#9aa3b4",
+        "--architect-panel-shadow": "inset 0 1px 0 rgba(255,255,255,0.9), 0 18px 34px -30px rgba(16,12,61,0.16)"
+    };
+export default function VerifyEmailPage() {
+    _s();
+    const [params] = useSearchParams();
+    const navigate = useNavigate();
+    const { language } = useLanguage();
+    const { theme } = useTheme();
+    const [status, setStatus] = useState("verifying");
+    const [message, setMessage] = useState("");
+    const isArabic = language === "ar";
+    const t = (en, ar)=>isArabic ? ar : en;
+    const themeVars = useMemo(()=>authThemeVars(theme), [
+        theme
+    ]);
+    useEffect(()=>{
+        const token = params.get("token");
+        if (!token) {
+            setStatus("error");
+            setMessage(t("Verification token missing.", "رمز التحقق مفقود."));
+            return;
+        }
+        apiService.verifyEmail(token).then(()=>{
+            setStatus("success");
+            setMessage(t("Email verified successfully.", "تم التحقق من البريد الإلكتروني بنجاح."));
+        }).catch((err)=>{
+            setStatus("error");
+            setMessage(err?.message || t("Verification failed.", "فشل التحقق."));
+        });
+    }, [
+        params,
+        t
+    ]);
+    return /*#__PURE__*/ _jsxDEV("div", {
+        dir: isArabic ? "rtl" : "ltr",
+        className: "architect-shell min-h-screen",
+        style: themeVars,
+        children: /*#__PURE__*/ _jsxDEV("div", {
+            className: "relative isolate min-h-screen overflow-hidden px-4 py-6 sm:px-6 lg:px-8",
+            children: [
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "absolute inset-0 opacity-70",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "absolute left-[-8%] top-[-10%] h-72 w-72 rounded-full bg-[color:var(--architect-glow-a)] blur-3xl"
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                            lineNumber: 101,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "absolute right-[-6%] top-[14%] h-80 w-80 rounded-full bg-[color:var(--architect-glow-b)] blur-3xl"
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                            lineNumber: 102,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "absolute inset-x-0 bottom-[-20%] h-96 bg-gradient-to-t from-transparent to-[color:var(--architect-bg-secondary)]"
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                            lineNumber: 103,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                    lineNumber: 100,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "relative mx-auto grid min-h-[calc(100vh-3rem)] max-w-6xl items-center gap-6 lg:grid-cols-[1.04fr_0.96fr]",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV(motion.section, {
+                            initial: {
+                                opacity: 0,
+                                y: 18
+                            },
+                            animate: {
+                                opacity: 1,
+                                y: 0
+                            },
+                            transition: {
+                                duration: 0.45
+                            },
+                            className: "architect-hero hidden h-full flex-col justify-between lg:flex",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "space-y-6",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex flex-wrap items-center gap-3",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(SystemChip, {
+                                                    tone: "primary",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(ShieldCheck, {
+                                                            className: "h-4 w-4"
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                                            lineNumber: 116,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        t("Email Security", "أمان البريد")
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                                    lineNumber: 115,
+                                                    columnNumber: 17
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV(SystemChip, {
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV(Sparkles, {
+                                                            className: "h-4 w-4"
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                                            lineNumber: 120,
+                                                            columnNumber: 19
+                                                        }, this),
+                                                        t("Black-first dark mode", "وضع داكن أسود")
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                                    lineNumber: 119,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                            lineNumber: 114,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("h1", {
+                                            className: "font-['IBM_Plex_Sans_Arabic','Be_Vietnam_Pro',sans-serif] text-5xl font-semibold leading-[1.12] tracking-[-0.05em] text-[color:var(--architect-ink)]",
+                                            children: t("Verify your email", "تحقق من بريدك الإلكتروني")
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                            lineNumber: 124,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("p", {
+                                            className: "max-w-xl text-base leading-8 text-[color:var(--architect-muted)]",
+                                            children: t("We are confirming ownership of your email before returning you to the workspace.", "نؤكد الآن ملكية بريدك الإلكتروني قبل إعادتك إلى مساحة العمل.")
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                            lineNumber: 127,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                    lineNumber: 113,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "grid gap-3 sm:grid-cols-2",
+                                    children: [
+                                        {
+                                            label: t("Native RTL", "RTL أصيل"),
+                                            value: "01",
+                                            detail: t("Readable Arabic hierarchy.", "تدرج عربي واضح.")
+                                        },
+                                        {
+                                            label: t("Theme aware", "حسب الثيم"),
+                                            value: "02",
+                                            detail: t("Light and black dark tokens.", "فاتح وداكن أسود.")
+                                        },
+                                        {
+                                            label: t("Secure flow", "مسار آمن"),
+                                            value: "03",
+                                            detail: t("Verification before access.", "التحقق قبل الدخول.")
+                                        },
+                                        {
+                                            label: t("Fast recovery", "استعادة سريعة"),
+                                            value: "04",
+                                            detail: t("Simple next step after verify.", "خطوة تالية بسيطة.")
+                                        }
+                                    ].map((item)=>/*#__PURE__*/ _jsxDEV(SystemStat, {
+                                            label: item.label,
+                                            value: item.value,
+                                            detail: item.detail
+                                        }, item.value, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                            lineNumber: 142,
+                                            columnNumber: 17
+                                        }, this))
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                    lineNumber: 135,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                            lineNumber: 107,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV(motion.section, {
+                            initial: {
+                                opacity: 0,
+                                y: 18
+                            },
+                            animate: {
+                                opacity: 1,
+                                y: 0
+                            },
+                            transition: {
+                                duration: 0.45,
+                                delay: 0.06
+                            },
+                            className: "min-w-0",
+                            children: /*#__PURE__*/ _jsxDEV(SystemPanel, {
+                                title: t("Verification", "التحقق"),
+                                description: t("Email confirmation before login.", "تأكيد البريد الإلكتروني قبل الدخول."),
+                                icon: BadgeCheck,
+                                children: /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "space-y-4 text-center",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[color:var(--architect-surface-2)] text-[color:var(--architect-ink)]",
+                                            children: /*#__PURE__*/ _jsxDEV(BadgeCheck, {
+                                                className: "h-6 w-6"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                                lineNumber: 160,
+                                                columnNumber: 19
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                            lineNumber: 159,
+                                            columnNumber: 17
+                                        }, this),
+                                        status === "verifying" ? /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "architect-feedback bg-[color:var(--architect-surface-2)] text-[color:var(--architect-muted)]",
+                                            children: t("Verifying your email...", "جارٍ التحقق من بريدك الإلكتروني...")
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                            lineNumber: 164,
+                                            columnNumber: 19
+                                        }, this) : /*#__PURE__*/ _jsxDEV("div", {
+                                            className: status === "success" ? "architect-feedback architect-feedback-success" : "architect-feedback architect-feedback-error",
+                                            children: message
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                            lineNumber: 168,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV(Button, {
+                                            onClick: ()=>navigate("/?auth=login"),
+                                            className: "architect-button h-12 w-full rounded-md bg-[color:var(--architect-contrast)] text-[color:var(--architect-contrast-ink)] hover:opacity-95",
+                                            children: [
+                                                t("Go to login", "الانتقال إلى تسجيل الدخول"),
+                                                /*#__PURE__*/ _jsxDEV(ArrowRight, {
+                                                    className: "h-4 w-4"
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                                    lineNumber: 184,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                            lineNumber: 179,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                    lineNumber: 158,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                                lineNumber: 153,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                            lineNumber: 147,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+                    lineNumber: 106,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+            lineNumber: 99,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx",
+        lineNumber: 98,
+        columnNumber: 5
+    }, this);
+}
+_s(VerifyEmailPage, "c23pM7NOczlJDwOz7E8GfGHcTdc=", false, function() {
+    return [
+        useSearchParams,
+        useNavigate,
+        useLanguage,
+        useTheme
+    ];
+});
+_c = VerifyEmailPage;
+var _c;
+$RefreshReg$(_c, "VerifyEmailPage");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/VerifyEmailPage.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlZlcmlmeUVtYWlsUGFnZS50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgdXNlRWZmZWN0LCB1c2VNZW1vLCB1c2VTdGF0ZSB9IGZyb20gXCJyZWFjdFwiO1xuaW1wb3J0IHsgbW90aW9uIH0gZnJvbSBcImZyYW1lci1tb3Rpb25cIjtcbmltcG9ydCB7IEFycm93UmlnaHQsIEJhZGdlQ2hlY2ssIFNoaWVsZENoZWNrLCBTcGFya2xlcyB9IGZyb20gXCJsdWNpZGUtcmVhY3RcIjtcbmltcG9ydCB7IHVzZU5hdmlnYXRlLCB1c2VTZWFyY2hQYXJhbXMgfSBmcm9tIFwicmVhY3Qtcm91dGVyLWRvbVwiO1xuXG5pbXBvcnQgeyBCdXR0b24gfSBmcm9tIFwiQC9jb21wb25lbnRzL3VpL2J1dHRvblwiO1xuaW1wb3J0IHsgU3lzdGVtQ2hpcCwgU3lzdGVtUGFuZWwsIFN5c3RlbVN0YXQgfSBmcm9tIFwiQC9jb21wb25lbnRzL3N5c3RlbS9BcmNoaXRlY3RcIjtcbmltcG9ydCB7IHVzZUxhbmd1YWdlIH0gZnJvbSBcIkAvY29udGV4dHMvTGFuZ3VhZ2VDb250ZXh0XCI7XG5pbXBvcnQgeyB1c2VUaGVtZSB9IGZyb20gXCJAL2NvbnRleHRzL1RoZW1lQ29udGV4dFwiO1xuaW1wb3J0IHsgYXBpU2VydmljZSB9IGZyb20gXCJAL3NlcnZpY2VzL2FwaVwiO1xuXG5jb25zdCBhdXRoVGhlbWVWYXJzID0gKHRoZW1lOiBcImRhcmtcIiB8IFwibGlnaHRcIikgPT5cbiAgdGhlbWUgPT09IFwiZGFya1wiXG4gICAgPyB7XG4gICAgICAgIFwiLS1hcmNoaXRlY3QtYmdcIjogXCIjMDUwNTA1XCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3QtYmctc2Vjb25kYXJ5XCI6IFwiIzBiMGIwYlwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWdsb3ctYVwiOiBcInJnYmEoMjU1LDI1NSwyNTUsMC4wMylcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1nbG93LWJcIjogXCJyZ2JhKDAsMTA2LDk3LDAuMDYpXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3QtaW5rXCI6IFwiI2Y0ZjVmN1wiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LW11dGVkXCI6IFwiI2IwYjViZlwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LXN1YnRsZVwiOiBcIiM4NThiOTZcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1zdXJmYWNlLTBcIjogXCJyZ2JhKDE2LDE2LDE2LDAuOTQpXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3Qtc3VyZmFjZS0xXCI6IFwiIzEyMTIxMlwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LXN1cmZhY2UtMlwiOiBcIiMxYTFhMWFcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1zdXJmYWNlLXN0cm9uZ1wiOiBcInJnYmEoMjQsMjQsMjQsMC45NilcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1jb250cmFzdFwiOiBcIiNmNGY1ZjdcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1jb250cmFzdC1pbmtcIjogXCIjMDkwOTA5XCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3QtY29udHJhc3QtbXV0ZWRcIjogXCJyZ2JhKDksOSw5LDAuNTYpXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3Qta2lja2VyXCI6IFwiIzk0OWFhNlwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWNoaXAtc29mdC1iZ1wiOiBcIiMxODE4MThcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1jaGlwLXNvZnQtaW5rXCI6IFwiI2M4Y2RkNlwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWpld2VsLWJnXCI6IFwicmdiYSgxMzQsMjQyLDIyOCwwLjEyKVwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWpld2VsLWlua1wiOiBcIiM4NmYyZTRcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1vdXRsaW5lXCI6IFwicmdiYSgxMjUsMTI5LDEzOSwwLjM4KVwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWlucHV0LWJnXCI6IFwiIzEwMTAxMFwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWlucHV0LXBsYWNlaG9sZGVyXCI6IFwiIzgxODc5NFwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LXBhbmVsLXNoYWRvd1wiOiBcImluc2V0IDAgMXB4IDAgcmdiYSgyNTUsMjU1LDI1NSwwLjA0KSwgMCAyMHB4IDQwcHggLTMycHggcmdiYSgwLDAsMCwwLjcyKVwiLFxuICAgICAgfVxuICAgIDoge1xuICAgICAgICBcIi0tYXJjaGl0ZWN0LWJnXCI6IFwiI2Y3ZjlmYlwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWJnLXNlY29uZGFyeVwiOiBcIiNlZWYxZjRcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1nbG93LWFcIjogXCJyZ2JhKDE2LDEyLDYxLDAuMDYpXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3QtZ2xvdy1iXCI6IFwicmdiYSgwLDEwNiw5NywwLjA4KVwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWlua1wiOiBcIiMxMDBjM2RcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1tdXRlZFwiOiBcIiM1MzYwNzNcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1zdWJ0bGVcIjogXCIjNzc4MTk2XCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3Qtc3VyZmFjZS0wXCI6IFwicmdiYSgyNTUsMjU1LDI1NSwwLjkyKVwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LXN1cmZhY2UtMVwiOiBcIiNmNGY2ZjhcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1zdXJmYWNlLTJcIjogXCIjZWNlZWYwXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3Qtc3VyZmFjZS1zdHJvbmdcIjogXCJyZ2JhKDI1NSwyNTUsMjU1LDAuNzgpXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3QtY29udHJhc3RcIjogXCIjMTAwYzNkXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3QtY29udHJhc3QtaW5rXCI6IFwiI2ZmZmZmZlwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWNvbnRyYXN0LW11dGVkXCI6IFwicmdiYSgyNTUsMjU1LDI1NSwwLjU1KVwiLFxuICAgICAgICBcIi0tYXJjaGl0ZWN0LWtpY2tlclwiOiBcIiM2Zjc4OTBcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1jaGlwLXNvZnQtYmdcIjogXCIjZWNlZWYwXCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3QtY2hpcC1zb2Z0LWlua1wiOiBcIiM1ZDY4ODBcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1qZXdlbC1iZ1wiOiBcIiM4NmYyZTRcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1qZXdlbC1pbmtcIjogXCIjMDA2ZjY2XCIsXG4gICAgICAgIFwiLS1hcmNoaXRlY3Qtb3V0bGluZVwiOiBcInJnYmEoMTk3LDE5OCwyMDUsMC40NSlcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1pbnB1dC1iZ1wiOiBcIiNmZmZmZmZcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1pbnB1dC1wbGFjZWhvbGRlclwiOiBcIiM5YWEzYjRcIixcbiAgICAgICAgXCItLWFyY2hpdGVjdC1wYW5lbC1zaGFkb3dcIjogXCJpbnNldCAwIDFweCAwIHJnYmEoMjU1LDI1NSwyNTUsMC45KSwgMCAxOHB4IDM0cHggLTMwcHggcmdiYSgxNiwxMiw2MSwwLjE2KVwiLFxuICAgICAgfTtcblxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gVmVyaWZ5RW1haWxQYWdlKCkge1xuICBjb25zdCBbcGFyYW1zXSA9IHVzZVNlYXJjaFBhcmFtcygpO1xuICBjb25zdCBuYXZpZ2F0ZSA9IHVzZU5hdmlnYXRlKCk7XG4gIGNvbnN0IHsgbGFuZ3VhZ2UgfSA9IHVzZUxhbmd1YWdlKCk7XG4gIGNvbnN0IHsgdGhlbWUgfSA9IHVzZVRoZW1lKCk7XG4gIGNvbnN0IFtzdGF0dXMsIHNldFN0YXR1c10gPSB1c2VTdGF0ZTxcInZlcmlmeWluZ1wiIHwgXCJzdWNjZXNzXCIgfCBcImVycm9yXCI+KFwidmVyaWZ5aW5nXCIpO1xuICBjb25zdCBbbWVzc2FnZSwgc2V0TWVzc2FnZV0gPSB1c2VTdGF0ZTxzdHJpbmc+KFwiXCIpO1xuXG4gIGNvbnN0IGlzQXJhYmljID0gbGFuZ3VhZ2UgPT09IFwiYXJcIjtcbiAgY29uc3QgdCA9IChlbjogc3RyaW5nLCBhcjogc3RyaW5nKSA9PiAoaXNBcmFiaWMgPyBhciA6IGVuKTtcbiAgY29uc3QgdGhlbWVWYXJzID0gdXNlTWVtbygoKSA9PiBhdXRoVGhlbWVWYXJzKHRoZW1lKSwgW3RoZW1lXSk7XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICBjb25zdCB0b2tlbiA9IHBhcmFtcy5nZXQoXCJ0b2tlblwiKTtcbiAgICBpZiAoIXRva2VuKSB7XG4gICAgICBzZXRTdGF0dXMoXCJlcnJvclwiKTtcbiAgICAgIHNldE1lc3NhZ2UodChcIlZlcmlmaWNhdGlvbiB0b2tlbiBtaXNzaW5nLlwiLCBcItix2YXYsiDYp9mE2KrYrdmC2YIg2YXZgdmC2YjYry5cIikpO1xuICAgICAgcmV0dXJuO1xuICAgIH1cblxuICAgIGFwaVNlcnZpY2VcbiAgICAgIC52ZXJpZnlFbWFpbCh0b2tlbilcbiAgICAgIC50aGVuKCgpID0+IHtcbiAgICAgICAgc2V0U3RhdHVzKFwic3VjY2Vzc1wiKTtcbiAgICAgICAgc2V0TWVzc2FnZSh0KFwiRW1haWwgdmVyaWZpZWQgc3VjY2Vzc2Z1bGx5LlwiLCBcItiq2YUg2KfZhNiq2K3ZgtmCINmF2YYg2KfZhNio2LHZitivINin2YTYpdmE2YPYqtix2YjZhtmKINio2YbYrNin2K0uXCIpKTtcbiAgICAgIH0pXG4gICAgICAuY2F0Y2goKGVycjogYW55KSA9PiB7XG4gICAgICAgIHNldFN0YXR1cyhcImVycm9yXCIpO1xuICAgICAgICBzZXRNZXNzYWdlKGVycj8ubWVzc2FnZSB8fCB0KFwiVmVyaWZpY2F0aW9uIGZhaWxlZC5cIiwgXCLZgdi02YQg2KfZhNiq2K3ZgtmCLlwiKSk7XG4gICAgICB9KTtcbiAgfSwgW3BhcmFtcywgdF0pO1xuXG4gIHJldHVybiAoXG4gICAgPGRpdiBkaXI9e2lzQXJhYmljID8gXCJydGxcIiA6IFwibHRyXCJ9IGNsYXNzTmFtZT1cImFyY2hpdGVjdC1zaGVsbCBtaW4taC1zY3JlZW5cIiBzdHlsZT17dGhlbWVWYXJzIGFzIFJlYWN0LkNTU1Byb3BlcnRpZXN9PlxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJyZWxhdGl2ZSBpc29sYXRlIG1pbi1oLXNjcmVlbiBvdmVyZmxvdy1oaWRkZW4gcHgtNCBweS02IHNtOnB4LTYgbGc6cHgtOFwiPlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImFic29sdXRlIGluc2V0LTAgb3BhY2l0eS03MFwiPlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYWJzb2x1dGUgbGVmdC1bLTglXSB0b3AtWy0xMCVdIGgtNzIgdy03MiByb3VuZGVkLWZ1bGwgYmctW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1nbG93LWEpXSBibHVyLTN4bFwiIC8+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJhYnNvbHV0ZSByaWdodC1bLTYlXSB0b3AtWzE0JV0gaC04MCB3LTgwIHJvdW5kZWQtZnVsbCBiZy1bY29sb3I6dmFyKC0tYXJjaGl0ZWN0LWdsb3ctYildIGJsdXItM3hsXCIgLz5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImFic29sdXRlIGluc2V0LXgtMCBib3R0b20tWy0yMCVdIGgtOTYgYmctZ3JhZGllbnQtdG8tdCBmcm9tLXRyYW5zcGFyZW50IHRvLVtjb2xvcjp2YXIoLS1hcmNoaXRlY3QtYmctc2Vjb25kYXJ5KV1cIiAvPlxuICAgICAgICA8L2Rpdj5cblxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJlbGF0aXZlIG14LWF1dG8gZ3JpZCBtaW4taC1bY2FsYygxMDB2aC0zcmVtKV0gbWF4LXctNnhsIGl0ZW1zLWNlbnRlciBnYXAtNiBsZzpncmlkLWNvbHMtWzEuMDRmcl8wLjk2ZnJdXCI+XG4gICAgICAgICAgPG1vdGlvbi5zZWN0aW9uXG4gICAgICAgICAgICBpbml0aWFsPXt7IG9wYWNpdHk6IDAsIHk6IDE4IH19XG4gICAgICAgICAgICBhbmltYXRlPXt7IG9wYWNpdHk6IDEsIHk6IDAgfX1cbiAgICAgICAgICAgIHRyYW5zaXRpb249e3sgZHVyYXRpb246IDAuNDUgfX1cbiAgICAgICAgICAgIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1oZXJvIGhpZGRlbiBoLWZ1bGwgZmxleC1jb2wganVzdGlmeS1iZXR3ZWVuIGxnOmZsZXhcIlxuICAgICAgICAgID5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS02XCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBmbGV4LXdyYXAgaXRlbXMtY2VudGVyIGdhcC0zXCI+XG4gICAgICAgICAgICAgICAgPFN5c3RlbUNoaXAgdG9uZT1cInByaW1hcnlcIj5cbiAgICAgICAgICAgICAgICAgIDxTaGllbGRDaGVjayBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAgICAgIHt0KFwiRW1haWwgU2VjdXJpdHlcIiwgXCLYo9mF2KfZhiDYp9mE2KjYsdmK2K9cIil9XG4gICAgICAgICAgICAgICAgPC9TeXN0ZW1DaGlwPlxuICAgICAgICAgICAgICAgIDxTeXN0ZW1DaGlwPlxuICAgICAgICAgICAgICAgICAgPFNwYXJrbGVzIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICAgICAgICAgICAge3QoXCJCbGFjay1maXJzdCBkYXJrIG1vZGVcIiwgXCLZiNi22Lkg2K/Yp9mD2YYg2KPYs9mI2K9cIil9XG4gICAgICAgICAgICAgICAgPC9TeXN0ZW1DaGlwPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPGgxIGNsYXNzTmFtZT1cImZvbnQtWydJQk1fUGxleF9TYW5zX0FyYWJpYycsJ0JlX1ZpZXRuYW1fUHJvJyxzYW5zLXNlcmlmXSB0ZXh0LTV4bCBmb250LXNlbWlib2xkIGxlYWRpbmctWzEuMTJdIHRyYWNraW5nLVstMC4wNWVtXSB0ZXh0LVtjb2xvcjp2YXIoLS1hcmNoaXRlY3QtaW5rKV1cIj5cbiAgICAgICAgICAgICAgICB7dChcIlZlcmlmeSB5b3VyIGVtYWlsXCIsIFwi2KrYrdmC2YIg2YXZhiDYqNix2YrYr9mDINin2YTYpdmE2YPYqtix2YjZhtmKXCIpfVxuICAgICAgICAgICAgICA8L2gxPlxuICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJtYXgtdy14bCB0ZXh0LWJhc2UgbGVhZGluZy04IHRleHQtW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1tdXRlZCldXCI+XG4gICAgICAgICAgICAgICAge3QoXG4gICAgICAgICAgICAgICAgICBcIldlIGFyZSBjb25maXJtaW5nIG93bmVyc2hpcCBvZiB5b3VyIGVtYWlsIGJlZm9yZSByZXR1cm5pbmcgeW91IHRvIHRoZSB3b3Jrc3BhY2UuXCIsXG4gICAgICAgICAgICAgICAgICBcItmG2KTZg9ivINin2YTYotmGINmF2YTZg9mK2Kkg2KjYsdmK2K/ZgyDYp9mE2KXZhNmD2KrYsdmI2YbZiiDZgtio2YQg2KXYudin2K/YqtmDINil2YTZiSDZhdiz2KfYrdipINin2YTYudmF2YQuXCIsXG4gICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBnYXAtMyBzbTpncmlkLWNvbHMtMlwiPlxuICAgICAgICAgICAgICB7W1xuICAgICAgICAgICAgICAgIHsgbGFiZWw6IHQoXCJOYXRpdmUgUlRMXCIsIFwiUlRMINij2LXZitmEXCIpLCB2YWx1ZTogXCIwMVwiLCBkZXRhaWw6IHQoXCJSZWFkYWJsZSBBcmFiaWMgaGllcmFyY2h5LlwiLCBcItiq2K/YsdisINi52LHYqNmKINmI2KfYttitLlwiKSB9LFxuICAgICAgICAgICAgICAgIHsgbGFiZWw6IHQoXCJUaGVtZSBhd2FyZVwiLCBcItit2LPYqCDYp9mE2KvZitmFXCIpLCB2YWx1ZTogXCIwMlwiLCBkZXRhaWw6IHQoXCJMaWdodCBhbmQgYmxhY2sgZGFyayB0b2tlbnMuXCIsIFwi2YHYp9iq2K0g2YjYr9in2YPZhiDYo9iz2YjYry5cIikgfSxcbiAgICAgICAgICAgICAgICB7IGxhYmVsOiB0KFwiU2VjdXJlIGZsb3dcIiwgXCLZhdiz2KfYsSDYotmF2YZcIiksIHZhbHVlOiBcIjAzXCIsIGRldGFpbDogdChcIlZlcmlmaWNhdGlvbiBiZWZvcmUgYWNjZXNzLlwiLCBcItin2YTYqtit2YLZgiDZgtio2YQg2KfZhNiv2K7ZiNmELlwiKSB9LFxuICAgICAgICAgICAgICAgIHsgbGFiZWw6IHQoXCJGYXN0IHJlY292ZXJ5XCIsIFwi2KfYs9iq2LnYp9iv2Kkg2LPYsdmK2LnYqVwiKSwgdmFsdWU6IFwiMDRcIiwgZGV0YWlsOiB0KFwiU2ltcGxlIG5leHQgc3RlcCBhZnRlciB2ZXJpZnkuXCIsIFwi2K7Yt9mI2Kkg2KrYp9mE2YrYqSDYqNiz2YrYt9ipLlwiKSB9LFxuICAgICAgICAgICAgICBdLm1hcCgoaXRlbSkgPT4gKFxuICAgICAgICAgICAgICAgIDxTeXN0ZW1TdGF0IGtleT17aXRlbS52YWx1ZX0gbGFiZWw9e2l0ZW0ubGFiZWx9IHZhbHVlPXtpdGVtLnZhbHVlfSBkZXRhaWw9e2l0ZW0uZGV0YWlsfSAvPlxuICAgICAgICAgICAgICApKX1cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvbW90aW9uLnNlY3Rpb24+XG5cbiAgICAgICAgICA8bW90aW9uLnNlY3Rpb25cbiAgICAgICAgICAgIGluaXRpYWw9e3sgb3BhY2l0eTogMCwgeTogMTggfX1cbiAgICAgICAgICAgIGFuaW1hdGU9e3sgb3BhY2l0eTogMSwgeTogMCB9fVxuICAgICAgICAgICAgdHJhbnNpdGlvbj17eyBkdXJhdGlvbjogMC40NSwgZGVsYXk6IDAuMDYgfX1cbiAgICAgICAgICAgIGNsYXNzTmFtZT1cIm1pbi13LTBcIlxuICAgICAgICAgID5cbiAgICAgICAgICAgIDxTeXN0ZW1QYW5lbFxuICAgICAgICAgICAgICB0aXRsZT17dChcIlZlcmlmaWNhdGlvblwiLCBcItin2YTYqtit2YLZglwiKX1cbiAgICAgICAgICAgICAgZGVzY3JpcHRpb249e3QoXCJFbWFpbCBjb25maXJtYXRpb24gYmVmb3JlIGxvZ2luLlwiLCBcItiq2KPZg9mK2K8g2KfZhNio2LHZitivINin2YTYpdmE2YPYqtix2YjZhtmKINmC2KjZhCDYp9mE2K/YrtmI2YQuXCIpfVxuICAgICAgICAgICAgICBpY29uPXtCYWRnZUNoZWNrfVxuICAgICAgICAgICAgPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktNCB0ZXh0LWNlbnRlclwiPlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXgtYXV0byBmbGV4IGgtMTQgdy0xNCBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgcm91bmRlZC0yeGwgYmctW2NvbG9yOnZhcigtLWFyY2hpdGVjdC1zdXJmYWNlLTIpXSB0ZXh0LVtjb2xvcjp2YXIoLS1hcmNoaXRlY3QtaW5rKV1cIj5cbiAgICAgICAgICAgICAgICAgIDxCYWRnZUNoZWNrIGNsYXNzTmFtZT1cImgtNiB3LTZcIiAvPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICAgICAge3N0YXR1cyA9PT0gXCJ2ZXJpZnlpbmdcIiA/IChcbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWZlZWRiYWNrIGJnLVtjb2xvcjp2YXIoLS1hcmNoaXRlY3Qtc3VyZmFjZS0yKV0gdGV4dC1bY29sb3I6dmFyKC0tYXJjaGl0ZWN0LW11dGVkKV1cIj5cbiAgICAgICAgICAgICAgICAgICAge3QoXCJWZXJpZnlpbmcgeW91ciBlbWFpbC4uLlwiLCBcItis2KfYsdmNINin2YTYqtit2YLZgiDZhdmGINio2LHZitiv2YMg2KfZhNil2YTZg9iq2LHZiNmG2YouLi5cIil9XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICApIDogKFxuICAgICAgICAgICAgICAgICAgPGRpdlxuICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9e1xuICAgICAgICAgICAgICAgICAgICAgIHN0YXR1cyA9PT0gXCJzdWNjZXNzXCJcbiAgICAgICAgICAgICAgICAgICAgICAgID8gXCJhcmNoaXRlY3QtZmVlZGJhY2sgYXJjaGl0ZWN0LWZlZWRiYWNrLXN1Y2Nlc3NcIlxuICAgICAgICAgICAgICAgICAgICAgICAgOiBcImFyY2hpdGVjdC1mZWVkYmFjayBhcmNoaXRlY3QtZmVlZGJhY2stZXJyb3JcIlxuICAgICAgICAgICAgICAgICAgICB9XG4gICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgIHttZXNzYWdlfVxuICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgKX1cblxuICAgICAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IG5hdmlnYXRlKFwiLz9hdXRoPWxvZ2luXCIpfVxuICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiYXJjaGl0ZWN0LWJ1dHRvbiBoLTEyIHctZnVsbCByb3VuZGVkLW1kIGJnLVtjb2xvcjp2YXIoLS1hcmNoaXRlY3QtY29udHJhc3QpXSB0ZXh0LVtjb2xvcjp2YXIoLS1hcmNoaXRlY3QtY29udHJhc3QtaW5rKV0gaG92ZXI6b3BhY2l0eS05NVwiXG4gICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAge3QoXCJHbyB0byBsb2dpblwiLCBcItin2YTYp9mG2KrZgtin2YQg2KXZhNmJINiq2LPYrNmK2YQg2KfZhNiv2K7ZiNmEXCIpfVxuICAgICAgICAgICAgICAgICAgPEFycm93UmlnaHQgY2xhc3NOYW1lPVwiaC00IHctNFwiIC8+XG4gICAgICAgICAgICAgICAgPC9CdXR0b24+XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9TeXN0ZW1QYW5lbD5cbiAgICAgICAgICA8L21vdGlvbi5zZWN0aW9uPlxuICAgICAgICA8L2Rpdj5cbiAgICAgIDwvZGl2PlxuICAgIDwvZGl2PlxuICApO1xufVxuIl0sIm5hbWVzIjpbInVzZUVmZmVjdCIsInVzZU1lbW8iLCJ1c2VTdGF0ZSIsIm1vdGlvbiIsIkFycm93UmlnaHQiLCJCYWRnZUNoZWNrIiwiU2hpZWxkQ2hlY2siLCJTcGFya2xlcyIsInVzZU5hdmlnYXRlIiwidXNlU2VhcmNoUGFyYW1zIiwiQnV0dG9uIiwiU3lzdGVtQ2hpcCIsIlN5c3RlbVBhbmVsIiwiU3lzdGVtU3RhdCIsInVzZUxhbmd1YWdlIiwidXNlVGhlbWUiLCJhcGlTZXJ2aWNlIiwiYXV0aFRoZW1lVmFycyIsInRoZW1lIiwiVmVyaWZ5RW1haWxQYWdlIiwicGFyYW1zIiwibmF2aWdhdGUiLCJsYW5ndWFnZSIsInN0YXR1cyIsInNldFN0YXR1cyIsIm1lc3NhZ2UiLCJzZXRNZXNzYWdlIiwiaXNBcmFiaWMiLCJ0IiwiZW4iLCJhciIsInRoZW1lVmFycyIsInRva2VuIiwiZ2V0IiwidmVyaWZ5RW1haWwiLCJ0aGVuIiwiY2F0Y2giLCJlcnIiLCJkaXYiLCJkaXIiLCJjbGFzc05hbWUiLCJzdHlsZSIsInNlY3Rpb24iLCJpbml0aWFsIiwib3BhY2l0eSIsInkiLCJhbmltYXRlIiwidHJhbnNpdGlvbiIsImR1cmF0aW9uIiwidG9uZSIsImgxIiwicCIsImxhYmVsIiwidmFsdWUiLCJkZXRhaWwiLCJtYXAiLCJpdGVtIiwiZGVsYXkiLCJ0aXRsZSIsImRlc2NyaXB0aW9uIiwiaWNvbiIsIm9uQ2xpY2siXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLFNBQVNBLFNBQVMsRUFBRUMsT0FBTyxFQUFFQyxRQUFRLFFBQVEsUUFBUTtBQUNyRCxTQUFTQyxNQUFNLFFBQVEsZ0JBQWdCO0FBQ3ZDLFNBQVNDLFVBQVUsRUFBRUMsVUFBVSxFQUFFQyxXQUFXLEVBQUVDLFFBQVEsUUFBUSxlQUFlO0FBQzdFLFNBQVNDLFdBQVcsRUFBRUMsZUFBZSxRQUFRLG1CQUFtQjtBQUVoRSxTQUFTQyxNQUFNLFFBQVEseUJBQXlCO0FBQ2hELFNBQVND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

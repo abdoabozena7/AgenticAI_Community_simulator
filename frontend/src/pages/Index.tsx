@@ -278,6 +278,8 @@ const normalizeAssistantText = (text: string): string => {
     .trim();
 };
 
+const GUIDED_WORKFLOW_BOOTSTRAP_PENDING = '__guided_workflow_bootstrap_pending__';
+
 const Index = () => {
   const { language, setLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
@@ -303,7 +305,7 @@ const Index = () => {
   })();
   const simulation = useSimulation({ suppressAutoRestore });
   const guidedWorkflow = useGuidedWorkflow({
-    suppressAutoRestore: Boolean(requestedSimulationId || simulation.simulationId),
+    suppressAutoRestore: Boolean(suppressAutoRestore || requestedSimulationId || simulation.simulationId),
   });
   const guidedWorkflowState = guidedWorkflow.workflow;
   const guidedWorkflowLoading = guidedWorkflow.loading;
@@ -447,7 +449,9 @@ const Index = () => {
   const reasoningTimerRef = useRef<number | null>(null);
   const debateInviteShownForSimulationRef = useRef<string | null>(null);
   const guidedWorkflowBootstrappedForSimulationRef = useRef<string | null>(null);
+  const guidedWorkflowBootstrapRequestRef = useRef<string | null>(null);
   const guidedWorkflowAttachRequestRef = useRef<string | null>(null);
+  const guidedWorkflowScopeRequestRef = useRef<string | null>(null);
   const guidedWorkflowStartingSimulationRef = useRef(false);
   const guidedWorkflowAutoApproveRef = useRef<string | null>(null);
   const guidedWorkflowAutoStartRef = useRef<string | null>(null);
@@ -503,6 +507,19 @@ const Index = () => {
   const researchReviewedKeyRef = useRef('');
   const lastResearchGateKeyRef = useRef('');
   const startChoiceResolvedKeyRef = useRef('');
+  const guidedDraftInputRef = useRef<GuidedWorkflowDraftContext>({
+    idea: userInput.idea,
+    category: userInput.category,
+    targetAudience: userInput.targetAudience,
+    country: userInput.country,
+    city: userInput.city,
+    placeName: userInput.placeName || userInput.city || userInput.country,
+    riskAppetite: userInput.riskAppetite,
+    ideaMaturity: userInput.ideaMaturity,
+    goals: userInput.goals,
+    contextScope: guidedContextScope,
+    language: settings.language,
+  });
   const preflightStartPayloadRef = useRef<{
     preflight_ready: boolean;
     preflight_summary: string;
@@ -537,6 +554,10 @@ const Index = () => {
     userInput.riskAppetite,
     userInput.targetAudience,
   ]);
+
+  useEffect(() => {
+    guidedDraftInputRef.current = guidedDraftInput;
+  }, [guidedDraftInput]);
 
   const beginUiBusy = useCallback((stage: UiBusyStage) => {
     const token = uiBusyTokenRef.current + 1;
@@ -600,16 +621,31 @@ const Index = () => {
   ]);
 
   useEffect(() => {
+    if (guidedWorkflowState?.workflow_id) {
+      guidedWorkflowBootstrapRequestRef.current = guidedWorkflowState.workflow_id;
+      return;
+    }
+    if (simulation.simulationId) {
+      guidedWorkflowBootstrapRequestRef.current = null;
+    }
+  }, [guidedWorkflowState?.workflow_id, simulation.simulationId]);
+
+  useEffect(() => {
     if (guidedWorkflowState || guidedWorkflowLoading) return;
     if (simulation.simulationId) {
       return;
     }
+    if (guidedWorkflowBootstrapRequestRef.current) return;
+    guidedWorkflowBootstrapRequestRef.current = GUIDED_WORKFLOW_BOOTSTRAP_PENDING;
     void guidedWorkflow.ensureStarted({
-      draftContext: guidedDraftInput,
+      draftContext: guidedDraftInputRef.current,
       language: settings.language,
-    }).catch(() => undefined);
+    }).catch(() => {
+      if (guidedWorkflowBootstrapRequestRef.current === GUIDED_WORKFLOW_BOOTSTRAP_PENDING) {
+        guidedWorkflowBootstrapRequestRef.current = null;
+      }
+    });
   }, [
-    guidedDraftInput,
     guidedWorkflow.ensureStarted,
     guidedWorkflow.restoreBySimulation,
     guidedWorkflowLoading,
@@ -1830,6 +1866,21 @@ const Index = () => {
   }, [userInput]);
 
   const handleGuidedDraftChange = useCallback((updates: Partial<GuidedWorkflowDraftContext>) => {
+    guidedDraftInputRef.current = {
+      ...guidedDraftInputRef.current,
+      ...updates,
+      placeName: typeof updates.placeName === 'string'
+        ? updates.placeName
+        : guidedDraftInputRef.current.placeName,
+      targetAudience: Array.isArray(updates.targetAudience)
+        ? updates.targetAudience
+        : guidedDraftInputRef.current.targetAudience,
+      goals: Array.isArray(updates.goals)
+        ? updates.goals
+        : guidedDraftInputRef.current.goals,
+      contextScope: guidedDraftInputRef.current.contextScope || guidedContextScope,
+      language: settings.language,
+    };
     setUserInput((prev) => ({
       ...prev,
       ...(typeof updates.idea === 'string' ? { idea: updates.idea } : {}),
@@ -1842,26 +1893,52 @@ const Index = () => {
       ...(typeof updates.ideaMaturity === 'string' ? { ideaMaturity: updates.ideaMaturity as UserInput['ideaMaturity'] } : {}),
       ...(Array.isArray(updates.goals) ? { goals: updates.goals } : {}),
     }));
-  }, []);
+  }, [guidedContextScope, settings.language]);
 
-  const handleGuidedChooseScope = useCallback((scope: GuidedWorkflowDraftContext['contextScope']) => {
-    setGuidedContextScope(scope);
-    setLocationChoice(scope === 'specific_place' ? 'yes' : scope ? 'no' : null);
+  const handleGuidedChooseScope = useCallback(async (scope: GuidedWorkflowDraftContext['contextScope']) => {
+    if (!scope || guidedWorkflowLoading) return;
+    const workflowId = guidedWorkflowState?.workflow_id;
+    if (!workflowId) return;
     const locationState = resolveLocationState(userInput);
-    void guidedWorkflow.updateContextScope(
-      scope,
-      scope === 'specific_place' ? (locationState.locationLabel || undefined) : undefined
-    ).catch(() => undefined);
-  }, [guidedWorkflow, userInput]);
+    const placeName = scope === 'specific_place' ? (locationState.locationLabel || undefined) : undefined;
+    const requestKey = `${workflowId}:${scope}:${placeName || ''}`;
+    if (guidedWorkflowScopeRequestRef.current === requestKey) return;
+    guidedWorkflowScopeRequestRef.current = requestKey;
+    try {
+      const nextState = await guidedWorkflow.updateContextScope(scope, placeName);
+      const nextScope = nextState?.draft_context?.contextScope || scope;
+      setGuidedContextScope(nextScope);
+      setLocationChoice(nextScope === 'specific_place' ? 'yes' : nextScope ? 'no' : null);
+    } finally {
+      if (guidedWorkflowScopeRequestRef.current === requestKey) {
+        guidedWorkflowScopeRequestRef.current = null;
+      }
+    }
+  }, [guidedWorkflow, guidedWorkflowLoading, guidedWorkflowState?.workflow_id, userInput]);
 
-  const handleGuidedSubmitSchema = useCallback(async () => {
+  const handleGuidedSubmitSchema = useCallback(async (draftOverride?: GuidedWorkflowDraftContext) => {
+    const baseDraft = guidedDraftInputRef.current;
+    const draft = draftOverride
+      ? {
+        ...baseDraft,
+        ...draftOverride,
+        idea: draftOverride.idea.trim() || baseDraft.idea,
+        category: draftOverride.category.trim() || baseDraft.category,
+        targetAudience: draftOverride.targetAudience.length ? draftOverride.targetAudience : baseDraft.targetAudience,
+        goals: draftOverride.goals.length ? draftOverride.goals : baseDraft.goals,
+        contextScope: draftOverride.contextScope || baseDraft.contextScope,
+        language: draftOverride.language || baseDraft.language,
+      }
+      : baseDraft;
     await guidedWorkflow.submitSchema({
-      ...guidedDraftInput,
-      placeName: guidedDraftInput.contextScope === 'specific_place'
-        ? (guidedDraftInput.placeName || guidedDraftInput.city || guidedDraftInput.country)
+      ...draft,
+      targetAudience: Array.isArray(draft.targetAudience) ? [...draft.targetAudience] : [],
+      goals: Array.isArray(draft.goals) ? [...draft.goals] : [],
+      placeName: draft.contextScope === 'specific_place'
+        ? (draft.placeName || draft.city || draft.country)
         : '',
     }).catch(() => undefined);
-  }, [guidedDraftInput, guidedWorkflow]);
+  }, [guidedWorkflow]);
 
   const handleGuidedSubmitClarifications = useCallback(async (answers: Array<{ questionId: string; answer: string }>) => {
     await guidedWorkflow.answerClarifications(answers).catch(() => undefined);

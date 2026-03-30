@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { apiService } from '@/services/api';
 import { GuidedWorkflowDraftContext, GuidedWorkflowState } from '@/types/simulation';
 
@@ -20,6 +20,8 @@ export function useGuidedWorkflow(options?: { suppressAutoRestore?: boolean }) {
   const [workflow, setWorkflow] = useState<GuidedWorkflowState | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const ensureStartedRequestRef = useRef<Promise<GuidedWorkflowState | null> | null>(null);
+  const ensureStartedKeyRef = useRef('');
 
   const persistId = useCallback((workflowId?: string | null) => {
     if (typeof window === 'undefined') return;
@@ -41,6 +43,18 @@ export function useGuidedWorkflow(options?: { suppressAutoRestore?: boolean }) {
     draftContext: GuidedWorkflowDraftContext;
     language: 'ar' | 'en';
   }) => {
+    if (workflow?.workflow_id) {
+      return workflow;
+    }
+    const requestKey = JSON.stringify({
+      language: payload.language,
+      draftContext: payload.draftContext,
+    });
+    if (ensureStartedRequestRef.current && ensureStartedKeyRef.current === requestKey) {
+      return ensureStartedRequestRef.current;
+    }
+    ensureStartedKeyRef.current = requestKey;
+    const request = (async () => {
     setLoading(true);
     setError(null);
     try {
@@ -55,8 +69,15 @@ export function useGuidedWorkflow(options?: { suppressAutoRestore?: boolean }) {
       throw err;
     } finally {
       setLoading(false);
+      if (ensureStartedKeyRef.current === requestKey) {
+        ensureStartedKeyRef.current = '';
+        ensureStartedRequestRef.current = null;
+      }
     }
-  }, [applyState]);
+    })();
+    ensureStartedRequestRef.current = request;
+    return request;
+  }, [applyState, workflow]);
 
   const refresh = useCallback(async (workflowId?: string | null) => {
     const currentId = workflowId || workflow?.workflow_id;
@@ -74,6 +95,34 @@ export function useGuidedWorkflow(options?: { suppressAutoRestore?: boolean }) {
       setLoading(false);
     }
   }, [applyState, workflow?.workflow_id]);
+
+  useEffect(() => {
+    const workflowId = workflow?.workflow_id;
+    const isProgressing = workflow?.status === 'in_progress' || workflow?.current_stage_status === 'in_progress';
+    if (!workflowId || !isProgressing) return;
+
+    let cancelled = false;
+    const tick = async () => {
+      if (cancelled) return;
+      try {
+        await refresh(workflowId);
+      } catch {
+        // Best-effort background rehydration while async workflow stages run.
+      }
+    };
+
+    const timer = window.setInterval(() => {
+      if (!loading) {
+        void tick();
+      }
+    }, 2000);
+
+    void tick();
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [loading, refresh, workflow?.current_stage_status, workflow?.status, workflow?.workflow_id]);
 
   const restoreBySimulation = useCallback(async (simulationId?: string | null) => {
     const currentSimulationId = String(simulationId || '').trim();

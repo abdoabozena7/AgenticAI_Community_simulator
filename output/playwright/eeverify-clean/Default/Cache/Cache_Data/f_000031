@@ -1,0 +1,391 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/landing/PricingSection.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=85597f46"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useRef = __vite__cjsImport3_react["useRef"];
+import { gsap } from "/node_modules/.vite/deps/gsap.js?v=85597f46";
+import { ScrollTrigger } from "/node_modules/.vite/deps/gsap_ScrollTrigger.js?v=85597f46";
+import { Button } from "/src/components/ui/button.tsx";
+import { Check, Sparkles, Zap, Crown } from "/node_modules/.vite/deps/lucide-react.js?v=85597f46";
+import { useLanguage } from "/src/contexts/LanguageContext.tsx";
+gsap.registerPlugin(ScrollTrigger);
+const plans = [
+    {
+        name: 'Starter',
+        price: '$0',
+        period: '/month',
+        description: 'Perfect for trying out the platform',
+        icon: Zap,
+        features: [
+            '3 simulations per day',
+            '50 AI agents per simulation',
+            'Basic analytics',
+            'Email support',
+            'Community access'
+        ],
+        cta: 'Start Free',
+        popular: false,
+        gradient: 'from-cyan-500/20 to-cyan-500/5',
+        iconColor: 'text-cyan-400',
+        borderColor: 'border-cyan-500/20 hover:border-cyan-500/40'
+    },
+    {
+        name: 'Pro',
+        price: '$29',
+        period: '/month',
+        description: 'For serious entrepreneurs and teams',
+        icon: Sparkles,
+        features: [
+            'Unlimited simulations',
+            '500 AI agents per simulation',
+            'Advanced analytics & reports',
+            'Priority support',
+            'API access',
+            'Custom agent personas'
+        ],
+        cta: 'Start 7-Day Trial',
+        popular: true,
+        gradient: 'from-magenta-500/20 via-purple-500/20 to-magenta-500/5',
+        iconColor: 'text-magenta-400',
+        borderColor: 'border-magenta-500/40'
+    },
+    {
+        name: 'Enterprise',
+        price: 'Custom',
+        period: '',
+        description: 'For large organizations',
+        icon: Crown,
+        features: [
+            'Everything in Pro',
+            'Unlimited agents',
+            'White-label solution',
+            'Dedicated account manager',
+            'Custom integrations',
+            'SLA guarantee',
+            'On-premise deployment'
+        ],
+        cta: 'Contact Sales',
+        popular: false,
+        gradient: 'from-yellow-500/20 to-yellow-500/5',
+        iconColor: 'text-yellow-400',
+        borderColor: 'border-yellow-500/20 hover:border-yellow-500/40'
+    }
+];
+export function PricingSection({ onGetStarted }) {
+    _s();
+    const { t } = useLanguage();
+    const sectionRef = useRef(null);
+    const cardsRef = useRef(null);
+    useEffect(()=>{
+        const ctx = gsap.context(()=>{
+            gsap.fromTo('.pricing-header', {
+                opacity: 0,
+                y: 40
+            }, {
+                opacity: 1,
+                y: 0,
+                duration: 0.6,
+                scrollTrigger: {
+                    trigger: sectionRef.current,
+                    start: 'top 80%'
+                }
+            });
+            gsap.fromTo('.pricing-card', {
+                opacity: 0,
+                y: 60,
+                scale: 0.95
+            }, {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                stagger: 0.1,
+                duration: 0.5,
+                ease: 'power2.out',
+                scrollTrigger: {
+                    trigger: cardsRef.current,
+                    start: 'top 80%'
+                }
+            });
+        }, sectionRef);
+        return ()=>ctx.revert();
+    }, []);
+    return /*#__PURE__*/ _jsxDEV("section", {
+        id: "pricing",
+        ref: sectionRef,
+        className: "relative py-32 px-6 bg-background overflow-hidden",
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] opacity-20 blur-3xl pointer-events-none",
+                children: /*#__PURE__*/ _jsxDEV("div", {
+                    className: "w-full h-full rounded-full bg-gradient-to-r from-cyan-500 via-magenta-500 to-yellow-500"
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                    lineNumber: 127,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                lineNumber: 126,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "max-w-7xl mx-auto relative z-10",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "text-center mb-16 pricing-header",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: "text-xs uppercase tracking-widest text-muted-foreground font-medium",
+                                children: t('pricing.tag')
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                lineNumber: 132,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("h2", {
+                                className: "text-4xl md:text-5xl font-bold text-foreground mt-4 mb-4",
+                                children: t('pricing.title')
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                lineNumber: 135,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("p", {
+                                className: "text-lg text-muted-foreground max-w-2xl mx-auto",
+                                children: t('pricing.desc')
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                lineNumber: 138,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                        lineNumber: 131,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        ref: cardsRef,
+                        className: "grid md:grid-cols-3 gap-6 lg:gap-8",
+                        children: plans.map((plan)=>/*#__PURE__*/ _jsxDEV("div", {
+                                className: `pricing-card relative p-8 rounded-3xl liquid-glass border ${plan.borderColor} transition-all duration-300 ${plan.popular ? 'md:-translate-y-4 md:scale-105' : ''}`,
+                                children: [
+                                    plan.popular && /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "absolute -top-4 left-1/2 -translate-x-1/2",
+                                        children: /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-magenta-500 to-purple-500 text-white text-sm font-medium shadow-lg shadow-magenta-500/25",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Sparkles, {
+                                                    className: "w-3.5 h-3.5"
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                                    lineNumber: 155,
+                                                    columnNumber: 21
+                                                }, this),
+                                                "Most Popular"
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                            lineNumber: 154,
+                                            columnNumber: 19
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                        lineNumber: 153,
+                                        columnNumber: 17
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: `absolute inset-0 rounded-3xl bg-gradient-to-b ${plan.gradient} pointer-events-none`
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                        lineNumber: 162,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "relative z-10",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: `w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-6 ${plan.iconColor}`,
+                                                children: /*#__PURE__*/ _jsxDEV(plan.icon, {
+                                                    className: "w-6 h-6"
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                                    lineNumber: 167,
+                                                    columnNumber: 19
+                                                }, this)
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                                lineNumber: 166,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("h3", {
+                                                className: "text-xl font-bold text-foreground mb-2",
+                                                children: plan.name
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                                lineNumber: 171,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "flex items-baseline gap-1 mb-2",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                        className: "text-4xl font-bold text-foreground",
+                                                        children: plan.price
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                                        lineNumber: 173,
+                                                        columnNumber: 19
+                                                    }, this),
+                                                    /*#__PURE__*/ _jsxDEV("span", {
+                                                        className: "text-muted-foreground",
+                                                        children: plan.period
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                                        lineNumber: 174,
+                                                        columnNumber: 19
+                                                    }, this)
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                                lineNumber: 172,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                className: "text-sm text-muted-foreground mb-6",
+                                                children: plan.description
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                                lineNumber: 176,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("ul", {
+                                                className: "space-y-3 mb-8",
+                                                children: plan.features.map((feature, i)=>/*#__PURE__*/ _jsxDEV("li", {
+                                                        className: "flex items-center gap-3 text-muted-foreground",
+                                                        children: [
+                                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                                className: "w-5 h-5 rounded-full bg-white/10 flex items-center justify-center shrink-0",
+                                                                children: /*#__PURE__*/ _jsxDEV(Check, {
+                                                                    className: "w-3 h-3 text-foreground"
+                                                                }, void 0, false, {
+                                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                                                    lineNumber: 183,
+                                                                    columnNumber: 25
+                                                                }, this)
+                                                            }, void 0, false, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                                                lineNumber: 182,
+                                                                columnNumber: 23
+                                                            }, this),
+                                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                                className: "text-sm",
+                                                                children: feature
+                                                            }, void 0, false, {
+                                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                                                lineNumber: 185,
+                                                                columnNumber: 23
+                                                            }, this)
+                                                        ]
+                                                    }, i, true, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                                        lineNumber: 181,
+                                                        columnNumber: 21
+                                                    }, this))
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                                lineNumber: 179,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV(Button, {
+                                                onClick: onGetStarted,
+                                                className: `w-full rounded-full py-6 text-base font-semibold transition-all duration-300 ${plan.popular ? 'bg-gradient-to-r from-magenta-500 to-purple-500 text-white hover:opacity-90 shadow-lg shadow-magenta-500/25' : 'liquid-glass-button'}`,
+                                                children: plan.cta
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                                lineNumber: 191,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                        lineNumber: 164,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, plan.name, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                                lineNumber: 145,
+                                columnNumber: 13
+                            }, this))
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                        lineNumber: 143,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("p", {
+                        className: "text-center text-sm text-muted-foreground mt-8",
+                        children: "All plans include a 7-day free trial. No credit card required."
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                        lineNumber: 206,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+                lineNumber: 130,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx",
+        lineNumber: 120,
+        columnNumber: 5
+    }, this);
+}
+_s(PricingSection, "mI/j/CN0qFPCDK9Vrb48cSqrfBw=", false, function() {
+    return [
+        useLanguage
+    ];
+});
+_c = PricingSection;
+var _c;
+$RefreshReg$(_c, "PricingSection");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/PricingSection.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlByaWNpbmdTZWN0aW9uLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyB1c2VFZmZlY3QsIHVzZVJlZiB9IGZyb20gJ3JlYWN0JztcbmltcG9ydCB7IGdzYXAgfSBmcm9tICdnc2FwJztcbmltcG9ydCB7IFNjcm9sbFRyaWdnZXIgfSBmcm9tICdnc2FwL1Njcm9sbFRyaWdnZXInO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2J1dHRvbic7XG5pbXBvcnQgeyBDaGVjaywgU3BhcmtsZXMsIFphcCwgQ3Jvd24gfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgdXNlTGFuZ3VhZ2UgfSBmcm9tICdAL2NvbnRleHRzL0xhbmd1YWdlQ29udGV4dCc7XG5cbmdzYXAucmVnaXN0ZXJQbHVnaW4oU2Nyb2xsVHJpZ2dlcik7XG5cbmludGVyZmFjZSBQcmljaW5nU2VjdGlvblByb3BzIHtcbiAgb25HZXRTdGFydGVkOiAoKSA9PiB2b2lkO1xufVxuXG5jb25zdCBwbGFucyA9IFtcbiAge1xuICAgIG5hbWU6ICdTdGFydGVyJyxcbiAgICBwcmljZTogJyQwJyxcbiAgICBwZXJpb2Q6ICcvbW9udGgnLFxuICAgIGRlc2NyaXB0aW9uOiAnUGVyZmVjdCBmb3IgdHJ5aW5nIG91dCB0aGUgcGxhdGZvcm0nLFxuICAgIGljb246IFphcCxcbiAgICBmZWF0dXJlczogW1xuICAgICAgJzMgc2ltdWxhdGlvbnMgcGVyIGRheScsXG4gICAgICAnNTAgQUkgYWdlbnRzIHBlciBzaW11bGF0aW9uJyxcbiAgICAgICdCYXNpYyBhbmFseXRpY3MnLFxuICAgICAgJ0VtYWlsIHN1cHBvcnQnLFxuICAgICAgJ0NvbW11bml0eSBhY2Nlc3MnLFxuICAgIF0sXG4gICAgY3RhOiAnU3RhcnQgRnJlZScsXG4gICAgcG9wdWxhcjogZmFsc2UsXG4gICAgZ3JhZGllbnQ6ICdmcm9tLWN5YW4tNTAwLzIwIHRvLWN5YW4tNTAwLzUnLFxuICAgIGljb25Db2xvcjogJ3RleHQtY3lhbi00MDAnLFxuICAgIGJvcmRlckNvbG9yOiAnYm9yZGVyLWN5YW4tNTAwLzIwIGhvdmVyOmJvcmRlci1jeWFuLTUwMC80MCcsXG4gIH0sXG4gIHtcbiAgICBuYW1lOiAnUHJvJyxcbiAgICBwcmljZTogJyQyOScsXG4gICAgcGVyaW9kOiAnL21vbnRoJyxcbiAgICBkZXNjcmlwdGlvbjogJ0ZvciBzZXJpb3VzIGVudHJlcHJlbmV1cnMgYW5kIHRlYW1zJyxcbiAgICBpY29uOiBTcGFya2xlcyxcbiAgICBmZWF0dXJlczogW1xuICAgICAgJ1VubGltaXRlZCBzaW11bGF0aW9ucycsXG4gICAgICAnNTAwIEFJIGFnZW50cyBwZXIgc2ltdWxhdGlvbicsXG4gICAgICAnQWR2YW5jZWQgYW5hbHl0aWNzICYgcmVwb3J0cycsXG4gICAgICAnUHJpb3JpdHkgc3VwcG9ydCcsXG4gICAgICAnQVBJIGFjY2VzcycsXG4gICAgICAnQ3VzdG9tIGFnZW50IHBlcnNvbmFzJyxcbiAgICBdLFxuICAgIGN0YTogJ1N0YXJ0IDctRGF5IFRyaWFsJyxcbiAgICBwb3B1bGFyOiB0cnVlLFxuICAgIGdyYWRpZW50OiAnZnJvbS1tYWdlbnRhLTUwMC8yMCB2aWEtcHVycGxlLTUwMC8yMCB0by1tYWdlbnRhLTUwMC81JyxcbiAgICBpY29uQ29sb3I6ICd0ZXh0LW1hZ2VudGEtNDAwJyxcbiAgICBib3JkZXJDb2xvcjogJ2JvcmRlci1tYWdlbnRhLTUwMC80MCcsXG4gIH0sXG4gIHtcbiAgICBuYW1lOiAnRW50ZXJwcmlzZScsXG4gICAgcHJpY2U6ICdDdXN0b20nLFxuICAgIHBlcmlvZDogJycsXG4gICAgZGVzY3JpcHRpb246ICdGb3IgbGFyZ2Ugb3JnYW5pemF0aW9ucycsXG4gICAgaWNvbjogQ3Jvd24sXG4gICAgZmVhdHVyZXM6IFtcbiAgICAgICdFdmVyeXRoaW5nIGluIFBybycsXG4gICAgICAnVW5saW1pdGVkIGFnZW50cycsXG4gICAgICAnV2hpdGUtbGFiZWwgc29sdXRpb24nLFxuICAgICAgJ0RlZGljYXRlZCBhY2NvdW50IG1hbmFnZXInLFxuICAgICAgJ0N1c3RvbSBpbnRlZ3JhdGlvbnMnLFxuICAgICAgJ1NMQSBndWFyYW50ZWUnLFxuICAgICAgJ09uLXByZW1pc2UgZGVwbG95bWVudCcsXG4gICAgXSxcbiAgICBjdGE6ICdDb250YWN0IFNhbGVzJyxcbiAgICBwb3B1bGFyOiBmYWxzZSxcbiAgICBncmFkaWVudDogJ2Zyb20teWVsbG93LTUwMC8yMCB0by15ZWxsb3ctNTAwLzUnLFxuICAgIGljb25Db2xvcjogJ3RleHQteWVsbG93LTQwMCcsXG4gICAgYm9yZGVyQ29sb3I6ICdib3JkZXIteWVsbG93LTUwMC8yMCBob3Zlcjpib3JkZXIteWVsbG93LTUwMC80MCcsXG4gIH0sXG5dO1xuXG5leHBvcnQgZnVuY3Rpb24gUHJpY2luZ1NlY3Rpb24oeyBvbkdldFN0YXJ0ZWQgfTogUHJpY2luZ1NlY3Rpb25Qcm9wcykge1xuICBjb25zdCB7IHQgfSA9IHVzZUxhbmd1YWdlKCk7XG4gIGNvbnN0IHNlY3Rpb25SZWYgPSB1c2VSZWY8SFRNTERpdkVsZW1lbnQ+KG51bGwpO1xuICBjb25zdCBjYXJkc1JlZiA9IHVzZVJlZjxIVE1MRGl2RWxlbWVudD4obnVsbCk7XG5cbiAgdXNlRWZmZWN0KCgpID0+IHtcbiAgICBjb25zdCBjdHggPSBnc2FwLmNvbnRleHQoKCkgPT4ge1xuICAgICAgZ3NhcC5mcm9tVG8oXG4gICAgICAgICcucHJpY2luZy1oZWFkZXInLFxuICAgICAgICB7IG9wYWNpdHk6IDAsIHk6IDQwIH0sXG4gICAgICAgIHtcbiAgICAgICAgICBvcGFjaXR5OiAxLFxuICAgICAgICAgIHk6IDAsXG4gICAgICAgICAgZHVyYXRpb246IDAuNixcbiAgICAgICAgICBzY3JvbGxUcmlnZ2VyOiB7XG4gICAgICAgICAgICB0cmlnZ2VyOiBzZWN0aW9uUmVmLmN1cnJlbnQsXG4gICAgICAgICAgICBzdGFydDogJ3RvcCA4MCUnLFxuICAgICAgICAgIH0sXG4gICAgICAgIH1cbiAgICAgICk7XG5cbiAgICAgIGdzYXAuZnJvbVRvKFxuICAgICAgICAnLnByaWNpbmctY2FyZCcsXG4gICAgICAgIHsgb3BhY2l0eTogMCwgeTogNjAsIHNjYWxlOiAwLjk1IH0sXG4gICAgICAgIHtcbiAgICAgICAgICBvcGFjaXR5OiAxLFxuICAgICAgICAgIHk6IDAsXG4gICAgICAgICAgc2NhbGU6IDEsXG4gICAgICAgICAgc3RhZ2dlcjogMC4xLFxuICAgICAgICAgIGR1cmF0aW9uOiAwLjUsXG4gICAgICAgICAgZWFzZTogJ3Bvd2VyMi5vdXQnLFxuICAgICAgICAgIHNjcm9sbFRyaWdnZXI6IHtcbiAgICAgICAgICAgIHRyaWdnZXI6IGNhcmRzUmVmLmN1cnJlbnQsXG4gICAgICAgICAgICBzdGFydDogJ3RvcCA4MCUnLFxuICAgICAgICAgIH0sXG4gICAgICAgIH1cbiAgICAgICk7XG4gICAgfSwgc2VjdGlvblJlZik7XG5cbiAgICByZXR1cm4gKCkgPT4gY3R4LnJldmVydCgpO1xuICB9LCBbXSk7XG5cbiAgcmV0dXJuIChcbiAgICA8c2VjdGlvblxuICAgICAgaWQ9XCJwcmljaW5nXCJcbiAgICAgIHJlZj17c2VjdGlvblJlZn1cbiAgICAgIGNsYXNzTmFtZT1cInJlbGF0aXZlIHB5LTMyIHB4LTYgYmctYmFja2dyb3VuZCBvdmVyZmxvdy1oaWRkZW5cIlxuICAgID5cbiAgICAgIHsvKiBCYWNrZ3JvdW5kIGdsb3cgKi99XG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImFic29sdXRlIHRvcC0xLzIgbGVmdC0xLzIgLXRyYW5zbGF0ZS14LTEvMiAtdHJhbnNsYXRlLXktMS8yIHctWzgwMHB4XSBoLVs4MDBweF0gb3BhY2l0eS0yMCBibHVyLTN4bCBwb2ludGVyLWV2ZW50cy1ub25lXCI+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidy1mdWxsIGgtZnVsbCByb3VuZGVkLWZ1bGwgYmctZ3JhZGllbnQtdG8tciBmcm9tLWN5YW4tNTAwIHZpYS1tYWdlbnRhLTUwMCB0by15ZWxsb3ctNTAwXCIgLz5cbiAgICAgIDwvZGl2PlxuXG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cIm1heC13LTd4bCBteC1hdXRvIHJlbGF0aXZlIHotMTBcIj5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LWNlbnRlciBtYi0xNiBwcmljaW5nLWhlYWRlclwiPlxuICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQteHMgdXBwZXJjYXNlIHRyYWNraW5nLXdpZGVzdCB0ZXh0LW11dGVkLWZvcmVncm91bmQgZm9udC1tZWRpdW1cIj5cbiAgICAgICAgICAgIHt0KCdwcmljaW5nLnRhZycpfVxuICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICA8aDIgY2xhc3NOYW1lPVwidGV4dC00eGwgbWQ6dGV4dC01eGwgZm9udC1ib2xkIHRleHQtZm9yZWdyb3VuZCBtdC00IG1iLTRcIj5cbiAgICAgICAgICAgIHt0KCdwcmljaW5nLnRpdGxlJyl9XG4gICAgICAgICAgPC9oMj5cbiAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LWxnIHRleHQtbXV0ZWQtZm9yZWdyb3VuZCBtYXgtdy0yeGwgbXgtYXV0b1wiPlxuICAgICAgICAgICAge3QoJ3ByaWNpbmcuZGVzYycpfVxuICAgICAgICAgIDwvcD5cbiAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgPGRpdiByZWY9e2NhcmRzUmVmfSBjbGFzc05hbWU9XCJncmlkIG1kOmdyaWQtY29scy0zIGdhcC02IGxnOmdhcC04XCI+XG4gICAgICAgICAge3BsYW5zLm1hcCgocGxhbikgPT4gKFxuICAgICAgICAgICAgPGRpdlxuICAgICAgICAgICAgICBrZXk9e3BsYW4ubmFtZX1cbiAgICAgICAgICAgICAgY2xhc3NOYW1lPXtgcHJpY2luZy1jYXJkIHJlbGF0aXZlIHAtOCByb3VuZGVkLTN4bCBsaXF1aWQtZ2xhc3MgYm9yZGVyICR7cGxhbi5ib3JkZXJDb2xvcn0gdHJhbnNpdGlvbi1hbGwgZHVyYXRpb24tMzAwICR7XG4gICAgICAgICAgICAgICAgcGxhbi5wb3B1bGFyID8gJ21kOi10cmFuc2xhdGUteS00IG1kOnNjYWxlLTEwNScgOiAnJ1xuICAgICAgICAgICAgICB9YH1cbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgey8qIFBvcHVsYXIgYmFkZ2UgKi99XG4gICAgICAgICAgICAgIHtwbGFuLnBvcHVsYXIgJiYgKFxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiYWJzb2x1dGUgLXRvcC00IGxlZnQtMS8yIC10cmFuc2xhdGUteC0xLzJcIj5cbiAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTEuNSBweC00IHB5LTEuNSByb3VuZGVkLWZ1bGwgYmctZ3JhZGllbnQtdG8tciBmcm9tLW1hZ2VudGEtNTAwIHRvLXB1cnBsZS01MDAgdGV4dC13aGl0ZSB0ZXh0LXNtIGZvbnQtbWVkaXVtIHNoYWRvdy1sZyBzaGFkb3ctbWFnZW50YS01MDAvMjVcIj5cbiAgICAgICAgICAgICAgICAgICAgPFNwYXJrbGVzIGNsYXNzTmFtZT1cInctMy41IGgtMy41XCIgLz5cbiAgICAgICAgICAgICAgICAgICAgTW9zdCBQb3B1bGFyXG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgKX1cblxuICAgICAgICAgICAgICB7LyogR3JhZGllbnQgb3ZlcmxheSAqL31cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9e2BhYnNvbHV0ZSBpbnNldC0wIHJvdW5kZWQtM3hsIGJnLWdyYWRpZW50LXRvLWIgJHtwbGFuLmdyYWRpZW50fSBwb2ludGVyLWV2ZW50cy1ub25lYH0gLz5cblxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJlbGF0aXZlIHotMTBcIj5cbiAgICAgICAgICAgICAgICB7LyogSWNvbiAqL31cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17YHctMTIgaC0xMiByb3VuZGVkLTJ4bCBiZy13aGl0ZS8xMCBmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciBtYi02ICR7cGxhbi5pY29uQ29sb3J9YH0+XG4gICAgICAgICAgICAgICAgICA8cGxhbi5pY29uIGNsYXNzTmFtZT1cInctNiBoLTZcIiAvPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICAgICAgey8qIE5hbWUgJiBQcmljZSAqL31cbiAgICAgICAgICAgICAgICA8aDMgY2xhc3NOYW1lPVwidGV4dC14bCBmb250LWJvbGQgdGV4dC1mb3JlZ3JvdW5kIG1iLTJcIj57cGxhbi5uYW1lfTwvaDM+XG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWJhc2VsaW5lIGdhcC0xIG1iLTJcIj5cbiAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtNHhsIGZvbnQtYm9sZCB0ZXh0LWZvcmVncm91bmRcIj57cGxhbi5wcmljZX08L3NwYW4+XG4gICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LW11dGVkLWZvcmVncm91bmRcIj57cGxhbi5wZXJpb2R9PC9zcGFuPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kIG1iLTZcIj57cGxhbi5kZXNjcmlwdGlvbn08L3A+XG5cbiAgICAgICAgICAgICAgICB7LyogRmVhdHVyZXMgKi99XG4gICAgICAgICAgICAgICAgPHVsIGNsYXNzTmFtZT1cInNwYWNlLXktMyBtYi04XCI+XG4gICAgICAgICAgICAgICAgICB7cGxhbi5mZWF0dXJlcy5tYXAoKGZlYXR1cmUsIGkpID0+IChcbiAgICAgICAgICAgICAgICAgICAgPGxpIGtleT17aX0gY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTMgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ3LTUgaC01IHJvdW5kZWQtZnVsbCBiZy13aGl0ZS8xMCBmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciBzaHJpbmstMFwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgPENoZWNrIGNsYXNzTmFtZT1cInctMyBoLTMgdGV4dC1mb3JlZ3JvdW5kXCIgLz5cbiAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtXCI+e2ZlYXR1cmV9PC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICA8L2xpPlxuICAgICAgICAgICAgICAgICAgKSl9XG4gICAgICAgICAgICAgICAgPC91bD5cblxuICAgICAgICAgICAgICAgIHsvKiBDVEEgKi99XG4gICAgICAgICAgICAgICAgPEJ1dHRvblxuICAgICAgICAgICAgICAgICAgb25DbGljaz17b25HZXRTdGFydGVkfVxuICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPXtgdy1mdWxsIHJvdW5kZWQtZnVsbCBweS02IHRleHQtYmFzZSBmb250LXNlbWlib2xkIHRyYW5zaXRpb24tYWxsIGR1cmF0aW9uLTMwMCAke1xuICAgICAgICAgICAgICAgICAgICBwbGFuLnBvcHVsYXJcbiAgICAgICAgICAgICAgICAgICAgICA/ICdiZy1ncmFkaWVudC10by1yIGZyb20tbWFnZW50YS01MDAgdG8tcHVycGxlLTUwMCB0ZXh0LXdoaXRlIGhvdmVyOm9wYWNpdHktOTAgc2hhZG93LWxnIHNoYWRvdy1tYWdlbnRhLTUwMC8yNSdcbiAgICAgICAgICAgICAgICAgICAgICA6ICdsaXF1aWQtZ2xhc3MtYnV0dG9uJ1xuICAgICAgICAgICAgICAgICAgfWB9XG4gICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAge3BsYW4uY3RhfVxuICAgICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICkpfVxuICAgICAgICA8L2Rpdj5cblxuICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LWNlbnRlciB0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZCBtdC04XCI+XG4gICAgICAgICAgQWxsIHBsYW5zIGluY2x1ZGUgYSA3LWRheSBmcmVlIHRyaWFsLiBObyBjcmVkaXQgY2FyZCByZXF1aXJlZC5cbiAgICAgICAgPC9wPlxuICAgICAgPC9kaXY+XG4gICAgPC9zZWN0aW9uPlxuICApO1xufVxuIl0sIm5hbWVzIjpbInVzZUVmZmVjdCIsInVzZVJlZiIsImdzYXAiLCJTY3JvbGxUcmlnZ2VyIiwiQnV0dG9uIiwiQ2hlY2siLCJTcGFya2xlcyIsIlphcCIsIkNyb3duIiwidXNlTGFuZ3VhZ2UiLCJyZWdpc3RlclBsdWdpbiIsInBsYW5zIiwibmFtZSIsInByaWNlIiwicGVyaW9kIiwiZGVzY3JpcHRpb24iLCJpY29uIiwiZmVhdHVyZXMiLCJjdGEiLCJwb3B1bGFyIiwiZ3JhZGllbnQiLCJpY29uQ29sb3IiLCJib3JkZXJDb2xvciIsIlByaWNpbmdTZWN0aW9uIiwib25HZXRTdGFydGVkIiwidCIsInNlY3Rpb25SZWYiLCJjYXJkc1JlZiIsImN0eCIsImNvbnRleHQiLCJmcm9tVG8iLCJvcGFjaXR5IiwieSIsImR1cmF0aW9uIiwic2Nyb2xsVHJpZ2dlciIsInRyaWdnZXIiLCJjdXJyZW50Iiwic3RhcnQiLCJzY2FsZSIsInN0YWdnZXIiLCJlYXNlIiwicmV2ZXJ0Iiwic2VjdGlvbiIsImlkIiwicmVmIiwiY2xhc3NOYW1lIiwiZGl2Iiwic3BhbiIsImgyIiwicCIsIm1hcCIsInBsYW4iLCJoMyIsInVsIiwiZmVhdHVyZSIsImkiLCJsaSIsIm9uQ2xpY2siXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLFNBQVNBLFNBQVMsRUFBRUMsTUFBTSxRQUFRLFFBQVE7QUFDMUMsU0FBU0MsSUFBSSxRQUFRLE9BQU87QUFDNUIsU0FBU0MsYUFBYSxRQUFRLHFCQUFxQjtBQUNu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

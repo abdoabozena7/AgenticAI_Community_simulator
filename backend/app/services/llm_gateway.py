@@ -13,7 +13,7 @@ class LLMGateway:
         self._openai_api_key = os.getenv("OPENAI_API_KEY", "").strip()
         self._openai_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini").strip() or "gpt-4o-mini"
         self._ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
-        self._ollama_model = os.getenv("OLLAMA_FALLBACK_MODEL", "qwen2.5-coder:7b").strip() or "qwen2.5-coder:7b"
+        self._ollama_model = "gpt-oss:120b-cloud"
         self._provider_mode = os.getenv("LLM_PROVIDER", "auto").strip().lower() or "auto"
 
     async def generate_text(

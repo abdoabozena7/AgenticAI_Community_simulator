@@ -45,10 +45,15 @@ let activeRealtimeBaseUrl = resolveRealtimeBaseUrl(
   activeApiBaseUrl,
 );
 
-const buildApiBaseCandidates = () => {
+const buildApiBaseCandidates = (options?: { includeCurrentOrigin?: boolean }) => {
+  const includeCurrentOrigin = options?.includeCurrentOrigin ?? true;
+  const currentOrigin = typeof window !== 'undefined'
+    ? window.location.origin.trim().replace(/\/$/, '')
+    : '';
   const values: string[] = [];
   const push = (value?: string) => {
     const normalized = (value || '').trim().replace(/\/$/, '');
+    if (!includeCurrentOrigin && currentOrigin && normalized === currentOrigin) return;
     if (!normalized || values.includes(normalized)) return;
     values.push(normalized);
   };
@@ -60,7 +65,9 @@ const buildApiBaseCandidates = () => {
     const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
     const host = window.location.hostname || 'localhost';
     push(`${protocol}//${host}:8000`);
-    push(window.location.origin);
+    if (includeCurrentOrigin) {
+      push(window.location.origin);
+    }
     if (LOOPBACK_HOSTS.has(host)) {
       push('http://localhost:8000');
       push('http://127.0.0.1:8000');
@@ -1263,10 +1270,15 @@ class ApiService {
 
   private async request<T>(
     endpoint: string,
-    options?: (RequestInit & { timeoutMs?: number }),
+    options?: (RequestInit & { timeoutMs?: number; allowSameOriginFallback?: boolean }),
     retry = true
   ): Promise<T> {
-    const { timeoutMs = ApiService.DEFAULT_TIMEOUT_MS, ...requestInit } = options || {};
+    const {
+      timeoutMs = ApiService.DEFAULT_TIMEOUT_MS,
+      allowSameOriginFallback = true,
+      ...requestInit
+    } = options || {};
+    const attemptedBases = buildApiBaseCandidates({ includeCurrentOrigin: allowSameOriginFallback });
     const shouldProactivelyRefresh =
       !hasAuthorizationHeader(requestInit.headers)
       && !this.shouldSkipProactiveRefresh(endpoint)
@@ -1291,7 +1303,7 @@ class ApiService {
           ...requestInit?.headers,
         },
         signal,
-      });
+      }, attemptedBases);
 
       if (!response.ok) {
         if (response.status === 401 && retry) {
@@ -1317,7 +1329,7 @@ class ApiService {
         throw new Error(`Request timed out after ${timeoutSeconds}s. Please check the backend or increase timeout.`);
       }
       if (this.isTransportError(err)) {
-        throw this.buildNetworkError(endpoint, buildApiBaseCandidates(), err);
+        throw this.buildNetworkError(endpoint, attemptedBases, err);
       }
       throw err;
     } finally {
@@ -1808,15 +1820,20 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify(payload),
       timeoutMs: ApiService.LONG_TIMEOUT_MS,
+      allowSameOriginFallback: false,
     });
   }
 
   async getGuidedWorkflowState(workflowId: string): Promise<GuidedWorkflowStateResponse> {
-    return this.request<GuidedWorkflowStateResponse>(`/simulation/workflow/state?workflow_id=${encodeURIComponent(workflowId)}`);
+    return this.request<GuidedWorkflowStateResponse>(`/simulation/workflow/state?workflow_id=${encodeURIComponent(workflowId)}`, {
+      allowSameOriginFallback: false,
+    });
   }
 
   async getGuidedWorkflowStateBySimulation(simulationId: string): Promise<GuidedWorkflowStateResponse> {
-    return this.request<GuidedWorkflowStateResponse>(`/simulation/workflow/state?simulation_id=${encodeURIComponent(simulationId)}`);
+    return this.request<GuidedWorkflowStateResponse>(`/simulation/workflow/state?simulation_id=${encodeURIComponent(simulationId)}`, {
+      allowSameOriginFallback: false,
+    });
   }
 
   async updateGuidedWorkflowContext(payload: {

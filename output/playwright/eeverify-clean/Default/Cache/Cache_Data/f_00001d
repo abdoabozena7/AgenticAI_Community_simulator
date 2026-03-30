@@ -1,0 +1,381 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/TopBar.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+import { Brain, MessageSquareMore, MoonStar, Sparkles, SunMedium } from "/node_modules/.vite/deps/lucide-react.js?v=85597f46";
+import { cn } from "/src/lib/utils.ts";
+export const CATEGORY_OPTIONS = [
+    'Technology',
+    'Healthcare',
+    'Finance',
+    'Education',
+    'E-commerce',
+    'Entertainment',
+    'Social',
+    'B2B SaaS',
+    'Consumer Apps',
+    'Hardware'
+];
+export const AUDIENCE_OPTIONS = [
+    'Gen Z (18-24)',
+    'Millennials (25-40)',
+    'Gen X (41-56)',
+    'Boomers (57-75)',
+    'Developers',
+    'Enterprises',
+    'SMBs',
+    'Consumers',
+    'Students',
+    'Professionals'
+];
+export const MATURITY_LEVELS = [
+    {
+        value: 'concept',
+        label: 'Concept',
+        icon: 'C'
+    },
+    {
+        value: 'prototype',
+        label: 'Prototype',
+        icon: 'P'
+    },
+    {
+        value: 'mvp',
+        label: 'MVP',
+        icon: 'M'
+    },
+    {
+        value: 'launched',
+        label: 'Launched',
+        icon: 'L'
+    }
+];
+export const GOAL_OPTIONS = [
+    'Market Validation',
+    'Funding Readiness',
+    'User Acquisition',
+    'Product-Market Fit',
+    'Competitive Analysis',
+    'Growth Strategy'
+];
+const toneClasses = {
+    idle: 'border-border/60 bg-background/65 text-muted-foreground',
+    info: 'border-sky-400/30 bg-sky-500/10 text-sky-100',
+    success: 'border-emerald-400/30 bg-emerald-500/10 text-emerald-100',
+    warning: 'border-amber-400/35 bg-amber-500/10 text-amber-100',
+    error: 'border-rose-400/35 bg-rose-500/10 text-rose-100'
+};
+export function TopBar({ language, theme = 'dark', activePanel = 'chat', reasoningCount = 0, screenTitle, stageLabel, currentStatusLabel, currentStatusTone = 'idle', currentStepLoading = false, steps = [], onPanelChange, configDisabled = false, configDisabledReason, reasoningDisabled = false, reasoningDisabledReason }) {
+    const panelItems = [
+        {
+            key: 'chat',
+            label: language === 'ar' ? 'الدردشة' : 'Chat',
+            icon: MessageSquareMore
+        },
+        {
+            key: 'reasoning',
+            label: language === 'ar' ? 'النقاش' : 'Reasoning',
+            icon: Brain
+        },
+        {
+            key: 'config',
+            label: language === 'ar' ? 'الإعدادات' : 'Config',
+            icon: Sparkles
+        }
+    ];
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: "mx-4 mt-3 rounded-[30px] border border-border/60 bg-card/75 px-4 py-4 shadow-[0_18px_48px_-32px_rgba(0,0,0,0.78)] backdrop-blur-xl",
+        children: /*#__PURE__*/ _jsxDEV("div", {
+            className: "flex flex-col gap-4",
+            children: [
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "min-w-0",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex flex-wrap items-center gap-2",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("h1", {
+                                            className: "text-lg font-semibold text-foreground sm:text-xl",
+                                            children: screenTitle
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                            lineNumber: 82,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("span", {
+                                            className: "rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary",
+                                            children: stageLabel
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                            lineNumber: 83,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("span", {
+                                            className: "inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/60 px-3 py-1 text-xs text-muted-foreground",
+                                            children: [
+                                                theme === 'dark' ? /*#__PURE__*/ _jsxDEV(MoonStar, {
+                                                    className: "h-3.5 w-3.5"
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                                    lineNumber: 87,
+                                                    columnNumber: 37
+                                                }, this) : /*#__PURE__*/ _jsxDEV(SunMedium, {
+                                                    className: "h-3.5 w-3.5"
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                                    lineNumber: 87,
+                                                    columnNumber: 76
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("span", {
+                                                    children: language === 'ar' ? theme === 'dark' ? 'الوضع الداكن' : 'الوضع الفاتح' : theme === 'dark' ? 'Dark mode' : 'Light mode'
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                                    lineNumber: 88,
+                                                    columnNumber: 17
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                            lineNumber: 86,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                    lineNumber: 81,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: cn('mt-3 inline-flex max-w-full items-center gap-2 rounded-full border px-3 py-1.5 text-sm', toneClasses[currentStatusTone]),
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("span", {
+                                            className: cn('h-2.5 w-2.5 rounded-full', currentStatusTone === 'success' && 'bg-emerald-300', currentStatusTone === 'warning' && 'bg-amber-300', currentStatusTone === 'error' && 'bg-rose-300', (currentStatusTone === 'idle' || currentStatusTone === 'info') && 'bg-white/80', currentStepLoading && 'animate-pulse'),
+                                            "aria-hidden": "true"
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                            lineNumber: 92,
+                                            columnNumber: 15
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("span", {
+                                            className: "truncate",
+                                            children: currentStatusLabel
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                            lineNumber: 103,
+                                            columnNumber: 15
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                    lineNumber: 91,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                            lineNumber: 80,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "grid grid-cols-3 gap-2 xl:min-w-[360px]",
+                            children: panelItems.map((item)=>{
+                                const Icon = item.icon;
+                                const disabled = item.key === 'config' && configDisabled || item.key === 'reasoning' && reasoningDisabled;
+                                const disabledReason = item.key === 'config' ? configDisabledReason : item.key === 'reasoning' ? reasoningDisabledReason : undefined;
+                                const label = item.key === 'reasoning' && reasoningCount > 0 ? `${item.label} (${reasoningCount})` : item.label;
+                                return /*#__PURE__*/ _jsxDEV("button", {
+                                    type: "button",
+                                    onClick: ()=>!disabled && onPanelChange?.(item.key),
+                                    disabled: disabled,
+                                    title: disabled ? disabledReason : undefined,
+                                    className: cn('flex h-11 items-center justify-center gap-2 rounded-full border text-sm font-semibold transition-all duration-200', activePanel === item.key ? 'border-primary bg-primary text-primary-foreground shadow-[0_10px_20px_-16px_rgba(255,255,255,0.9)]' : 'border-border/60 bg-background/65 text-muted-foreground hover:border-primary/30 hover:text-foreground', disabled && 'cursor-not-allowed opacity-50'),
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(Icon, {
+                                            className: "h-4 w-4"
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                            lineNumber: 130,
+                                            columnNumber: 19
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("span", {
+                                            children: label
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                            lineNumber: 131,
+                                            columnNumber: 19
+                                        }, this)
+                                    ]
+                                }, item.key, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                    lineNumber: 116,
+                                    columnNumber: 17
+                                }, this);
+                            })
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                            lineNumber: 107,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                    lineNumber: 79,
+                    columnNumber: 9
+                }, this),
+                steps.length ? /*#__PURE__*/ _jsxDEV("div", {
+                    className: "overflow-x-auto scrollbar-thin",
+                    children: /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex min-w-max items-center gap-2 pb-1",
+                        dir: "rtl",
+                        children: steps.map((step, index)=>/*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: cn('group flex min-w-[132px] items-center gap-2 rounded-full border px-3 py-2 text-sm transition-all duration-300', step.state === 'completed' && 'border-emerald-400/40 bg-emerald-500/12 text-emerald-100', step.state === 'current' && 'border-white/35 bg-white text-slate-950 shadow-[0_14px_28px_-20px_rgba(255,255,255,0.9)]', step.state === 'upcoming' && 'border-amber-400/40 bg-amber-500/12 text-amber-100'),
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("span", {
+                                                className: cn('flex h-6 w-6 items-center justify-center rounded-full transition-all duration-300', step.state === 'completed' && 'bg-emerald-400 text-slate-950', step.state === 'current' && 'bg-slate-950 text-white', step.state === 'upcoming' && 'bg-amber-300 text-slate-950'),
+                                                children: step.state === 'current' ? /*#__PURE__*/ _jsxDEV("span", {
+                                                    className: "relative flex h-2.5 w-2.5",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV("span", {
+                                                            className: "absolute inline-flex h-full w-full animate-ping rounded-full bg-white/70 opacity-75"
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                                            lineNumber: 161,
+                                                            columnNumber: 27
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV("span", {
+                                                            className: "relative inline-flex h-2.5 w-2.5 rounded-full bg-white"
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                                            lineNumber: 162,
+                                                            columnNumber: 27
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                                    lineNumber: 160,
+                                                    columnNumber: 25
+                                                }, this) : /*#__PURE__*/ _jsxDEV("span", {
+                                                    className: "text-[11px] font-bold",
+                                                    children: index + 1
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                                    lineNumber: 165,
+                                                    columnNumber: 25
+                                                }, this)
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                                lineNumber: 151,
+                                                columnNumber: 21
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "min-w-0",
+                                                children: [
+                                                    /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: "truncate font-semibold",
+                                                        children: step.label
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                                        lineNumber: 169,
+                                                        columnNumber: 23
+                                                    }, this),
+                                                    step.subtleStatus ? /*#__PURE__*/ _jsxDEV("div", {
+                                                        className: cn('truncate text-[11px]', step.state === 'current' ? 'text-slate-700' : 'text-current/70'),
+                                                        children: step.subtleStatus
+                                                    }, void 0, false, {
+                                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                                        lineNumber: 171,
+                                                        columnNumber: 25
+                                                    }, this) : null
+                                                ]
+                                            }, void 0, true, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                                lineNumber: 168,
+                                                columnNumber: 21
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                        lineNumber: 143,
+                                        columnNumber: 19
+                                    }, this),
+                                    index < steps.length - 1 ? /*#__PURE__*/ _jsxDEV("div", {
+                                        className: cn('h-px w-6 shrink-0 transition-colors duration-300', step.state === 'completed' ? 'bg-emerald-400/60' : 'bg-border/70'),
+                                        "aria-hidden": "true"
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                        lineNumber: 178,
+                                        columnNumber: 21
+                                    }, this) : null
+                                ]
+                            }, step.key, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                                lineNumber: 142,
+                                columnNumber: 17
+                            }, this))
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                        lineNumber: 140,
+                        columnNumber: 13
+                    }, this)
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+                    lineNumber: 139,
+                    columnNumber: 11
+                }, this) : null
+            ]
+        }, void 0, true, {
+            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+            lineNumber: 78,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx",
+        lineNumber: 77,
+        columnNumber: 5
+    }, this);
+}
+_c = TopBar;
+var _c;
+$RefreshReg$(_c, "TopBar");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/TopBar.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIlRvcEJhci50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgQnJhaW4sIE1lc3NhZ2VTcXVhcmVNb3JlLCBNb29uU3RhciwgU3BhcmtsZXMsIFN1bk1lZGl1bSB9IGZyb20gJ2x1Y2lkZS1yZWFjdCc7XG5pbXBvcnQgdHlwZSB7IFRvcEJhclN0ZXAgfSBmcm9tICdAL3R5cGVzL3NpbXVsYXRpb24nO1xuaW1wb3J0IHsgY24gfSBmcm9tICdAL2xpYi91dGlscyc7XG5cbmV4cG9ydCBjb25zdCBDQVRFR09SWV9PUFRJT05TID0gW1xuICAnVGVjaG5vbG9neScsICdIZWFsdGhjYXJlJywgJ0ZpbmFuY2UnLCAnRWR1Y2F0aW9uJywgJ0UtY29tbWVyY2UnLFxuICAnRW50ZXJ0YWlubWVudCcsICdTb2NpYWwnLCAnQjJCIFNhYVMnLCAnQ29uc3VtZXIgQXBwcycsICdIYXJkd2FyZScsXG5dO1xuXG5leHBvcnQgY29uc3QgQVVESUVOQ0VfT1BUSU9OUyA9IFtcbiAgJ0dlbiBaICgxOC0yNCknLCAnTWlsbGVubmlhbHMgKDI1LTQwKScsICdHZW4gWCAoNDEtNTYpJywgJ0Jvb21lcnMgKDU3LTc1KScsXG4gICdEZXZlbG9wZXJzJywgJ0VudGVycHJpc2VzJywgJ1NNQnMnLCAnQ29uc3VtZXJzJywgJ1N0dWRlbnRzJywgJ1Byb2Zlc3Npb25hbHMnLFxuXTtcblxuZXhwb3J0IGNvbnN0IE1BVFVSSVRZX0xFVkVMUyA9IFtcbiAgeyB2YWx1ZTogJ2NvbmNlcHQnLCBsYWJlbDogJ0NvbmNlcHQnLCBpY29uOiAnQycgfSxcbiAgeyB2YWx1ZTogJ3Byb3RvdHlwZScsIGxhYmVsOiAnUHJvdG90eXBlJywgaWNvbjogJ1AnIH0sXG4gIHsgdmFsdWU6ICdtdnAnLCBsYWJlbDogJ01WUCcsIGljb246ICdNJyB9LFxuICB7IHZhbHVlOiAnbGF1bmNoZWQnLCBsYWJlbDogJ0xhdW5jaGVkJywgaWNvbjogJ0wnIH0sXG5dO1xuXG5leHBvcnQgY29uc3QgR09BTF9PUFRJT05TID0gW1xuICAnTWFya2V0IFZhbGlkYXRpb24nLCAnRnVuZGluZyBSZWFkaW5lc3MnLCAnVXNlciBBY3F1aXNpdGlvbicsXG4gICdQcm9kdWN0LU1hcmtldCBGaXQnLCAnQ29tcGV0aXRpdmUgQW5hbHlzaXMnLCAnR3Jvd3RoIFN0cmF0ZWd5Jyxcbl07XG5cbmludGVyZmFjZSBUb3BCYXJQcm9wcyB7XG4gIGxhbmd1YWdlOiAnYXInIHwgJ2VuJztcbiAgdGhlbWU/OiBzdHJpbmc7XG4gIGFjdGl2ZVBhbmVsPzogJ2NvbmZpZycgfCAnY2hhdCcgfCAncmVhc29uaW5nJztcbiAgcmVhc29uaW5nQ291bnQ/OiBudW1iZXI7XG4gIHNjcmVlblRpdGxlOiBzdHJpbmc7XG4gIHN0YWdlTGFiZWw6IHN0cmluZztcbiAgY3VycmVudFN0YXR1c0xhYmVsOiBzdHJpbmc7XG4gIGN1cnJlbnRTdGF0dXNUb25lPzogJ2lkbGUnIHwgJ2luZm8nIHwgJ3N1Y2Nlc3MnIHwgJ3dhcm5pbmcnIHwgJ2Vycm9yJztcbiAgY3VycmVudFN0ZXBMb2FkaW5nPzogYm9vbGVhbjtcbiAgc3RlcHM/OiBUb3BCYXJTdGVwW107XG4gIG9uUGFuZWxDaGFuZ2U/OiAocGFuZWw6ICdjb25maWcnIHwgJ2NoYXQnIHwgJ3JlYXNvbmluZycpID0+IHZvaWQ7XG4gIGNvbmZpZ0Rpc2FibGVkPzogYm9vbGVhbjtcbiAgY29uZmlnRGlzYWJsZWRSZWFzb24/OiBzdHJpbmc7XG4gIHJlYXNvbmluZ0Rpc2FibGVkPzogYm9vbGVhbjtcbiAgcmVhc29uaW5nRGlzYWJsZWRSZWFzb24/OiBzdHJpbmc7XG59XG5cbmNvbnN0IHRvbmVDbGFzc2VzOiBSZWNvcmQ8Tm9uTnVsbGFibGU8VG9wQmFyUHJvcHNbJ2N1cnJlbnRTdGF0dXNUb25lJ10+LCBzdHJpbmc+ID0ge1xuICBpZGxlOiAnYm9yZGVyLWJvcmRlci82MCBiZy1iYWNrZ3JvdW5kLzY1IHRleHQtbXV0ZWQtZm9yZWdyb3VuZCcsXG4gIGluZm86ICdib3JkZXItc2t5LTQwMC8zMCBiZy1za3ktNTAwLzEwIHRleHQtc2t5LTEwMCcsXG4gIHN1Y2Nlc3M6ICdib3JkZXItZW1lcmFsZC00MDAvMzAgYmctZW1lcmFsZC01MDAvMTAgdGV4dC1lbWVyYWxkLTEwMCcsXG4gIHdhcm5pbmc6ICdib3JkZXItYW1iZXItNDAwLzM1IGJnLWFtYmVyLTUwMC8xMCB0ZXh0LWFtYmVyLTEwMCcsXG4gIGVycm9yOiAnYm9yZGVyLXJvc2UtNDAwLzM1IGJnLXJvc2UtNTAwLzEwIHRleHQtcm9zZS0xMDAnLFxufTtcblxuZXhwb3J0IGZ1bmN0aW9uIFRvcEJhcih7XG4gIGxhbmd1YWdlLFxuICB0aGVtZSA9ICdkYXJrJyxcbiAgYWN0aXZlUGFuZWwgPSAnY2hhdCcsXG4gIHJlYXNvbmluZ0NvdW50ID0gMCxcbiAgc2NyZWVuVGl0bGUsXG4gIHN0YWdlTGFiZWwsXG4gIGN1cnJlbnRTdGF0dXNMYWJlbCxcbiAgY3VycmVudFN0YXR1c1RvbmUgPSAnaWRsZScsXG4gIGN1cnJlbnRTdGVwTG9hZGluZyA9IGZhbHNlLFxuICBzdGVwcyA9IFtdLFxuICBvblBhbmVsQ2hhbmdlLFxuICBjb25maWdEaXNhYmxlZCA9IGZhbHNlLFxuICBjb25maWdEaXNhYmxlZFJlYXNvbixcbiAgcmVhc29uaW5nRGlzYWJsZWQgPSBmYWxzZSxcbiAgcmVhc29uaW5nRGlzYWJsZWRSZWFzb24sXG59OiBUb3BCYXJQcm9wcykge1xuICBjb25zdCBwYW5lbEl0ZW1zID0gW1xuICAgIHsga2V5OiAnY2hhdCcgYXMgY29uc3QsIGxhYmVsOiBsYW5ndWFnZSA9PT0gJ2FyJyA/ICfYp9mE2K/Ysdiv2LTYqScgOiAnQ2hhdCcsIGljb246IE1lc3NhZ2VTcXVhcmVNb3JlIH0sXG4gICAgeyBrZXk6ICdyZWFzb25pbmcnIGFzIGNvbnN0LCBsYWJlbDogbGFuZ3VhZ2UgPT09ICdhcicgPyAn2KfZhNmG2YLYp9i0JyA6ICdSZWFzb25pbmcnLCBpY29uOiBCcmFpbiB9LFxuICAgIHsga2V5OiAnY29uZmlnJyBhcyBjb25zdCwgbGFiZWw6IGxhbmd1YWdlID09PSAnYXInID8gJ9in2YTYpdi52K/Yp9iv2KfYqicgOiAnQ29uZmlnJywgaWNvbjogU3BhcmtsZXMgfSxcbiAgXTtcblxuICByZXR1cm4gKFxuICAgIDxkaXYgY2xhc3NOYW1lPVwibXgtNCBtdC0zIHJvdW5kZWQtWzMwcHhdIGJvcmRlciBib3JkZXItYm9yZGVyLzYwIGJnLWNhcmQvNzUgcHgtNCBweS00IHNoYWRvdy1bMF8xOHB4XzQ4cHhfLTMycHhfcmdiYSgwLDAsMCwwLjc4KV0gYmFja2Ryb3AtYmx1ci14bFwiPlxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGZsZXgtY29sIGdhcC00XCI+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBmbGV4LWNvbCBnYXAtMyB4bDpmbGV4LXJvdyB4bDppdGVtcy1zdGFydCB4bDpqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm1pbi13LTBcIj5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBmbGV4LXdyYXAgaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICAgIDxoMSBjbGFzc05hbWU9XCJ0ZXh0LWxnIGZvbnQtc2VtaWJvbGQgdGV4dC1mb3JlZ3JvdW5kIHNtOnRleHQteGxcIj57c2NyZWVuVGl0bGV9PC9oMT5cbiAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwicm91bmRlZC1mdWxsIGJvcmRlciBib3JkZXItcHJpbWFyeS8yMCBiZy1wcmltYXJ5LzEwIHB4LTMgcHktMSB0ZXh0LXhzIGZvbnQtc2VtaWJvbGQgdGV4dC1wcmltYXJ5XCI+XG4gICAgICAgICAgICAgICAge3N0YWdlTGFiZWx9XG4gICAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwiaW5saW5lLWZsZXggaXRlbXMtY2VudGVyIGdhcC0yIHJvdW5kZWQtZnVsbCBib3JkZXIgYm9yZGVyLWJvcmRlci82MCBiZy1iYWNrZ3JvdW5kLzYwIHB4LTMgcHktMSB0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgIHt0aGVtZSA9PT0gJ2RhcmsnID8gPE1vb25TdGFyIGNsYXNzTmFtZT1cImgtMy41IHctMy41XCIgLz4gOiA8U3VuTWVkaXVtIGNsYXNzTmFtZT1cImgtMy41IHctMy41XCIgLz59XG4gICAgICAgICAgICAgICAgPHNwYW4+e2xhbmd1YWdlID09PSAnYXInID8gKHRoZW1lID09PSAnZGFyaycgPyAn2KfZhNmI2LbYuSDYp9mE2K/Yp9mD2YYnIDogJ9in2YTZiNi22Lkg2KfZhNmB2KfYqtitJykgOiAodGhlbWUgPT09ICdkYXJrJyA/ICdEYXJrIG1vZGUnIDogJ0xpZ2h0IG1vZGUnKX08L3NwYW4+XG4gICAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9e2NuKCdtdC0zIGlubGluZS1mbGV4IG1heC13LWZ1bGwgaXRlbXMtY2VudGVyIGdhcC0yIHJvdW5kZWQtZnVsbCBib3JkZXIgcHgtMyBweS0xLjUgdGV4dC1zbScsIHRvbmVDbGFzc2VzW2N1cnJlbnRTdGF0dXNUb25lXSl9PlxuICAgICAgICAgICAgICA8c3BhblxuICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgICAgICAgICAnaC0yLjUgdy0yLjUgcm91bmRlZC1mdWxsJyxcbiAgICAgICAgICAgICAgICAgIGN1cnJlbnRTdGF0dXNUb25lID09PSAnc3VjY2VzcycgJiYgJ2JnLWVtZXJhbGQtMzAwJyxcbiAgICAgICAgICAgICAgICAgIGN1cnJlbnRTdGF0dXNUb25lID09PSAnd2FybmluZycgJiYgJ2JnLWFtYmVyLTMwMCcsXG4gICAgICAgICAgICAgICAgICBjdXJyZW50U3RhdHVzVG9uZSA9PT0gJ2Vycm9yJyAmJiAnYmctcm9zZS0zMDAnLFxuICAgICAgICAgICAgICAgICAgKGN1cnJlbnRTdGF0dXNUb25lID09PSAnaWRsZScgfHwgY3VycmVudFN0YXR1c1RvbmUgPT09ICdpbmZvJykgJiYgJ2JnLXdoaXRlLzgwJyxcbiAgICAgICAgICAgICAgICAgIGN1cnJlbnRTdGVwTG9hZGluZyAmJiAnYW5pbWF0ZS1wdWxzZScsXG4gICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICBhcmlhLWhpZGRlbj1cInRydWVcIlxuICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0cnVuY2F0ZVwiPntjdXJyZW50U3RhdHVzTGFiZWx9PC9zcGFuPlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImdyaWQgZ3JpZC1jb2xzLTMgZ2FwLTIgeGw6bWluLXctWzM2MHB4XVwiPlxuICAgICAgICAgICAge3BhbmVsSXRlbXMubWFwKChpdGVtKSA9PiB7XG4gICAgICAgICAgICAgIGNvbnN0IEljb24gPSBpdGVtLmljb247XG4gICAgICAgICAgICAgIGNvbnN0IGRpc2FibGVkID0gKGl0ZW0ua2V5ID09PSAnY29uZmlnJyAmJiBjb25maWdEaXNhYmxlZCkgfHwgKGl0ZW0ua2V5ID09PSAncmVhc29uaW5nJyAmJiByZWFzb25pbmdEaXNhYmxlZCk7XG4gICAgICAgICAgICAgIGNvbnN0IGRpc2FibGVkUmVhc29uID0gaXRlbS5rZXkgPT09ICdjb25maWcnID8gY29uZmlnRGlzYWJsZWRSZWFzb24gOiBpdGVtLmtleSA9PT0gJ3JlYXNvbmluZycgPyByZWFzb25pbmdEaXNhYmxlZFJlYXNvbiA6IHVuZGVmaW5lZDtcbiAgICAgICAgICAgICAgY29uc3QgbGFiZWwgPSBpdGVtLmtleSA9PT0gJ3JlYXNvbmluZycgJiYgcmVhc29uaW5nQ291bnQgPiAwXG4gICAgICAgICAgICAgICAgPyBgJHtpdGVtLmxhYmVsfSAoJHtyZWFzb25pbmdDb3VudH0pYFxuICAgICAgICAgICAgICAgIDogaXRlbS5sYWJlbDtcbiAgICAgICAgICAgICAgcmV0dXJuIChcbiAgICAgICAgICAgICAgICA8YnV0dG9uXG4gICAgICAgICAgICAgICAgICBrZXk9e2l0ZW0ua2V5fVxuICAgICAgICAgICAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiAhZGlzYWJsZWQgJiYgb25QYW5lbENoYW5nZT8uKGl0ZW0ua2V5KX1cbiAgICAgICAgICAgICAgICAgIGRpc2FibGVkPXtkaXNhYmxlZH1cbiAgICAgICAgICAgICAgICAgIHRpdGxlPXtkaXNhYmxlZCA/IGRpc2FibGVkUmVhc29uIDogdW5kZWZpbmVkfVxuICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgICAgICAgICAgICAgJ2ZsZXggaC0xMSBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgZ2FwLTIgcm91bmRlZC1mdWxsIGJvcmRlciB0ZXh0LXNtIGZvbnQtc2VtaWJvbGQgdHJhbnNpdGlvbi1hbGwgZHVyYXRpb24tMjAwJyxcbiAgICAgICAgICAgICAgICAgICAgYWN0aXZlUGFuZWwgPT09IGl0ZW0ua2V5XG4gICAgICAgICAgICAgICAgICAgICAgPyAnYm9yZGVyLXByaW1hcnkgYmctcHJpbWFyeSB0ZXh0LXByaW1hcnktZm9yZWdyb3VuZCBzaGFkb3ctWzBfMTBweF8yMHB4Xy0xNnB4X3JnYmEoMjU1LDI1NSwyNTUsMC45KV0nXG4gICAgICAgICAgICAgICAgICAgICAgOiAnYm9yZGVyLWJvcmRlci82MCBiZy1iYWNrZ3JvdW5kLzY1IHRleHQtbXV0ZWQtZm9yZWdyb3VuZCBob3Zlcjpib3JkZXItcHJpbWFyeS8zMCBob3Zlcjp0ZXh0LWZvcmVncm91bmQnLFxuICAgICAgICAgICAgICAgICAgICBkaXNhYmxlZCAmJiAnY3Vyc29yLW5vdC1hbGxvd2VkIG9wYWNpdHktNTAnLFxuICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICA8SWNvbiBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAgICAgIDxzcGFuPntsYWJlbH08L3NwYW4+XG4gICAgICAgICAgICAgICAgPC9idXR0b24+XG4gICAgICAgICAgICAgICk7XG4gICAgICAgICAgICB9KX1cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9kaXY+XG5cbiAgICAgICAge3N0ZXBzLmxlbmd0aCA/IChcbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm92ZXJmbG93LXgtYXV0byBzY3JvbGxiYXItdGhpblwiPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IG1pbi13LW1heCBpdGVtcy1jZW50ZXIgZ2FwLTIgcGItMVwiIGRpcj1cInJ0bFwiPlxuICAgICAgICAgICAgICB7c3RlcHMubWFwKChzdGVwLCBpbmRleCkgPT4gKFxuICAgICAgICAgICAgICAgIDxkaXYga2V5PXtzdGVwLmtleX0gY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICAgICAgICAgIDxkaXZcbiAgICAgICAgICAgICAgICAgICAgY2xhc3NOYW1lPXtjbihcbiAgICAgICAgICAgICAgICAgICAgICAnZ3JvdXAgZmxleCBtaW4tdy1bMTMycHhdIGl0ZW1zLWNlbnRlciBnYXAtMiByb3VuZGVkLWZ1bGwgYm9yZGVyIHB4LTMgcHktMiB0ZXh0LXNtIHRyYW5zaXRpb24tYWxsIGR1cmF0aW9uLTMwMCcsXG4gICAgICAgICAgICAgICAgICAgICAgc3RlcC5zdGF0ZSA9PT0gJ2NvbXBsZXRlZCcgJiYgJ2JvcmRlci1lbWVyYWxkLTQwMC80MCBiZy1lbWVyYWxkLTUwMC8xMiB0ZXh0LWVtZXJhbGQtMTAwJyxcbiAgICAgICAgICAgICAgICAgICAgICBzdGVwLnN0YXRlID09PSAnY3VycmVudCcgJiYgJ2JvcmRlci13aGl0ZS8zNSBiZy13aGl0ZSB0ZXh0LXNsYXRlLTk1MCBzaGFkb3ctWzBfMTRweF8yOHB4Xy0yMHB4X3JnYmEoMjU1LDI1NSwyNTUsMC45KV0nLFxuICAgICAgICAgICAgICAgICAgICAgIHN0ZXAuc3RhdGUgPT09ICd1cGNvbWluZycgJiYgJ2JvcmRlci1hbWJlci00MDAvNDAgYmctYW1iZXItNTAwLzEyIHRleHQtYW1iZXItMTAwJyxcbiAgICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgICAgPHNwYW5cbiAgICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2NuKFxuICAgICAgICAgICAgICAgICAgICAgICAgJ2ZsZXggaC02IHctNiBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgcm91bmRlZC1mdWxsIHRyYW5zaXRpb24tYWxsIGR1cmF0aW9uLTMwMCcsXG4gICAgICAgICAgICAgICAgICAgICAgICBzdGVwLnN0YXRlID09PSAnY29tcGxldGVkJyAmJiAnYmctZW1lcmFsZC00MDAgdGV4dC1zbGF0ZS05NTAnLFxuICAgICAgICAgICAgICAgICAgICAgICAgc3RlcC5zdGF0ZSA9PT0gJ2N1cnJlbnQnICYmICdiZy1zbGF0ZS05NTAgdGV4dC13aGl0ZScsXG4gICAgICAgICAgICAgICAgICAgICAgICBzdGVwLnN0YXRlID09PSAndXBjb21pbmcnICYmICdiZy1hbWJlci0zMDAgdGV4dC1zbGF0ZS05NTAnLFxuICAgICAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgICAgICB7c3RlcC5zdGF0ZSA9PT0gJ2N1cnJlbnQnID8gKFxuICAgICAgICAgICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwicmVsYXRpdmUgZmxleCBoLTIuNSB3LTIuNVwiPlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJhYnNvbHV0ZSBpbmxpbmUtZmxleCBoLWZ1bGwgdy1mdWxsIGFuaW1hdGUtcGluZyByb3VuZGVkLWZ1bGwgYmctd2hpdGUvNzAgb3BhY2l0eS03NVwiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInJlbGF0aXZlIGlubGluZS1mbGV4IGgtMi41IHctMi41IHJvdW5kZWQtZnVsbCBiZy13aGl0ZVwiIC8+XG4gICAgICAgICAgICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtWzExcHhdIGZvbnQtYm9sZFwiPntpbmRleCArIDF9PC9zcGFuPlxuICAgICAgICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtaW4tdy0wXCI+XG4gICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0cnVuY2F0ZSBmb250LXNlbWlib2xkXCI+e3N0ZXAubGFiZWx9PC9kaXY+XG4gICAgICAgICAgICAgICAgICAgICAge3N0ZXAuc3VidGxlU3RhdHVzID8gKFxuICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9e2NuKCd0cnVuY2F0ZSB0ZXh0LVsxMXB4XScsIHN0ZXAuc3RhdGUgPT09ICdjdXJyZW50JyA/ICd0ZXh0LXNsYXRlLTcwMCcgOiAndGV4dC1jdXJyZW50LzcwJyl9PlxuICAgICAgICAgICAgICAgICAgICAgICAgICB7c3RlcC5zdWJ0bGVTdGF0dXN9XG4gICAgICAgICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgICAgICApIDogbnVsbH1cbiAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgICAgIHtpbmRleCA8IHN0ZXBzLmxlbmd0aCAtIDEgPyAoXG4gICAgICAgICAgICAgICAgICAgIDxkaXZcbiAgICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2NuKFxuICAgICAgICAgICAgICAgICAgICAgICAgJ2gtcHggdy02IHNocmluay0wIHRyYW5zaXRpb24tY29sb3JzIGR1cmF0aW9uLTMwMCcsXG4gICAgICAgICAgICAgICAgICAgICAgICBzdGVwLnN0YXRlID09PSAnY29tcGxldGVkJyA/ICdiZy1lbWVyYWxkLTQwMC82MCcgOiAnYmctYm9yZGVyLzcwJyxcbiAgICAgICAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgICAgICAgIGFyaWEtaGlkZGVuPVwidHJ1ZVwiXG4gICAgICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgICApIDogbnVsbH1cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgKSl9XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgKSA6IG51bGx9XG4gICAgICA8L2Rpdj5cbiAgICA8L2Rpdj5cbiAgKTtcbn1cbiJdLCJuYW1lcyI6WyJCcmFpbiIsIk1lc3NhZ2VTcXVhcmVNb3JlIiwiTW9vblN0YXIiLCJTcGFya2xlcyIsIlN1bk1lZGl1bSIsImNuIiwiQ0FURUdPUllfT1BUSU9OUyIsIkFVRElFTkNFX09QVElPTlMiLCJNQVRVUklUWV9MRVZFTFMiLCJ2YWx1ZSIsImxhYmVsIiwiaWNvbiIsIkdPQUxfT1BUSU9OUyIsInRvbmVDbGFzc2VzIiwiaWRsZSIsImluZm8iLCJzdWNjZXNzIiwid2FybmluZyIsImVycm9yIiwiVG9wQmFyIiwibGFuZ3VhZ2UiLCJ0aGVtZSIsImFjdGl2ZVBhbmVsIiwicmVhc29uaW5nQ291bnQiLCJzY3JlZW5UaXRsZSIsInN0YWdlTGFiZWwiLCJjdXJyZW50U3RhdHVzTGFiZWwiLCJjdXJyZW50U3RhdHVzVG9uZSIsImN1cnJlbnRTdGVwTG9hZGluZyIsInN0ZXBzIiwib25QYW5lbENoYW5nZSIsImNvbmZpZ0Rpc2FibGVkIiwiY29uZmlnRGlzYWJsZWRSZWFzb24iLCJyZWFzb25pbmdEaXNhYmxlZCIsInJlYXNvbmluZ0Rpc2FibGVkUmVhc29uIiwicGFuZWxJdGVtcyIsImtleSIsImRpdiIsImNsYXNzTmFtZSIsImgxIiwic3BhbiIsImFyaWEtaGlkZGVuIiwibWFwIiwiaXRlbSIsIkljb24iLCJkaXNhYmxlZCIsImRpc2FibGVkUmVhc29uIiwidW5kZWZpbmVkIiwiYnV0dG9uIiwidHlwZSIsIm9uQ2xpY2siLCJ0aXRsZSIsImxlbmd0aCIsImRpciIsInN0ZXAiLCJpbmRleCIsInN0YXRlIiwic3VidGxlU3RhdHVzIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUFBLFNBQVNBLEtBQUssRUFBRUMsaUJBQWlCLEVBQUVDLFFBQVEsRUFBRUMsUUFBUSxFQUFFQyxTQUFTLFFBQVEsZUFBZTtBQUV2RixTQUFTQyxFQUFFLFFBQVEsY0FBYztBQUVqQyxPQUFPLE1BQU1DLG1CQUFtQjtJQUM5QjtJQUFjO0lBQWM7SUFBVztJQUFhO0lBQ3BEO0lBQWlCO0lBQVU7SUFBWTtJQUFpQjtDQUN6RCxDQUFDO0FBRUYsT0FBTyxNQUFNQyxtQkFBbUI7SUFDOUI7SUFBaUI7SUFBdUI7SUFBaUI7SUFDekQ7SUFBYztJQUFlO0lBQVE7SUFBYTtJQUFZO0NBQy9ELENBQUM7QUFFRixPQUFPLE1BQU1DLGtCQUFrQjtJQUM3QjtRQUFFQyxPQUFPO1FBQVdDLE9BQU87UUFBV0MsTUFBTTtJQUFJO0lBQ2hEO1FBQUVGLE9BQU87UUFBYUMsT0FBTztRQUFhQyxNQUFNO0lBQUk7SUFDcEQ7UUFBRUYsT0FBTztRQUFPQyxPQUFPO1FBQU9DLE1BQU07SUFBSTtJQUN4QztRQUFFRixPQUFPO1FBQVlDLE9BQU87UUFBWUMsTUFBTTtJQUFJO0NBQ25ELENBQUM7QUFFRixPQUFPLE1BQU1DLGVBQWU7SUFDMUI7SUFBcUI7SUFBcUI7SUFDMUM7SUFBc0I7SUFBd0I7Q0FDL0MsQ0FBQztBQW9CRixNQUFNQyxjQUE2RTtJQUNqRkMsTUFBTTtJQUNOQyxNQUFNO0lBQ05DLFNBQVM7SUFDVEMsU0FBUztJQUNUQyxPQUFPO0FBQ1Q7QUFFQSxPQUFPLFNBQVNDLE9BQU8sRUFDckJDLFFBQVEsRUFDUkMsUUFB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

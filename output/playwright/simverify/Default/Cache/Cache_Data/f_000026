@@ -1,0 +1,203 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/landing/FooterSection.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import { Github, Twitter, Linkedin } from "/node_modules/.vite/deps/lucide-react.js?v=85597f46";
+import { useLanguage } from "/src/contexts/LanguageContext.tsx";
+export function FooterSection() {
+    _s();
+    const { t } = useLanguage();
+    return /*#__PURE__*/ _jsxDEV("footer", {
+        className: "relative py-16 px-6 liquid-glass border-t border-white/10",
+        children: /*#__PURE__*/ _jsxDEV("div", {
+            className: "max-w-6xl mx-auto",
+            children: [
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "flex flex-col md:flex-row items-center justify-between gap-8",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex items-center gap-3 group",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "w-8 h-8 rounded-lg liquid-glass flex items-center justify-center",
+                                    children: /*#__PURE__*/ _jsxDEV("span", {
+                                        className: "text-foreground font-bold text-sm",
+                                        children: "AS"
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+                                        lineNumber: 14,
+                                        columnNumber: 15
+                                    }, this)
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+                                    lineNumber: 13,
+                                    columnNumber: 13
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("span", {
+                                    className: "text-foreground font-semibold group-hover:rgb-text transition-all duration-300",
+                                    children: "ASSET"
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+                                    lineNumber: 16,
+                                    columnNumber: 13
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+                            lineNumber: 12,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("nav", {
+                            className: "flex items-center gap-8",
+                            children: [
+                                t('nav.features'),
+                                t('pricing.tag'),
+                                t('nav.howItWorks')
+                            ].map((link)=>/*#__PURE__*/ _jsxDEV("a", {
+                                    href: "#",
+                                    className: "text-sm text-muted-foreground hover:text-foreground transition-all duration-300 hover:rgb-text-subtle",
+                                    children: link
+                                }, link, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+                                    lineNumber: 22,
+                                    columnNumber: 15
+                                }, this))
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+                            lineNumber: 20,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex items-center gap-4",
+                            children: [
+                                {
+                                    Icon: Github,
+                                    color: 'cyan'
+                                },
+                                {
+                                    Icon: Twitter,
+                                    color: 'magenta'
+                                },
+                                {
+                                    Icon: Linkedin,
+                                    color: 'yellow'
+                                }
+                            ].map(({ Icon, color }, i)=>/*#__PURE__*/ _jsxDEV("a", {
+                                    href: "#",
+                                    className: `p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary transition-all duration-300 rgb-icon-${color}-hover`,
+                                    children: /*#__PURE__*/ _jsxDEV(Icon, {
+                                        className: "w-5 h-5"
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+                                        lineNumber: 44,
+                                        columnNumber: 17
+                                    }, this)
+                                }, i, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+                                    lineNumber: 39,
+                                    columnNumber: 15
+                                }, this))
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+                            lineNumber: 33,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+                    lineNumber: 10,
+                    columnNumber: 9
+                }, this),
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4",
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("p", {
+                            className: "text-sm text-muted-foreground",
+                            children: t('footer.rights')
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+                            lineNumber: 51,
+                            columnNumber: 11
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: "flex items-center gap-6",
+                            children: [
+                                t('footer.privacy'),
+                                t('footer.terms')
+                            ].map((link)=>/*#__PURE__*/ _jsxDEV("a", {
+                                    href: "#",
+                                    className: "text-sm text-muted-foreground hover:text-foreground transition-colors",
+                                    children: link
+                                }, link, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+                                    lineNumber: 56,
+                                    columnNumber: 15
+                                }, this))
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+                            lineNumber: 54,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+                    lineNumber: 50,
+                    columnNumber: 9
+                }, this)
+            ]
+        }, void 0, true, {
+            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+            lineNumber: 9,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx",
+        lineNumber: 8,
+        columnNumber: 5
+    }, this);
+}
+_s(FooterSection, "ot2YhC7pP10gRrIouBKIa40vomw=", false, function() {
+    return [
+        useLanguage
+    ];
+});
+_c = FooterSection;
+var _c;
+$RefreshReg$(_c, "FooterSection");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/landing/FooterSection.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkZvb3RlclNlY3Rpb24udHN4Il0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IEdpdGh1YiwgVHdpdHRlciwgTGlua2VkaW4gfSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgdXNlTGFuZ3VhZ2UgfSBmcm9tICdAL2NvbnRleHRzL0xhbmd1YWdlQ29udGV4dCc7XG5cbmV4cG9ydCBmdW5jdGlvbiBGb290ZXJTZWN0aW9uKCkge1xuICBjb25zdCB7IHQgfSA9IHVzZUxhbmd1YWdlKCk7XG5cbiAgcmV0dXJuIChcbiAgICA8Zm9vdGVyIGNsYXNzTmFtZT1cInJlbGF0aXZlIHB5LTE2IHB4LTYgbGlxdWlkLWdsYXNzIGJvcmRlci10IGJvcmRlci13aGl0ZS8xMFwiPlxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJtYXgtdy02eGwgbXgtYXV0b1wiPlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggZmxleC1jb2wgbWQ6ZmxleC1yb3cgaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBnYXAtOFwiPlxuICAgICAgICAgIHsvKiBMb2dvICovfVxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTMgZ3JvdXBcIj5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidy04IGgtOCByb3VuZGVkLWxnIGxpcXVpZC1nbGFzcyBmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlclwiPlxuICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LWZvcmVncm91bmQgZm9udC1ib2xkIHRleHQtc21cIj5BUzwvc3Bhbj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC1mb3JlZ3JvdW5kIGZvbnQtc2VtaWJvbGQgZ3JvdXAtaG92ZXI6cmdiLXRleHQgdHJhbnNpdGlvbi1hbGwgZHVyYXRpb24tMzAwXCI+QVNTRVQ8L3NwYW4+XG4gICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICB7LyogTGlua3MgKi99XG4gICAgICAgICAgPG5hdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtOFwiPlxuICAgICAgICAgICAge1t0KCduYXYuZmVhdHVyZXMnKSwgdCgncHJpY2luZy50YWcnKSwgdCgnbmF2Lmhvd0l0V29ya3MnKV0ubWFwKChsaW5rKSA9PiAoXG4gICAgICAgICAgICAgIDxhXG4gICAgICAgICAgICAgICAga2V5PXtsaW5rfVxuICAgICAgICAgICAgICAgIGhyZWY9XCIjXCJcbiAgICAgICAgICAgICAgICBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZCBob3Zlcjp0ZXh0LWZvcmVncm91bmQgdHJhbnNpdGlvbi1hbGwgZHVyYXRpb24tMzAwIGhvdmVyOnJnYi10ZXh0LXN1YnRsZVwiXG4gICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICB7bGlua31cbiAgICAgICAgICAgICAgPC9hPlxuICAgICAgICAgICAgKSl9XG4gICAgICAgICAgPC9uYXY+XG5cbiAgICAgICAgICB7LyogU29jaWFsICovfVxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTRcIj5cbiAgICAgICAgICAgIHtbXG4gICAgICAgICAgICAgIHsgSWNvbjogR2l0aHViLCBjb2xvcjogJ2N5YW4nIH0sXG4gICAgICAgICAgICAgIHsgSWNvbjogVHdpdHRlciwgY29sb3I6ICdtYWdlbnRhJyB9LFxuICAgICAgICAgICAgICB7IEljb246IExpbmtlZGluLCBjb2xvcjogJ3llbGxvdycgfSxcbiAgICAgICAgICAgIF0ubWFwKCh7IEljb24sIGNvbG9yIH0sIGkpID0+IChcbiAgICAgICAgICAgICAgPGFcbiAgICAgICAgICAgICAgICBrZXk9e2l9XG4gICAgICAgICAgICAgICAgaHJlZj1cIiNcIlxuICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17YHAtMiByb3VuZGVkLWZ1bGwgdGV4dC1tdXRlZC1mb3JlZ3JvdW5kIGhvdmVyOnRleHQtZm9yZWdyb3VuZCBob3ZlcjpiZy1zZWNvbmRhcnkgdHJhbnNpdGlvbi1hbGwgZHVyYXRpb24tMzAwIHJnYi1pY29uLSR7Y29sb3J9LWhvdmVyYH1cbiAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgIDxJY29uIGNsYXNzTmFtZT1cInctNSBoLTVcIiAvPlxuICAgICAgICAgICAgICA8L2E+XG4gICAgICAgICAgICApKX1cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC0xMiBwdC04IGJvcmRlci10IGJvcmRlci1ib3JkZXIgZmxleCBmbGV4LWNvbCBtZDpmbGV4LXJvdyBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIGdhcC00XCI+XG4gICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgIHt0KCdmb290ZXIucmlnaHRzJyl9XG4gICAgICAgICAgPC9wPlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTZcIj5cbiAgICAgICAgICAgIHtbdCgnZm9vdGVyLnByaXZhY3knKSwgdCgnZm9vdGVyLnRlcm1zJyldLm1hcCgobGluaykgPT4gKFxuICAgICAgICAgICAgICA8YVxuICAgICAgICAgICAgICAgIGtleT17bGlua31cbiAgICAgICAgICAgICAgICBocmVmPVwiI1wiXG4gICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmQgaG92ZXI6dGV4dC1mb3JlZ3JvdW5kIHRyYW5zaXRpb24tY29sb3JzXCJcbiAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgIHtsaW5rfVxuICAgICAgICAgICAgICA8L2E+XG4gICAgICAgICAgICApKX1cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9kaXY+XG4gICAgICA8L2Rpdj5cbiAgICA8L2Zvb3Rlcj5cbiAgKTtcbn1cbiJdLCJuYW1lcyI6WyJHaXRodWIiLCJUd2l0dGVyIiwiTGlua2VkaW4iLCJ1c2VMYW5ndWFnZSIsIkZvb3RlclNlY3Rpb24iLCJ0IiwiZm9vdGVyIiwiY2xhc3NOYW1lIiwiZGl2Iiwic3BhbiIsIm5hdiIsIm1hcCIsImxpbmsiLCJhIiwiaHJlZiIsIkljb24iLCJjb2xvciIsImkiLCJwIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxTQUFTQSxNQUFNLEVBQUVDLE9BQU8sRUFBRUMsUUFBUSxRQUFRLGVBQWU7QUFDekQsU0FBU0MsV0FBVyxRQUFRLDZCQUE2QjtBQUV6RCxPQUFPLFNBQVNDOztJQUNkLE1BQU0sRUFBRUMsQ0FBQyxFQUFFLEdBQUdGO0lBRWQscUJBQ0UsUUFBQ0c7UUFBT0MsV0FBVTtrQkFDaEIsY0FBQSxRQUFDQztZQUFJRCxXQUFVOzs4QkFDYixRQUFDQztvQkFBSUQsV0FBVTs7c0NBRWIsUUFBQ0M7NEJBQUlELFdBQVU7OzhDQUNiLFFBQUNDO29DQUFJRCxXQUFVOzhDQUNiLGNBQUEsUUFBQ0U7d0NBQUtGLFdBQVU7a0RBQW9DOzs7Ozs7Ozs7Ozs4Q0FFdEQsUUFBQ0U7b0NBQUtGLFdBQVU7OENBQWlGOzs7Ozs7Ozs7Ozs7c0NBSW5HLFFBQUNHOzRCQUFJSCxXQUFVO3NDQUNaO2dDQUFDRixFQUFFO2dDQUFpQkEsRUFBRTtnQ0FBZ0JBLEVBQUU7NkJBQWtCLENBQUNNLEdBQUcsQ0FBQyxDQUFDQyxxQkFDL0QsUUFBQ0M7b0NBRUNDLE1BQUs7b0NBQ0xQLFdBQVU7OENBRVRLO21DQUpJQTs7Ozs7Ozs7OztzQ0FVWCxRQUFDSjs0QkFBSUQsV0FBVTtzQ0FDWjtnQ0FDQztvQ0FBRVEsTUFBTWY7b0NBQVFnQixPQUFPO2dDQUFPO2dDQUM5QjtvQ0FBRUQsTUFBTWQ7b0NBQVNlLE9BQU87Z0NBQVU7Z0NBQ2xDO29DQUFFRCxNQUFNYjtvQ0FBVWMsT0FBTztnQ0FBUzs2QkFDbkMsQ0FBQ0wsR0FBRyxDQUFDLENBQUMsRUFBRUksSUFBSSxFQUFFQyxLQUFLLEVBQUUsRUFBRUMsa0JBQ3RCLFFBQUNKO29DQUVDQyxNQUFLO29DQUNMUCxXQUFXLENBQUMscUhBQXFILEVBQUVTLE1BQU0sTUFBTSxDQUFDOzhDQUVoSixjQUFBLFFBQUNEO3dDQUFLUixXQUFVOzs7Ozs7bUNBSlhVOzs7Ozs7Ozs7Ozs7Ozs7OzhCQVViLFFBQUNUO29CQUFJRCxXQUFVOztzQ0FDYixRQUFDVzs0QkFBRVgsV0FBVTtzQ0FDVkYsRUFBRTs7Ozs7O3NDQUVMLFFBQUNHOzRCQUFJRCxXQUFVO3NDQUNaO2dDQUFDRixFQUFFO2dDQUFtQkEsRUFBRTs2QkFBZ0IsQ0FBQ00sR0FBRyxDQUFDLENBQUNDLHFCQUM3QyxRQUFDQztvQ0FFQ0MsTUFBSztvQ0FDTFAsV0FBVTs4Q0FFVEs7bUNBSklBOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFZckI7R0FqRWdCUjs7UUFDQUQ7OztLQURBQyJ9

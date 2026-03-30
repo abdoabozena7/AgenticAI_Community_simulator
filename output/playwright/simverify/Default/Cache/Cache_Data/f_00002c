@@ -1,0 +1,922 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/dashboard/IdeaCourtTab.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+import __vite__cjsImport3_react from "/node_modules/.vite/deps/react.js?v=85597f46"; const useEffect = __vite__cjsImport3_react["useEffect"]; const useState = __vite__cjsImport3_react["useState"];
+import { AnimatePresence, motion } from "/node_modules/.vite/deps/framer-motion.js?v=85597f46";
+import { AlertCircle, AlertTriangle, ArrowRight, CheckCircle, ChevronDown, ChevronUp, Gavel, Loader2, Scale, Shield, Target, XCircle } from "/node_modules/.vite/deps/lucide-react.js?v=85597f46";
+import { Button } from "/src/components/ui/button.tsx";
+import { Textarea } from "/src/components/ui/textarea.tsx";
+import { Badge } from "/src/components/ui/badge.tsx";
+import { useLanguage } from "/src/contexts/LanguageContext.tsx";
+import { useTheme } from "/src/contexts/ThemeContext.tsx";
+import { apiService } from "/src/services/api.ts";
+import { cn } from "/src/lib/utils.ts";
+const classifyVerdict = (text, isRTL)=>{
+    const lower = text.toLowerCase();
+    if (lower.includes('strong') || lower.includes('accept') || lower.includes('great')) return 'strong';
+    if (lower.includes('weak') || lower.includes('reject') || lower.includes('fail')) return 'weak';
+    if (isRTL && (text.includes('قوية') || text.includes('ممتاز'))) return 'strong';
+    if (isRTL && (text.includes('ضعيفة') || text.includes('رفض'))) return 'weak';
+    return 'medium';
+};
+function SectionCard({ id, title, icon: Icon, tone, open, onToggle, children }) {
+    const toneMap = {
+        emerald: 'text-emerald-400',
+        amber: 'text-amber-400',
+        rose: 'text-rose-400',
+        slate: 'text-slate-300'
+    };
+    return /*#__PURE__*/ _jsxDEV("section", {
+        className: "architect-panel overflow-hidden",
+        children: [
+            /*#__PURE__*/ _jsxDEV("button", {
+                type: "button",
+                onClick: ()=>onToggle(id),
+                className: "flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-white/3",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center gap-3",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: cn('flex h-9 w-9 items-center justify-center rounded-full bg-white/5', toneMap[tone]),
+                                children: /*#__PURE__*/ _jsxDEV(Icon, {
+                                    className: "h-4 w-4"
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                    lineNumber: 72,
+                                    columnNumber: 13
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 71,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "text-sm font-semibold text-foreground",
+                                        children: title
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                        lineNumber: 75,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "text-xs text-muted-foreground",
+                                        children: open ? 'Expanded section' : 'Collapsed section'
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                        lineNumber: 76,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 74,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                        lineNumber: 70,
+                        columnNumber: 9
+                    }, this),
+                    open ? /*#__PURE__*/ _jsxDEV(ChevronUp, {
+                        className: "h-4 w-4 text-muted-foreground"
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                        lineNumber: 82,
+                        columnNumber: 11
+                    }, this) : /*#__PURE__*/ _jsxDEV(ChevronDown, {
+                        className: "h-4 w-4 text-muted-foreground"
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                        lineNumber: 84,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                lineNumber: 65,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV(AnimatePresence, {
+                initial: false,
+                children: open && /*#__PURE__*/ _jsxDEV(motion.div, {
+                    initial: {
+                        height: 0,
+                        opacity: 0
+                    },
+                    animate: {
+                        height: 'auto',
+                        opacity: 1
+                    },
+                    exit: {
+                        height: 0,
+                        opacity: 0
+                    },
+                    transition: {
+                        duration: 0.22
+                    },
+                    className: "px-5 pb-5",
+                    children: children
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                    lineNumber: 90,
+                    columnNumber: 11
+                }, this)
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                lineNumber: 88,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+        lineNumber: 64,
+        columnNumber: 5
+    }, this);
+}
+_c = SectionCard;
+export default function IdeaCourtTab() {
+    _s();
+    const { language, isRTL } = useLanguage();
+    const { theme } = useTheme();
+    const [idea, setIdea] = useState('');
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [result, setResult] = useState(null);
+    const [expandedSections, setExpandedSections] = useState([
+        'defense',
+        'prosecution',
+        'verdict'
+    ]);
+    const [error, setError] = useState(null);
+    const t = (en, ar)=>language === 'ar' ? ar : en;
+    useEffect(()=>{
+        const pending = localStorage.getItem('pendingCourtIdea');
+        if (pending) {
+            setIdea(pending);
+            localStorage.removeItem('pendingCourtIdea');
+        }
+    }, []);
+    const handleSubmit = async ()=>{
+        if (!idea.trim()) return;
+        setIsProcessing(true);
+        setError(null);
+        try {
+            const res = await apiService.runCourt({
+                idea: idea.trim(),
+                language
+            });
+            const verdictText = res?.verdict || '';
+            const verdict = classifyVerdict(verdictText, isRTL);
+            setResult({
+                defense: res?.defense || [],
+                prosecution: res?.prosecution || [],
+                verdict,
+                verdictText,
+                verdictTextAr: verdictText,
+                successConditions: res?.success_conditions || [],
+                risks: res?.fatal_risks || [],
+                nextSteps: res?.next_steps || []
+            });
+            setExpandedSections([
+                'defense',
+                'prosecution',
+                'verdict'
+            ]);
+        } catch (err) {
+            setError(err?.message || t('Failed to run Idea Court', 'تعذر تشغيل محكمة الأفكار'));
+        } finally{
+            setIsProcessing(false);
+        }
+    };
+    const toggleSection = (section)=>{
+        setExpandedSections((prev)=>prev.includes(section) ? prev.filter((item)=>item !== section) : [
+                ...prev,
+                section
+            ]);
+    };
+    const verdictConfig = (()=>{
+        switch(result?.verdict){
+            case 'strong':
+                return {
+                    icon: CheckCircle,
+                    label: isRTL ? 'قوية' : 'Strong',
+                    wrap: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200',
+                    accent: 'text-emerald-400'
+                };
+            case 'weak':
+                return {
+                    icon: XCircle,
+                    label: isRTL ? 'ضعيفة' : 'Weak',
+                    wrap: 'border-rose-500/20 bg-rose-500/10 text-rose-100',
+                    accent: 'text-rose-400'
+                };
+            default:
+                return {
+                    icon: AlertTriangle,
+                    label: isRTL ? 'متوسطة' : 'Moderate',
+                    wrap: 'border-amber-500/20 bg-amber-500/10 text-amber-100',
+                    accent: 'text-amber-400'
+                };
+        }
+    })();
+    const shellClass = theme === 'dark' ? 'architect-shell architect-shell-dark' : 'architect-shell architect-shell-light';
+    const bullets = (items, tone)=>/*#__PURE__*/ _jsxDEV("ul", {
+            className: "space-y-3",
+            children: items.length ? items.map((item, index)=>/*#__PURE__*/ _jsxDEV("li", {
+                    className: "flex items-start gap-3 text-sm text-muted-foreground",
+                    children: [
+                        tone === 'emerald' ? /*#__PURE__*/ _jsxDEV(CheckCircle, {
+                            className: "mt-0.5 h-4 w-4 shrink-0 text-emerald-400"
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                            lineNumber: 187,
+                            columnNumber: 33
+                        }, this) : null,
+                        tone === 'rose' ? /*#__PURE__*/ _jsxDEV(XCircle, {
+                            className: "mt-0.5 h-4 w-4 shrink-0 text-rose-400"
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                            lineNumber: 188,
+                            columnNumber: 30
+                        }, this) : null,
+                        tone === 'amber' ? /*#__PURE__*/ _jsxDEV(AlertTriangle, {
+                            className: "mt-0.5 h-4 w-4 shrink-0 text-amber-400"
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                            lineNumber: 189,
+                            columnNumber: 31
+                        }, this) : null,
+                        /*#__PURE__*/ _jsxDEV("span", {
+                            children: item
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                            lineNumber: 190,
+                            columnNumber: 11
+                        }, this)
+                    ]
+                }, `${item}-${index}`, true, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                    lineNumber: 186,
+                    columnNumber: 9
+                }, this)) : /*#__PURE__*/ _jsxDEV("li", {
+                className: "text-sm text-muted-foreground",
+                children: t('No items yet.', 'لا توجد عناصر بعد.')
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                lineNumber: 193,
+                columnNumber: 9
+            }, this)
+        }, void 0, false, {
+            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+            lineNumber: 184,
+            columnNumber: 5
+        }, this);
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: cn(shellClass, 'space-y-8'),
+        children: [
+            /*#__PURE__*/ _jsxDEV("header", {
+                className: "architect-hero",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "space-y-3",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "text-[11px] uppercase tracking-[0.4em] text-muted-foreground",
+                                children: t('Architectural review', 'مراجعة معمارية')
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 202,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("h1", {
+                                className: "text-3xl font-semibold tracking-tight text-foreground",
+                                children: t('Idea Court', 'محكمة الأفكار')
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 205,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("p", {
+                                className: "max-w-2xl text-sm leading-7 text-muted-foreground",
+                                children: t('Test whether an idea is strong enough to survive scrutiny from both sides before you invest in it.', 'اختبر ما إذا كانت الفكرة قوية بما يكفي للصمود أمام التحليل من كل الجهات قبل أن تستثمر فيها.')
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 208,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                        lineNumber: 201,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex flex-wrap gap-2",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV(Badge, {
+                                variant: "outline",
+                                children: t('Balanced critique', 'مراجعة متوازنة')
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 216,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Badge, {
+                                variant: "outline",
+                                children: t('Fast verdict', 'حكم سريع')
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 217,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Badge, {
+                                variant: "outline",
+                                children: theme === 'dark' ? t('Black / charcoal mode', 'وضع أسود / فحمي') : t('Light mode', 'الوضع الفاتح')
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 218,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                        lineNumber: 215,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                lineNumber: 200,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "grid gap-6 xl:grid-cols-[1.05fr_0.95fr]",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("section", {
+                        className: "architect-panel space-y-5 p-6",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-start justify-between gap-4",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "text-xs uppercase tracking-[0.35em] text-muted-foreground",
+                                                children: t('Input brief', 'مدخل الفكرة')
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                lineNumber: 226,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("h2", {
+                                                className: "mt-2 text-xl font-semibold text-foreground",
+                                                children: t('Describe the idea clearly', 'صف الفكرة بوضوح')
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                lineNumber: 229,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                        lineNumber: 225,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "flex h-11 w-11 items-center justify-center rounded-full bg-white/5 text-foreground",
+                                        children: /*#__PURE__*/ _jsxDEV(Scale, {
+                                            className: "h-5 w-5"
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                            lineNumber: 234,
+                                            columnNumber: 15
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                        lineNumber: 233,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 224,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV(Textarea, {
+                                placeholder: t('Quick coffee kiosk near a university...', 'كشك قهوة سريع بجانب جامعة...'),
+                                value: idea,
+                                onChange: (e)=>setIdea(e.target.value),
+                                className: "architect-input min-h-32 resize-none"
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 238,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex flex-wrap items-center gap-3",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Button, {
+                                        onClick: handleSubmit,
+                                        disabled: isProcessing || !idea.trim(),
+                                        className: "architect-button-primary min-w-44",
+                                        children: isProcessing ? /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Loader2, {
+                                                    className: "mr-2 h-4 w-4 animate-spin"
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                    lineNumber: 253,
+                                                    columnNumber: 19
+                                                }, this),
+                                                t('Analyzing...', 'جاري التحليل...')
+                                            ]
+                                        }, void 0, true) : /*#__PURE__*/ _jsxDEV(_Fragment, {
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV(Gavel, {
+                                                    className: "mr-2 h-4 w-4"
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                    lineNumber: 258,
+                                                    columnNumber: 19
+                                                }, this),
+                                                t('Run Idea Court', 'تشغيل محكمة الأفكار')
+                                            ]
+                                        }, void 0, true)
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                        lineNumber: 246,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("p", {
+                                        className: "text-xs text-muted-foreground",
+                                        children: t('The verdict becomes a structured critique, not a raw score.', 'الحكم يخرج كمراجعة منظمة، لا كدرجة فقط.')
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                        lineNumber: 263,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 245,
+                                columnNumber: 11
+                            }, this),
+                            error ? /*#__PURE__*/ _jsxDEV("div", {
+                                className: "rounded-2xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-100",
+                                children: error
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 269,
+                                columnNumber: 13
+                            }, this) : null
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                        lineNumber: 223,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("section", {
+                        className: "architect-panel space-y-5 p-6",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-start justify-between gap-4",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "text-xs uppercase tracking-[0.35em] text-muted-foreground",
+                                                children: t('Verdict stage', 'مرحلة الحكم')
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                lineNumber: 278,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("h2", {
+                                                className: "mt-2 text-xl font-semibold text-foreground",
+                                                children: t('Architectural summary', 'الملخص المعماري')
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                lineNumber: 281,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                        lineNumber: 277,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV(Badge, {
+                                        className: cn('border px-3 py-1 text-xs', verdictConfig.wrap),
+                                        children: result ? verdictConfig.label : t('Waiting', 'بانتظار الإدخال')
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                        lineNumber: 285,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 276,
+                                columnNumber: 11
+                            }, this),
+                            result ? /*#__PURE__*/ _jsxDEV("div", {
+                                className: cn('rounded-2xl border p-5', verdictConfig.wrap),
+                                children: /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-start gap-4",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: cn('flex h-12 w-12 items-center justify-center rounded-full bg-white/5', verdictConfig.accent),
+                                            children: /*#__PURE__*/ _jsxDEV(verdictConfig.icon, {
+                                                className: "h-6 w-6"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                lineNumber: 294,
+                                                columnNumber: 19
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                            lineNumber: 293,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "space-y-2",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "text-sm uppercase tracking-[0.3em] text-muted-foreground",
+                                                    children: t('Decision', 'القرار')
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                    lineNumber: 297,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("p", {
+                                                    className: "text-base leading-7 text-foreground",
+                                                    children: result.verdictText
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                    lineNumber: 300,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                            lineNumber: 296,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                    lineNumber: 292,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 291,
+                                columnNumber: 13
+                            }, this) : /*#__PURE__*/ _jsxDEV("div", {
+                                className: "rounded-2xl bg-background/40 p-5",
+                                children: /*#__PURE__*/ _jsxDEV("p", {
+                                    className: "text-sm leading-7 text-muted-foreground",
+                                    children: t('Run the review to generate a defense, a prosecution, a verdict, and the next operational steps.', 'شغّل المراجعة للحصول على دفاع، واتهام، وحكم، وخطوات تنفيذية واضحة.')
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                    lineNumber: 308,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 307,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "grid gap-3 sm:grid-cols-3",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "rounded-2xl bg-background/50 p-4",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "text-xs uppercase tracking-[0.25em] text-muted-foreground",
+                                                children: t('Strength', 'القوة')
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                lineNumber: 319,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "mt-2 text-2xl font-semibold text-foreground",
+                                                children: result?.verdict === 'strong' ? 'A' : result?.verdict === 'medium' ? 'B' : 'C'
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                lineNumber: 322,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                        lineNumber: 318,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "rounded-2xl bg-background/50 p-4",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "text-xs uppercase tracking-[0.25em] text-muted-foreground",
+                                                children: t('Risk', 'المخاطرة')
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                lineNumber: 327,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "mt-2 text-2xl font-semibold text-foreground",
+                                                children: result?.risks.length ?? 0
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                lineNumber: 330,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                        lineNumber: 326,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "rounded-2xl bg-background/50 p-4",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "text-xs uppercase tracking-[0.25em] text-muted-foreground",
+                                                children: t('Actions', 'الإجراءات')
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                lineNumber: 335,
+                                                columnNumber: 15
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("div", {
+                                                className: "mt-2 text-2xl font-semibold text-foreground",
+                                                children: result?.nextSteps.length ?? 0
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                lineNumber: 338,
+                                                columnNumber: 15
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                        lineNumber: 334,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 317,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                        lineNumber: 275,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                lineNumber: 222,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "grid gap-6 xl:grid-cols-2",
+                children: [
+                    /*#__PURE__*/ _jsxDEV(SectionCard, {
+                        id: "defense",
+                        title: t('Defense AI', 'الدفاع'),
+                        icon: Shield,
+                        tone: "emerald",
+                        open: expandedSections.includes('defense'),
+                        onToggle: toggleSection,
+                        children: bullets(result?.defense || [], 'emerald')
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                        lineNumber: 347,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(SectionCard, {
+                        id: "prosecution",
+                        title: t('Prosecution AI', 'الادعاء'),
+                        icon: Gavel,
+                        tone: "rose",
+                        open: expandedSections.includes('prosecution'),
+                        onToggle: toggleSection,
+                        children: bullets(result?.prosecution || [], 'rose')
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                        lineNumber: 358,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(SectionCard, {
+                        id: "verdict",
+                        title: t('Judge Verdict', 'حكم القاضي'),
+                        icon: Scale,
+                        tone: "amber",
+                        open: expandedSections.includes('verdict'),
+                        onToggle: toggleSection,
+                        children: /*#__PURE__*/ _jsxDEV("div", {
+                            className: cn('rounded-2xl border p-4', verdictConfig.wrap),
+                            children: /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-start gap-3",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: cn('flex h-10 w-10 items-center justify-center rounded-full bg-white/5', verdictConfig.accent),
+                                        children: /*#__PURE__*/ _jsxDEV(verdictConfig.icon, {
+                                            className: "h-5 w-5"
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                            lineNumber: 380,
+                                            columnNumber: 17
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                        lineNumber: 379,
+                                        columnNumber: 15
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: "space-y-2",
+                                        children: [
+                                            /*#__PURE__*/ _jsxDEV(Badge, {
+                                                className: cn('border px-3 py-1 text-xs', verdictConfig.wrap),
+                                                children: verdictConfig.label
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                lineNumber: 383,
+                                                columnNumber: 17
+                                            }, this),
+                                            /*#__PURE__*/ _jsxDEV("p", {
+                                                className: "text-sm leading-7 text-foreground",
+                                                children: result?.verdictText || t('No verdict yet.', 'لا يوجد حكم بعد.')
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                                lineNumber: 386,
+                                                columnNumber: 17
+                                            }, this)
+                                        ]
+                                    }, void 0, true, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                        lineNumber: 382,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 378,
+                                columnNumber: 13
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                            lineNumber: 377,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                        lineNumber: 369,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(SectionCard, {
+                        id: "success",
+                        title: t('Success conditions', 'شروط النجاح'),
+                        icon: Target,
+                        tone: "emerald",
+                        open: expandedSections.includes('success'),
+                        onToggle: toggleSection,
+                        children: bullets(result?.successConditions || [], 'emerald')
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                        lineNumber: 394,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(SectionCard, {
+                        id: "risks",
+                        title: t('Risks', 'المخاطر'),
+                        icon: AlertCircle,
+                        tone: "amber",
+                        open: expandedSections.includes('risks'),
+                        onToggle: toggleSection,
+                        children: bullets(result?.risks || [], 'amber')
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                        lineNumber: 405,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV(SectionCard, {
+                        id: "nextSteps",
+                        title: t('Next steps', 'الخطوات التالية'),
+                        icon: ArrowRight,
+                        tone: "slate",
+                        open: expandedSections.includes('nextSteps'),
+                        onToggle: toggleSection,
+                        children: /*#__PURE__*/ _jsxDEV("ol", {
+                            className: "space-y-3",
+                            children: (result?.nextSteps || []).length ? result.nextSteps.map((step, index)=>/*#__PURE__*/ _jsxDEV("li", {
+                                    className: "flex items-start gap-3 text-sm text-muted-foreground",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("span", {
+                                            className: "flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/5 text-xs font-semibold text-foreground",
+                                            children: index + 1
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                            lineNumber: 427,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("span", {
+                                            children: step
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                            lineNumber: 430,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, `${step}-${index}`, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                    lineNumber: 426,
+                                    columnNumber: 15
+                                }, this)) : /*#__PURE__*/ _jsxDEV("li", {
+                                className: "text-sm text-muted-foreground",
+                                children: t('No next steps yet.', 'لا توجد خطوات تالية بعد.')
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                                lineNumber: 433,
+                                columnNumber: 15
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                            lineNumber: 424,
+                            columnNumber: 11
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                        lineNumber: 416,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+                lineNumber: 346,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx",
+        lineNumber: 199,
+        columnNumber: 5
+    }, this);
+}
+_s(IdeaCourtTab, "PDlxjyeA4xNcOVV9mYBpt/7+GRo=", false, function() {
+    return [
+        useLanguage,
+        useTheme
+    ];
+});
+_c1 = IdeaCourtTab;
+var _c, _c1;
+$RefreshReg$(_c, "SectionCard");
+$RefreshReg$(_c1, "IdeaCourtTab");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/IdeaCourtTab.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIklkZWFDb3VydFRhYi50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgdXNlRWZmZWN0LCB1c2VTdGF0ZSwgdHlwZSBSZWFjdE5vZGUgfSBmcm9tICdyZWFjdCc7XG5pbXBvcnQgeyBBbmltYXRlUHJlc2VuY2UsIG1vdGlvbiB9IGZyb20gJ2ZyYW1lci1tb3Rpb24nO1xuaW1wb3J0IHtcbiAgQWxlcnRDaXJjbGUsXG4gIEFsZXJ0VHJpYW5nbGUsXG4gIEFycm93UmlnaHQsXG4gIENoZWNrQ2lyY2xlLFxuICBDaGV2cm9uRG93bixcbiAgQ2hldnJvblVwLFxuICBHYXZlbCxcbiAgTG9hZGVyMixcbiAgU2NhbGUsXG4gIFNoaWVsZCxcbiAgVGFyZ2V0LFxuICBYQ2lyY2xlLFxufSBmcm9tICdsdWNpZGUtcmVhY3QnO1xuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSAnQC9jb21wb25lbnRzL3VpL2J1dHRvbic7XG5pbXBvcnQgeyBUZXh0YXJlYSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS90ZXh0YXJlYSc7XG5pbXBvcnQgeyBCYWRnZSB9IGZyb20gJ0AvY29tcG9uZW50cy91aS9iYWRnZSc7XG5pbXBvcnQgeyB1c2VMYW5ndWFnZSB9IGZyb20gJ0AvY29udGV4dHMvTGFuZ3VhZ2VDb250ZXh0JztcbmltcG9ydCB7IHVzZVRoZW1lIH0gZnJvbSAnQC9jb250ZXh0cy9UaGVtZUNvbnRleHQnO1xuaW1wb3J0IHsgYXBpU2VydmljZSB9IGZyb20gJ0Avc2VydmljZXMvYXBpJztcbmltcG9ydCB7IGNuIH0gZnJvbSAnQC9saWIvdXRpbHMnO1xuXG5pbnRlcmZhY2UgQ291cnRSZXN1bHQge1xuICBkZWZlbnNlOiBzdHJpbmdbXTtcbiAgcHJvc2VjdXRpb246IHN0cmluZ1tdO1xuICB2ZXJkaWN0OiAnc3Ryb25nJyB8ICdtZWRpdW0nIHwgJ3dlYWsnO1xuICB2ZXJkaWN0VGV4dDogc3RyaW5nO1xuICB2ZXJkaWN0VGV4dEFyOiBzdHJpbmc7XG4gIHN1Y2Nlc3NDb25kaXRpb25zOiBzdHJpbmdbXTtcbiAgcmlza3M6IHN0cmluZ1tdO1xuICBuZXh0U3RlcHM6IHN0cmluZ1tdO1xufVxuXG5jb25zdCBjbGFzc2lmeVZlcmRpY3QgPSAodGV4dDogc3RyaW5nLCBpc1JUTDogYm9vbGVhbik6IENvdXJ0UmVzdWx0Wyd2ZXJkaWN0J10gPT4ge1xuICBjb25zdCBsb3dlciA9IHRleHQudG9Mb3dlckNhc2UoKTtcbiAgaWYgKGxvd2VyLmluY2x1ZGVzKCdzdHJvbmcnKSB8fCBsb3dlci5pbmNsdWRlcygnYWNjZXB0JykgfHwgbG93ZXIuaW5jbHVkZXMoJ2dyZWF0JykpIHJldHVybiAnc3Ryb25nJztcbiAgaWYgKGxvd2VyLmluY2x1ZGVzKCd3ZWFrJykgfHwgbG93ZXIuaW5jbHVkZXMoJ3JlamVjdCcpIHx8IGxvd2VyLmluY2x1ZGVzKCdmYWlsJykpIHJldHVybiAnd2Vhayc7XG4gIGlmIChpc1JUTCAmJiAodGV4dC5pbmNsdWRlcygn2YLZiNmK2KknKSB8fCB0ZXh0LmluY2x1ZGVzKCfZhdmF2KrYp9iyJykpKSByZXR1cm4gJ3N0cm9uZyc7XG4gIGlmIChpc1JUTCAmJiAodGV4dC5pbmNsdWRlcygn2LbYudmK2YHYqScpIHx8IHRleHQuaW5jbHVkZXMoJ9ix2YHYticpKSkgcmV0dXJuICd3ZWFrJztcbiAgcmV0dXJuICdtZWRpdW0nO1xufTtcblxudHlwZSBTZWN0aW9uQ2FyZFByb3BzID0ge1xuICBpZDogc3RyaW5nO1xuICB0aXRsZTogc3RyaW5nO1xuICBpY29uOiB0eXBlb2YgU2hpZWxkO1xuICB0b25lOiAnZW1lcmFsZCcgfCAnYW1iZXInIHwgJ3Jvc2UnIHwgJ3NsYXRlJztcbiAgb3BlbjogYm9vbGVhbjtcbiAgb25Ub2dnbGU6IChpZDogc3RyaW5nKSA9PiB2b2lkO1xuICBjaGlsZHJlbjogUmVhY3ROb2RlO1xufTtcblxuZnVuY3Rpb24gU2VjdGlvbkNhcmQoeyBpZCwgdGl0bGUsIGljb246IEljb24sIHRvbmUsIG9wZW4sIG9uVG9nZ2xlLCBjaGlsZHJlbiB9OiBTZWN0aW9uQ2FyZFByb3BzKSB7XG4gIGNvbnN0IHRvbmVNYXAgPSB7XG4gICAgZW1lcmFsZDogJ3RleHQtZW1lcmFsZC00MDAnLFxuICAgIGFtYmVyOiAndGV4dC1hbWJlci00MDAnLFxuICAgIHJvc2U6ICd0ZXh0LXJvc2UtNDAwJyxcbiAgICBzbGF0ZTogJ3RleHQtc2xhdGUtMzAwJyxcbiAgfSBhcyBjb25zdDtcblxuICByZXR1cm4gKFxuICAgIDxzZWN0aW9uIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1wYW5lbCBvdmVyZmxvdy1oaWRkZW5cIj5cbiAgICAgIDxidXR0b25cbiAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgIG9uQ2xpY2s9eygpID0+IG9uVG9nZ2xlKGlkKX1cbiAgICAgICAgY2xhc3NOYW1lPVwiZmxleCB3LWZ1bGwgaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiBnYXAtNCBweC01IHB5LTQgdGV4dC1sZWZ0IHRyYW5zaXRpb24tY29sb3JzIGhvdmVyOmJnLXdoaXRlLzNcIlxuICAgICAgPlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0zXCI+XG4gICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPXtjbignZmxleCBoLTkgdy05IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciByb3VuZGVkLWZ1bGwgYmctd2hpdGUvNScsIHRvbmVNYXBbdG9uZV0pfT5cbiAgICAgICAgICAgIDxJY29uIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICA8ZGl2PlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXNtIGZvbnQtc2VtaWJvbGQgdGV4dC1mb3JlZ3JvdW5kXCI+e3RpdGxlfTwvZGl2PlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXhzIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICB7b3BlbiA/ICdFeHBhbmRlZCBzZWN0aW9uJyA6ICdDb2xsYXBzZWQgc2VjdGlvbid9XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgPC9kaXY+XG4gICAgICAgIHtvcGVuID8gKFxuICAgICAgICAgIDxDaGV2cm9uVXAgY2xhc3NOYW1lPVwiaC00IHctNCB0ZXh0LW11dGVkLWZvcmVncm91bmRcIiAvPlxuICAgICAgICApIDogKFxuICAgICAgICAgIDxDaGV2cm9uRG93biBjbGFzc05hbWU9XCJoLTQgdy00IHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiIC8+XG4gICAgICAgICl9XG4gICAgICA8L2J1dHRvbj5cblxuICAgICAgPEFuaW1hdGVQcmVzZW5jZSBpbml0aWFsPXtmYWxzZX0+XG4gICAgICAgIHtvcGVuICYmIChcbiAgICAgICAgICA8bW90aW9uLmRpdlxuICAgICAgICAgICAgaW5pdGlhbD17eyBoZWlnaHQ6IDAsIG9wYWNpdHk6IDAgfX1cbiAgICAgICAgICAgIGFuaW1hdGU9e3sgaGVpZ2h0OiAnYXV0bycsIG9wYWNpdHk6IDEgfX1cbiAgICAgICAgICAgIGV4aXQ9e3sgaGVpZ2h0OiAwLCBvcGFjaXR5OiAwIH19XG4gICAgICAgICAgICB0cmFuc2l0aW9uPXt7IGR1cmF0aW9uOiAwLjIyIH19XG4gICAgICAgICAgICBjbGFzc05hbWU9XCJweC01IHBiLTVcIlxuICAgICAgICAgID5cbiAgICAgICAgICAgIHtjaGlsZHJlbn1cbiAgICAgICAgICA8L21vdGlvbi5kaXY+XG4gICAgICAgICl9XG4gICAgICA8L0FuaW1hdGVQcmVzZW5jZT5cbiAgICA8L3NlY3Rpb24+XG4gICk7XG59XG5cbmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIElkZWFDb3VydFRhYigpIHtcbiAgY29uc3QgeyBsYW5ndWFnZSwgaXNSVEwgfSA9IHVzZUxhbmd1YWdlKCk7XG4gIGNvbnN0IHsgdGhlbWUgfSA9IHVzZVRoZW1lKCk7XG4gIGNvbnN0IFtpZGVhLCBzZXRJZGVhXSA9IHVzZVN0YXRlKCcnKTtcbiAgY29uc3QgW2lzUHJvY2Vzc2luZywgc2V0SXNQcm9jZXNzaW5nXSA9IHVzZVN0YXRlKGZhbHNlKTtcbiAgY29uc3QgW3Jlc3VsdCwgc2V0UmVzdWx0XSA9IHVzZVN0YXRlPENvdXJ0UmVzdWx0IHwgbnVsbD4obnVsbCk7XG4gIGNvbnN0IFtleHBhbmRlZFNlY3Rpb25zLCBzZXRFeHBhbmRlZFNlY3Rpb25zXSA9IHVzZVN0YXRlPHN0cmluZ1tdPihbJ2RlZmVuc2UnLCAncHJvc2VjdXRpb24nLCAndmVyZGljdCddKTtcbiAgY29uc3QgW2Vycm9yLCBzZXRFcnJvcl0gPSB1c2VTdGF0ZTxzdHJpbmcgfCBudWxsPihudWxsKTtcbiAgY29uc3QgdCA9IChlbjogc3RyaW5nLCBhcjogc3RyaW5nKSA9PiAobGFuZ3VhZ2UgPT09ICdhcicgPyBhciA6IGVuKTtcblxuICB1c2VFZmZlY3QoKCkgPT4ge1xuICAgIGNvbnN0IHBlbmRpbmcgPSBsb2NhbFN0b3JhZ2UuZ2V0SXRlbSgncGVuZGluZ0NvdXJ0SWRlYScpO1xuICAgIGlmIChwZW5kaW5nKSB7XG4gICAgICBzZXRJZGVhKHBlbmRpbmcpO1xuICAgICAgbG9jYWxTdG9yYWdlLnJlbW92ZUl0ZW0oJ3BlbmRpbmdDb3VydElkZWEnKTtcbiAgICB9XG4gIH0sIFtdKTtcblxuICBjb25zdCBoYW5kbGVTdWJtaXQgPSBhc3luYyAoKSA9PiB7XG4gICAgaWYgKCFpZGVhLnRyaW0oKSkgcmV0dXJuO1xuICAgIHNldElzUHJvY2Vzc2luZyh0cnVlKTtcbiAgICBzZXRFcnJvcihudWxsKTtcbiAgICB0cnkge1xuICAgICAgY29uc3QgcmVzID0gYXdhaXQgYXBpU2VydmljZS5ydW5Db3VydCh7IGlkZWE6IGlkZWEudHJpbSgpLCBsYW5ndWFnZSB9KTtcbiAgICAgIGNvbnN0IHZlcmRpY3RUZXh0ID0gcmVzPy52ZXJkaWN0IHx8ICcnO1xuICAgICAgY29uc3QgdmVyZGljdCA9IGNsYXNzaWZ5VmVyZGljdCh2ZXJkaWN0VGV4dCwgaXNSVEwpO1xuICAgICAgc2V0UmVzdWx0KHtcbiAgICAgICAgZGVmZW5zZTogcmVzPy5kZWZlbnNlIHx8IFtdLFxuICAgICAgICBwcm9zZWN1dGlvbjogcmVzPy5wcm9zZWN1dGlvbiB8fCBbXSxcbiAgICAgICAgdmVyZGljdCxcbiAgICAgICAgdmVyZGljdFRleHQsXG4gICAgICAgIHZlcmRpY3RUZXh0QXI6IHZlcmRpY3RUZXh0LFxuICAgICAgICBzdWNjZXNzQ29uZGl0aW9uczogcmVzPy5zdWNjZXNzX2NvbmRpdGlvbnMgfHwgW10sXG4gICAgICAgIHJpc2tzOiByZXM/LmZhdGFsX3Jpc2tzIHx8IFtdLFxuICAgICAgICBuZXh0U3RlcHM6IHJlcz8ubmV4dF9zdGVwcyB8fCBbXSxcbiAgICAgIH0pO1xuICAgICAgc2V0RXhwYW5kZWRTZWN0aW9ucyhbJ2RlZmVuc2UnLCAncHJvc2VjdXRpb24nLCAndmVyZGljdCddKTtcbiAgICB9IGNhdGNoIChlcnI6IGFueSkge1xuICAgICAgc2V0RXJyb3IoZXJyPy5tZXNzYWdlIHx8IHQoJ0ZhaWxlZCB0byBydW4gSWRlYSBDb3VydCcsICfYqti52LDYsSDYqti02LrZitmEINmF2K3Zg9mF2Kkg2KfZhNij2YHZg9in2LEnKSk7XG4gICAgfSBmaW5hbGx5IHtcbiAgICAgIHNldElzUHJvY2Vzc2luZyhmYWxzZSk7XG4gICAgfVxuICB9O1xuXG4gIGNvbnN0IHRvZ2dsZVNlY3Rpb24gPSAoc2VjdGlvbjogc3RyaW5nKSA9PiB7XG4gICAgc2V0RXhwYW5kZWRTZWN0aW9ucygocHJldikgPT4gKFxuICAgICAgcHJldi5pbmNsdWRlcyhzZWN0aW9uKSA/IHByZXYuZmlsdGVyKChpdGVtKSA9PiBpdGVtICE9PSBzZWN0aW9uKSA6IFsuLi5wcmV2LCBzZWN0aW9uXVxuICAgICkpO1xuICB9O1xuXG4gIGNvbnN0IHZlcmRpY3RDb25maWcgPSAoKCkgPT4ge1xuICAgIHN3aXRjaCAocmVzdWx0Py52ZXJkaWN0KSB7XG4gICAgICBjYXNlICdzdHJvbmcnOlxuICAgICAgICByZXR1cm4ge1xuICAgICAgICAgIGljb246IENoZWNrQ2lyY2xlLFxuICAgICAgICAgIGxhYmVsOiBpc1JUTCA/ICfZgtmI2YrYqScgOiAnU3Ryb25nJyxcbiAgICAgICAgICB3cmFwOiAnYm9yZGVyLWVtZXJhbGQtNTAwLzIwIGJnLWVtZXJhbGQtNTAwLzEwIHRleHQtZW1lcmFsZC0yMDAnLFxuICAgICAgICAgIGFjY2VudDogJ3RleHQtZW1lcmFsZC00MDAnLFxuICAgICAgICB9O1xuICAgICAgY2FzZSAnd2Vhayc6XG4gICAgICAgIHJldHVybiB7XG4gICAgICAgICAgaWNvbjogWENpcmNsZSxcbiAgICAgICAgICBsYWJlbDogaXNSVEwgPyAn2LbYudmK2YHYqScgOiAnV2VhaycsXG4gICAgICAgICAgd3JhcDogJ2JvcmRlci1yb3NlLTUwMC8yMCBiZy1yb3NlLTUwMC8xMCB0ZXh0LXJvc2UtMTAwJyxcbiAgICAgICAgICBhY2NlbnQ6ICd0ZXh0LXJvc2UtNDAwJyxcbiAgICAgICAgfTtcbiAgICAgIGRlZmF1bHQ6XG4gICAgICAgIHJldHVybiB7XG4gICAgICAgICAgaWNvbjogQWxlcnRUcmlhbmdsZSxcbiAgICAgICAgICBsYWJlbDogaXNSVEwgPyAn2YXYqtmI2LPYt9ipJyA6ICdNb2RlcmF0ZScsXG4gICAgICAgICAgd3JhcDogJ2JvcmRlci1hbWJlci01MDAvMjAgYmctYW1iZXItNTAwLzEwIHRleHQtYW1iZXItMTAwJyxcbiAgICAgICAgICBhY2NlbnQ6ICd0ZXh0LWFtYmVyLTQwMCcsXG4gICAgICAgIH07XG4gICAgfVxuICB9KSgpO1xuXG4gIGNvbnN0IHNoZWxsQ2xhc3MgPSB0aGVtZSA9PT0gJ2RhcmsnID8gJ2FyY2hpdGVjdC1zaGVsbCBhcmNoaXRlY3Qtc2hlbGwtZGFyaycgOiAnYXJjaGl0ZWN0LXNoZWxsIGFyY2hpdGVjdC1zaGVsbC1saWdodCc7XG5cbiAgY29uc3QgYnVsbGV0cyA9IChpdGVtczogc3RyaW5nW10sIHRvbmU6ICdlbWVyYWxkJyB8ICdhbWJlcicgfCAncm9zZScpID0+IChcbiAgICA8dWwgY2xhc3NOYW1lPVwic3BhY2UteS0zXCI+XG4gICAgICB7aXRlbXMubGVuZ3RoID8gaXRlbXMubWFwKChpdGVtLCBpbmRleCkgPT4gKFxuICAgICAgICA8bGkga2V5PXtgJHtpdGVtfS0ke2luZGV4fWB9IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtc3RhcnQgZ2FwLTMgdGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICB7dG9uZSA9PT0gJ2VtZXJhbGQnID8gPENoZWNrQ2lyY2xlIGNsYXNzTmFtZT1cIm10LTAuNSBoLTQgdy00IHNocmluay0wIHRleHQtZW1lcmFsZC00MDBcIiAvPiA6IG51bGx9XG4gICAgICAgICAge3RvbmUgPT09ICdyb3NlJyA/IDxYQ2lyY2xlIGNsYXNzTmFtZT1cIm10LTAuNSBoLTQgdy00IHNocmluay0wIHRleHQtcm9zZS00MDBcIiAvPiA6IG51bGx9XG4gICAgICAgICAge3RvbmUgPT09ICdhbWJlcicgPyA8QWxlcnRUcmlhbmdsZSBjbGFzc05hbWU9XCJtdC0wLjUgaC00IHctNCBzaHJpbmstMCB0ZXh0LWFtYmVyLTQwMFwiIC8+IDogbnVsbH1cbiAgICAgICAgICA8c3Bhbj57aXRlbX08L3NwYW4+XG4gICAgICAgIDwvbGk+XG4gICAgICApKSA6IChcbiAgICAgICAgPGxpIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+e3QoJ05vIGl0ZW1zIHlldC4nLCAn2YTYpyDYqtmI2KzYryDYudmG2KfYtdixINio2LnYry4nKX08L2xpPlxuICAgICAgKX1cbiAgICA8L3VsPlxuICApO1xuXG4gIHJldHVybiAoXG4gICAgPGRpdiBjbGFzc05hbWU9e2NuKHNoZWxsQ2xhc3MsICdzcGFjZS15LTgnKX0+XG4gICAgICA8aGVhZGVyIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1oZXJvXCI+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0zXCI+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LVsxMXB4XSB1cHBlcmNhc2UgdHJhY2tpbmctWzAuNGVtXSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgIHt0KCdBcmNoaXRlY3R1cmFsIHJldmlldycsICfZhdix2KfYrNi52Kkg2YXYudmF2KfYsdmK2KknKX1cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8aDEgY2xhc3NOYW1lPVwidGV4dC0zeGwgZm9udC1zZW1pYm9sZCB0cmFja2luZy10aWdodCB0ZXh0LWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgIHt0KCdJZGVhIENvdXJ0JywgJ9mF2K3Zg9mF2Kkg2KfZhNij2YHZg9in2LEnKX1cbiAgICAgICAgICA8L2gxPlxuICAgICAgICAgIDxwIGNsYXNzTmFtZT1cIm1heC13LTJ4bCB0ZXh0LXNtIGxlYWRpbmctNyB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgIHt0KFxuICAgICAgICAgICAgICAnVGVzdCB3aGV0aGVyIGFuIGlkZWEgaXMgc3Ryb25nIGVub3VnaCB0byBzdXJ2aXZlIHNjcnV0aW55IGZyb20gYm90aCBzaWRlcyBiZWZvcmUgeW91IGludmVzdCBpbiBpdC4nLFxuICAgICAgICAgICAgICAn2KfYrtiq2KjYsSDZhdinINil2LDYpyDZg9in2YbYqiDYp9mE2YHZg9ix2Kkg2YLZiNmK2Kkg2KjZhdinINmK2YPZgdmKINmE2YTYtdmF2YjYryDYo9mF2KfZhSDYp9mE2KrYrdmE2YrZhCDZhdmGINmD2YQg2KfZhNis2YfYp9iqINmC2KjZhCDYo9mGINiq2LPYqtir2YXYsSDZgdmK2YfYpy4nXG4gICAgICAgICAgICApfVxuICAgICAgICAgIDwvcD5cbiAgICAgICAgPC9kaXY+XG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBmbGV4LXdyYXAgZ2FwLTJcIj5cbiAgICAgICAgICA8QmFkZ2UgdmFyaWFudD1cIm91dGxpbmVcIj57dCgnQmFsYW5jZWQgY3JpdGlxdWUnLCAn2YXYsdin2KzYudipINmF2KrZiNin2LLZhtipJyl9PC9CYWRnZT5cbiAgICAgICAgICA8QmFkZ2UgdmFyaWFudD1cIm91dGxpbmVcIj57dCgnRmFzdCB2ZXJkaWN0JywgJ9it2YPZhSDYs9ix2YrYuScpfTwvQmFkZ2U+XG4gICAgICAgICAgPEJhZGdlIHZhcmlhbnQ9XCJvdXRsaW5lXCI+e3RoZW1lID09PSAnZGFyaycgPyB0KCdCbGFjayAvIGNoYXJjb2FsIG1vZGUnLCAn2YjYtti5INij2LPZiNivIC8g2YHYrdmF2YonKSA6IHQoJ0xpZ2h0IG1vZGUnLCAn2KfZhNmI2LbYuSDYp9mE2YHYp9iq2K0nKX08L0JhZGdlPlxuICAgICAgICA8L2Rpdj5cbiAgICAgIDwvaGVhZGVyPlxuXG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImdyaWQgZ2FwLTYgeGw6Z3JpZC1jb2xzLVsxLjA1ZnJfMC45NWZyXVwiPlxuICAgICAgICA8c2VjdGlvbiBjbGFzc05hbWU9XCJhcmNoaXRlY3QtcGFuZWwgc3BhY2UteS01IHAtNlwiPlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1zdGFydCBqdXN0aWZ5LWJldHdlZW4gZ2FwLTRcIj5cbiAgICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC14cyB1cHBlcmNhc2UgdHJhY2tpbmctWzAuMzVlbV0gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAge3QoJ0lucHV0IGJyaWVmJywgJ9mF2K/YrtmEINin2YTZgdmD2LHYqScpfVxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPGgyIGNsYXNzTmFtZT1cIm10LTIgdGV4dC14bCBmb250LXNlbWlib2xkIHRleHQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgIHt0KCdEZXNjcmliZSB0aGUgaWRlYSBjbGVhcmx5JywgJ9i12YEg2KfZhNmB2YPYsdipINio2YjYttmI2K0nKX1cbiAgICAgICAgICAgICAgPC9oMj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGgtMTEgdy0xMSBpdGVtcy1jZW50ZXIganVzdGlmeS1jZW50ZXIgcm91bmRlZC1mdWxsIGJnLXdoaXRlLzUgdGV4dC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgIDxTY2FsZSBjbGFzc05hbWU9XCJoLTUgdy01XCIgLz5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgPFRleHRhcmVhXG4gICAgICAgICAgICBwbGFjZWhvbGRlcj17dCgnUXVpY2sgY29mZmVlIGtpb3NrIG5lYXIgYSB1bml2ZXJzaXR5Li4uJywgJ9mD2LTZgyDZgtmH2YjYqSDYs9ix2YrYuSDYqNis2KfZhtioINis2KfZhdi52KkuLi4nKX1cbiAgICAgICAgICAgIHZhbHVlPXtpZGVhfVxuICAgICAgICAgICAgb25DaGFuZ2U9eyhlKSA9PiBzZXRJZGVhKGUudGFyZ2V0LnZhbHVlKX1cbiAgICAgICAgICAgIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1pbnB1dCBtaW4taC0zMiByZXNpemUtbm9uZVwiXG4gICAgICAgICAgLz5cblxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBmbGV4LXdyYXAgaXRlbXMtY2VudGVyIGdhcC0zXCI+XG4gICAgICAgICAgICA8QnV0dG9uXG4gICAgICAgICAgICAgIG9uQ2xpY2s9e2hhbmRsZVN1Ym1pdH1cbiAgICAgICAgICAgICAgZGlzYWJsZWQ9e2lzUHJvY2Vzc2luZyB8fCAhaWRlYS50cmltKCl9XG4gICAgICAgICAgICAgIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1idXR0b24tcHJpbWFyeSBtaW4tdy00NFwiXG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIHtpc1Byb2Nlc3NpbmcgPyAoXG4gICAgICAgICAgICAgICAgPD5cbiAgICAgICAgICAgICAgICAgIDxMb2FkZXIyIGNsYXNzTmFtZT1cIm1yLTIgaC00IHctNCBhbmltYXRlLXNwaW5cIiAvPlxuICAgICAgICAgICAgICAgICAge3QoJ0FuYWx5emluZy4uLicsICfYrNin2LHZiiDYp9mE2KrYrdmE2YrZhC4uLicpfVxuICAgICAgICAgICAgICAgIDwvPlxuICAgICAgICAgICAgICApIDogKFxuICAgICAgICAgICAgICAgIDw+XG4gICAgICAgICAgICAgICAgICA8R2F2ZWwgY2xhc3NOYW1lPVwibXItMiBoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAgICAgIHt0KCdSdW4gSWRlYSBDb3VydCcsICfYqti02LrZitmEINmF2K3Zg9mF2Kkg2KfZhNij2YHZg9in2LEnKX1cbiAgICAgICAgICAgICAgICA8Lz5cbiAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC14cyB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAge3QoJ1RoZSB2ZXJkaWN0IGJlY29tZXMgYSBzdHJ1Y3R1cmVkIGNyaXRpcXVlLCBub3QgYSByYXcgc2NvcmUuJywgJ9in2YTYrdmD2YUg2YrYrtix2Kwg2YPZhdix2KfYrNi52Kkg2YXZhti42YXYqdiMINmE2Kcg2YPYr9ix2KzYqSDZgdmC2LcuJyl9XG4gICAgICAgICAgICA8L3A+XG4gICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICB7ZXJyb3IgPyAoXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJvdW5kZWQtMnhsIGJvcmRlciBib3JkZXItcm9zZS01MDAvMjAgYmctcm9zZS01MDAvMTAgcHgtNCBweS0zIHRleHQtc20gdGV4dC1yb3NlLTEwMFwiPlxuICAgICAgICAgICAgICB7ZXJyb3J9XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICApIDogbnVsbH1cbiAgICAgICAgPC9zZWN0aW9uPlxuXG4gICAgICAgIDxzZWN0aW9uIGNsYXNzTmFtZT1cImFyY2hpdGVjdC1wYW5lbCBzcGFjZS15LTUgcC02XCI+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLXN0YXJ0IGp1c3RpZnktYmV0d2VlbiBnYXAtNFwiPlxuICAgICAgICAgICAgPGRpdj5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJ0ZXh0LXhzIHVwcGVyY2FzZSB0cmFja2luZy1bMC4zNWVtXSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICB7dCgnVmVyZGljdCBzdGFnZScsICfZhdix2K3ZhNipINin2YTYrdmD2YUnKX1cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDxoMiBjbGFzc05hbWU9XCJtdC0yIHRleHQteGwgZm9udC1zZW1pYm9sZCB0ZXh0LWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICB7dCgnQXJjaGl0ZWN0dXJhbCBzdW1tYXJ5JywgJ9in2YTZhdmE2K7YtSDYp9mE2YXYudmF2KfYsdmKJyl9XG4gICAgICAgICAgICAgIDwvaDI+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDxCYWRnZSBjbGFzc05hbWU9e2NuKCdib3JkZXIgcHgtMyBweS0xIHRleHQteHMnLCB2ZXJkaWN0Q29uZmlnLndyYXApfT5cbiAgICAgICAgICAgICAge3Jlc3VsdCA/IHZlcmRpY3RDb25maWcubGFiZWwgOiB0KCdXYWl0aW5nJywgJ9io2KfZhtiq2LjYp9ixINin2YTYpdiv2K7Yp9mEJyl9XG4gICAgICAgICAgICA8L0JhZGdlPlxuICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAge3Jlc3VsdCA/IChcbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPXtjbigncm91bmRlZC0yeGwgYm9yZGVyIHAtNScsIHZlcmRpY3RDb25maWcud3JhcCl9PlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtc3RhcnQgZ2FwLTRcIj5cbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17Y24oJ2ZsZXggaC0xMiB3LTEyIGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciByb3VuZGVkLWZ1bGwgYmctd2hpdGUvNScsIHZlcmRpY3RDb25maWcuYWNjZW50KX0+XG4gICAgICAgICAgICAgICAgICA8dmVyZGljdENvbmZpZy5pY29uIGNsYXNzTmFtZT1cImgtNiB3LTZcIiAvPlxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQtc20gdXBwZXJjYXNlIHRyYWNraW5nLVswLjNlbV0gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAgICAgIHt0KCdEZWNpc2lvbicsICfYp9mE2YLYsdin2LEnKX1cbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwidGV4dC1iYXNlIGxlYWRpbmctNyB0ZXh0LWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICAgICAge3Jlc3VsdC52ZXJkaWN0VGV4dH1cbiAgICAgICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICApIDogKFxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJyb3VuZGVkLTJ4bCBiZy1iYWNrZ3JvdW5kLzQwIHAtNVwiPlxuICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIGxlYWRpbmctNyB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICB7dChcbiAgICAgICAgICAgICAgICAgICdSdW4gdGhlIHJldmlldyB0byBnZW5lcmF0ZSBhIGRlZmVuc2UsIGEgcHJvc2VjdXRpb24sIGEgdmVyZGljdCwgYW5kIHRoZSBuZXh0IG9wZXJhdGlvbmFsIHN0ZXBzLicsXG4gICAgICAgICAgICAgICAgICAn2LTYutmR2YQg2KfZhNmF2LHYp9is2LnYqSDZhNmE2K3YtdmI2YQg2LnZhNmJINiv2YHYp9i52Iwg2YjYp9iq2YfYp9mF2Iwg2YjYrdmD2YXYjCDZiNiu2LfZiNin2Kog2KrZhtmB2YrYsNmK2Kkg2YjYp9i22K3YqS4nXG4gICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgKX1cblxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZ3JpZCBnYXAtMyBzbTpncmlkLWNvbHMtM1wiPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJyb3VuZGVkLTJ4bCBiZy1iYWNrZ3JvdW5kLzUwIHAtNFwiPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInRleHQteHMgdXBwZXJjYXNlIHRyYWNraW5nLVswLjI1ZW1dIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICAgIHt0KCdTdHJlbmd0aCcsICfYp9mE2YLZiNipJyl9XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTIgdGV4dC0yeGwgZm9udC1zZW1pYm9sZCB0ZXh0LWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICB7cmVzdWx0Py52ZXJkaWN0ID09PSAnc3Ryb25nJyA/ICdBJyA6IHJlc3VsdD8udmVyZGljdCA9PT0gJ21lZGl1bScgPyAnQicgOiAnQyd9XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJvdW5kZWQtMnhsIGJnLWJhY2tncm91bmQvNTAgcC00XCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC14cyB1cHBlcmNhc2UgdHJhY2tpbmctWzAuMjVlbV0gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAge3QoJ1Jpc2snLCAn2KfZhNmF2K7Yp9i32LHYqScpfVxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC0yIHRleHQtMnhsIGZvbnQtc2VtaWJvbGQgdGV4dC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAge3Jlc3VsdD8ucmlza3MubGVuZ3RoID8/IDB9XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJvdW5kZWQtMnhsIGJnLWJhY2tncm91bmQvNTAgcC00XCI+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwidGV4dC14cyB1cHBlcmNhc2UgdHJhY2tpbmctWzAuMjVlbV0gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICAgICAge3QoJ0FjdGlvbnMnLCAn2KfZhNil2KzYsdin2KHYp9iqJyl9XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTIgdGV4dC0yeGwgZm9udC1zZW1pYm9sZCB0ZXh0LWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICB7cmVzdWx0Py5uZXh0U3RlcHMubGVuZ3RoID8/IDB9XG4gICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgIDwvc2VjdGlvbj5cbiAgICAgIDwvZGl2PlxuXG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cImdyaWQgZ2FwLTYgeGw6Z3JpZC1jb2xzLTJcIj5cbiAgICAgICAgPFNlY3Rpb25DYXJkXG4gICAgICAgICAgaWQ9XCJkZWZlbnNlXCJcbiAgICAgICAgICB0aXRsZT17dCgnRGVmZW5zZSBBSScsICfYp9mE2K/Zgdin2LknKX1cbiAgICAgICAgICBpY29uPXtTaGllbGR9XG4gICAgICAgICAgdG9uZT1cImVtZXJhbGRcIlxuICAgICAgICAgIG9wZW49e2V4cGFuZGVkU2VjdGlvbnMuaW5jbHVkZXMoJ2RlZmVuc2UnKX1cbiAgICAgICAgICBvblRvZ2dsZT17dG9nZ2xlU2VjdGlvbn1cbiAgICAgICAgPlxuICAgICAgICAgIHtidWxsZXRzKHJlc3VsdD8uZGVmZW5zZSB8fCBbXSwgJ2VtZXJhbGQnKX1cbiAgICAgICAgPC9TZWN0aW9uQ2FyZD5cblxuICAgICAgICA8U2VjdGlvbkNhcmRcbiAgICAgICAgICBpZD1cInByb3NlY3V0aW9uXCJcbiAgICAgICAgICB0aXRsZT17dCgnUHJvc2VjdXRpb24gQUknLCAn2KfZhNin2K/Yudin2KEnKX1cbiAgICAgICAgICBpY29uPXtHYXZlbH1cbiAgICAgICAgICB0b25lPVwicm9zZVwiXG4gICAgICAgICAgb3Blbj17ZXhwYW5kZWRTZWN0aW9ucy5pbmNsdWRlcygncHJvc2VjdXRpb24nKX1cbiAgICAgICAgICBvblRvZ2dsZT17dG9nZ2xlU2VjdGlvbn1cbiAgICAgICAgPlxuICAgICAgICAgIHtidWxsZXRzKHJlc3VsdD8ucHJvc2VjdXRpb24gfHwgW10sICdyb3NlJyl9XG4gICAgICAgIDwvU2VjdGlvbkNhcmQ+XG5cbiAgICAgICAgPFNlY3Rpb25DYXJkXG4gICAgICAgICAgaWQ9XCJ2ZXJkaWN0XCJcbiAgICAgICAgICB0aXRsZT17dCgnSnVkZ2UgVmVyZGljdCcsICfYrdmD2YUg2KfZhNmC2KfYttmKJyl9XG4gICAgICAgICAgaWNvbj17U2NhbGV9XG4gICAgICAgICAgdG9uZT1cImFtYmVyXCJcbiAgICAgICAgICBvcGVuPXtleHBhbmRlZFNlY3Rpb25zLmluY2x1ZGVzKCd2ZXJkaWN0Jyl9XG4gICAgICAgICAgb25Ub2dnbGU9e3RvZ2dsZVNlY3Rpb259XG4gICAgICAgID5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17Y24oJ3JvdW5kZWQtMnhsIGJvcmRlciBwLTQnLCB2ZXJkaWN0Q29uZmlnLndyYXApfT5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1zdGFydCBnYXAtM1wiPlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17Y24oJ2ZsZXggaC0xMCB3LTEwIGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciByb3VuZGVkLWZ1bGwgYmctd2hpdGUvNScsIHZlcmRpY3RDb25maWcuYWNjZW50KX0+XG4gICAgICAgICAgICAgICAgPHZlcmRpY3RDb25maWcuaWNvbiBjbGFzc05hbWU9XCJoLTUgdy01XCIgLz5cbiAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwic3BhY2UteS0yXCI+XG4gICAgICAgICAgICAgICAgPEJhZGdlIGNsYXNzTmFtZT17Y24oJ2JvcmRlciBweC0zIHB5LTEgdGV4dC14cycsIHZlcmRpY3RDb25maWcud3JhcCl9PlxuICAgICAgICAgICAgICAgICAge3ZlcmRpY3RDb25maWcubGFiZWx9XG4gICAgICAgICAgICAgICAgPC9CYWRnZT5cbiAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9XCJ0ZXh0LXNtIGxlYWRpbmctNyB0ZXh0LWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICAgIHtyZXN1bHQ/LnZlcmRpY3RUZXh0IHx8IHQoJ05vIHZlcmRpY3QgeWV0LicsICfZhNinINmK2YjYrNivINit2YPZhSDYqNi52K8uJyl9XG4gICAgICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICA8L1NlY3Rpb25DYXJkPlxuXG4gICAgICAgIDxTZWN0aW9uQ2FyZFxuICAgICAgICAgIGlkPVwic3VjY2Vzc1wiXG4gICAgICAgICAgdGl0bGU9e3QoJ1N1Y2Nlc3MgY29uZGl0aW9ucycsICfYtNix2YjYtyDYp9mE2YbYrNin2K0nKX1cbiAgICAgICAgICBpY29uPXtUYXJnZXR9XG4gICAgICAgICAgdG9uZT1cImVtZXJhbGRcIlxuICAgICAgICAgIG9wZW49e2V4cGFuZGVkU2VjdGlvbnMuaW5jbHVkZXMoJ3N1Y2Nlc3MnKX1cbiAgICAgICAgICBvblRvZ2dsZT17dG9nZ2xlU2VjdGlvbn1cbiAgICAgICAgPlxuICAgICAgICAgIHtidWxsZXRzKHJlc3VsdD8uc3VjY2Vzc0NvbmRpdGlvbnMgfHwgW10sICdlbWVyYWxkJyl9XG4gICAgICAgIDwvU2VjdGlvbkNhcmQ+XG5cbiAgICAgICAgPFNlY3Rpb25DYXJkXG4gICAgICAgICAgaWQ9XCJyaXNrc1wiXG4gICAgICAgICAgdGl0bGU9e3QoJ1Jpc2tzJywgJ9in2YTZhdiu2KfYt9ixJyl9XG4gICAgICAgICAgaWNvbj17QWxlcnRDaXJjbGV9XG4gICAgICAgICAgdG9uZT1cImFtYmVyXCJcbiAgICAgICAgICBvcGVuPXtleHBhbmRlZFNlY3Rpb25zLmluY2x1ZGVzKCdyaXNrcycpfVxuICAgICAgICAgIG9uVG9nZ2xlPXt0b2dnbGVTZWN0aW9ufVxuICAgICAgICA+XG4gICAgICAgICAge2J1bGxldHMocmVzdWx0Py5yaXNrcyB8fCBbXSwgJ2FtYmVyJyl9XG4gICAgICAgIDwvU2VjdGlvbkNhcmQ+XG5cbiAgICAgICAgPFNlY3Rpb25DYXJkXG4gICAgICAgICAgaWQ9XCJuZXh0U3RlcHNcIlxuICAgICAgICAgIHRpdGxlPXt0KCdOZXh0IHN0ZXBzJywgJ9in2YTYrti32YjYp9iqINin2YTYqtin2YTZitipJyl9XG4gICAgICAgICAgaWNvbj17QXJyb3dSaWdodH1cbiAgICAgICAgICB0b25lPVwic2xhdGVcIlxuICAgICAgICAgIG9wZW49e2V4cGFuZGVkU2VjdGlvbnMuaW5jbHVkZXMoJ25leHRTdGVwcycpfVxuICAgICAgICAgIG9uVG9nZ2xlPXt0b2dnbGVTZWN0aW9ufVxuICAgICAgICA+XG4gICAgICAgICAgPG9sIGNsYXNzTmFtZT1cInNwYWNlLXktM1wiPlxuICAgICAgICAgICAgeyhyZXN1bHQ/Lm5leHRTdGVwcyB8fCBbXSkubGVuZ3RoID8gcmVzdWx0IS5uZXh0U3RlcHMubWFwKChzdGVwLCBpbmRleCkgPT4gKFxuICAgICAgICAgICAgICA8bGkga2V5PXtgJHtzdGVwfS0ke2luZGV4fWB9IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtc3RhcnQgZ2FwLTMgdGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJmbGV4IGgtNiB3LTYgc2hyaW5rLTAgaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIHJvdW5kZWQtZnVsbCBiZy13aGl0ZS81IHRleHQteHMgZm9udC1zZW1pYm9sZCB0ZXh0LWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAgICAgIHtpbmRleCArIDF9XG4gICAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgICAgIDxzcGFuPntzdGVwfTwvc3Bhbj5cbiAgICAgICAgICAgICAgPC9saT5cbiAgICAgICAgICAgICkpIDogKFxuICAgICAgICAgICAgICA8bGkgY2xhc3NOYW1lPVwidGV4dC1zbSB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj57dCgnTm8gbmV4dCBzdGVwcyB5ZXQuJywgJ9mE2Kcg2KrZiNis2K8g2K7Yt9mI2KfYqiDYqtin2YTZitipINio2LnYry4nKX08L2xpPlxuICAgICAgICAgICAgKX1cbiAgICAgICAgICA8L29sPlxuICAgICAgICA8L1NlY3Rpb25DYXJkPlxuICAgICAgPC9kaXY+XG4gICAgPC9kaXY+XG4gICk7XG59XG4iXSwibmFtZXMiOlsidXNlRWZmZWN0IiwidXNlU3RhdGUiLCJBbmltYXRlUHJlc2VuY2UiLCJtb3Rpb24iLCJBbGVydENpcmNsZSIsIkFsZXJ0VHJpYW5nbGUiLCJBcnJvd1JpZ2h0IiwiQ2hlY2tDaXJjbGUiLCJDaGV2cm9uRG93biIsIkNoZXZyb25VcCIsIkdhdmVsIiwiTG9hZGVyMiIsIlNjYWxlIiwiU2hpZWxkIiwiVGFyZ2V0IiwiWENpcmNsZSIsIkJ1dHRvbiIsIlRleHRhcmVhIiwiQmFkZ2UiLCJ1c2VMYW5ndWFnZSIsInVzZVRoZW1lIiwiYXBpU2VydmljZSIsImNuIiwiY2xhc3NpZnlWZXJkaWN0IiwidGV4dCIsImlzUlRMIiwibG93ZXIiLCJ0b0xvd2VyQ2FzZSIsImluY2x1ZGVzIiwiU2VjdGlvbkNhcmQiLCJpZCIsInRpdGxlIiwiaWNvbiIsIkljb24iLCJ0b25lIiwib3BlbiIsIm9uVG9nZ2xlIiwiY2hpbGRyZW4iLCJ0b25lTWFwIiwiZW1lcmFsZCIsImFtYmVyIiwicm9zZSIsInNsYXRlIiwic2VjdGlvbiIsImNsYXNzTmFtZSIsImJ1dHRvbiIsInR5cGUiLCJvbkNsaWNrIiwiZGl2Iiwic3BhbiIsImluaXRpYWwiLCJoZWlnaHQiLCJvcGFjaXR5IiwiYW5pbWF0ZSIsImV4aXQiLCJ0cmFuc2l0aW9uIiwiZHVyYXRpb24iLCJJZGVhQ291cnRUYWIiLCJsYW5ndWFnZSIsInRoZW1lIiwiaWRlYSIsInNldElkZWEiLCJpc1Byb2Nlc3NpbmciLCJzZXRJc1Byb2Nlc3NpbmciLCJyZXN1bHQiLCJzZXRSZXN1bHQiLCJleHBhbmRlZFNlY3Rpb25zIiwic2V0RXhwYW5kZWRTZWN0aW9ucyIsImVycm9yIiwic2V0RXJyb3IiLCJ0IiwiZW4iLCJhciIsInBlbmRpbmciLCJsb2NhbFN0b3JhZ2UiLCJnZXRJdGVtIiwicmVtb3ZlSXRlbSIsImhhbmRsZVN1Ym1pdCIsInRyaW0iLCJyZXMiLCJydW5Db3VydCIsInZlcmRpY3RUZXh0IiwidmVyZGljdCIsImRlZmVuc2UiLCJwcm9zZWN1dGlvbiIsInZlcmRpY3RUZXh0QXIiLCJzdWNjZXNzQ29uZGl0aW9ucyIsInN1Y2Nlc3NfY29uZGl0aW9ucyIsInJpc2tzIiwiZmF0YWxfcmlza3MiLCJuZXh0U3RlcHMiLCJuZXh0X3N0ZXBzIiwiZXJyIiwibWVzc2FnZSIsInRvZ2dsZVNlY3Rpb24iLCJwcmV2IiwiZmlsdGVyIiwiaXRlbSIsInZlcmRpY3RDb25maWciLCJsYWJlbCIsIndyYXAiLCJhY2NlbnQiLCJzaGVsbENsYXNzIiwiYnVsbGV0cyIsIml0ZW1zIiwidWwiLCJsZW5ndGgiLCJtYXAiLCJpbmRleCIsImxpIiwiaGVhZGVyIiwiaDEiLCJwIiwidmFyaWFudCIsImgyIiwicGxhY2Vob2xkZXIiLCJ2YWx1ZSIsIm9uQ2hhbmdlIiwiZSIsInRhcmdldCIsImRpc2FibGVkIiwib2wi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

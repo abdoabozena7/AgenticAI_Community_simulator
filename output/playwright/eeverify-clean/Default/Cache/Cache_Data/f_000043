@@ -1,0 +1,388 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/IterationTimeline.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+import { cn } from "/src/lib/utils.ts";
+const PHASE_ORDER = [
+    'individual_opinions',
+    'discussion',
+    'neutrality_reduction',
+    'final_convergence'
+];
+const LEGACY_TO_CANONICAL = {
+    intake: 'individual_opinions',
+    search_bootstrap: 'individual_opinions',
+    evidence_map: 'individual_opinions',
+    research_digest: 'individual_opinions',
+    agent_init: 'individual_opinions',
+    debate: 'discussion',
+    deliberation: 'discussion',
+    convergence: 'neutrality_reduction',
+    resolution: 'final_convergence',
+    verdict: 'final_convergence',
+    summary: 'final_convergence',
+    completed: 'final_convergence'
+};
+const phaseLabel = (key, language)=>{
+    const labelsAr = {
+        individual_opinions: 'الآراء الفردية',
+        discussion: 'النقاش',
+        neutrality_reduction: 'تقليل الحياد',
+        final_convergence: 'التقارب النهائي'
+    };
+    const labelsEn = {
+        individual_opinions: 'Individual Opinions',
+        discussion: 'Discussion',
+        neutrality_reduction: 'Neutrality Reduction',
+        final_convergence: 'Final Convergence'
+    };
+    return language === 'ar' ? labelsAr[key] : labelsEn[key];
+};
+const safePct = (value)=>{
+    if (typeof value !== 'number' || Number.isNaN(value)) return 0;
+    return Math.max(0, Math.min(100, value));
+};
+const normalizePhase = (raw)=>{
+    const key = String(raw || '').trim();
+    if (!key) return null;
+    return LEGACY_TO_CANONICAL[key] || null;
+};
+export function IterationTimeline({ currentIteration, totalIterations, milestones = [], language, currentPhaseKey, phaseProgressPct }) {
+    const normalizedPhase = normalizePhase(currentPhaseKey);
+    const phaseIndex = normalizedPhase ? PHASE_ORDER.indexOf(normalizedPhase) : -1;
+    const phaseRatio = safePct(phaseProgressPct) / 100;
+    const phaseDrivenProgress = phaseIndex >= 0 ? (phaseIndex + phaseRatio) / (PHASE_ORDER.length - 1) * 100 : 0;
+    const iterationDrivenProgress = totalIterations > 0 ? currentIteration / totalIterations * 100 : 0;
+    const progress = normalizedPhase ? phaseDrivenProgress : iterationDrivenProgress;
+    const defaultMilestones = totalIterations > 0 ? [
+        0.25,
+        0.5,
+        0.75,
+        1
+    ].map((p)=>Math.floor(p * totalIterations)) : [];
+    const allMilestones = [
+        ...new Set([
+            ...milestones,
+            ...defaultMilestones
+        ])
+    ].filter((value)=>value > 0).sort((a, b)=>a - b);
+    const currentPhaseLabel = normalizedPhase ? phaseLabel(normalizedPhase, language) : language === 'ar' ? 'غير محدد' : 'Unknown';
+    return /*#__PURE__*/ _jsxDEV("div", {
+        className: "glass-panel p-5 lg:p-6",
+        children: [
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "mb-4 flex items-center justify-between",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center gap-2",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "h-2.5 w-2.5 animate-pulse rounded-full bg-primary"
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                lineNumber: 104,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: "text-base font-semibold text-foreground",
+                                children: language === 'ar' ? 'تسلسل التقدم' : 'Progress Timeline'
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                lineNumber: 105,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                        lineNumber: 103,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center gap-2",
+                        dir: "ltr",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: "text-3xl font-mono font-bold leading-none text-primary",
+                                children: currentIteration
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                lineNumber: 110,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: "text-muted-foreground",
+                                children: "/"
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                lineNumber: 111,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: "text-base font-mono text-muted-foreground",
+                                children: totalIterations || '-'
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                lineNumber: 112,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                        lineNumber: 109,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                lineNumber: 102,
+                columnNumber: 7
+            }, this),
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "relative h-3.5 overflow-hidden rounded-full bg-secondary",
+                children: /*#__PURE__*/ _jsxDEV("div", {
+                    className: "absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-500 ease-out",
+                    style: {
+                        width: `${Math.min(progress, 100)}%`
+                    },
+                    children: /*#__PURE__*/ _jsxDEV("div", {
+                        className: "absolute inset-0 bg-primary/30 blur-sm"
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                        lineNumber: 121,
+                        columnNumber: 11
+                    }, this)
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                    lineNumber: 117,
+                    columnNumber: 9
+                }, this)
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                lineNumber: 116,
+                columnNumber: 7
+            }, this),
+            normalizedPhase ? /*#__PURE__*/ _jsxDEV("div", {
+                className: "mt-3 space-y-2",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center justify-between text-sm",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: "text-muted-foreground",
+                                children: language === 'ar' ? 'المرحلة الحالية' : 'Current phase'
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                lineNumber: 128,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("span", {
+                                className: "font-medium text-foreground",
+                                children: [
+                                    currentPhaseLabel,
+                                    typeof phaseProgressPct === 'number' && ` - ${Math.round(safePct(phaseProgressPct))}%`
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                lineNumber: 131,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                        lineNumber: 127,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "grid grid-cols-4 gap-1.5 sm:grid-cols-8",
+                        children: PHASE_ORDER.map((phase, index)=>{
+                            const passed = phaseIndex > index;
+                            const active = phaseIndex === index;
+                            return /*#__PURE__*/ _jsxDEV("div", {
+                                className: cn('truncate rounded-md border px-2 py-1.5 text-center text-xs', passed && 'border-primary/40 bg-primary/10 text-primary', active && 'border-accent/50 bg-accent/15 text-foreground', !passed && !active && 'border-border/40 bg-secondary/30 text-muted-foreground'),
+                                title: phaseLabel(phase, language),
+                                children: phaseLabel(phase, language)
+                            }, phase, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                lineNumber: 141,
+                                columnNumber: 17
+                            }, this);
+                        })
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                        lineNumber: 136,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                lineNumber: 126,
+                columnNumber: 9
+            }, this) : null,
+            !normalizedPhase && totalIterations > 0 ? /*#__PURE__*/ _jsxDEV("div", {
+                className: "relative mt-2 h-5",
+                dir: "ltr",
+                children: allMilestones.map((milestone)=>{
+                    const position = milestone / totalIterations * 100;
+                    const isPassed = currentIteration >= milestone;
+                    return /*#__PURE__*/ _jsxDEV("span", {
+                        className: cn('absolute -translate-x-1/2 text-xs font-mono transition-colors duration-300', isPassed ? 'text-primary' : 'text-muted-foreground'),
+                        style: {
+                            left: `${position}%`
+                        },
+                        children: milestone
+                    }, milestone, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                        lineNumber: 165,
+                        columnNumber: 15
+                    }, this);
+                })
+            }, void 0, false, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                lineNumber: 160,
+                columnNumber: 9
+            }, this) : null,
+            /*#__PURE__*/ _jsxDEV("div", {
+                className: "mt-5 flex items-center justify-between border-t border-border/50 pt-3",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("div", {
+                        className: "flex items-center gap-4",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-1.5",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: cn('h-2 w-2 rounded-full', progress > 0 ? 'bg-success' : 'bg-muted-foreground/30')
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                        lineNumber: 183,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        className: "text-sm text-muted-foreground",
+                                        children: language === 'ar' ? 'بداية' : 'Started'
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                        lineNumber: 184,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                lineNumber: 182,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-1.5",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: cn('h-2 w-2 rounded-full', progress >= 50 ? 'bg-warning' : 'bg-muted-foreground/30')
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                        lineNumber: 187,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        className: "text-sm text-muted-foreground",
+                                        children: language === 'ar' ? 'منتصف' : 'Midpoint'
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                        lineNumber: 188,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                lineNumber: 186,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "flex items-center gap-1.5",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV("div", {
+                                        className: cn('h-2 w-2 rounded-full', progress >= 100 ? 'bg-primary' : 'bg-muted-foreground/30')
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                        lineNumber: 191,
+                                        columnNumber: 13
+                                    }, this),
+                                    /*#__PURE__*/ _jsxDEV("span", {
+                                        className: "text-sm text-muted-foreground",
+                                        children: language === 'ar' ? 'اكتمال' : 'Complete'
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                        lineNumber: 192,
+                                        columnNumber: 13
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                                lineNumber: 190,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                        lineNumber: 181,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("span", {
+                        className: "text-sm text-muted-foreground",
+                        dir: "ltr",
+                        children: language === 'ar' ? `اكتمل ${progress.toFixed(0)}%` : `${progress.toFixed(0)}% complete`
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                        lineNumber: 195,
+                        columnNumber: 9
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+                lineNumber: 180,
+                columnNumber: 7
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx",
+        lineNumber: 101,
+        columnNumber: 5
+    }, this);
+}
+_c = IterationTimeline;
+var _c;
+$RefreshReg$(_c, "IterationTimeline");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/IterationTimeline.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkl0ZXJhdGlvblRpbWVsaW5lLnRzeCJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBjbiB9IGZyb20gJ0AvbGliL3V0aWxzJztcbmludGVyZmFjZSBJdGVyYXRpb25UaW1lbGluZVByb3BzIHtcbiAgY3VycmVudEl0ZXJhdGlvbjogbnVtYmVyO1xuICB0b3RhbEl0ZXJhdGlvbnM6IG51bWJlcjtcbiAgbWlsZXN0b25lcz86IG51bWJlcltdO1xuICBsYW5ndWFnZTogJ2FyJyB8ICdlbic7XG4gIGN1cnJlbnRQaGFzZUtleT86IHN0cmluZyB8IG51bGw7XG4gIHBoYXNlUHJvZ3Jlc3NQY3Q/OiBudW1iZXIgfCBudWxsO1xufVxuXG50eXBlIENhbm9uaWNhbFBoYXNlS2V5ID1cbiAgfCAnaW5kaXZpZHVhbF9vcGluaW9ucydcbiAgfCAnZGlzY3Vzc2lvbidcbiAgfCAnbmV1dHJhbGl0eV9yZWR1Y3Rpb24nXG4gIHwgJ2ZpbmFsX2NvbnZlcmdlbmNlJztcblxuY29uc3QgUEhBU0VfT1JERVI6IENhbm9uaWNhbFBoYXNlS2V5W10gPSBbXG4gICdpbmRpdmlkdWFsX29waW5pb25zJyxcbiAgJ2Rpc2N1c3Npb24nLFxuICAnbmV1dHJhbGl0eV9yZWR1Y3Rpb24nLFxuICAnZmluYWxfY29udmVyZ2VuY2UnLFxuXTtcblxuY29uc3QgTEVHQUNZX1RPX0NBTk9OSUNBTDogUmVjb3JkPHN0cmluZywgQ2Fub25pY2FsUGhhc2VLZXk+ID0ge1xuICBpbnRha2U6ICdpbmRpdmlkdWFsX29waW5pb25zJyxcbiAgc2VhcmNoX2Jvb3RzdHJhcDogJ2luZGl2aWR1YWxfb3BpbmlvbnMnLFxuICBldmlkZW5jZV9tYXA6ICdpbmRpdmlkdWFsX29waW5pb25zJyxcbiAgcmVzZWFyY2hfZGlnZXN0OiAnaW5kaXZpZHVhbF9vcGluaW9ucycsXG4gIGFnZW50X2luaXQ6ICdpbmRpdmlkdWFsX29waW5pb25zJyxcbiAgZGViYXRlOiAnZGlzY3Vzc2lvbicsXG4gIGRlbGliZXJhdGlvbjogJ2Rpc2N1c3Npb24nLFxuICBjb252ZXJnZW5jZTogJ25ldXRyYWxpdHlfcmVkdWN0aW9uJyxcbiAgcmVzb2x1dGlvbjogJ2ZpbmFsX2NvbnZlcmdlbmNlJyxcbiAgdmVyZGljdDogJ2ZpbmFsX2NvbnZlcmdlbmNlJyxcbiAgc3VtbWFyeTogJ2ZpbmFsX2NvbnZlcmdlbmNlJyxcbiAgY29tcGxldGVkOiAnZmluYWxfY29udmVyZ2VuY2UnLFxufTtcblxuY29uc3QgcGhhc2VMYWJlbCA9IChrZXk6IENhbm9uaWNhbFBoYXNlS2V5LCBsYW5ndWFnZTogJ2FyJyB8ICdlbicpID0+IHtcbiAgY29uc3QgbGFiZWxzQXI6IFJlY29yZDxDYW5vbmljYWxQaGFzZUtleSwgc3RyaW5nPiA9IHtcbiAgICBpbmRpdmlkdWFsX29waW5pb25zOiAn2KfZhNii2LHYp9ihINin2YTZgdix2K/ZitipJyxcbiAgICBkaXNjdXNzaW9uOiAn2KfZhNmG2YLYp9i0JyxcbiAgICBuZXV0cmFsaXR5X3JlZHVjdGlvbjogJ9iq2YLZhNmK2YQg2KfZhNit2YrYp9ivJyxcbiAgICBmaW5hbF9jb252ZXJnZW5jZTogJ9in2YTYqtmC2KfYsdioINin2YTZhtmH2KfYptmKJyxcbiAgfTtcbiAgY29uc3QgbGFiZWxzRW46IFJlY29yZDxDYW5vbmljYWxQaGFzZUtleSwgc3RyaW5nPiA9IHtcbiAgICBpbmRpdmlkdWFsX29waW5pb25zOiAnSW5kaXZpZHVhbCBPcGluaW9ucycsXG4gICAgZGlzY3Vzc2lvbjogJ0Rpc2N1c3Npb24nLFxuICAgIG5ldXRyYWxpdHlfcmVkdWN0aW9uOiAnTmV1dHJhbGl0eSBSZWR1Y3Rpb24nLFxuICAgIGZpbmFsX2NvbnZlcmdlbmNlOiAnRmluYWwgQ29udmVyZ2VuY2UnLFxuICB9O1xuICByZXR1cm4gbGFuZ3VhZ2UgPT09ICdhcicgPyBsYWJlbHNBcltrZXldIDogbGFiZWxzRW5ba2V5XTtcbn07XG5cbmNvbnN0IHNhZmVQY3QgPSAodmFsdWU/OiBudW1iZXIgfCBudWxsKSA9PiB7XG4gIGlmICh0eXBlb2YgdmFsdWUgIT09ICdudW1iZXInIHx8IE51bWJlci5pc05hTih2YWx1ZSkpIHJldHVybiAwO1xuICByZXR1cm4gTWF0aC5tYXgoMCwgTWF0aC5taW4oMTAwLCB2YWx1ZSkpO1xufTtcblxuY29uc3Qgbm9ybWFsaXplUGhhc2UgPSAocmF3Pzogc3RyaW5nIHwgbnVsbCk6IENhbm9uaWNhbFBoYXNlS2V5IHwgbnVsbCA9PiB7XG4gIGNvbnN0IGtleSA9IFN0cmluZyhyYXcgfHwgJycpLnRyaW0oKTtcbiAgaWYgKCFrZXkpIHJldHVybiBudWxsO1xuICByZXR1cm4gTEVHQUNZX1RPX0NBTk9OSUNBTFtrZXldIHx8IG51bGw7XG59O1xuXG5leHBvcnQgZnVuY3Rpb24gSXRlcmF0aW9uVGltZWxpbmUoe1xuICBjdXJyZW50SXRlcmF0aW9uLFxuICB0b3RhbEl0ZXJhdGlvbnMsXG4gIG1pbGVzdG9uZXMgPSBbXSxcbiAgbGFuZ3VhZ2UsXG4gIGN1cnJlbnRQaGFzZUtleSxcbiAgcGhhc2VQcm9ncmVzc1BjdCxcbn06IEl0ZXJhdGlvblRpbWVsaW5lUHJvcHMpIHtcbiAgY29uc3Qgbm9ybWFsaXplZFBoYXNlID0gbm9ybWFsaXplUGhhc2UoY3VycmVudFBoYXNlS2V5KTtcbiAgY29uc3QgcGhhc2VJbmRleCA9IG5vcm1hbGl6ZWRQaGFzZSA/IFBIQVNFX09SREVSLmluZGV4T2Yobm9ybWFsaXplZFBoYXNlKSA6IC0xO1xuICBjb25zdCBwaGFzZVJhdGlvID0gc2FmZVBjdChwaGFzZVByb2dyZXNzUGN0KSAvIDEwMDtcblxuICBjb25zdCBwaGFzZURyaXZlblByb2dyZXNzID0gcGhhc2VJbmRleCA+PSAwXG4gICAgPyAoKHBoYXNlSW5kZXggKyBwaGFzZVJhdGlvKSAvIChQSEFTRV9PUkRFUi5sZW5ndGggLSAxKSkgKiAxMDBcbiAgICA6IDA7XG5cbiAgY29uc3QgaXRlcmF0aW9uRHJpdmVuUHJvZ3Jlc3MgPSB0b3RhbEl0ZXJhdGlvbnMgPiAwXG4gICAgPyAoY3VycmVudEl0ZXJhdGlvbiAvIHRvdGFsSXRlcmF0aW9ucykgKiAxMDBcbiAgICA6IDA7XG5cbiAgY29uc3QgcHJvZ3Jlc3MgPSBub3JtYWxpemVkUGhhc2UgPyBwaGFzZURyaXZlblByb2dyZXNzIDogaXRlcmF0aW9uRHJpdmVuUHJvZ3Jlc3M7XG5cbiAgY29uc3QgZGVmYXVsdE1pbGVzdG9uZXMgPSB0b3RhbEl0ZXJhdGlvbnMgPiAwXG4gICAgPyBbMC4yNSwgMC41LCAwLjc1LCAxXS5tYXAoKHApID0+IE1hdGguZmxvb3IocCAqIHRvdGFsSXRlcmF0aW9ucykpXG4gICAgOiBbXTtcblxuICBjb25zdCBhbGxNaWxlc3RvbmVzID0gWy4uLm5ldyBTZXQoWy4uLm1pbGVzdG9uZXMsIC4uLmRlZmF1bHRNaWxlc3RvbmVzXSldXG4gICAgLmZpbHRlcigodmFsdWUpID0+IHZhbHVlID4gMClcbiAgICAuc29ydCgoYSwgYikgPT4gYSAtIGIpO1xuXG4gIGNvbnN0IGN1cnJlbnRQaGFzZUxhYmVsID0gbm9ybWFsaXplZFBoYXNlXG4gICAgPyBwaGFzZUxhYmVsKG5vcm1hbGl6ZWRQaGFzZSwgbGFuZ3VhZ2UpXG4gICAgOiAobGFuZ3VhZ2UgPT09ICdhcicgPyAn2LrZitixINmF2K3Yr9ivJyA6ICdVbmtub3duJyk7XG5cbiAgcmV0dXJuIChcbiAgICA8ZGl2IGNsYXNzTmFtZT1cImdsYXNzLXBhbmVsIHAtNSBsZzpwLTZcIj5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwibWItNCBmbGV4IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWJldHdlZW5cIj5cbiAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMlwiPlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiaC0yLjUgdy0yLjUgYW5pbWF0ZS1wdWxzZSByb3VuZGVkLWZ1bGwgYmctcHJpbWFyeVwiIC8+XG4gICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC1iYXNlIGZvbnQtc2VtaWJvbGQgdGV4dC1mb3JlZ3JvdW5kXCI+XG4gICAgICAgICAgICB7bGFuZ3VhZ2UgPT09ICdhcicgPyAn2KrYs9mE2LPZhCDYp9mE2KrZgtiv2YUnIDogJ1Byb2dyZXNzIFRpbWVsaW5lJ31cbiAgICAgICAgICA8L3NwYW4+XG4gICAgICAgIDwvZGl2PlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCIgZGlyPVwibHRyXCI+XG4gICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC0zeGwgZm9udC1tb25vIGZvbnQtYm9sZCBsZWFkaW5nLW5vbmUgdGV4dC1wcmltYXJ5XCI+e2N1cnJlbnRJdGVyYXRpb259PC9zcGFuPlxuICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPi88L3NwYW4+XG4gICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPVwidGV4dC1iYXNlIGZvbnQtbW9ubyB0ZXh0LW11dGVkLWZvcmVncm91bmRcIj57dG90YWxJdGVyYXRpb25zIHx8ICctJ308L3NwYW4+XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9kaXY+XG5cbiAgICAgIDxkaXYgY2xhc3NOYW1lPVwicmVsYXRpdmUgaC0zLjUgb3ZlcmZsb3ctaGlkZGVuIHJvdW5kZWQtZnVsbCBiZy1zZWNvbmRhcnlcIj5cbiAgICAgICAgPGRpdlxuICAgICAgICAgIGNsYXNzTmFtZT1cImFic29sdXRlIGluc2V0LXktMCBsZWZ0LTAgcm91bmRlZC1mdWxsIGJnLWdyYWRpZW50LXRvLXIgZnJvbS1wcmltYXJ5IHRvLWFjY2VudCB0cmFuc2l0aW9uLWFsbCBkdXJhdGlvbi01MDAgZWFzZS1vdXRcIlxuICAgICAgICAgIHN0eWxlPXt7IHdpZHRoOiBgJHtNYXRoLm1pbihwcm9ncmVzcywgMTAwKX0lYCB9fVxuICAgICAgICA+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJhYnNvbHV0ZSBpbnNldC0wIGJnLXByaW1hcnkvMzAgYmx1ci1zbVwiIC8+XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9kaXY+XG5cbiAgICAgIHtub3JtYWxpemVkUGhhc2UgPyAoXG4gICAgICAgIDxkaXYgY2xhc3NOYW1lPVwibXQtMyBzcGFjZS15LTJcIj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGp1c3RpZnktYmV0d2VlbiB0ZXh0LXNtXCI+XG4gICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LW11dGVkLWZvcmVncm91bmRcIj5cbiAgICAgICAgICAgICAge2xhbmd1YWdlID09PSAnYXInID8gJ9in2YTZhdix2K3ZhNipINin2YTYrdin2YTZitipJyA6ICdDdXJyZW50IHBoYXNlJ31cbiAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cImZvbnQtbWVkaXVtIHRleHQtZm9yZWdyb3VuZFwiPlxuICAgICAgICAgICAgICB7Y3VycmVudFBoYXNlTGFiZWx9XG4gICAgICAgICAgICAgIHt0eXBlb2YgcGhhc2VQcm9ncmVzc1BjdCA9PT0gJ251bWJlcicgJiYgYCAtICR7TWF0aC5yb3VuZChzYWZlUGN0KHBoYXNlUHJvZ3Jlc3NQY3QpKX0lYH1cbiAgICAgICAgICAgIDwvc3Bhbj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImdyaWQgZ3JpZC1jb2xzLTQgZ2FwLTEuNSBzbTpncmlkLWNvbHMtOFwiPlxuICAgICAgICAgICAge1BIQVNFX09SREVSLm1hcCgocGhhc2UsIGluZGV4KSA9PiB7XG4gICAgICAgICAgICAgIGNvbnN0IHBhc3NlZCA9IHBoYXNlSW5kZXggPiBpbmRleDtcbiAgICAgICAgICAgICAgY29uc3QgYWN0aXZlID0gcGhhc2VJbmRleCA9PT0gaW5kZXg7XG4gICAgICAgICAgICAgIHJldHVybiAoXG4gICAgICAgICAgICAgICAgPGRpdlxuICAgICAgICAgICAgICAgICAga2V5PXtwaGFzZX1cbiAgICAgICAgICAgICAgICAgIGNsYXNzTmFtZT17Y24oXG4gICAgICAgICAgICAgICAgICAgICd0cnVuY2F0ZSByb3VuZGVkLW1kIGJvcmRlciBweC0yIHB5LTEuNSB0ZXh0LWNlbnRlciB0ZXh0LXhzJyxcbiAgICAgICAgICAgICAgICAgICAgcGFzc2VkICYmICdib3JkZXItcHJpbWFyeS80MCBiZy1wcmltYXJ5LzEwIHRleHQtcHJpbWFyeScsXG4gICAgICAgICAgICAgICAgICAgIGFjdGl2ZSAmJiAnYm9yZGVyLWFjY2VudC81MCBiZy1hY2NlbnQvMTUgdGV4dC1mb3JlZ3JvdW5kJyxcbiAgICAgICAgICAgICAgICAgICAgIXBhc3NlZCAmJiAhYWN0aXZlICYmICdib3JkZXItYm9yZGVyLzQwIGJnLXNlY29uZGFyeS8zMCB0ZXh0LW11dGVkLWZvcmVncm91bmQnLFxuICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICAgIHRpdGxlPXtwaGFzZUxhYmVsKHBoYXNlLCBsYW5ndWFnZSl9XG4gICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAge3BoYXNlTGFiZWwocGhhc2UsIGxhbmd1YWdlKX1cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgKTtcbiAgICAgICAgICAgIH0pfVxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICA8L2Rpdj5cbiAgICAgICkgOiBudWxsfVxuXG4gICAgICB7IW5vcm1hbGl6ZWRQaGFzZSAmJiB0b3RhbEl0ZXJhdGlvbnMgPiAwID8gKFxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInJlbGF0aXZlIG10LTIgaC01XCIgZGlyPVwibHRyXCI+XG4gICAgICAgICAge2FsbE1pbGVzdG9uZXMubWFwKChtaWxlc3RvbmUpID0+IHtcbiAgICAgICAgICAgIGNvbnN0IHBvc2l0aW9uID0gKG1pbGVzdG9uZSAvIHRvdGFsSXRlcmF0aW9ucykgKiAxMDA7XG4gICAgICAgICAgICBjb25zdCBpc1Bhc3NlZCA9IGN1cnJlbnRJdGVyYXRpb24gPj0gbWlsZXN0b25lO1xuICAgICAgICAgICAgcmV0dXJuIChcbiAgICAgICAgICAgICAgPHNwYW5cbiAgICAgICAgICAgICAgICBrZXk9e21pbGVzdG9uZX1cbiAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2NuKFxuICAgICAgICAgICAgICAgICAgJ2Fic29sdXRlIC10cmFuc2xhdGUteC0xLzIgdGV4dC14cyBmb250LW1vbm8gdHJhbnNpdGlvbi1jb2xvcnMgZHVyYXRpb24tMzAwJyxcbiAgICAgICAgICAgICAgICAgIGlzUGFzc2VkID8gJ3RleHQtcHJpbWFyeScgOiAndGV4dC1tdXRlZC1mb3JlZ3JvdW5kJyxcbiAgICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgICAgIHN0eWxlPXt7IGxlZnQ6IGAke3Bvc2l0aW9ufSVgIH19XG4gICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICB7bWlsZXN0b25lfVxuICAgICAgICAgICAgICA8L3NwYW4+XG4gICAgICAgICAgICApO1xuICAgICAgICAgIH0pfVxuICAgICAgICA8L2Rpdj5cbiAgICAgICkgOiBudWxsfVxuXG4gICAgICA8ZGl2IGNsYXNzTmFtZT1cIm10LTUgZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIGJvcmRlci10IGJvcmRlci1ib3JkZXIvNTAgcHQtM1wiPlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC00XCI+XG4gICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJmbGV4IGl0ZW1zLWNlbnRlciBnYXAtMS41XCI+XG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17Y24oJ2gtMiB3LTIgcm91bmRlZC1mdWxsJywgcHJvZ3Jlc3MgPiAwID8gJ2JnLXN1Y2Nlc3MnIDogJ2JnLW11dGVkLWZvcmVncm91bmQvMzAnKX0gLz5cbiAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT1cInRleHQtc20gdGV4dC1tdXRlZC1mb3JlZ3JvdW5kXCI+e2xhbmd1YWdlID09PSAnYXInID8gJ9io2K/Yp9mK2KknIDogJ1N0YXJ0ZWQnfTwvc3Bhbj5cbiAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0xLjVcIj5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPXtjbignaC0yIHctMiByb3VuZGVkLWZ1bGwnLCBwcm9ncmVzcyA+PSA1MCA/ICdiZy13YXJuaW5nJyA6ICdiZy1tdXRlZC1mb3JlZ3JvdW5kLzMwJyl9IC8+XG4gICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPntsYW5ndWFnZSA9PT0gJ2FyJyA/ICfZhdmG2KrYtdmBJyA6ICdNaWRwb2ludCd9PC9zcGFuPlxuICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTEuNVwiPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9e2NuKCdoLTIgdy0yIHJvdW5kZWQtZnVsbCcsIHByb2dyZXNzID49IDEwMCA/ICdiZy1wcmltYXJ5JyA6ICdiZy1tdXRlZC1mb3JlZ3JvdW5kLzMwJyl9IC8+XG4gICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiPntsYW5ndWFnZSA9PT0gJ2FyJyA/ICfYp9mD2KrZhdin2YQnIDogJ0NvbXBsZXRlJ308L3NwYW4+XG4gICAgICAgICAgPC9kaXY+XG4gICAgICAgIDwvZGl2PlxuICAgICAgICA8c3BhbiBjbGFzc05hbWU9XCJ0ZXh0LXNtIHRleHQtbXV0ZWQtZm9yZWdyb3VuZFwiIGRpcj1cImx0clwiPlxuICAgICAgICAgIHtsYW5ndWFnZSA9PT0gJ2FyJyA/IGDYp9mD2KrZhdmEICR7cHJvZ3Jlc3MudG9GaXhlZCgwKX0lYCA6IGAke3Byb2dyZXNzLnRvRml4ZWQoMCl9JSBjb21wbGV0ZWB9XG4gICAgICAgIDwvc3Bhbj5cbiAgICAgIDwvZGl2PlxuICAgIDwvZGl2PlxuICApO1xufVxuIl0sIm5hbWVzIjpbImNuIiwiUEhBU0VfT1JERVIiLCJMRUdBQ1lfVE9fQ0FOT05JQ0FMIiwiaW50YWtlIiwic2VhcmNoX2Jvb3RzdHJhcCIsImV2aWRlbmNlX21hcCIsInJlc2VhcmNoX2RpZ2VzdCIsImFnZW50X2luaXQiLCJkZWJhdGUiLCJkZWxpYmVyYXRpb24iLCJjb252ZXJnZW5jZSIsInJlc29sdXRpb24iLCJ2ZXJkaWN0Iiwic3VtbWFyeSIsImNvbXBsZXRlZCIsInBoYXNlTGFiZWwiLCJrZXkiLCJsYW5ndWFnZSIsImxhYmVsc0FyIiwiaW5kaXZpZHVhbF9vcGluaW9ucyIsImRpc2N1c3Npb24iLCJuZXV0cmFsaXR5X3JlZHVjdGlvbiIsImZpbmFsX2NvbnZlcmdlbmNlIiwibGFiZWxzRW4iLCJzYWZlUGN0IiwidmFsdWUiLCJOdW1iZXIiLCJpc05hTiIsIk1hdGgiLCJtYXgiLCJtaW4iLCJub3JtYWxpemVQaGFzZSIsInJhdyIsIlN0cmluZyIsInRyaW0iLCJJdGVyYXRpb25UaW1lbGluZSIsImN1cnJlbnRJdGVyYXRpb24iLCJ0b3RhbEl0ZXJhdGlvbnMiLCJtaWxlc3RvbmVzIiwiY3VycmVudFBoYXNlS2V5IiwicGhhc2VQcm9ncmVzc1BjdCIsIm5vcm1hbGl6ZWRQaGFzZSIsInBoYXNlSW5kZXgiLCJpbmRleE9mIiwicGhhc2VSYXRpbyIsInBoYXNlRHJpdmVuUHJvZ3Jlc3MiLCJsZW5ndGgiLCJpdGVyYXRpb25Ecml2ZW5Qcm9ncmVzcyIsInByb2dyZXNzIiwiZGVmYXVsdE1pbGVzdG9uZXMiLCJtYXAiLCJwIiwiZmxvb3IiLCJhbGxNaWxlc3RvbmVzIiwiU2V0IiwiZmlsdGVyIiwic29ydCIsImEiLCJiIiwiY3VycmVudFBoYXNlTGFiZWwiLCJkaXYiLCJjbGFzc05hbWUiLCJzcGFuIiwiZGlyIiwic3R5bGUiLCJ3aWR0aCIsInJvdW5kIiwicGhhc2UiLCJpbmRleCIsInBhc3NlZCIsImFjdGl2ZSIsInRpdGxlIiwibWlsZXN0b25lIiwicG9zaXRpb24iLCJpc1Bhc3NlZCIsImxlZnQiLCJ0b0ZpeGVkIl0sIm1hcHBpbmdzIjoiOzs7Ozs7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

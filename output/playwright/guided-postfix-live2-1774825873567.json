@@ -1,0 +1,26 @@
+{
+  "startedAt": "2026-03-29T23:09:27.227Z",
+  "requests": [
+    {
+      "ts": "2026-03-29T23:09:40.391Z",
+      "method": "POST",
+      "url": "http://127.0.0.1:8000/simulation/workflow/start",
+      "postData": "{\"language\":\"en\",\"draft_context\":{\"idea\":\"\",\"category\":\"\",\"targetAudience\":[],\"country\":\"\",\"city\":\"\",\"placeName\":\"\",\"riskAppetite\":50,\"ideaMaturity\":\"concept\",\"goals\":[],\"contextScope\":\"\",\"language\":\"en\"}}"
+    }
+  ],
+  "responses": [],
+  "snapshots": [
+    {
+      "label": "initial-context-scope",
+      "url": "http://127.0.0.1:5173/simulate",
+      "body": "Point of no return\n\nTest your ideas before launching them\n\nBack to dashboard\nLog out\nRealtime: Disconnected\nSettings\nIdle\nIdea evaluation pipeline\nIdea intake\nDark mode\nReady to continue\nChat\nReasoning\nConfig\nIdea intake\nLive activity\nExecution activity\n\nTrack research, personas, debate, and execution as they happen.\n\nSTATUS\nReady to start\nNo activity yet\nOnce the run starts, you will see research, persona building, debate, and execution step by step.\nRun mandatory pipeline\nDecision metrics\n\nA compact summary to understand the current direction.\n\nWaiting for data"
+    }
+  ],
+  "errors": [
+    {
+      "message": "TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:visible').filter({ hasText: /Internet \\/ general audience/i }).first()\u001b[22m\n",
+      "stack": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button:visible').filter({ hasText: /Internet \\/ general audience/i }).first()\u001b[22m\n\n    at [stdin]:40:23"
+    }
+  ],
+  "loginStatus": 200
+}

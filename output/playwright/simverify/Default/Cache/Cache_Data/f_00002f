@@ -1,0 +1,344 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/dashboard/NotificationsPanel.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"]; const _Fragment = __vite__cjsImport2_react_jsxDevRuntime["Fragment"];
+var _s = $RefreshSig$();
+import { motion, AnimatePresence } from "/node_modules/.vite/deps/framer-motion.js?v=85597f46";
+import { Bell, CheckCircle, AlertTriangle, Brain, Zap, X } from "/node_modules/.vite/deps/lucide-react.js?v=85597f46";
+import { useLanguage } from "/src/contexts/LanguageContext.tsx";
+import { useTheme } from "/src/contexts/ThemeContext.tsx";
+import { cn } from "/src/lib/utils.ts";
+export default function NotificationsPanel({ isOpen, onClose, items, loading = false, onMarkAllRead, onMarkRead }) {
+    _s();
+    const { isRTL } = useLanguage();
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+    const unreadCount = items.filter((n)=>!n.read).length;
+    const getIcon = (type)=>{
+        switch(type){
+            case 'success':
+                return /*#__PURE__*/ _jsxDEV(CheckCircle, {
+                    className: "h-5 w-5 text-emerald-500"
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                    lineNumber: 43,
+                    columnNumber: 16
+                }, this);
+            case 'warning':
+                return /*#__PURE__*/ _jsxDEV(AlertTriangle, {
+                    className: "h-5 w-5 text-amber-500"
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                    lineNumber: 45,
+                    columnNumber: 16
+                }, this);
+            case 'ai':
+                return /*#__PURE__*/ _jsxDEV(Brain, {
+                    className: "h-5 w-5 text-slate-700 dark:text-white"
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                    lineNumber: 47,
+                    columnNumber: 16
+                }, this);
+            case 'info':
+                return /*#__PURE__*/ _jsxDEV(Zap, {
+                    className: "h-5 w-5 text-slate-700 dark:text-white"
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                    lineNumber: 49,
+                    columnNumber: 16
+                }, this);
+        }
+    };
+    const shellClass = cn('absolute top-full z-50 mt-2 w-[24rem] max-w-[calc(100vw-1rem)] overflow-hidden rounded-[28px] shadow-[0_28px_70px_-36px_rgba(0,0,0,0.5)]', isDark ? 'bg-zinc-950 text-white ring-1 ring-white/10' : 'bg-white text-slate-900 ring-1 ring-black/5');
+    const surfaceClass = isDark ? 'bg-white/5 text-white/80 ring-1 ring-white/10' : 'bg-slate-50 text-slate-800 ring-1 ring-black/5';
+    const mutedClass = isDark ? 'text-white/55' : 'text-slate-500';
+    const titleClass = isDark ? 'text-white' : 'text-slate-900';
+    return /*#__PURE__*/ _jsxDEV(AnimatePresence, {
+        children: isOpen && /*#__PURE__*/ _jsxDEV(_Fragment, {
+            children: [
+                /*#__PURE__*/ _jsxDEV("div", {
+                    className: "fixed inset-0 z-40",
+                    onClick: onClose
+                }, void 0, false, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                    lineNumber: 65,
+                    columnNumber: 11
+                }, this),
+                /*#__PURE__*/ _jsxDEV(motion.div, {
+                    initial: {
+                        opacity: 0,
+                        y: -10,
+                        scale: 0.98
+                    },
+                    animate: {
+                        opacity: 1,
+                        y: 0,
+                        scale: 1
+                    },
+                    exit: {
+                        opacity: 0,
+                        y: -10,
+                        scale: 0.98
+                    },
+                    className: cn(shellClass, isRTL ? 'left-0' : 'right-0'),
+                    children: [
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: cn('flex items-center justify-between px-4 py-4', isDark ? 'bg-white/[0.03]' : 'bg-slate-50'),
+                            children: [
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-center gap-2",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV("span", {
+                                            className: cn('flex h-9 w-9 items-center justify-center rounded-2xl', isDark ? 'bg-white/5' : 'bg-white'),
+                                            children: /*#__PURE__*/ _jsxDEV(Bell, {
+                                                className: cn('h-4.5 w-4.5', titleClass)
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                                lineNumber: 75,
+                                                columnNumber: 19
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                            lineNumber: 74,
+                                            columnNumber: 17
+                                        }, this),
+                                        /*#__PURE__*/ _jsxDEV("div", {
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("p", {
+                                                    className: cn('text-sm font-semibold', titleClass),
+                                                    children: isRTL ? 'الإشعارات' : 'Notifications'
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                                    lineNumber: 78,
+                                                    columnNumber: 19
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("p", {
+                                                    className: cn('text-xs', mutedClass),
+                                                    children: isRTL ? 'سجل الأحداث والتنبيهات' : 'Event and alert stream'
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                                    lineNumber: 79,
+                                                    columnNumber: 19
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                            lineNumber: 77,
+                                            columnNumber: 17
+                                        }, this),
+                                        unreadCount > 0 ? /*#__PURE__*/ _jsxDEV("span", {
+                                            className: cn('ml-1 rounded-full px-2 py-0.5 text-[11px] font-medium', isDark ? 'bg-emerald-500/15 text-emerald-300' : 'bg-emerald-50 text-emerald-700'),
+                                            children: unreadCount
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                            lineNumber: 82,
+                                            columnNumber: 19
+                                        }, this) : null
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                    lineNumber: 73,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("div", {
+                                    className: "flex items-center gap-2",
+                                    children: [
+                                        unreadCount > 0 && onMarkAllRead ? /*#__PURE__*/ _jsxDEV("button", {
+                                            onClick: onMarkAllRead,
+                                            className: cn('rounded-full px-3 py-1 text-xs font-medium transition-colors', isDark ? 'bg-white/5 text-white/75 hover:bg-white/10' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'),
+                                            children: isRTL ? 'قراءة الكل' : 'Mark all read'
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                            lineNumber: 90,
+                                            columnNumber: 19
+                                        }, this) : null,
+                                        /*#__PURE__*/ _jsxDEV("button", {
+                                            onClick: onClose,
+                                            className: cn('rounded-full p-2 transition-colors', isDark ? 'bg-white/5 text-white/70 hover:bg-white/10' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'),
+                                            children: /*#__PURE__*/ _jsxDEV(X, {
+                                                className: "h-4 w-4"
+                                            }, void 0, false, {
+                                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                                lineNumber: 101,
+                                                columnNumber: 19
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                            lineNumber: 97,
+                                            columnNumber: 17
+                                        }, this)
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                    lineNumber: 88,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                            lineNumber: 72,
+                            columnNumber: 13
+                        }, this),
+                        /*#__PURE__*/ _jsxDEV("div", {
+                            className: cn('max-h-96 overflow-y-auto p-2', isDark ? 'bg-black' : 'bg-white'),
+                            children: loading ? /*#__PURE__*/ _jsxDEV("div", {
+                                className: cn('rounded-2xl px-4 py-6 text-sm', surfaceClass),
+                                children: isRTL ? 'جارٍ تحميل الإشعارات...' : 'Loading notifications...'
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                lineNumber: 108,
+                                columnNumber: 17
+                            }, this) : items.length === 0 ? /*#__PURE__*/ _jsxDEV("div", {
+                                className: cn('rounded-2xl px-4 py-6 text-sm', surfaceClass),
+                                children: isRTL ? 'لا توجد إشعارات بعد.' : 'No notifications yet.'
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                lineNumber: 112,
+                                columnNumber: 17
+                            }, this) : /*#__PURE__*/ _jsxDEV("div", {
+                                className: "space-y-2",
+                                children: items.map((notif)=>/*#__PURE__*/ _jsxDEV("button", {
+                                        type: "button",
+                                        onClick: ()=>onMarkRead?.(notif.id),
+                                        className: cn('w-full rounded-[22px] px-4 py-4 text-left transition-colors', notif.read ? isDark ? 'bg-white/5 hover:bg-white/10' : 'bg-slate-50 hover:bg-slate-100' : isDark ? 'bg-white/10 hover:bg-white/10' : 'bg-slate-100 hover:bg-slate-200'),
+                                        children: /*#__PURE__*/ _jsxDEV("div", {
+                                            className: "flex items-start gap-3",
+                                            children: [
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: cn('mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl', notif.type === 'ai' ? isDark ? 'bg-white/10' : 'bg-slate-100' : surfaceClass),
+                                                    children: getIcon(notif.type)
+                                                }, void 0, false, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                                    lineNumber: 134,
+                                                    columnNumber: 25
+                                                }, this),
+                                                /*#__PURE__*/ _jsxDEV("div", {
+                                                    className: "min-w-0 flex-1",
+                                                    children: [
+                                                        /*#__PURE__*/ _jsxDEV("div", {
+                                                            className: "flex items-center gap-2",
+                                                            children: [
+                                                                /*#__PURE__*/ _jsxDEV("p", {
+                                                                    className: cn('text-sm font-medium', titleClass),
+                                                                    children: isRTL ? notif.titleAr : notif.title
+                                                                }, void 0, false, {
+                                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                                                    lineNumber: 139,
+                                                                    columnNumber: 29
+                                                                }, this),
+                                                                !notif.read ? /*#__PURE__*/ _jsxDEV("span", {
+                                                                    className: cn('h-2 w-2 rounded-full', isDark ? 'bg-emerald-400' : 'bg-emerald-500')
+                                                                }, void 0, false, {
+                                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                                                    lineNumber: 140,
+                                                                    columnNumber: 44
+                                                                }, this) : null
+                                                            ]
+                                                        }, void 0, true, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                                            lineNumber: 138,
+                                                            columnNumber: 27
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV("p", {
+                                                            className: cn('mt-1 line-clamp-2 text-xs leading-6', mutedClass),
+                                                            children: isRTL ? notif.messageAr : notif.message
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                                            lineNumber: 142,
+                                                            columnNumber: 27
+                                                        }, this),
+                                                        /*#__PURE__*/ _jsxDEV("span", {
+                                                            className: cn('mt-1 block text-[11px]', mutedClass),
+                                                            children: notif.time
+                                                        }, void 0, false, {
+                                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                                            lineNumber: 143,
+                                                            columnNumber: 27
+                                                        }, this)
+                                                    ]
+                                                }, void 0, true, {
+                                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                                    lineNumber: 137,
+                                                    columnNumber: 25
+                                                }, this)
+                                            ]
+                                        }, void 0, true, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                            lineNumber: 133,
+                                            columnNumber: 23
+                                        }, this)
+                                    }, notif.id, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                        lineNumber: 118,
+                                        columnNumber: 21
+                                    }, this))
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                                lineNumber: 116,
+                                columnNumber: 17
+                            }, this)
+                        }, void 0, false, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                            lineNumber: 106,
+                            columnNumber: 13
+                        }, this)
+                    ]
+                }, void 0, true, {
+                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+                    lineNumber: 66,
+                    columnNumber: 11
+                }, this)
+            ]
+        }, void 0, true)
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx",
+        lineNumber: 62,
+        columnNumber: 5
+    }, this);
+}
+_s(NotificationsPanel, "jPmUr/YUnKZ0p+mClS0sTzvXbdM=", false, function() {
+    return [
+        useLanguage,
+        useTheme
+    ];
+});
+_c = NotificationsPanel;
+var _c;
+$RefreshReg$(_c, "NotificationsPanel");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/components/dashboard/NotificationsPanel.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIk5vdGlmaWNhdGlvbnNQYW5lbC50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgbW90aW9uLCBBbmltYXRlUHJlc2VuY2UgfSBmcm9tICdmcmFtZXItbW90aW9uJztcbmltcG9ydCB7IEJlbGwsIENoZWNrQ2lyY2xlLCBBbGVydFRyaWFuZ2xlLCBCcmFpbiwgWmFwLCBYIH0gZnJvbSAnbHVjaWRlLXJlYWN0JztcbmltcG9ydCB7IHVzZUxhbmd1YWdlIH0gZnJvbSAnQC9jb250ZXh0cy9MYW5ndWFnZUNvbnRleHQnO1xuaW1wb3J0IHsgdXNlVGhlbWUgfSBmcm9tICdAL2NvbnRleHRzL1RoZW1lQ29udGV4dCc7XG5pbXBvcnQgeyBjbiB9IGZyb20gJ0AvbGliL3V0aWxzJztcblxuZXhwb3J0IGludGVyZmFjZSBOb3RpZmljYXRpb25JdGVtIHtcbiAgaWQ6IHN0cmluZztcbiAgdHlwZTogJ3N1Y2Nlc3MnIHwgJ3dhcm5pbmcnIHwgJ2luZm8nIHwgJ2FpJztcbiAgdGl0bGU6IHN0cmluZztcbiAgdGl0bGVBcjogc3RyaW5nO1xuICBtZXNzYWdlOiBzdHJpbmc7XG4gIG1lc3NhZ2VBcjogc3RyaW5nO1xuICB0aW1lOiBzdHJpbmc7XG4gIHJlYWQ6IGJvb2xlYW47XG59XG5cbmludGVyZmFjZSBOb3RpZmljYXRpb25zUGFuZWxQcm9wcyB7XG4gIGlzT3BlbjogYm9vbGVhbjtcbiAgb25DbG9zZTogKCkgPT4gdm9pZDtcbiAgaXRlbXM6IE5vdGlmaWNhdGlvbkl0ZW1bXTtcbiAgbG9hZGluZz86IGJvb2xlYW47XG4gIG9uTWFya0FsbFJlYWQ/OiAoKSA9PiB2b2lkO1xuICBvbk1hcmtSZWFkPzogKGlkOiBzdHJpbmcpID0+IHZvaWQ7XG59XG5cbmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIE5vdGlmaWNhdGlvbnNQYW5lbCh7XG4gIGlzT3BlbixcbiAgb25DbG9zZSxcbiAgaXRlbXMsXG4gIGxvYWRpbmcgPSBmYWxzZSxcbiAgb25NYXJrQWxsUmVhZCxcbiAgb25NYXJrUmVhZCxcbn06IE5vdGlmaWNhdGlvbnNQYW5lbFByb3BzKSB7XG4gIGNvbnN0IHsgaXNSVEwgfSA9IHVzZUxhbmd1YWdlKCk7XG4gIGNvbnN0IHsgdGhlbWUgfSA9IHVzZVRoZW1lKCk7XG4gIGNvbnN0IGlzRGFyayA9IHRoZW1lID09PSAnZGFyayc7XG4gIGNvbnN0IHVucmVhZENvdW50ID0gaXRlbXMuZmlsdGVyKChuKSA9PiAhbi5yZWFkKS5sZW5ndGg7XG5cbiAgY29uc3QgZ2V0SWNvbiA9ICh0eXBlOiBOb3RpZmljYXRpb25JdGVtWyd0eXBlJ10pID0+IHtcbiAgICBzd2l0Y2ggKHR5cGUpIHtcbiAgICAgIGNhc2UgJ3N1Y2Nlc3MnOlxuICAgICAgICByZXR1cm4gPENoZWNrQ2lyY2xlIGNsYXNzTmFtZT1cImgtNSB3LTUgdGV4dC1lbWVyYWxkLTUwMFwiIC8+O1xuICAgICAgY2FzZSAnd2FybmluZyc6XG4gICAgICAgIHJldHVybiA8QWxlcnRUcmlhbmdsZSBjbGFzc05hbWU9XCJoLTUgdy01IHRleHQtYW1iZXItNTAwXCIgLz47XG4gICAgICBjYXNlICdhaSc6XG4gICAgICAgIHJldHVybiA8QnJhaW4gY2xhc3NOYW1lPVwiaC01IHctNSB0ZXh0LXNsYXRlLTcwMCBkYXJrOnRleHQtd2hpdGVcIiAvPjtcbiAgICAgIGNhc2UgJ2luZm8nOlxuICAgICAgICByZXR1cm4gPFphcCBjbGFzc05hbWU9XCJoLTUgdy01IHRleHQtc2xhdGUtNzAwIGRhcms6dGV4dC13aGl0ZVwiIC8+O1xuICAgIH1cbiAgfTtcblxuICBjb25zdCBzaGVsbENsYXNzID0gY24oXG4gICAgJ2Fic29sdXRlIHRvcC1mdWxsIHotNTAgbXQtMiB3LVsyNHJlbV0gbWF4LXctW2NhbGMoMTAwdnctMXJlbSldIG92ZXJmbG93LWhpZGRlbiByb3VuZGVkLVsyOHB4XSBzaGFkb3ctWzBfMjhweF83MHB4Xy0zNnB4X3JnYmEoMCwwLDAsMC41KV0nLFxuICAgIGlzRGFyayA/ICdiZy16aW5jLTk1MCB0ZXh0LXdoaXRlIHJpbmctMSByaW5nLXdoaXRlLzEwJyA6ICdiZy13aGl0ZSB0ZXh0LXNsYXRlLTkwMCByaW5nLTEgcmluZy1ibGFjay81JyxcbiAgKTtcbiAgY29uc3Qgc3VyZmFjZUNsYXNzID0gaXNEYXJrID8gJ2JnLXdoaXRlLzUgdGV4dC13aGl0ZS84MCByaW5nLTEgcmluZy13aGl0ZS8xMCcgOiAnYmctc2xhdGUtNTAgdGV4dC1zbGF0ZS04MDAgcmluZy0xIHJpbmctYmxhY2svNSc7XG4gIGNvbnN0IG11dGVkQ2xhc3MgPSBpc0RhcmsgPyAndGV4dC13aGl0ZS81NScgOiAndGV4dC1zbGF0ZS01MDAnO1xuICBjb25zdCB0aXRsZUNsYXNzID0gaXNEYXJrID8gJ3RleHQtd2hpdGUnIDogJ3RleHQtc2xhdGUtOTAwJztcblxuICByZXR1cm4gKFxuICAgIDxBbmltYXRlUHJlc2VuY2U+XG4gICAgICB7aXNPcGVuICYmIChcbiAgICAgICAgPD5cbiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZpeGVkIGluc2V0LTAgei00MFwiIG9uQ2xpY2s9e29uQ2xvc2V9IC8+XG4gICAgICAgICAgPG1vdGlvbi5kaXZcbiAgICAgICAgICAgIGluaXRpYWw9e3sgb3BhY2l0eTogMCwgeTogLTEwLCBzY2FsZTogMC45OCB9fVxuICAgICAgICAgICAgYW5pbWF0ZT17eyBvcGFjaXR5OiAxLCB5OiAwLCBzY2FsZTogMSB9fVxuICAgICAgICAgICAgZXhpdD17eyBvcGFjaXR5OiAwLCB5OiAtMTAsIHNjYWxlOiAwLjk4IH19XG4gICAgICAgICAgICBjbGFzc05hbWU9e2NuKHNoZWxsQ2xhc3MsIGlzUlRMID8gJ2xlZnQtMCcgOiAncmlnaHQtMCcpfVxuICAgICAgICAgID5cbiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPXtjbignZmxleCBpdGVtcy1jZW50ZXIganVzdGlmeS1iZXR3ZWVuIHB4LTQgcHktNCcsIGlzRGFyayA/ICdiZy13aGl0ZS9bMC4wM10nIDogJ2JnLXNsYXRlLTUwJyl9PlxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPXtjbignZmxleCBoLTkgdy05IGl0ZW1zLWNlbnRlciBqdXN0aWZ5LWNlbnRlciByb3VuZGVkLTJ4bCcsIGlzRGFyayA/ICdiZy13aGl0ZS81JyA6ICdiZy13aGl0ZScpfT5cbiAgICAgICAgICAgICAgICAgIDxCZWxsIGNsYXNzTmFtZT17Y24oJ2gtNC41IHctNC41JywgdGl0bGVDbGFzcyl9IC8+XG4gICAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgICAgIDxkaXY+XG4gICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9e2NuKCd0ZXh0LXNtIGZvbnQtc2VtaWJvbGQnLCB0aXRsZUNsYXNzKX0+e2lzUlRMID8gJ9in2YTYpdi02LnYp9ix2KfYqicgOiAnTm90aWZpY2F0aW9ucyd9PC9wPlxuICAgICAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPXtjbigndGV4dC14cycsIG11dGVkQ2xhc3MpfT57aXNSVEwgPyAn2LPYrNmEINin2YTYo9it2K/Yp9irINmI2KfZhNiq2YbYqNmK2YfYp9iqJyA6ICdFdmVudCBhbmQgYWxlcnQgc3RyZWFtJ308L3A+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAge3VucmVhZENvdW50ID4gMCA/IChcbiAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT17Y24oJ21sLTEgcm91bmRlZC1mdWxsIHB4LTIgcHktMC41IHRleHQtWzExcHhdIGZvbnQtbWVkaXVtJywgaXNEYXJrID8gJ2JnLWVtZXJhbGQtNTAwLzE1IHRleHQtZW1lcmFsZC0zMDAnIDogJ2JnLWVtZXJhbGQtNTAgdGV4dC1lbWVyYWxkLTcwMCcpfT5cbiAgICAgICAgICAgICAgICAgICAge3VucmVhZENvdW50fVxuICAgICAgICAgICAgICAgICAgPC9zcGFuPlxuICAgICAgICAgICAgICAgICkgOiBudWxsfVxuICAgICAgICAgICAgICA8L2Rpdj5cblxuICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImZsZXggaXRlbXMtY2VudGVyIGdhcC0yXCI+XG4gICAgICAgICAgICAgICAge3VucmVhZENvdW50ID4gMCAmJiBvbk1hcmtBbGxSZWFkID8gKFxuICAgICAgICAgICAgICAgICAgPGJ1dHRvblxuICAgICAgICAgICAgICAgICAgICBvbkNsaWNrPXtvbk1hcmtBbGxSZWFkfVxuICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2NuKCdyb3VuZGVkLWZ1bGwgcHgtMyBweS0xIHRleHQteHMgZm9udC1tZWRpdW0gdHJhbnNpdGlvbi1jb2xvcnMnLCBpc0RhcmsgPyAnYmctd2hpdGUvNSB0ZXh0LXdoaXRlLzc1IGhvdmVyOmJnLXdoaXRlLzEwJyA6ICdiZy1zbGF0ZS0xMDAgdGV4dC1zbGF0ZS03MDAgaG92ZXI6Ymctc2xhdGUtMjAwJyl9XG4gICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgIHtpc1JUTCA/ICfZgtix2KfYodipINin2YTZg9mEJyA6ICdNYXJrIGFsbCByZWFkJ31cbiAgICAgICAgICAgICAgICAgIDwvYnV0dG9uPlxuICAgICAgICAgICAgICAgICkgOiBudWxsfVxuICAgICAgICAgICAgICAgIDxidXR0b25cbiAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9e29uQ2xvc2V9XG4gICAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2NuKCdyb3VuZGVkLWZ1bGwgcC0yIHRyYW5zaXRpb24tY29sb3JzJywgaXNEYXJrID8gJ2JnLXdoaXRlLzUgdGV4dC13aGl0ZS83MCBob3ZlcjpiZy13aGl0ZS8xMCcgOiAnYmctc2xhdGUtMTAwIHRleHQtc2xhdGUtNjAwIGhvdmVyOmJnLXNsYXRlLTIwMCcpfVxuICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgIDxYIGNsYXNzTmFtZT1cImgtNCB3LTRcIiAvPlxuICAgICAgICAgICAgICAgIDwvYnV0dG9uPlxuICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17Y24oJ21heC1oLTk2IG92ZXJmbG93LXktYXV0byBwLTInLCBpc0RhcmsgPyAnYmctYmxhY2snIDogJ2JnLXdoaXRlJyl9PlxuICAgICAgICAgICAgICB7bG9hZGluZyA/IChcbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT17Y24oJ3JvdW5kZWQtMnhsIHB4LTQgcHktNiB0ZXh0LXNtJywgc3VyZmFjZUNsYXNzKX0+XG4gICAgICAgICAgICAgICAgICB7aXNSVEwgPyAn2KzYp9ix2Y0g2KrYrdmF2YrZhCDYp9mE2KXYtNi52KfYsdin2KouLi4nIDogJ0xvYWRpbmcgbm90aWZpY2F0aW9ucy4uLid9XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICkgOiBpdGVtcy5sZW5ndGggPT09IDAgPyAoXG4gICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9e2NuKCdyb3VuZGVkLTJ4bCBweC00IHB5LTYgdGV4dC1zbScsIHN1cmZhY2VDbGFzcyl9PlxuICAgICAgICAgICAgICAgICAge2lzUlRMID8gJ9mE2Kcg2KrZiNis2K8g2KXYtNi52KfYsdin2Kog2KjYudivLicgOiAnTm8gbm90aWZpY2F0aW9ucyB5ZXQuJ31cbiAgICAgICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICAgICAgKSA6IChcbiAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cInNwYWNlLXktMlwiPlxuICAgICAgICAgICAgICAgICAge2l0ZW1zLm1hcCgobm90aWYpID0+IChcbiAgICAgICAgICAgICAgICAgICAgPGJ1dHRvblxuICAgICAgICAgICAgICAgICAgICAgIGtleT17bm90aWYuaWR9XG4gICAgICAgICAgICAgICAgICAgICAgdHlwZT1cImJ1dHRvblwiXG4gICAgICAgICAgICAgICAgICAgICAgb25DbGljaz17KCkgPT4gb25NYXJrUmVhZD8uKG5vdGlmLmlkKX1cbiAgICAgICAgICAgICAgICAgICAgICBjbGFzc05hbWU9e2NuKFxuICAgICAgICAgICAgICAgICAgICAgICAgJ3ctZnVsbCByb3VuZGVkLVsyMnB4XSBweC00IHB5LTQgdGV4dC1sZWZ0IHRyYW5zaXRpb24tY29sb3JzJyxcbiAgICAgICAgICAgICAgICAgICAgICAgIG5vdGlmLnJlYWRcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPyBpc0RhcmtcbiAgICAgICAgICAgICAgICAgICAgICAgICAgPyAnYmctd2hpdGUvNSBob3ZlcjpiZy13aGl0ZS8xMCdcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA6ICdiZy1zbGF0ZS01MCBob3ZlcjpiZy1zbGF0ZS0xMDAnXG4gICAgICAgICAgICAgICAgICAgICAgICAgIDogaXNEYXJrXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgPyAnYmctd2hpdGUvMTAgaG92ZXI6Ymctd2hpdGUvMTAnXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgOiAnYmctc2xhdGUtMTAwIGhvdmVyOmJnLXNsYXRlLTIwMCcsXG4gICAgICAgICAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1zdGFydCBnYXAtM1wiPlxuICAgICAgICAgICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9e2NuKCdtdC0wLjUgZmxleCBoLTEwIHctMTAgc2hyaW5rLTAgaXRlbXMtY2VudGVyIGp1c3RpZnktY2VudGVyIHJvdW5kZWQtMnhsJywgbm90aWYudHlwZSA9PT0gJ2FpJyA/IChpc0RhcmsgPyAnYmctd2hpdGUvMTAnIDogJ2JnLXNsYXRlLTEwMCcpIDogc3VyZmFjZUNsYXNzKX0+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIHtnZXRJY29uKG5vdGlmLnR5cGUpfVxuICAgICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cIm1pbi13LTAgZmxleC0xXCI+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPVwiZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTJcIj5cbiAgICAgICAgICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9e2NuKCd0ZXh0LXNtIGZvbnQtbWVkaXVtJywgdGl0bGVDbGFzcyl9Pntpc1JUTCA/IG5vdGlmLnRpdGxlQXIgOiBub3RpZi50aXRsZX08L3A+XG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgeyFub3RpZi5yZWFkID8gPHNwYW4gY2xhc3NOYW1lPXtjbignaC0yIHctMiByb3VuZGVkLWZ1bGwnLCBpc0RhcmsgPyAnYmctZW1lcmFsZC00MDAnIDogJ2JnLWVtZXJhbGQtNTAwJyl9IC8+IDogbnVsbH1cbiAgICAgICAgICAgICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgICAgICAgICAgIDxwIGNsYXNzTmFtZT17Y24oJ210LTEgbGluZS1jbGFtcC0yIHRleHQteHMgbGVhZGluZy02JywgbXV0ZWRDbGFzcyl9Pntpc1JUTCA/IG5vdGlmLm1lc3NhZ2VBciA6IG5vdGlmLm1lc3NhZ2V9PC9wPlxuICAgICAgICAgICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9e2NuKCdtdC0xIGJsb2NrIHRleHQtWzExcHhdJywgbXV0ZWRDbGFzcyl9Pntub3RpZi50aW1lfTwvc3Bhbj5cbiAgICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgICA8L2J1dHRvbj5cbiAgICAgICAgICAgICAgICAgICkpfVxuICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICApfVxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPC9tb3Rpb24uZGl2PlxuICAgICAgICA8Lz5cbiAgICAgICl9XG4gICAgPC9BbmltYXRlUHJlc2VuY2U+XG4gICk7XG59XG4iXSwibmFtZXMiOlsibW90aW9uIiwiQW5pbWF0ZVByZXNlbmNlIiwiQmVsbCIsIkNoZWNrQ2lyY2xlIiwiQWxlcnRUcmlhbmdsZSIsIkJyYWluIiwiWmFwIiwiWCIsInVzZUxhbmd1YWdlIiwidXNlVGhlbWUiLCJjbiIsIk5vdGlmaWNhdGlvbnNQYW5lbCIsImlzT3BlbiIsIm9uQ2xvc2UiLCJpdGVtcyIsImxvYWRpbmciLCJvbk1hcmtBbGxSZWFkIiwib25NYXJrUmVhZCIsImlzUlRMIiwidGhlbWUiLCJpc0RhcmsiLCJ1bnJlYWRDb3VudCIsImZpbHRlciIsIm4iLCJyZWFkIiwibGVuZ3RoIiwiZ2V0SWNvbiIsInR5cGUiLCJjbGFzc05hbWUiLCJzaGVsbENsYXNzIiwic3VyZmFjZUNsYXNzIiwibXV0ZWRDbGFzcyIsInRpdGxlQ2xhc3MiLCJkaXYiLCJvbkNsaWNrIiwiaW5pdGlhbCIsIm9wYWNpdHkiLCJ5Iiwic2NhbGUiLCJhbmltYXRlIiwiZXhpdCIsInNwYW4iLCJwIiwiYnV0dG9uIiwibWFwIiwibm90aWYiLCJpZCIsInRpdGxlQXIiLCJ0aXRsZSIsIm1lc3NhZ2VBciIsIm1lc3NhZ2UiLCJ0aW1lIl0sIm1hcHBpbmdzIjoiOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFBQSxTQUFTQSxNQUFNLEVBQUVDLGVBQWUsUUFBUSxnQkFBZ0I7QUFDeEQsU0FBU0MsSUFBSSxFQUFFQyxXQUFXLEVBQUVDLGFBQWEsRUFBRUMsS0FBSyxFQUFFQyxHQUFHLEVBQUVDLENBQUMsUUFBUSxlQUFlO0FBQy9FLFNBQVNDLFdBQVcsUUFBUSw2QkFBNkI7QUFDekQsU0FBU0MsUUFBUSxRQUFRLDBCQUEwQjtBQUNuRCxTQUFTQyxFQUFFLFFBQVEsY0FBYztBQXNCakMsZUFBZSxTQUFTQyxtQkFBbUIsRUFDekNDLE1BQU0sRUFDTkMsT0FBTyxFQUNQQyxLQUFLLEVBQ0xDLFVBQVUsS0FBSyxFQUNmQyxhQUFhLEVBQ2JDLFVBQVUsRUFDYzs7SUFDeEIsTUFBTSxFQUFFQyxLQUFL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

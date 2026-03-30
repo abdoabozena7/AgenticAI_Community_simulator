@@ -1,0 +1,208 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/pages/BonusPage.tsx");import * as RefreshRuntime from "/@react-refresh";
+const inWebWorker = typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
+let prevRefreshReg;
+let prevRefreshSig;
+
+if (import.meta.hot && !inWebWorker) {
+  if (!window.$RefreshReg$) {
+    throw new Error(
+      "@vitejs/plugin-react-swc can't detect preamble. Something is wrong."
+    );
+  }
+
+  prevRefreshReg = window.$RefreshReg$;
+  prevRefreshSig = window.$RefreshSig$;
+  window.$RefreshReg$ = RefreshRuntime.getRefreshReg("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx");
+  window.$RefreshSig$ = RefreshRuntime.createSignatureFunctionForTransform;
+}
+
+import __vite__cjsImport2_react_jsxDevRuntime from "/node_modules/.vite/deps/react_jsx-dev-runtime.js?v=85597f46"; const _jsxDEV = __vite__cjsImport2_react_jsxDevRuntime["jsxDEV"];
+var _s = $RefreshSig$();
+import { ArrowLeft, Gift, Sparkles } from "/node_modules/.vite/deps/lucide-react.js?v=85597f46";
+import { useNavigate } from "/node_modules/.vite/deps/react-router-dom.js?v=85597f46";
+import { Button } from "/src/components/ui/button.tsx";
+import { useLanguage } from "/src/contexts/LanguageContext.tsx";
+import { useTheme } from "/src/contexts/ThemeContext.tsx";
+import { cn } from "/src/lib/utils.ts";
+export default function BonusPage() {
+    _s();
+    const navigate = useNavigate();
+    const { language } = useLanguage();
+    const { theme } = useTheme();
+    const rtl = language === "ar";
+    const t = (en, ar)=>rtl ? ar : en;
+    const shellClass = cn("min-h-screen", theme === "dark" ? "text-white [--bg:#050505] [--surface:#101010] [--surface-2:#171717] [--ink:#f3f3f3] [--muted:#a3a3a3]" : "text-[#100c3d] [--bg:#f5f6f8] [--surface:#ffffff] [--surface-2:#eceef2] [--ink:#100c3d] [--muted:#637083]");
+    return /*#__PURE__*/ _jsxDEV("div", {
+        dir: rtl ? "rtl" : "ltr",
+        className: shellClass,
+        style: {
+            background: "var(--bg)"
+        },
+        children: /*#__PURE__*/ _jsxDEV("div", {
+            className: "mx-auto flex min-h-screen max-w-5xl items-center px-4 py-8 sm:px-6 lg:px-8",
+            children: /*#__PURE__*/ _jsxDEV("div", {
+                className: "grid w-full gap-6 lg:grid-cols-[minmax(0,1.12fr)_minmax(320px,0.88fr)]",
+                children: [
+                    /*#__PURE__*/ _jsxDEV("section", {
+                        className: "rounded-[32px] border border-white/10 bg-[color:var(--surface)] p-8 shadow-[0_24px_80px_rgba(0,0,0,0.18)] sm:p-10",
+                        children: [
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "inline-flex items-center gap-2 rounded-full bg-[color:var(--surface-2)] px-4 py-2 text-sm text-[color:var(--ink)]",
+                                children: [
+                                    /*#__PURE__*/ _jsxDEV(Gift, {
+                                        className: "h-4 w-4"
+                                    }, void 0, false, {
+                                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+                                        lineNumber: 29,
+                                        columnNumber: 15
+                                    }, this),
+                                    t("Bonus Credits", "الأرصدة الإضافية")
+                                ]
+                            }, void 0, true, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+                                lineNumber: 28,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("h1", {
+                                className: "mt-6 max-w-xl font-['IBM_Plex_Sans_Arabic'] text-4xl font-semibold tracking-[-0.05em] text-[color:var(--ink)] sm:text-5xl",
+                                children: t("Bonus packs are coming soon", "حزم المكافآت قادمة قريبًا")
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+                                lineNumber: 33,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("p", {
+                                className: "mt-4 max-w-2xl text-base leading-8 text-[color:var(--muted)]",
+                                children: t("We are preparing bonus packs for teams, founders, and trial users. The layout stays aligned with the same system theme, with black-based dark mode and calm editorial spacing.", "نجهز حزم مكافآت للفرق والمؤسسين والمستخدمين التجريبيين. الواجهة تظل متسقة مع ثيم النظام نفسه، مع وضع ليلي قائم على الأسود ومسافات تحريرية هادئة.")
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+                                lineNumber: 37,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ _jsxDEV("div", {
+                                className: "mt-8 flex flex-wrap gap-3",
+                                children: /*#__PURE__*/ _jsxDEV(Button, {
+                                    type: "button",
+                                    onClick: ()=>navigate("/dashboard"),
+                                    className: "h-12 rounded-2xl bg-[color:var(--ink)] text-[color:var(--surface)] hover:opacity-90",
+                                    children: [
+                                        /*#__PURE__*/ _jsxDEV(ArrowLeft, {
+                                            className: "h-4 w-4"
+                                        }, void 0, false, {
+                                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+                                            lineNumber: 50,
+                                            columnNumber: 17
+                                        }, this),
+                                        t("Back to dashboard", "العودة إلى اللوحة")
+                                    ]
+                                }, void 0, true, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+                                    lineNumber: 45,
+                                    columnNumber: 15
+                                }, this)
+                            }, void 0, false, {
+                                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+                                lineNumber: 44,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+                        lineNumber: 27,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ _jsxDEV("aside", {
+                        className: "rounded-[32px] border border-white/10 bg-[color:var(--surface)] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.18)]",
+                        children: /*#__PURE__*/ _jsxDEV("div", {
+                            className: "rounded-[28px] bg-[color:var(--surface-2)] p-6",
+                            children: [
+                                /*#__PURE__*/ _jsxDEV(Sparkles, {
+                                    className: "h-7 w-7 text-[color:var(--ink)]"
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+                                    lineNumber: 58,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("p", {
+                                    className: "mt-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-[color:var(--muted)]",
+                                    children: t("Status", "الحالة")
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+                                    lineNumber: 59,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("p", {
+                                    className: "mt-2 font-['Be_Vietnam_Pro'] text-2xl font-semibold text-[color:var(--ink)]",
+                                    children: t("In design", "قيد التصميم")
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+                                    lineNumber: 62,
+                                    columnNumber: 15
+                                }, this),
+                                /*#__PURE__*/ _jsxDEV("p", {
+                                    className: "mt-3 text-sm leading-7 text-[color:var(--muted)]",
+                                    children: t("This section will host bonus offers, credit bundles, and campaign timing once the product flow is ready.", "ستستضيف هذه المساحة عروض المكافآت وحزم الرصيد وتوقيت الحملات بمجرد جاهزية مسار المنتج.")
+                                }, void 0, false, {
+                                    fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+                                    lineNumber: 65,
+                                    columnNumber: 15
+                                }, this)
+                            ]
+                        }, void 0, true, {
+                            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+                            lineNumber: 57,
+                            columnNumber: 13
+                        }, this)
+                    }, void 0, false, {
+                        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+                        lineNumber: 56,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+                lineNumber: 26,
+                columnNumber: 9
+            }, this)
+        }, void 0, false, {
+            fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+            lineNumber: 25,
+            columnNumber: 7
+        }, this)
+    }, void 0, false, {
+        fileName: "D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx",
+        lineNumber: 24,
+        columnNumber: 5
+    }, this);
+}
+_s(BonusPage, "qFiYLgpivS7U9AmimcFNFGX6Nuc=", false, function() {
+    return [
+        useNavigate,
+        useLanguage,
+        useTheme
+    ];
+});
+_c = BonusPage;
+var _c;
+$RefreshReg$(_c, "BonusPage");
+
+
+if (import.meta.hot && !inWebWorker) {
+  window.$RefreshReg$ = prevRefreshReg;
+  window.$RefreshSig$ = prevRefreshSig;
+}
+
+
+if (import.meta.hot && !inWebWorker) {
+  RefreshRuntime.__hmr_import(import.meta.url).then((currentExports) => {
+    RefreshRuntime.registerExportsForReactRefresh("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx", currentExports);
+    import.meta.hot.accept((nextExports) => {
+      if (!nextExports) return;
+      const invalidateMessage = RefreshRuntime.validateRefreshBoundaryAndEnqueueUpdate("D:/projects/Ai/AgenticAI_Community_simulator-DEPI/frontend/src/pages/BonusPage.tsx", currentExports, nextExports);
+      if (invalidateMessage) import.meta.hot.invalidate(invalidateMessage);
+    });
+  });
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIkJvbnVzUGFnZS50c3giXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgQXJyb3dMZWZ0LCBHaWZ0LCBTcGFya2xlcyB9IGZyb20gXCJsdWNpZGUtcmVhY3RcIjtcbmltcG9ydCB7IHVzZU5hdmlnYXRlIH0gZnJvbSBcInJlYWN0LXJvdXRlci1kb21cIjtcblxuaW1wb3J0IHsgQnV0dG9uIH0gZnJvbSBcIkAvY29tcG9uZW50cy91aS9idXR0b25cIjtcbmltcG9ydCB7IHVzZUxhbmd1YWdlIH0gZnJvbSBcIkAvY29udGV4dHMvTGFuZ3VhZ2VDb250ZXh0XCI7XG5pbXBvcnQgeyB1c2VUaGVtZSB9IGZyb20gXCJAL2NvbnRleHRzL1RoZW1lQ29udGV4dFwiO1xuaW1wb3J0IHsgY24gfSBmcm9tIFwiQC9saWIvdXRpbHNcIjtcblxuZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gQm9udXNQYWdlKCkge1xuICBjb25zdCBuYXZpZ2F0ZSA9IHVzZU5hdmlnYXRlKCk7XG4gIGNvbnN0IHsgbGFuZ3VhZ2UgfSA9IHVzZUxhbmd1YWdlKCk7XG4gIGNvbnN0IHsgdGhlbWUgfSA9IHVzZVRoZW1lKCk7XG4gIGNvbnN0IHJ0bCA9IGxhbmd1YWdlID09PSBcImFyXCI7XG4gIGNvbnN0IHQgPSAoZW46IHN0cmluZywgYXI6IHN0cmluZykgPT4gKHJ0bCA/IGFyIDogZW4pO1xuXG4gIGNvbnN0IHNoZWxsQ2xhc3MgPSBjbihcbiAgICBcIm1pbi1oLXNjcmVlblwiLFxuICAgIHRoZW1lID09PSBcImRhcmtcIlxuICAgICAgPyBcInRleHQtd2hpdGUgWy0tYmc6IzA1MDUwNV0gWy0tc3VyZmFjZTojMTAxMDEwXSBbLS1zdXJmYWNlLTI6IzE3MTcxN10gWy0taW5rOiNmM2YzZjNdIFstLW11dGVkOiNhM2EzYTNdXCJcbiAgICAgIDogXCJ0ZXh0LVsjMTAwYzNkXSBbLS1iZzojZjVmNmY4XSBbLS1zdXJmYWNlOiNmZmZmZmZdIFstLXN1cmZhY2UtMjojZWNlZWYyXSBbLS1pbms6IzEwMGMzZF0gWy0tbXV0ZWQ6IzYzNzA4M11cIixcbiAgKTtcblxuICByZXR1cm4gKFxuICAgIDxkaXYgZGlyPXtydGwgPyBcInJ0bFwiIDogXCJsdHJcIn0gY2xhc3NOYW1lPXtzaGVsbENsYXNzfSBzdHlsZT17eyBiYWNrZ3JvdW5kOiBcInZhcigtLWJnKVwiIH19PlxuICAgICAgPGRpdiBjbGFzc05hbWU9XCJteC1hdXRvIGZsZXggbWluLWgtc2NyZWVuIG1heC13LTV4bCBpdGVtcy1jZW50ZXIgcHgtNCBweS04IHNtOnB4LTYgbGc6cHgtOFwiPlxuICAgICAgICA8ZGl2IGNsYXNzTmFtZT1cImdyaWQgdy1mdWxsIGdhcC02IGxnOmdyaWQtY29scy1bbWlubWF4KDAsMS4xMmZyKV9taW5tYXgoMzIwcHgsMC44OGZyKV1cIj5cbiAgICAgICAgICA8c2VjdGlvbiBjbGFzc05hbWU9XCJyb3VuZGVkLVszMnB4XSBib3JkZXIgYm9yZGVyLXdoaXRlLzEwIGJnLVtjb2xvcjp2YXIoLS1zdXJmYWNlKV0gcC04IHNoYWRvdy1bMF8yNHB4XzgwcHhfcmdiYSgwLDAsMCwwLjE4KV0gc206cC0xMFwiPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJpbmxpbmUtZmxleCBpdGVtcy1jZW50ZXIgZ2FwLTIgcm91bmRlZC1mdWxsIGJnLVtjb2xvcjp2YXIoLS1zdXJmYWNlLTIpXSBweC00IHB5LTIgdGV4dC1zbSB0ZXh0LVtjb2xvcjp2YXIoLS1pbmspXVwiPlxuICAgICAgICAgICAgICA8R2lmdCBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAge3QoXCJCb251cyBDcmVkaXRzXCIsIFwi2KfZhNij2LHYtdiv2Kkg2KfZhNil2LbYp9mB2YrYqVwiKX1cbiAgICAgICAgICAgIDwvZGl2PlxuXG4gICAgICAgICAgICA8aDEgY2xhc3NOYW1lPVwibXQtNiBtYXgtdy14bCBmb250LVsnSUJNX1BsZXhfU2Fuc19BcmFiaWMnXSB0ZXh0LTR4bCBmb250LXNlbWlib2xkIHRyYWNraW5nLVstMC4wNWVtXSB0ZXh0LVtjb2xvcjp2YXIoLS1pbmspXSBzbTp0ZXh0LTV4bFwiPlxuICAgICAgICAgICAgICB7dChcIkJvbnVzIHBhY2tzIGFyZSBjb21pbmcgc29vblwiLCBcItit2LLZhSDYp9mE2YXZg9in2YHYotiqINmC2KfYr9mF2Kkg2YLYsdmK2KjZi9inXCIpfVxuICAgICAgICAgICAgPC9oMT5cblxuICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwibXQtNCBtYXgtdy0yeGwgdGV4dC1iYXNlIGxlYWRpbmctOCB0ZXh0LVtjb2xvcjp2YXIoLS1tdXRlZCldXCI+XG4gICAgICAgICAgICAgIHt0KFxuICAgICAgICAgICAgICAgIFwiV2UgYXJlIHByZXBhcmluZyBib251cyBwYWNrcyBmb3IgdGVhbXMsIGZvdW5kZXJzLCBhbmQgdHJpYWwgdXNlcnMuIFRoZSBsYXlvdXQgc3RheXMgYWxpZ25lZCB3aXRoIHRoZSBzYW1lIHN5c3RlbSB0aGVtZSwgd2l0aCBibGFjay1iYXNlZCBkYXJrIG1vZGUgYW5kIGNhbG0gZWRpdG9yaWFsIHNwYWNpbmcuXCIsXG4gICAgICAgICAgICAgICAgXCLZhtis2YfYsiDYrdiy2YUg2YXZg9in2YHYotiqINmE2YTZgdix2YIg2YjYp9mE2YXYpNiz2LPZitmGINmI2KfZhNmF2LPYqtiu2K/ZhdmK2YYg2KfZhNiq2KzYsdmK2KjZitmK2YYuINin2YTZiNin2KzZh9ipINiq2LjZhCDZhdiq2LPZgtipINmF2Lkg2KvZitmFINin2YTZhti42KfZhSDZhtmB2LPZh9iMINmF2Lkg2YjYtti5INmE2YrZhNmKINmC2KfYptmFINi52YTZiSDYp9mE2KPYs9mI2K8g2YjZhdiz2KfZgdin2Kog2KrYrdix2YrYsdmK2Kkg2YfYp9iv2KbYqS5cIixcbiAgICAgICAgICAgICAgKX1cbiAgICAgICAgICAgIDwvcD5cblxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJtdC04IGZsZXggZmxleC13cmFwIGdhcC0zXCI+XG4gICAgICAgICAgICAgIDxCdXR0b25cbiAgICAgICAgICAgICAgICB0eXBlPVwiYnV0dG9uXCJcbiAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBuYXZpZ2F0ZShcIi9kYXNoYm9hcmRcIil9XG4gICAgICAgICAgICAgICAgY2xhc3NOYW1lPVwiaC0xMiByb3VuZGVkLTJ4bCBiZy1bY29sb3I6dmFyKC0taW5rKV0gdGV4dC1bY29sb3I6dmFyKC0tc3VyZmFjZSldIGhvdmVyOm9wYWNpdHktOTBcIlxuICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgPEFycm93TGVmdCBjbGFzc05hbWU9XCJoLTQgdy00XCIgLz5cbiAgICAgICAgICAgICAgICB7dChcIkJhY2sgdG8gZGFzaGJvYXJkXCIsIFwi2KfZhNi52YjYr9ipINil2YTZiSDYp9mE2YTZiNit2KlcIil9XG4gICAgICAgICAgICAgIDwvQnV0dG9uPlxuICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgPC9zZWN0aW9uPlxuXG4gICAgICAgICAgPGFzaWRlIGNsYXNzTmFtZT1cInJvdW5kZWQtWzMycHhdIGJvcmRlciBib3JkZXItd2hpdGUvMTAgYmctW2NvbG9yOnZhcigtLXN1cmZhY2UpXSBwLTYgc2hhZG93LVswXzI0cHhfODBweF9yZ2JhKDAsMCwwLDAuMTgpXVwiPlxuICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9XCJyb3VuZGVkLVsyOHB4XSBiZy1bY29sb3I6dmFyKC0tc3VyZmFjZS0yKV0gcC02XCI+XG4gICAgICAgICAgICAgIDxTcGFya2xlcyBjbGFzc05hbWU9XCJoLTcgdy03IHRleHQtW2NvbG9yOnZhcigtLWluayldXCIgLz5cbiAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwibXQtNCB0ZXh0LVsxMXB4XSBmb250LXNlbWlib2xkIHVwcGVyY2FzZSB0cmFja2luZy1bMC4yNGVtXSB0ZXh0LVtjb2xvcjp2YXIoLS1tdXRlZCldXCI+XG4gICAgICAgICAgICAgICAge3QoXCJTdGF0dXNcIiwgXCLYp9mE2K3Yp9mE2KlcIil9XG4gICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwibXQtMiBmb250LVsnQmVfVmlldG5hbV9Qcm8nXSB0ZXh0LTJ4bCBmb250LXNlbWlib2xkIHRleHQtW2NvbG9yOnZhcigtLWluayldXCI+XG4gICAgICAgICAgICAgICAge3QoXCJJbiBkZXNpZ25cIiwgXCLZgtmK2K8g2KfZhNiq2LXZhdmK2YVcIil9XG4gICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgICAgPHAgY2xhc3NOYW1lPVwibXQtMyB0ZXh0LXNtIGxlYWRpbmctNyB0ZXh0LVtjb2xvcjp2YXIoLS1tdXRlZCldXCI+XG4gICAgICAgICAgICAgICAge3QoXG4gICAgICAgICAgICAgICAgICBcIlRoaXMgc2VjdGlvbiB3aWxsIGhvc3QgYm9udXMgb2ZmZXJzLCBjcmVkaXQgYnVuZGxlcywgYW5kIGNhbXBhaWduIHRpbWluZyBvbmNlIHRoZSBwcm9kdWN0IGZsb3cgaXMgcmVhZHkuXCIsXG4gICAgICAgICAgICAgICAgICBcItiz2KrYs9iq2LbZitmBINmH2LDZhyDYp9mE2YXYs9in2K3YqSDYudix2YjYtiDYp9mE2YXZg9in2YHYotiqINmI2K3YstmFINin2YTYsdi12YrYryDZiNiq2YjZgtmK2Kog2KfZhNit2YXZhNin2Kog2KjZhdis2LHYryDYrNin2YfYstmK2Kkg2YXYs9in2LEg2KfZhNmF2YbYqtisLlwiLFxuICAgICAgICAgICAgICAgICl9XG4gICAgICAgICAgICAgIDwvcD5cbiAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgIDwvYXNpZGU+XG4gICAgICAgIDwvZGl2PlxuICAgICAgPC9kaXY+XG4gICAgPC9kaXY+XG4gICk7XG59XG4iXSwibmFtZXMiOlsiQXJyb3dMZWZ0IiwiR2lmdCIsIlNwYXJrbGVzIiwidXNlTmF2aWdhdGUiLCJCdXR0b24iLCJ1c2VMYW5ndWFnZSIsInVzZVRoZW1lIiwiY24iLCJCb251c1BhZ2UiLCJuYXZpZ2F0ZSIsImxhbmd1YWdlIiwidGhlbWUiLCJydGwiLCJ0IiwiZW4iLCJhciIsInNoZWxsQ2xhc3MiLCJkaXYiLCJkaXIiLCJjbGFzc05hbWUiLCJzdHlsZSIsImJhY2tncm91bmQiLCJzZWN0aW9uIiwiaDEiLCJwIiwidHlwZSIsIm9uQ2xpY2siLCJhc2lkZSJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FBQUEsU0FBU0EsU0FBUyxFQUFFQyxJQUFJLEVBQUVDLFFBQVEsUUFBUSxlQUFlO0FBQ3pELFNBQVNDLFdBQVcsUUFBUSxtQkFBbUI7QUFFL0MsU0FBU0MsTUFBTSxRQUFRLHlCQUF5QjtBQUNoRCxTQUFTQyxXQUFXLFFBQVEsNkJBQTZCO0FBQ3pELFNBQVNDLFFBQVEsUUFBUSwwQkFBMEI7QUFDbkQsU0FBU0MsRUFBRSxRQUFRLGNBQWM7QUFFakMsZUFBZSxTQUFTQzs7SUFDdEIsTUFBTUMsV0FBV047SUFDakIsTUFBTSxFQUFFTyxRQUFRLEVBQUUsR0FBR0w7SUFDckIsTUFBTSxFQUFFTSxLQUFLLEVBQUUsR0FBR0w7SUFDbEIsTUFBTU0sTUFBTUYsYUFBYTtJQUN6QixNQUFNRyxJQUFJLENBQUNDLElBQVlDLEtBQWdCSCxNQUFNRyxLQUFLRDtJQUVsRCxNQUFNRSxhQUFhVCxHQUNqQixnQkFDQUksVUFBVSxTQUNOLDBHQUNBO0lBR04scUJBQ0UsUUFBQ007UUFBSUMsS0FBS04sTUFBTSxRQUFRO1FBQU9PLFdBQVdIO1FBQVlJLE9BQU87WUFBRUMsWUFBWTtRQUFZO2tCQUNyRixjQUFBLFFBQUNKO1lBQUlFLFdBQVU7c0JBQ2IsY0FBQSxRQUFDRjtnQkFBSUUsV0FBVTs7a0NBQ2IsUUFBQ0c7d0JBQVFILFdBQVU7OzBDQUNqQixRQUFDRjtnQ0FBSUUsV0FBVTs7a0RBQ2IsUUFBQ2xCO3dDQUFLa0IsV0FBVTs7Ozs7O29DQUNmTixFQUFFLGlCQUFpQjs7Ozs7OzswQ0FHdEIsUUFBQ1U7Z0NBQUdKLFdBQVU7MENBQ1hOLEVBQUUsK0JBQStCOzs7Ozs7MENBR3BDLFFBQUNXO2dDQUFFTCxXQUFVOzBDQUNWTixFQUNDLGtMQUNBOzs7Ozs7MENBSUosUUFBQ0k7Z0NBQUlFLFdBQVU7MENBQ2IsY0FBQSxRQUFDZjtvQ0FDQ3FCLE1BQUs7b0NBQ0xDLFNBQVMsSUFBTWpCLFNBQVM7b0NBQ3hCVSxXQUFVOztzREFFVixRQUFDbkI7NENBQVVtQixXQUFVOzs7Ozs7d0NBQ3BCTixFQUFFLHFCQUFxQjs7Ozs7Ozs7Ozs7Ozs7Ozs7O2tDQUs5QixRQUFDYzt3QkFBTVIsV0FBVTtrQ0FDZixjQUFBLFFBQUNGOzRCQUFJRSxXQUFVOzs4Q0FDYixRQUFDakI7b0NBQVNpQixXQUFVOzs7Ozs7OENBQ3BCLFFBQUNLO29DQUFFTCxXQUFVOzhDQUNWTixFQUFFLFVBQVU7Ozs7Ozs4Q0FFZixRQUFDVztvQ0FBRUwsV0FBVTs4Q0FDVk4sRUFBRSxhQUFhOzs7Ozs7OENBRWxCLFFBQUNXO29DQUFFTCxXQUFVOzhDQUNWTixFQUNDLDRHQUNBOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUFTbEI7R0FwRXdCTDs7UUFDTEw7UUFDSUU7UUFDSEM7OztLQUhJRSJ9

@@ -29,7 +29,10 @@ from . import db as db_core
 from .web_search import search_web
 
 _WORKFLOWS: Dict[str, Dict[str, Any]] = {}
-_WORKFLOW_LOCK = asyncio.Lock()
+_WORKFLOW_LOCKS: Dict[str, asyncio.Lock] = {}
+_WORKFLOW_LOCKS_GUARD = asyncio.Lock()
+_WORKFLOW_PROGRESS_TASKS: Dict[str, asyncio.Task[None]] = {}
+_WORKFLOW_PROGRESS_TASKS_GUARD = asyncio.Lock()
 _WORKFLOW_PERSONA_AGENT: Optional[PersonaAgent] = None
 
 WORKFLOW_STAGES = [
@@ -96,6 +99,25 @@ class _WorkflowPersonaError(RuntimeError):
 
 def _now_ms() -> int:
     return int(time.time() * 1000)
+
+
+def _normalize_workflow_id(workflow_id: Any) -> str:
+    return str(workflow_id or "").strip()
+
+
+async def _workflow_lock(workflow_id: Any) -> asyncio.Lock:
+    safe_workflow_id = _normalize_workflow_id(workflow_id)
+    if not safe_workflow_id:
+        raise ValueError("workflow_id is required for guided workflow locking")
+    lock = _WORKFLOW_LOCKS.get(safe_workflow_id)
+    if lock is not None:
+        return lock
+    async with _WORKFLOW_LOCKS_GUARD:
+        lock = _WORKFLOW_LOCKS.get(safe_workflow_id)
+        if lock is None:
+            lock = asyncio.Lock()
+            _WORKFLOW_LOCKS[safe_workflow_id] = lock
+        return lock
 
 
 def _clone(payload: Dict[str, Any]) -> Dict[str, Any]:
@@ -703,9 +725,88 @@ async def _persist(state: Dict[str, Any]) -> None:
     )
 
 
-async def _advance_until_input(state: Dict[str, Any]) -> None:
-    if state.get("status") == "paused":
+def _long_stage_fingerprint(state: Dict[str, Any], stage: str) -> str:
+    payload: Dict[str, Any] = {
+        "stage": stage,
+        "language": state.get("language") or "en",
+        "draft_context": dict(state.get("draft_context") or {}),
+    }
+    if stage == "persona_synthesis":
+        payload["idea_research"] = dict(state.get("idea_research") or {})
+        payload["location_research"] = dict(state.get("location_research") or {})
+    return json.dumps(payload, ensure_ascii=False, sort_keys=True)
+
+
+def _long_stage_snapshot(state: Dict[str, Any], stage: str) -> Dict[str, Any]:
+    snapshot: Dict[str, Any] = {
+        "workflow_id": state.get("workflow_id"),
+        "user_id": state.get("user_id"),
+        "language": state.get("language") or "en",
+        "draft_context": _clone(state.get("draft_context") or {}),
+        "idea_research": _clone(state.get("idea_research") or {}),
+        "location_research": _clone(state.get("location_research") or {}),
+        "simulation": _clone(state.get("simulation") or {}),
+    }
+    if stage == "persona_synthesis":
+        snapshot["clarification_answers"] = _clone(state.get("clarification_answers") or {})
+    return snapshot
+
+
+async def _run_long_stage(stage: str, snapshot: Dict[str, Any]) -> Dict[str, Any]:
+    if stage == "idea_research":
+        return {"idea_research": await _run_idea_research(snapshot)}
+    if stage == "location_research":
+        return {"location_research": await _run_location_research(snapshot)}
+    if stage == "persona_synthesis":
+        persona_snapshot, persona_state = await _generate_persona_snapshot(snapshot)
+        return {
+            "persona_snapshot": persona_snapshot,
+            "persona_state": persona_state,
+        }
+    raise ValueError(f"Unsupported workflow stage: {stage}")
+
+
+async def _clear_workflow_progress_task(workflow_id: str, task: asyncio.Task[None]) -> None:
+    async with _WORKFLOW_PROGRESS_TASKS_GUARD:
+        if _WORKFLOW_PROGRESS_TASKS.get(workflow_id) is task:
+            _WORKFLOW_PROGRESS_TASKS.pop(workflow_id, None)
+
+
+async def _ensure_workflow_progress_task(workflow_id: str, user_id: Optional[int]) -> None:
+    safe_workflow_id = _normalize_workflow_id(workflow_id)
+    if not safe_workflow_id:
         return
+    async with _WORKFLOW_PROGRESS_TASKS_GUARD:
+        existing = _WORKFLOW_PROGRESS_TASKS.get(safe_workflow_id)
+        if existing is not None and not existing.done():
+            return
+    task = asyncio.create_task(_continue_workflow_progress(safe_workflow_id, user_id))
+    _WORKFLOW_PROGRESS_TASKS[safe_workflow_id] = task
+    task.add_done_callback(lambda done: asyncio.create_task(_clear_workflow_progress_task(safe_workflow_id, done)))
+
+
+async def _deferred_workflow_progress_task(workflow_id: str, user_id: Optional[int]) -> None:
+    # Let the current request flush its response before long-running workflow work begins.
+    await asyncio.sleep(0)
+    await _ensure_workflow_progress_task(workflow_id, user_id)
+
+
+async def _advance_and_finalize(state: Dict[str, Any], *, user_id: Optional[int]) -> Tuple[Dict[str, Any], Optional[Dict[str, Any]]]:
+    pending = await _advance_until_input(state, allow_long_running=False)
+    await _persist(state)
+    response = _state_response(state)
+    if pending:
+        await _ensure_workflow_progress_task(str(state.get("workflow_id") or ""), user_id)
+    return response, pending
+
+
+async def _advance_until_input(
+    state: Dict[str, Any],
+    *,
+    allow_long_running: bool = True,
+) -> Optional[Dict[str, Any]]:
+    if state.get("status") == "paused":
+        return None
 
     draft = state.get("draft_context") or {}
     scope = _normalize_scope(draft.get("contextScope"))
@@ -719,7 +820,7 @@ async def _advance_until_input(state: Dict[str, Any]) -> None:
             else "اختر نوع السياق أولًا. هذه الخطوة إجبارية ولا يمكن تخطيها.",
             stage="context_scope",
         )
-        return
+        return None
 
     missing = _required_fields(state)
     if missing:
@@ -732,7 +833,7 @@ async def _advance_until_input(state: Dict[str, Any]) -> None:
             else "أجمع الآن فقط الحقول الناقصة من الـschema بدون تكرار ما هو موجود.",
             stage="schema_intake",
         )
-        return
+        return None
 
     if state.get("clarification_questions") is None:
         questions = _build_clarification_questions(state)
@@ -750,7 +851,7 @@ async def _advance_until_input(state: Dict[str, Any]) -> None:
             else "أحتاج توضيحات قصيرة فقط في النقاط التي ما زالت غامضة فعلًا.",
             stage="clarification",
         )
-        return
+        return None
     _mark_stage(state, "clarification", "completed", "Clarification complete.")
 
     if state.get("idea_research") is None:
@@ -763,6 +864,12 @@ async def _advance_until_input(state: Dict[str, Any]) -> None:
             else "Agent البحث عن الفكرة يجمع الآن إشارات السوق والمنتج.",
             stage="idea_research",
         )
+        if not allow_long_running:
+            return {
+                "stage": "idea_research",
+                "fingerprint": _long_stage_fingerprint(state, "idea_research"),
+                "snapshot": _long_stage_snapshot(state, "idea_research"),
+            }
         state["idea_research"] = await _run_idea_research(state)
         state["verification"] = _verify_stage(state, "idea_research")
         _mark_stage(state, "idea_research", "completed", "Idea research complete.")
@@ -777,6 +884,12 @@ async def _advance_until_input(state: Dict[str, Any]) -> None:
             else "Agent المكان يراجع الصفحات المحلية العامة وإشارات السوشيال المفتوحة.",
             stage="location_research",
         )
+        if not allow_long_running:
+            return {
+                "stage": "location_research",
+                "fingerprint": _long_stage_fingerprint(state, "location_research"),
+                "snapshot": _long_stage_snapshot(state, "location_research"),
+            }
         state["location_research"] = await _run_location_research(state)
         state["verification"] = _verify_stage(state, "location_research")
         _mark_stage(state, "location_research", "completed", "Location research complete.")
@@ -784,6 +897,12 @@ async def _advance_until_input(state: Dict[str, Any]) -> None:
     if state.get("persona_snapshot") is None:
         state["status"] = "in_progress"
         _mark_stage(state, "persona_synthesis", "in_progress", "Building personas.")
+        if not allow_long_running:
+            return {
+                "stage": "persona_synthesis",
+                "fingerprint": _long_stage_fingerprint(state, "persona_synthesis"),
+                "snapshot": _long_stage_snapshot(state, "persona_synthesis"),
+            }
         try:
             snapshot, persona_state = await _generate_persona_snapshot(state)
         except _WorkflowPersonaError as exc:
@@ -802,7 +921,7 @@ async def _advance_until_input(state: Dict[str, Any]) -> None:
                 stage="persona_synthesis",
                 tone="status",
             )
-            return
+            return None
         except Exception as exc:
             detail = str(exc).strip() or "Persona generation failed."
             state["persona_snapshot"] = None
@@ -818,7 +937,7 @@ async def _advance_until_input(state: Dict[str, Any]) -> None:
                 stage="persona_synthesis",
                 tone="status",
             )
-            return
+            return None
         state["persona_snapshot"] = snapshot
         state["persona_generation_debug"] = dict(persona_state.persona_generation_debug or {})
         state["persona_validation_errors"] = list(persona_state.persona_validation_errors or [])
@@ -843,7 +962,7 @@ async def _advance_until_input(state: Dict[str, Any]) -> None:
             stage="review",
         )
         state["verification"] = _verify_stage(state, "review")
-        return
+        return None
 
     state["status"] = "ready"
     _mark_stage(state, "ready_to_start", "ready", "Workflow is ready to start the simulation.")
@@ -854,6 +973,112 @@ async def _advance_until_input(state: Dict[str, Any]) -> None:
         else "كل المراحل المطلوبة اكتملت. يمكنك بدء المحاكاة الآن.",
         stage="ready_to_start",
     )
+
+
+    return None
+
+
+async def _continue_workflow_progress(workflow_id: str, user_id: Optional[int]) -> None:
+    safe_workflow_id = _normalize_workflow_id(workflow_id)
+    if not safe_workflow_id:
+        return
+
+    pending: Optional[Dict[str, Any]] = None
+    while True:
+        if pending is None:
+            async with await _workflow_lock(safe_workflow_id):
+                state = await _hydrate(safe_workflow_id, user_id)
+                if state is None or state.get("status") == "paused":
+                    return
+                pending = await _advance_until_input(state, allow_long_running=False)
+                await _persist(state)
+                if pending is None:
+                    return
+
+        stage = str(pending.get("stage") or "")
+        fingerprint = str(pending.get("fingerprint") or "")
+        snapshot = pending.get("snapshot") if isinstance(pending.get("snapshot"), dict) else {}
+
+        try:
+            result = await _run_long_stage(stage, snapshot)
+        except _WorkflowPersonaError as exc:
+            async with await _workflow_lock(safe_workflow_id):
+                state = await _hydrate(safe_workflow_id, user_id)
+                if state is None or state.get("status") == "paused":
+                    return
+                if _long_stage_fingerprint(state, stage) != fingerprint or state.get("persona_snapshot") is not None:
+                    pending = None
+                    continue
+                detail = str(exc).strip() or "Persona generation failed."
+                persona_state = exc.orchestration_state
+                state["persona_generation_debug"] = dict(persona_state.persona_generation_debug or {})
+                state["persona_validation_errors"] = list(persona_state.persona_validation_errors or [detail])
+                state["persona_snapshot"] = None
+                state["verification"] = _verify_stage(state, "persona_synthesis")
+                _mark_stage(state, "persona_synthesis", "awaiting_input", detail)
+                _add_guide_message(state, f"Persona generation is blocked: {detail}", stage="persona_synthesis", tone="status")
+                await _persist(state)
+                return
+        except Exception as exc:
+            async with await _workflow_lock(safe_workflow_id):
+                state = await _hydrate(safe_workflow_id, user_id)
+                if state is None or state.get("status") == "paused":
+                    return
+                if _long_stage_fingerprint(state, stage) != fingerprint:
+                    pending = None
+                    continue
+                detail = str(exc).strip() or f"{stage.replace('_', ' ').title()} failed."
+                if stage == "idea_research":
+                    state["idea_research"] = None
+                elif stage == "location_research":
+                    state["location_research"] = None
+                else:
+                    state["persona_snapshot"] = None
+                    state["persona_generation_debug"] = {}
+                    state["persona_validation_errors"] = [detail]
+                state["verification"] = _verify_stage(state, stage)
+                _mark_stage(state, stage, "awaiting_input", detail)
+                _add_guide_message(state, f"{stage.replace('_', ' ').title()} is blocked: {detail}", stage=stage, tone="status")
+                await _persist(state)
+                return
+
+        async with await _workflow_lock(safe_workflow_id):
+            state = await _hydrate(safe_workflow_id, user_id)
+            if state is None or state.get("status") == "paused":
+                return
+            if _long_stage_fingerprint(state, stage) != fingerprint:
+                pending = None
+                continue
+
+            if stage == "idea_research":
+                state["idea_research"] = dict(result.get("idea_research") or {})
+                state["verification"] = _verify_stage(state, "idea_research")
+                _mark_stage(state, "idea_research", "completed", "Idea research complete.")
+            elif stage == "location_research":
+                state["location_research"] = dict(result.get("location_research") or {})
+                state["verification"] = _verify_stage(state, "location_research")
+                _mark_stage(state, "location_research", "completed", "Location research complete.")
+            elif stage == "persona_synthesis":
+                persona_snapshot = dict(result.get("persona_snapshot") or {})
+                persona_state = result.get("persona_state")
+                state["persona_snapshot"] = persona_snapshot
+                if getattr(persona_state, "persona_source_mode", None):
+                    state.setdefault("draft_context", {})["personaSourceMode"] = str(persona_state.persona_source_mode)
+                state["persona_generation_debug"] = dict(getattr(persona_state, "persona_generation_debug", {}) or {})
+                state["persona_validation_errors"] = list(getattr(persona_state, "persona_validation_errors", []) or [])
+                state["persona_library"] = {
+                    "place_key": persona_snapshot.get("place_key"),
+                    "place_label": persona_snapshot.get("place_label"),
+                    "source": persona_snapshot.get("source"),
+                    "persona_set": persona_snapshot.get("persona_set"),
+                }
+                state["verification"] = _verify_stage(state, "persona_synthesis")
+                _mark_stage(state, "persona_synthesis", "completed", "Persona synthesis complete.")
+
+            pending = await _advance_until_input(state, allow_long_running=False)
+            await _persist(state)
+            if pending is None:
+                return
 
 
 async def _hydrate(workflow_id: str, user_id: Optional[int]) -> Optional[Dict[str, Any]]:
@@ -877,13 +1102,16 @@ async def start_workflow(
     workflow_id: Optional[str] = None,
 ) -> Dict[str, Any]:
     safe_language = _normalize_language(language)
-    async with _WORKFLOW_LOCK:
-        if workflow_id:
-            existing = await _hydrate(workflow_id, user_id)
+    safe_workflow_id = _normalize_workflow_id(workflow_id)
+    if safe_workflow_id:
+        async with await _workflow_lock(safe_workflow_id):
+            existing = await _hydrate(safe_workflow_id, user_id)
             if existing is not None:
                 return _state_response(existing)
+    new_workflow_id = str(uuid.uuid4())
+    async with await _workflow_lock(new_workflow_id):
         state = {
-            "workflow_id": str(uuid.uuid4()),
+            "workflow_id": new_workflow_id,
             "user_id": user_id,
             "language": safe_language,
             "status": "awaiting_input",
@@ -923,22 +1151,29 @@ async def start_workflow(
 
 
 async def get_workflow(workflow_id: str, user_id: Optional[int]) -> Optional[Dict[str, Any]]:
-    async with _WORKFLOW_LOCK:
-        state = await _hydrate(workflow_id, user_id)
+    safe_workflow_id = _normalize_workflow_id(workflow_id)
+    if not safe_workflow_id:
+        return None
+    async with await _workflow_lock(safe_workflow_id):
+        state = await _hydrate(safe_workflow_id, user_id)
         if state is None:
             return None
         return _state_response(state)
 
 
 async def get_workflow_for_simulation(simulation_id: str, user_id: Optional[int]) -> Optional[Dict[str, Any]]:
-    async with _WORKFLOW_LOCK:
-        state = await db_core.fetch_guided_workflow_by_simulation(simulation_id, user_id=user_id)
-        if state is None:
-            return None
-        workflow_id = str(state.get("workflow_id") or "").strip()
-        if workflow_id:
-            _WORKFLOWS[workflow_id] = state
+    state = await db_core.fetch_guided_workflow_by_simulation(simulation_id, user_id=user_id)
+    if state is None:
+        return None
+    workflow_id = _normalize_workflow_id(state.get("workflow_id"))
+    if not workflow_id:
         return _state_response(state)
+    async with await _workflow_lock(workflow_id):
+        hydrated = await _hydrate(workflow_id, user_id)
+        if hydrated is None:
+            _WORKFLOWS[workflow_id] = state
+            hydrated = state
+        return _state_response(hydrated)
 
 
 async def update_context_scope(
@@ -948,8 +1183,11 @@ async def update_context_scope(
     scope: str,
     place_name: Optional[str] = None,
 ) -> Optional[Dict[str, Any]]:
-    async with _WORKFLOW_LOCK:
-        state = await _hydrate(workflow_id, user_id)
+    safe_workflow_id = _normalize_workflow_id(workflow_id)
+    if not safe_workflow_id:
+        return None
+    async with await _workflow_lock(safe_workflow_id):
+        state = await _hydrate(safe_workflow_id, user_id)
         if state is None:
             return None
         normalized_scope = _normalize_scope(scope)
@@ -992,8 +1230,13 @@ async def submit_schema(
     user_id: Optional[int],
     updates: Dict[str, Any],
 ) -> Optional[Dict[str, Any]]:
-    async with _WORKFLOW_LOCK:
-        state = await _hydrate(workflow_id, user_id)
+    safe_workflow_id = _normalize_workflow_id(workflow_id)
+    if not safe_workflow_id:
+        return None
+    response: Optional[Dict[str, Any]] = None
+    pending: Optional[Dict[str, Any]] = None
+    async with await _workflow_lock(safe_workflow_id):
+        state = await _hydrate(safe_workflow_id, user_id)
         if state is None:
             return None
         previous = dict(state.get("draft_context") or {})
@@ -1024,9 +1267,12 @@ async def submit_schema(
         state["clarification_answers"] = {}
         state["review_approved"] = False
         state["review"] = None
-        await _advance_until_input(state)
+        pending = await _advance_until_input(state, allow_long_running=False)
         await _persist(state)
-        return _state_response(state)
+        response = _state_response(state)
+    if pending:
+        asyncio.create_task(_deferred_workflow_progress_task(safe_workflow_id, user_id))
+    return response
 
 
 async def answer_clarifications(
@@ -1035,8 +1281,11 @@ async def answer_clarifications(
     user_id: Optional[int],
     answers: List[Dict[str, Any]],
 ) -> Optional[Dict[str, Any]]:
-    async with _WORKFLOW_LOCK:
-        state = await _hydrate(workflow_id, user_id)
+    safe_workflow_id = _normalize_workflow_id(workflow_id)
+    if not safe_workflow_id:
+        return None
+    async with await _workflow_lock(safe_workflow_id):
+        state = await _hydrate(safe_workflow_id, user_id)
         if state is None:
             return None
         answer_map = state.setdefault("clarification_answers", {})
@@ -1068,8 +1317,11 @@ async def approve_review(
     *,
     user_id: Optional[int],
 ) -> Optional[Dict[str, Any]]:
-    async with _WORKFLOW_LOCK:
-        state = await _hydrate(workflow_id, user_id)
+    safe_workflow_id = _normalize_workflow_id(workflow_id)
+    if not safe_workflow_id:
+        return None
+    async with await _workflow_lock(safe_workflow_id):
+        state = await _hydrate(safe_workflow_id, user_id)
         if state is None:
             return None
         state["review_approved"] = True
@@ -1091,8 +1343,11 @@ async def pause_workflow(
     user_id: Optional[int],
     reason: Optional[str] = None,
 ) -> Optional[Dict[str, Any]]:
-    async with _WORKFLOW_LOCK:
-        state = await _hydrate(workflow_id, user_id)
+    safe_workflow_id = _normalize_workflow_id(workflow_id)
+    if not safe_workflow_id:
+        return None
+    async with await _workflow_lock(safe_workflow_id):
+        state = await _hydrate(safe_workflow_id, user_id)
         if state is None:
             return None
         state["status"] = "paused"
@@ -1107,8 +1362,11 @@ async def resume_workflow(
     *,
     user_id: Optional[int],
 ) -> Optional[Dict[str, Any]]:
-    async with _WORKFLOW_LOCK:
-        state = await _hydrate(workflow_id, user_id)
+    safe_workflow_id = _normalize_workflow_id(workflow_id)
+    if not safe_workflow_id:
+        return None
+    async with await _workflow_lock(safe_workflow_id):
+        state = await _hydrate(safe_workflow_id, user_id)
         if state is None:
             return None
         state["status"] = "in_progress"
@@ -1124,8 +1382,11 @@ async def apply_correction(
     user_id: Optional[int],
     text: str,
 ) -> Optional[Dict[str, Any]]:
-    async with _WORKFLOW_LOCK:
-        state = await _hydrate(workflow_id, user_id)
+    safe_workflow_id = _normalize_workflow_id(workflow_id)
+    if not safe_workflow_id:
+        return None
+    async with await _workflow_lock(safe_workflow_id):
+        state = await _hydrate(safe_workflow_id, user_id)
         if state is None:
             return None
         correction = _neutralize_correction(state, text)
@@ -1150,8 +1411,11 @@ async def attach_simulation(
     user_id: Optional[int],
     simulation_id: str,
 ) -> Optional[Dict[str, Any]]:
-    async with _WORKFLOW_LOCK:
-        state = await _hydrate(workflow_id, user_id)
+    safe_workflow_id = _normalize_workflow_id(workflow_id)
+    if not safe_workflow_id:
+        return None
+    async with await _workflow_lock(safe_workflow_id):
+        state = await _hydrate(safe_workflow_id, user_id)
         if state is None:
             return None
         simulation = state.get("simulation")

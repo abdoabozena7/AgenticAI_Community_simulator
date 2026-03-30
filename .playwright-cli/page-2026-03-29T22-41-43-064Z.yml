@@ -1,0 +1,126 @@
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - img [ref=e10]
+          - generic [ref=e13]:
+            - heading "Point of no return" [level=1] [ref=e14]:
+              - generic [ref=e15]: Point of no return
+            - paragraph [ref=e16]: Test your ideas before launching them
+        - generic [ref=e17]:
+          - button "Back to dashboard" [ref=e18] [cursor=pointer]
+          - button "Log out" [ref=e19] [cursor=pointer]
+          - generic [ref=e20]:
+            - img [ref=e21]
+            - generic [ref=e28]: "Realtime: Disconnected"
+          - button "Settings" [ref=e29] [cursor=pointer]:
+            - img [ref=e30]
+            - text: Settings
+          - generic [ref=e35]: Idle
+    - generic [ref=e37]:
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - generic [ref=e40]:
+            - heading "Idea evaluation pipeline" [level=1] [ref=e41]
+            - generic [ref=e42]: Idea intake
+            - generic [ref=e43]:
+              - img [ref=e44]
+              - generic [ref=e46]: Dark mode
+          - generic [ref=e49]: Ready to continue
+        - generic [ref=e50]:
+          - button "Chat" [ref=e51] [cursor=pointer]:
+            - img [ref=e52]
+            - generic [ref=e54]: Chat
+          - button "Reasoning" [disabled] [ref=e55]:
+            - img [ref=e56]
+            - generic [ref=e66]: Reasoning
+          - button "Config" [ref=e67] [cursor=pointer]:
+            - img [ref=e68]
+            - generic [ref=e70]: Config
+      - generic [ref=e80]: Idea intake
+    - generic [ref=e83]:
+      - generic [ref=e89]:
+        - generic [ref=e90]:
+          - generic [ref=e91]:
+            - generic [ref=e92]:
+              - img [ref=e93]
+              - generic [ref=e98]: Live activity
+            - generic [ref=e99]:
+              - heading "Execution activity" [level=3] [ref=e100]
+              - paragraph [ref=e101]: Track research, personas, debate, and execution as they happen.
+          - generic [ref=e102]:
+            - generic [ref=e103]: Status
+            - generic [ref=e104]: Ready to start
+        - generic [ref=e106]:
+          - generic [ref=e107]: No activity yet
+          - generic [ref=e108]: Once the run starts, you will see research, persona building, debate, and execution step by step.
+      - separator [ref=e109]:
+        - img [ref=e111]
+      - generic [ref=e122]:
+        - generic [ref=e123]:
+          - list "Conversation progress" [ref=e124]:
+            - listitem [ref=e125]:
+              - generic [ref=e127]: Context scope
+            - listitem [ref=e128]:
+              - generic [ref=e130]: Schema intake
+            - listitem [ref=e131]:
+              - generic [ref=e133]: Smart clarification
+            - listitem [ref=e134]:
+              - generic [ref=e136]: Idea research
+            - listitem [ref=e137]:
+              - generic [ref=e139]: Persona synthesis
+            - listitem [ref=e140]:
+              - generic [ref=e142]: Review
+            - listitem [ref=e143]:
+              - generic [ref=e145]: Ready to start
+          - status [ref=e146]:
+            - generic [ref=e147]: "Now in: Schema intake"
+            - generic [ref=e148]: "Current: Schema intake • ETA: ~9 min"
+        - generic [ref=e149]:
+          - generic [ref=e150]:
+            - img [ref=e151]
+            - text: Needs review
+          - generic [ref=e159]:
+            - generic [ref=e160]: GuideAgent
+            - generic [ref=e161]: Simulation guide
+          - generic [ref=e209]: Context scope locked to internet.
+          - generic [ref=e213]: I collected only the schema fields that are still missing.
+          - generic [ref=e216]:
+            - generic [ref=e217]: Collect only missing fields
+            - generic [ref=e218]: We will not repeat what is already known.
+          - generic [ref=e222]:
+            - generic [ref=e223]: Step 4 / 4
+            - generic [ref=e224]:
+              - generic [ref=e225]: What do you want from this simulation?
+              - generic [ref=e226]: Pick what you want to optimize for.
+              - generic [ref=e227]:
+                - button "Market Validation" [ref=e228] [cursor=pointer]
+                - button "Product-Market Fit" [ref=e229] [cursor=pointer]
+                - button "Growth Strategy" [ref=e230] [cursor=pointer]
+                - button "Competitive Analysis" [ref=e231] [cursor=pointer]
+            - generic [ref=e232]: "Required now: idea, category, targetAudience, goals"
+            - generic [ref=e233]:
+              - button "Previous" [ref=e234] [cursor=pointer]
+              - button "Submit fields" [disabled]:
+                - img
+                - text: Submit fields
+              - button "Open config" [ref=e235] [cursor=pointer]
+        - generic [ref=e184]:
+          - button "Pause" [disabled]:
+            - img
+            - text: Pause
+          - button "Reasoning (0)" [ref=e186] [cursor=pointer]:
+            - img
+            - text: Reasoning (0)
+          - button "Correction" [ref=e187] [cursor=pointer]
+      - separator [ref=e188]:
+        - img [ref=e190]
+      - generic [ref=e200]:
+        - generic [ref=e201]:
+          - heading "Decision metrics" [level=2] [ref=e202]
+          - paragraph [ref=e203]: A compact summary to understand the current direction.
+        - generic [ref=e205]: Waiting for data
