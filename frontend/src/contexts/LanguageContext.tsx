@@ -113,10 +113,10 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.signIn': 'تسجيل الدخول',
     'nav.startFree': 'ابدأ مجانًا',
 
-    'hero.title1': 'جرّب فكرتك',
-    'hero.title2': 'قبل ما تبنيها',
+    'hero.title1': 'شوف مستقبل فكرتك',
+    'hero.title2': 'قبل إطلاقها',
     'hero.subtitle':
-      'عندك فكرة في دماغك؟ ASSET يساعدك تختبرها قبل ما تصرف وقت وفلوس.',
+      'بيئة آمنة لاختبار الفكرة قبل أن تواجه الواقع.',
     'hero.cta': 'ابدأ تجربة مجانية',
     'hero.watchDemo': 'شاهد العرض',
     'hero.stat1': '+24 وكيل ذكي',
