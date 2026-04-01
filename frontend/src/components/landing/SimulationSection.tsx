@@ -104,7 +104,7 @@ export function SimulationSection() {
 
   return (
     <section
-      id="how-it-works"
+      id="simulation-preview"
       ref={sectionRef}
       className="relative min-h-screen py-24 px-6 bg-transparent overflow-hidden"
     >

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { RippleButton } from '@/components/ui/ripple-button';
 import { ArrowRight, Play } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { VideoModal } from './VideoModal';
 
 interface HeroSectionProps {
   onGetStarted: () => void;
@@ -10,7 +9,6 @@ interface HeroSectionProps {
 
 export function HeroSection({ onGetStarted }: HeroSectionProps) {
   const { t, isRTL } = useLanguage();
-  const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [typedTitle1, setTypedTitle1] = useState('');
   const [typedTitle2, setTypedTitle2] = useState('');
   const title1 = t('hero.title1');
@@ -49,6 +47,10 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
       timers.forEach((id) => window.clearTimeout(id));
     };
   }, [title1Chars, title2Chars]);
+
+  const handleScrollToDemo = () => {
+    document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <section
@@ -132,7 +134,7 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
           </RippleButton>
 
           <RippleButton
-            onClick={() => setIsVideoOpen(true)}
+            onClick={handleScrollToDemo}
             variant="ghost"
             size="lg"
             rippleColor="rgba(255, 0, 255, 0.2)"
@@ -142,14 +144,12 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
             {t('hero.watchDemo')}
           </RippleButton>
         </div>
-
-        <VideoModal isOpen={isVideoOpen} onClose={() => setIsVideoOpen(false)} />
       </div>
 
       {/* Scroll indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
         <div className="w-6 h-10 rounded-full border-2 border-border flex items-start justify-center p-2">
-          <div className="w-1 h-2 bg-muted-foreground rounded-full" />
+          <div className="w-1 h-2 bg-muted-foreground rounded-full animate-bounce" />
         </div>
       </div>
     </section>

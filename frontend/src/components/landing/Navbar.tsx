@@ -112,7 +112,7 @@ export function Navbar({ onLogin, onRegister }: NavbarProps) {
           style={{ opacity: compactGlowOpacity, ...smoothTiming }}
         />
 
-        <div className={`flex items-center gap-3 z-20 shrink-0 ${isRTL ? 'order-1 flex-row-reverse' : 'order-3'}`}>
+        <div className={`flex items-center gap-3 z-20 shrink-0 ${isRTL ? 'order-3 flex-row-reverse' : 'order-1'}`}>
           <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center">
             <span className="text-background font-bold text-sm leading-none">AS</span>
           </div>
@@ -140,7 +140,7 @@ export function Navbar({ onLogin, onRegister }: NavbarProps) {
         </div>
 
         <div
-          className={`z-10 shrink-0 flex items-center transition-[gap,margin] duration-700 ${isRTL ? 'order-3 flex-row-reverse' : 'order-1'}`}
+          className={`z-10 shrink-0 flex items-center transition-[gap,margin] duration-700 ${isRTL ? 'order-1 flex-row-reverse' : 'order-3'}`}
           style={actionGroupStyle}
         >
           <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`} style={actionClusterStyle}>

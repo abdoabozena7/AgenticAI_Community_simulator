@@ -3,6 +3,7 @@ import { gsap } from 'gsap';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { LANDING_DEMO_VIDEO_URL } from './landingDemo';
 
 interface VideoModalProps {
   isOpen: boolean;
@@ -48,8 +49,7 @@ export function VideoModal({ isOpen, onClose }: VideoModalProps) {
                 autoPlay
                 poster=""
               >
-                {/* Replace with your actual video source */}
-                <source src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
+                <source src={LANDING_DEMO_VIDEO_URL} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
