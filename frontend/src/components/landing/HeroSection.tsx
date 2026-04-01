@@ -115,13 +115,13 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
           ref={titleRef}
           className={`${isRTL ? 'hero-title-ar' : 'font-display'} font-semibold text-foreground ${
             isRTL
-              ? 'max-w-[11.25ch] text-[3.25rem] leading-[1.08] tracking-[-0.02em] md:text-[4.45rem] lg:text-[5.05rem] mb-4'
+              ? 'max-w-[13.5ch] text-[3.25rem] leading-[1.08] tracking-[-0.02em] md:text-[4.45rem] lg:text-[5.05rem] mb-4'
               : 'max-w-[11.25ch] text-5xl leading-[1.02] tracking-[-0.05em] md:text-7xl lg:text-[7rem] mb-4'
           }`}
           style={{ perspective: '1000px' }}
         >
-          <span className="block">{t('hero.title1')}</span>
-          <span className="mt-1 block text-foreground">
+          <span className={`block ${isRTL ? 'md:whitespace-nowrap' : ''}`}>{t('hero.title1')}</span>
+          <span className={`mt-1 block text-foreground ${isRTL ? 'md:whitespace-nowrap' : ''}`}>
             {t('hero.title2')}
           </span>
         </h1>
