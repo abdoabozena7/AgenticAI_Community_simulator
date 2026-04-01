@@ -12,18 +12,18 @@ const SettingsPage = () => {
 
   const [appSettings, setAppSettings] = useState(() => {
     if (typeof window === 'undefined') {
-      return { language: 'en' as 'en' | 'ar', theme: 'dark' as 'dark' | 'light' };
+      return { language: 'ar' as 'en' | 'ar', theme: 'dark' as 'dark' | 'light' };
     }
     try {
       const saved = window.localStorage.getItem('appSettings');
-      if (!saved) return { language: 'en' as 'en' | 'ar', theme: 'dark' as 'dark' | 'light' };
+      if (!saved) return { language: 'ar' as 'en' | 'ar', theme: 'dark' as 'dark' | 'light' };
       const parsed = JSON.parse(saved);
       return {
-        language: parsed?.language === 'ar' ? 'ar' : 'en',
+        language: parsed?.language === 'en' ? 'en' : 'ar',
         theme: parsed?.theme === 'light' ? 'light' : 'dark',
       } as { language: 'en' | 'ar'; theme: 'dark' | 'light' };
     } catch {
-      return { language: 'en' as 'en' | 'ar', theme: 'dark' as 'dark' | 'light' };
+      return { language: 'ar' as 'en' | 'ar', theme: 'dark' as 'dark' | 'light' };
     }
   });
 

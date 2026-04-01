@@ -211,14 +211,14 @@ const looksMojibake = (value: string): boolean => {
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>(() => {
-    if (typeof window === 'undefined') return 'en';
+    if (typeof window === 'undefined') return 'ar';
     try {
       const saved = window.localStorage.getItem('appSettings');
-      if (!saved) return 'en';
+      if (!saved) return 'ar';
       const parsed = JSON.parse(saved);
-      return parsed?.language === 'ar' ? 'ar' : 'en';
+      return parsed?.language === 'en' ? 'en' : 'ar';
     } catch {
-      return 'en';
+      return 'ar';
     }
   });
 
