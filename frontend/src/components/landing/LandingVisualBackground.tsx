@@ -20,7 +20,7 @@ export function LandingVisualBackground() {
           autoSpeed={0.42}
           autoIntensity={1.4}
           takeoverDuration={0.25}
-          autoResumeDelay={3000}
+          autoResumeDelay={2000}
           autoRampDuration={0.6}
           color0="#5227FF"
           color1="#FF9FFC"
