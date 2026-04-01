@@ -77,11 +77,11 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
       className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pb-16 pt-28 md:pt-32"
     >
       {/* Background */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_10%,rgba(120,72,190,0.14),transparent_52%),linear-gradient(180deg,rgba(0,0,0,0.02),rgba(0,0,0,0.18))]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_10%,rgba(120,72,190,0.22),transparent_52%),linear-gradient(180deg,rgba(0,0,0,0.01),rgba(0,0,0,0.12))]" />
 
       {/* Animated grid pattern */}
       <div
-        className="absolute inset-0 opacity-[0.02]"
+        className="absolute inset-0 opacity-[0.028]"
         style={{
           backgroundImage:
             'linear-gradient(hsl(var(--foreground) / 0.1) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground) / 0.1) 1px, transparent 1px)',
@@ -90,7 +90,7 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
       />
 
       {/* Ambient glow */}
-      <div className="pointer-events-none absolute left-1/2 top-[40%] h-[540px] w-[540px] -translate-x-1/2 -translate-y-1/2 opacity-[0.12] blur-3xl">
+      <div className="pointer-events-none absolute left-1/2 top-[40%] h-[620px] w-[620px] -translate-x-1/2 -translate-y-1/2 opacity-[0.18] blur-3xl">
         <div 
           className="w-full h-full rounded-full animate-pulse"
           style={{
@@ -115,23 +115,15 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
           ref={titleRef}
           className={`${isRTL ? 'hero-title-ar' : 'font-display'} font-semibold text-foreground ${
             isRTL
-              ? 'text-[3.4rem] leading-[1.1] tracking-[-0.02em] md:text-[4.6rem] lg:text-[5.15rem] mb-4 whitespace-nowrap'
-              : 'max-w-[10.5ch] text-5xl leading-[1.02] tracking-[-0.05em] md:text-7xl lg:text-[7rem] mb-4'
+              ? 'max-w-[11.25ch] text-[3.25rem] leading-[1.08] tracking-[-0.02em] md:text-[4.45rem] lg:text-[5.05rem] mb-4'
+              : 'max-w-[11.25ch] text-5xl leading-[1.02] tracking-[-0.05em] md:text-7xl lg:text-[7rem] mb-4'
           }`}
           style={{ perspective: '1000px' }}
         >
-          {isRTL ? (
-            <span className="block text-foreground">
-              {t('hero.title1')} {t('hero.title2')}
-            </span>
-          ) : (
-            <>
-              <span className="block">{t('hero.title1')}</span>
-              <span className="mt-1 block text-foreground">
-                {t('hero.title2')}
-              </span>
-            </>
-          )}
+          <span className="block">{t('hero.title1')}</span>
+          <span className="mt-1 block text-foreground">
+            {t('hero.title2')}
+          </span>
         </h1>
 
         {/* Subtitle */}

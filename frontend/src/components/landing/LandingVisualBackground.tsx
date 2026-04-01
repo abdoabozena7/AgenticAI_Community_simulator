@@ -8,17 +8,17 @@ export function LandingVisualBackground() {
       <div className="absolute inset-0">
         <LiquidEther
           colors={['#5227FF', '#FF9FFC', '#B19EEF']}
-          mouseForce={20}
-          cursorSize={100}
+          mouseForce={24}
+          cursorSize={118}
           isViscous
-          viscous={30}
-          iterationsViscous={32}
-          iterationsPoisson={32}
-          resolution={0.5}
+          viscous={34}
+          iterationsViscous={34}
+          iterationsPoisson={34}
+          resolution={0.6}
           isBounce={false}
           autoDemo
-          autoSpeed={0.5}
-          autoIntensity={2.2}
+          autoSpeed={0.58}
+          autoIntensity={2.8}
           takeoverDuration={0.25}
           autoResumeDelay={3000}
           autoRampDuration={0.6}
@@ -29,7 +29,7 @@ export function LandingVisualBackground() {
         />
       </div>
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.03),transparent_42%),linear-gradient(180deg,rgba(0,0,0,0.18),rgba(0,0,0,0.42))]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.04),transparent_40%),radial-gradient(circle_at_80%_28%,rgba(121,86,255,0.15),transparent_46%),linear-gradient(180deg,rgba(0,0,0,0.08),rgba(0,0,0,0.28))]" />
     </div>
   );
 }
