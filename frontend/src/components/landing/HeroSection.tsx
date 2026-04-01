@@ -16,6 +16,10 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
   const title2 = t('hero.title2');
   const title1Chars = useMemo(() => Array.from(title1), [title1]);
   const title2Chars = useMemo(() => Array.from(title2), [title2]);
+  const firstLineTypingDelayMs = 160;
+  const secondLineTypingDelayMs = 115;
+  const lineBreakPauseMs = 340;
+  const supportingContentPauseMs = 260;
 
   useEffect(() => {
     let cancelled = false;
@@ -34,17 +38,17 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
     title1Chars.forEach((_, index) => { 
       schedule(() => {
         setTypedTitle1(title1Chars.slice(0, index + 1).join(''));
-      }, index * 110);
+      }, index * firstLineTypingDelayMs);
     });
 
-    const lineTwoStartDelay = title1Chars.length * 110 + 220;
+    const lineTwoStartDelay = title1Chars.length * firstLineTypingDelayMs + lineBreakPauseMs;
     title2Chars.forEach((_, index) => {
       schedule(() => {
         setTypedTitle2(title2Chars.slice(0, index + 1).join(''));
-      }, lineTwoStartDelay + index * 72);
+      }, lineTwoStartDelay + index * secondLineTypingDelayMs);
     });
 
-    const supportingContentDelay = lineTwoStartDelay + title2Chars.length * 72 + 180;
+    const supportingContentDelay = lineTwoStartDelay + title2Chars.length * secondLineTypingDelayMs + supportingContentPauseMs;
     schedule(() => {
       setShowSupportingContent(true);
     }, supportingContentDelay);
@@ -53,7 +57,14 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
       cancelled = true;
       timers.forEach((id) => window.clearTimeout(id));
     };
-  }, [title1Chars, title2Chars]);
+  }, [
+    firstLineTypingDelayMs,
+    lineBreakPauseMs,
+    secondLineTypingDelayMs,
+    supportingContentPauseMs,
+    title1Chars,
+    title2Chars,
+  ]);
 
   const handleScrollToDemo = () => {
     document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
