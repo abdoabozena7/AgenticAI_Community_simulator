@@ -50,7 +50,7 @@
     {
       "label": "before-idea",
       "url": "http://localhost:8080/simulate",
-      "title": "ASSET",
+      "title": "VoxBOx",
       "hasChatInput": true,
       "chatInputDisabled": false,
       "hasSend": true,
