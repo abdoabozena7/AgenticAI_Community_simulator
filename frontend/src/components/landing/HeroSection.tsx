@@ -106,9 +106,9 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
                 isDark ? 'bg-white text-black' : 'bg-black text-white'
               }`}
             >
-              <span className="text-[11px] font-bold leading-none">AS</span>
+              <span className="text-[11px] font-bold leading-none">VB</span>
             </div>
-            <span className="font-medium tracking-tight">ASSET</span>
+            <span className="font-medium tracking-tight">VoxBox</span>
           </div>
         </div>
 
