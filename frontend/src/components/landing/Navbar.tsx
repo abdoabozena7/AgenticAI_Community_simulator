@@ -135,9 +135,9 @@ export function Navbar({ onLogin, onRegister }: NavbarProps) {
 
         <div className={`flex items-center gap-3 z-20 shrink-0 ${isRTL ? 'order-3 flex-row-reverse' : 'order-1'}`}>
           <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center">
-            <span className="text-background font-bold text-sm leading-none">AS</span>
+            <span className="text-background font-bold text-sm leading-none">VB</span>
           </div>
-          <span className="text-foreground font-semibold text-[1.75rem]">ASSET</span>
+          <span className="text-foreground font-semibold text-[1.75rem]">VoxBox</span>
         </div>
 
         <div
@@ -221,9 +221,9 @@ export function Navbar({ onLogin, onRegister }: NavbarProps) {
       <div className="flex lg:hidden items-center justify-between max-w-[calc(100vw-1rem)] mx-auto px-3 py-3">
         <div className="flex items-center gap-2">
           <div className="w-9 h-9 rounded-xl bg-foreground flex items-center justify-center">
-            <span className="text-background font-bold text-sm leading-none">AS</span>
+            <span className="text-background font-bold text-sm leading-none">VB</span>
           </div>
-          <span className="text-foreground font-semibold text-base">ASSET</span>
+          <span className="text-foreground font-semibold text-base">VoxBox</span>
         </div>
 
         <div className="flex items-center gap-2">
