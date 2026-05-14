@@ -1639,6 +1639,100 @@ class SimulationEngine:
                     return parsed
             return {}
 
+        def _court_case_type(
+            *,
+            reason_tag: str,
+            snippets: List[str],
+            gate_stats: Optional[Dict[str, Any]] = None,
+        ) -> str:
+            stats = gate_stats if isinstance(gate_stats, dict) else {}
+            combined = _normalized(
+                " ".join(
+                    [
+                        str(reason_tag or ""),
+                        " ".join(str(item or "") for item in (snippets or [])),
+                        str(stats.get("dominant_fallback_reason") or ""),
+                    ]
+                )
+            )
+            low_quality_ratio = float(stats.get("low_quality_ratio") or 0.0)
+            avg_confidence = float(stats.get("avg_confidence") or 0.0)
+            reject_ratio = float(stats.get("reject_ratio") or 0.0)
+            neutral_ratio = float(stats.get("neutral_ratio") or 0.0)
+            top_reason_ratio = float(stats.get("top_reason_ratio") or 0.0)
+
+            pricing_markers = [
+                "price",
+                "pricing",
+                "fee",
+                "cost",
+                "budget",
+                "afford",
+                "monet",
+                "roi",
+                "سعر",
+                "تسعير",
+                "رسوم",
+                "تكلفة",
+                "ميزانية",
+                "يدفع",
+            ]
+            trust_markers = [
+                "trust",
+                "privacy",
+                "safe",
+                "safety",
+                "risk",
+                "compliance",
+                "legal",
+                "policy",
+                "unsafe",
+                "ثقة",
+                "خصوصية",
+                "أمان",
+                "سلامة",
+                "مخاطر",
+                "قانون",
+                "امتثال",
+            ]
+
+            if low_quality_ratio >= 0.35:
+                return "low_quality_reasoning"
+            if any(marker in combined for marker in pricing_markers):
+                return "pricing_challenge"
+            if any(marker in combined for marker in trust_markers):
+                return "trust_objection"
+            if avg_confidence and avg_confidence < 0.45:
+                return "low_confidence_decision"
+            if reject_ratio >= 0.55 and top_reason_ratio >= 0.45:
+                return "unresolved_objection"
+            if neutral_ratio >= 0.50 and top_reason_ratio >= 0.40:
+                return "low_confidence_decision"
+            return "evidence_gap"
+
+        def _court_confidence_snapshot(gate_stats: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+            stats = gate_stats if isinstance(gate_stats, dict) else {}
+            return {
+                "evidence_score": float((overall_evidence_summary or {}).get("score") or 0.0),
+                "direct_count": int((overall_evidence_summary or {}).get("direct_count") or 0),
+                "derived_count": int((overall_evidence_summary or {}).get("derived_count") or 0),
+                "estimate_count": int((overall_evidence_summary or {}).get("estimate_count") or 0),
+                "proxy_ratio": float((overall_evidence_summary or {}).get("proxy_ratio") or 0.0),
+                "contradiction_count": int(
+                    stats.get("contradiction_count")
+                    or (overall_evidence_summary or {}).get("contradiction_count")
+                    or 0
+                ),
+                "domain_diversity": float((overall_evidence_summary or {}).get("domain_diversity") or 0.0),
+                "reject_ratio": float(stats.get("reject_ratio") or 0.0),
+                "neutral_ratio": float(stats.get("neutral_ratio") or 0.0),
+                "focus_ratio": float(stats.get("focus_ratio") or 0.0),
+                "top_reason_ratio": float(stats.get("top_reason_ratio") or 0.0),
+                "fallback_issue_ratio": float(stats.get("fallback_issue_ratio") or 0.0),
+                "avg_confidence": float(stats.get("avg_confidence") or 0.0),
+                "low_quality_ratio": float(stats.get("low_quality_ratio") or 0.0),
+            }
+
         async def _generate_clarification_payload(
             *,
             reason_tag: str,
@@ -1737,15 +1831,25 @@ class SimulationEngine:
                     "neutral": int(gate_stats.get("neutral_count") or 0),
                     "total_window": int(gate_stats.get("total_window") or 0),
                 }
+            case_type = str(
+                (gate_stats or {}).get("case_type")
+                or _court_case_type(reason_tag=reason_tag, snippets=snippets, gate_stats=gate_stats)
+            ).strip() or "evidence_gap"
+            confidence_snapshot = (gate_stats or {}).get("confidence_snapshot")
+            if not isinstance(confidence_snapshot, dict):
+                confidence_snapshot = _court_confidence_snapshot(gate_stats)
             return {
                 "question_id": uuid.uuid4().hex[:12],
                 "question": question,
                 "options": options[:3],
                 "reason_tag": reason_tag,
                 "reason_summary": summary_text or reason_summary,
+                "mode": "court",
+                "case_type": case_type,
                 "decision_axis": decision_axis,
                 "affected_agents": affected_agents or None,
                 "supporting_snippets": supporting_snippets,
+                "confidence_snapshot": confidence_snapshot,
                 "question_quality": {
                     "score": quality_score,
                     "checks_passed": checks_passed,
@@ -1816,6 +1920,37 @@ class SimulationEngine:
             if fallback_counter:
                 dominant_fallback_reason, dominant_fallback_count = fallback_counter.most_common(1)[0]
                 dominant_fallback_ratio = dominant_fallback_count / max(1, len(unresolved_fallback_hits))
+            confidences = [
+                float(item.get("confidence") or 0.0)
+                for item in focus_items
+                if item.get("confidence") is not None
+            ]
+            avg_confidence = (sum(confidences) / len(confidences)) if confidences else 0.0
+            low_quality_hits = sum(1 for item in focus_items if bool(item.get("low_quality_reasoning")))
+            low_quality_ratio = low_quality_hits / max(1, len(focus_items))
+            evidence_summaries = [
+                item.get("evidence_summary")
+                for item in focus_items
+                if isinstance(item.get("evidence_summary"), dict)
+            ]
+            contradiction_count = max(
+                [int(item.get("contradiction_count") or 0) for item in evidence_summaries] or [0]
+            )
+            proxy_ratio = (
+                sum(float(item.get("proxy_ratio") or 0.0) for item in evidence_summaries) / len(evidence_summaries)
+                if evidence_summaries
+                else float((overall_evidence_summary or {}).get("proxy_ratio") or 0.0)
+            )
+            direct_ratio = (
+                sum(float(item.get("direct_ratio") or 0.0) for item in evidence_summaries) / len(evidence_summaries)
+                if evidence_summaries
+                else float((overall_evidence_summary or {}).get("direct_ratio") or 0.0)
+            )
+            estimate_ratio = (
+                sum(float(item.get("estimate_ratio") or 0.0) for item in evidence_summaries) / len(evidence_summaries)
+                if evidence_summaries
+                else float((overall_evidence_summary or {}).get("estimate_ratio") or 0.0)
+            )
 
             reject_neutral_convergence = (
                 reject_ratio >= 0.55
@@ -1885,6 +2020,33 @@ class SimulationEngine:
                     _clip_text(str(item.get("message") or ""), 220)
                     for item in focus_items[-3:]
                 ]
+            case_type = _court_case_type(
+                reason_tag=top_reason_tag,
+                snippets=representative,
+                gate_stats={
+                    "dominant_fallback_reason": dominant_fallback_reason or None,
+                    "avg_confidence": avg_confidence,
+                    "reject_ratio": reject_ratio,
+                    "neutral_ratio": neutral_ratio,
+                    "top_reason_ratio": top_reason_ratio,
+                    "low_quality_ratio": low_quality_ratio,
+                },
+            )
+            confidence_snapshot = _court_confidence_snapshot(
+                {
+                    "reject_ratio": reject_ratio,
+                    "neutral_ratio": neutral_ratio,
+                    "focus_ratio": focus_ratio,
+                    "top_reason_ratio": top_reason_ratio,
+                    "fallback_issue_ratio": fallback_issue_ratio,
+                    "avg_confidence": avg_confidence,
+                    "low_quality_ratio": low_quality_ratio,
+                    "contradiction_count": contradiction_count,
+                    "proxy_ratio": proxy_ratio,
+                    "direct_ratio": direct_ratio,
+                    "estimate_ratio": estimate_ratio,
+                }
+            )
             reason_summary = (
                 f"reject_ratio={reject_ratio:.2f}, neutral_ratio={neutral_ratio:.2f}, "
                 f"focus_ratio={focus_ratio:.2f}, fallback_issue_ratio={fallback_issue_ratio:.2f}, "
@@ -1905,6 +2067,14 @@ class SimulationEngine:
                 "fallback_reason_variety": fallback_reason_variety,
                 "dominant_fallback_reason": dominant_fallback_reason or None,
                 "dominant_fallback_ratio": dominant_fallback_ratio,
+                "avg_confidence": avg_confidence,
+                "low_quality_ratio": low_quality_ratio,
+                "contradiction_count": contradiction_count,
+                "proxy_ratio": proxy_ratio,
+                "direct_ratio": direct_ratio,
+                "estimate_ratio": estimate_ratio,
+                "case_type": case_type,
+                "confidence_snapshot": confidence_snapshot,
             }
 
         def _update_word_counts(message: str, counts: Dict[str, int]) -> None:
@@ -4268,6 +4438,10 @@ class SimulationEngine:
                             "reason_tag": reason_tag or "evidence_gap",
                             "fallback_reason": fallback_reason,
                             "message": message,
+                            "confidence": confidence,
+                            "low_quality_reasoning": low_quality_reasoning,
+                            "reasoning_quality_flags": list(reasoning_quality_flags or []),
+                            "evidence_summary": dict(task_evidence_summary or {}) if isinstance(task_evidence_summary, dict) else {},
                         }
                     )
                     gate = _evaluate_clarification_gate(

@@ -1,185 +1,60 @@
-/* MariaDB / XAMPP compatible schema
-   DB: agentic_simulator
-   Charset: utf8mb4
-*/
+/* Minimal research schema for the simulation backend. */
 
 SET NAMES utf8mb4;
 SET time_zone = "+00:00";
+SET FOREIGN_KEY_CHECKS = 0;
 
--- -------------------------
--- Users & Auth
--- -------------------------
-CREATE TABLE IF NOT EXISTS users (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  username VARCHAR(64) NOT NULL UNIQUE,
-  email VARCHAR(128) NULL,
-  password_hash VARCHAR(256) NOT NULL,
-  role VARCHAR(16) NOT NULL DEFAULT 'user',
-  credits DECIMAL(12,2) NOT NULL DEFAULT 0.00,
-  email_verified TINYINT(1) NOT NULL DEFAULT 0,
-  email_verified_at TIMESTAMP NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+DROP TABLE IF EXISTS promo_redemptions;
+DROP TABLE IF EXISTS promo_codes;
+DROP TABLE IF EXISTS daily_token_usage;
+DROP TABLE IF EXISTS daily_usage;
+DROP TABLE IF EXISTS audit_logs;
+DROP TABLE IF EXISTS password_resets;
+DROP TABLE IF EXISTS email_verifications;
+DROP TABLE IF EXISTS refresh_tokens;
+DROP TABLE IF EXISTS sessions;
+DROP TABLE IF EXISTS simulation_token_usage;
+DROP TABLE IF EXISTS simulation_chat_events;
+DROP TABLE IF EXISTS research_steps;
+DROP TABLE IF EXISTS research_sessions;
+DROP TABLE IF EXISTS developer_suite_cases;
+DROP TABLE IF EXISTS developer_suite_runs;
+DROP TABLE IF EXISTS persona_set_personas;
+DROP TABLE IF EXISTS persona_sets;
+DROP TABLE IF EXISTS persona_library_records;
+DROP TABLE IF EXISTS persona_lab_jobs;
+DROP TABLE IF EXISTS guided_workflows;
+DROP TABLE IF EXISTS memory_retrieval_logs;
+DROP TABLE IF EXISTS memory_episodes;
+DROP TABLE IF EXISTS memory_edges;
+DROP TABLE IF EXISTS memory_nodes;
+DROP TABLE IF EXISTS memory_scopes;
+DROP TABLE IF EXISTS research_events;
+DROP TABLE IF EXISTS simulation_events;
+DROP TABLE IF EXISTS users;
 
-CREATE TABLE IF NOT EXISTS sessions (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  user_id BIGINT NOT NULL,
-  token VARCHAR(128) NOT NULL UNIQUE,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  expires_at TIMESTAMP NULL,
-  INDEX idx_sessions_user (user_id),
-  CONSTRAINT fk_sessions_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Refresh tokens for JWT auth
-CREATE TABLE IF NOT EXISTS refresh_tokens (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  user_id BIGINT NOT NULL,
-  token_hash VARCHAR(128) NOT NULL UNIQUE,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  expires_at DATETIME NOT NULL,
-  revoked_at TIMESTAMP NULL,
-  replaced_by VARCHAR(128) NULL,
-  ip_address VARCHAR(64) NULL,
-  user_agent TEXT NULL,
-  INDEX idx_refresh_user (user_id),
-  CONSTRAINT fk_refresh_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Email verification tokens
-CREATE TABLE IF NOT EXISTS email_verifications (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  user_id BIGINT NOT NULL,
-  token_hash VARCHAR(128) NOT NULL UNIQUE,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  expires_at DATETIME NOT NULL,
-  used_at TIMESTAMP NULL,
-  INDEX idx_email_verify_user (user_id),
-  CONSTRAINT fk_email_verify_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Password reset tokens
-CREATE TABLE IF NOT EXISTS password_resets (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  user_id BIGINT NOT NULL,
-  token_hash VARCHAR(128) NOT NULL UNIQUE,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  expires_at DATETIME NOT NULL,
-  used_at TIMESTAMP NULL,
-  INDEX idx_password_reset_user (user_id),
-  CONSTRAINT fk_password_reset_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Audit logs
-CREATE TABLE IF NOT EXISTS audit_logs (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  user_id BIGINT NULL,
-  action VARCHAR(64) NOT NULL,
-  meta JSON NULL,
-  ip_address VARCHAR(64) NULL,
-  user_agent TEXT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_audit_user (user_id),
-  INDEX idx_audit_action (action),
-  CONSTRAINT fk_audit_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Daily usage limit (e.g., 5/day)
-CREATE TABLE IF NOT EXISTS daily_usage (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  user_id BIGINT NOT NULL,
-  usage_date DATE NOT NULL,
-  used_count INT NOT NULL DEFAULT 0,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_daily_usage_user_date (user_id, usage_date),
-  INDEX idx_daily_usage_user (user_id),
-  CONSTRAINT fk_daily_usage_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS daily_token_usage (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  user_id BIGINT NOT NULL,
-  usage_date DATE NOT NULL,
-  used_tokens INT NOT NULL DEFAULT 0,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_daily_tokens_user_date (user_id, usage_date),
-  INDEX idx_daily_tokens_user (user_id),
-  CONSTRAINT fk_daily_tokens_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS app_settings (
-  setting_key VARCHAR(64) PRIMARY KEY,
-  setting_value VARCHAR(255) NOT NULL,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Promo codes that grant credits/attempts
-CREATE TABLE IF NOT EXISTS promo_codes (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  code VARCHAR(64) NOT NULL UNIQUE,
-  bonus_attempts INT NOT NULL DEFAULT 0,
-  max_uses INT NULL,
-  uses INT NOT NULL DEFAULT 0,
-  expires_at TIMESTAMP NULL,
-  is_active TINYINT(1) NOT NULL DEFAULT 1,
-  created_by BIGINT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_promo_active (is_active),
-  CONSTRAINT fk_promo_created_by FOREIGN KEY (created_by)
-    REFERENCES users(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS promo_redemptions (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  promo_code_id BIGINT NOT NULL,
-  user_id BIGINT NOT NULL,
-  redeemed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_promo_user (promo_code_id, user_id),
-  INDEX idx_redemptions_user (user_id),
-  CONSTRAINT fk_redemptions_promo FOREIGN KEY (promo_code_id)
-    REFERENCES promo_codes(id) ON DELETE CASCADE,
-  CONSTRAINT fk_redemptions_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- -------------------------
--- Simulation core tables
--- -------------------------
 CREATE TABLE IF NOT EXISTS simulations (
   simulation_id VARCHAR(36) PRIMARY KEY,
-  user_id BIGINT NULL,
-  seed BIGINT NULL,
   status VARCHAR(24) NOT NULL DEFAULT 'running',
   user_context JSON NULL,
   final_metrics JSON NULL,
   summary TEXT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  ended_at TIMESTAMP NULL,
-  INDEX idx_sim_user (user_id),
-  CONSTRAINT fk_sim_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE SET NULL
+  ended_at TIMESTAMP NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS simulation_token_usage (
+CREATE TABLE IF NOT EXISTS simulation_checkpoints (
   simulation_id VARCHAR(36) PRIMARY KEY,
-  user_id BIGINT NOT NULL,
-  used_tokens INT NOT NULL DEFAULT 0,
-  free_tokens_applied INT NOT NULL DEFAULT 0,
-  credits_charged DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  checkpoint_json LONGTEXT NULL,
+  status VARCHAR(24) NOT NULL DEFAULT 'running',
+  last_error TEXT NULL,
+  status_reason VARCHAR(32) NULL,
+  current_phase_key VARCHAR(64) NULL,
+  phase_progress_pct FLOAT NULL,
+  event_seq BIGINT NULL,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_sim_token_user (user_id),
-  CONSTRAINT fk_sim_token_sim FOREIGN KEY (simulation_id)
-    REFERENCES simulations(simulation_id) ON DELETE CASCADE,
-  CONSTRAINT fk_sim_token_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE CASCADE
+  CONSTRAINT fk_checkpoint_sim FOREIGN KEY (simulation_id)
+    REFERENCES simulations(simulation_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS agents (
@@ -261,338 +136,4 @@ CREATE TABLE IF NOT EXISTS metrics (
     REFERENCES simulations(simulation_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE IF NOT EXISTS memory_scopes (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  scope_key VARCHAR(191) NOT NULL UNIQUE,
-  user_id BIGINT NULL,
-  scope_mode VARCHAR(32) NOT NULL DEFAULT 'cross_run',
-  place_key VARCHAR(128) NOT NULL,
-  audience_key VARCHAR(128) NOT NULL,
-  idea_fingerprint VARCHAR(64) NOT NULL,
-  scope_meta_json JSON NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_memory_scopes_place (place_key),
-  INDEX idx_memory_scopes_audience (audience_key),
-  INDEX idx_memory_scopes_idea (idea_fingerprint),
-  CONSTRAINT fk_memory_scopes_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS memory_nodes (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  scope_id BIGINT NOT NULL,
-  node_key VARCHAR(191) NOT NULL,
-  node_type VARCHAR(64) NOT NULL,
-  label VARCHAR(255) NOT NULL,
-  attrs_json JSON NULL,
-  weight FLOAT NOT NULL DEFAULT 0,
-  first_seen_seq BIGINT NULL,
-  last_seen_seq BIGINT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_memory_nodes_scope_key (scope_id, node_key),
-  INDEX idx_memory_nodes_scope_type (scope_id, node_type),
-  CONSTRAINT fk_memory_nodes_scope FOREIGN KEY (scope_id)
-    REFERENCES memory_scopes(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS memory_edges (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  scope_id BIGINT NOT NULL,
-  edge_key VARCHAR(191) NOT NULL,
-  source_node_key VARCHAR(191) NOT NULL,
-  target_node_key VARCHAR(191) NOT NULL,
-  relation_type VARCHAR(64) NOT NULL,
-  weight FLOAT NOT NULL DEFAULT 0,
-  support_count INT NOT NULL DEFAULT 0,
-  contradiction_count INT NOT NULL DEFAULT 0,
-  attrs_json JSON NULL,
-  first_seen_seq BIGINT NULL,
-  last_seen_seq BIGINT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_memory_edges_scope_key (scope_id, edge_key),
-  INDEX idx_memory_edges_scope_relation (scope_id, relation_type),
-  INDEX idx_memory_edges_source (scope_id, source_node_key),
-  INDEX idx_memory_edges_target (scope_id, target_node_key),
-  CONSTRAINT fk_memory_edges_scope FOREIGN KEY (scope_id)
-    REFERENCES memory_scopes(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS memory_episodes (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  scope_id BIGINT NOT NULL,
-  episode_key VARCHAR(191) NOT NULL,
-  simulation_id VARCHAR(36) NULL,
-  event_seq BIGINT NULL,
-  episode_type VARCHAR(64) NOT NULL,
-  source_node_key VARCHAR(191) NULL,
-  target_node_key VARCHAR(191) NULL,
-  payload_json JSON NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_memory_episodes_scope_key (scope_id, episode_key),
-  INDEX idx_memory_episodes_scope_type (scope_id, episode_type),
-  INDEX idx_memory_episodes_scope_seq (scope_id, event_seq),
-  CONSTRAINT fk_memory_episodes_scope FOREIGN KEY (scope_id)
-    REFERENCES memory_scopes(id) ON DELETE CASCADE,
-  CONSTRAINT fk_memory_episodes_sim FOREIGN KEY (simulation_id)
-    REFERENCES simulations(simulation_id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS memory_retrieval_logs (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  scope_id BIGINT NOT NULL,
-  simulation_id VARCHAR(36) NULL,
-  persona_signature VARCHAR(191) NULL,
-  retrieval_type VARCHAR(64) NOT NULL,
-  query_meta_json JSON NULL,
-  hit_count INT NOT NULL DEFAULT 0,
-  hits_json JSON NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_memory_retrieval_scope_type (scope_id, retrieval_type),
-  INDEX idx_memory_retrieval_sim (simulation_id),
-  CONSTRAINT fk_memory_retrieval_scope FOREIGN KEY (scope_id)
-    REFERENCES memory_scopes(id) ON DELETE CASCADE,
-  CONSTRAINT fk_memory_retrieval_sim FOREIGN KEY (simulation_id)
-    REFERENCES simulations(simulation_id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS simulation_checkpoints (
-  simulation_id VARCHAR(36) PRIMARY KEY,
-  checkpoint_json LONGTEXT NULL,
-  status VARCHAR(24) NOT NULL DEFAULT 'running',
-  last_error TEXT NULL,
-  status_reason VARCHAR(32) NULL,
-  current_phase_key VARCHAR(64) NULL,
-  phase_progress_pct FLOAT NULL,
-  event_seq BIGINT NULL,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  CONSTRAINT fk_checkpoint_sim FOREIGN KEY (simulation_id)
-    REFERENCES simulations(simulation_id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS research_events (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  simulation_id VARCHAR(36) NOT NULL,
-  event_seq BIGINT NULL,
-  cycle_id VARCHAR(64) NULL,
-  url TEXT NULL,
-  domain VARCHAR(255) NULL,
-  favicon_url VARCHAR(1024) NULL,
-  action VARCHAR(32) NULL,
-  status VARCHAR(24) NULL,
-  title VARCHAR(512) NULL,
-  http_status INT NULL,
-  content_chars INT NULL,
-  relevance_score FLOAT NULL,
-  snippet TEXT NULL,
-  error TEXT NULL,
-  meta_json JSON NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_research_events_sim (simulation_id),
-  INDEX idx_research_events_seq (simulation_id, event_seq),
-  CONSTRAINT fk_research_events_sim FOREIGN KEY (simulation_id)
-    REFERENCES simulations(simulation_id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS simulation_chat_events (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  simulation_id VARCHAR(36) NOT NULL,
-  event_seq BIGINT NOT NULL,
-  message_id VARCHAR(64) NOT NULL,
-  role VARCHAR(16) NOT NULL,
-  content LONGTEXT NOT NULL,
-  meta_json JSON NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_chat_events_sim_seq (simulation_id, event_seq),
-  UNIQUE KEY uq_chat_events_sim_msg (simulation_id, message_id),
-  CONSTRAINT fk_chat_events_sim FOREIGN KEY (simulation_id)
-    REFERENCES simulations(simulation_id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS guided_workflows (
-  workflow_id VARCHAR(36) PRIMARY KEY,
-  user_id BIGINT NULL,
-  status VARCHAR(24) NOT NULL DEFAULT 'awaiting_input',
-  current_stage VARCHAR(64) NOT NULL DEFAULT 'context_scope',
-  state_json LONGTEXT NOT NULL,
-  attached_simulation_id VARCHAR(36) NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_guided_workflows_user (user_id),
-  INDEX idx_guided_workflows_stage (current_stage),
-  INDEX idx_guided_workflows_sim (attached_simulation_id),
-  CONSTRAINT fk_guided_workflows_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE SET NULL,
-  CONSTRAINT fk_guided_workflows_sim FOREIGN KEY (attached_simulation_id)
-    REFERENCES simulations(simulation_id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS persona_lab_jobs (
-  job_id VARCHAR(36) PRIMARY KEY,
-  user_id BIGINT NULL,
-  status VARCHAR(24) NOT NULL DEFAULT 'queued',
-  current_stage VARCHAR(64) NOT NULL DEFAULT 'preparing_request',
-  final_saved_set_id BIGINT NULL,
-  state_json LONGTEXT NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_persona_lab_jobs_user (user_id),
-  INDEX idx_persona_lab_jobs_stage (current_stage),
-  INDEX idx_persona_lab_jobs_saved_set (final_saved_set_id),
-  CONSTRAINT fk_persona_lab_jobs_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE SET NULL,
-  CONSTRAINT fk_persona_lab_jobs_saved_set FOREIGN KEY (final_saved_set_id)
-    REFERENCES persona_sets(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS persona_library_records (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  user_id BIGINT NULL,
-  place_key VARCHAR(191) NOT NULL,
-  place_label VARCHAR(255) NOT NULL,
-  scope VARCHAR(32) NOT NULL DEFAULT 'global',
-  source_policy VARCHAR(32) NOT NULL DEFAULT 'open_socials',
-  persona_count INT NOT NULL DEFAULT 0,
-  payload_json LONGTEXT NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_persona_library_user_place (user_id, place_key),
-  INDEX idx_persona_library_place (place_key),
-  CONSTRAINT fk_persona_library_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS persona_sets (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  set_key VARCHAR(191) NOT NULL UNIQUE,
-  creator_user_id BIGINT NULL,
-  place_key VARCHAR(191) NULL,
-  place_label VARCHAR(255) NULL,
-  audience_key VARCHAR(191) NOT NULL DEFAULT '',
-  audience_filters_json JSON NULL,
-  scope VARCHAR(32) NOT NULL DEFAULT 'shared',
-  shared_asset TINYINT(1) NOT NULL DEFAULT 1,
-  source_mode VARCHAR(48) NOT NULL,
-  context_type VARCHAR(32) NULL,
-  source_summary TEXT NULL,
-  evidence_summary_json JSON NULL,
-  generation_config_json JSON NULL,
-  quality_score FLOAT NULL,
-  confidence_score FLOAT NULL,
-  quality_meta_json JSON NULL,
-  validation_meta_json JSON NULL,
-  reusable_dataset_ref VARCHAR(191) NULL,
-  persona_count INT NOT NULL DEFAULT 0,
-  payload_json LONGTEXT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_persona_sets_place (place_key),
-  INDEX idx_persona_sets_audience (audience_key),
-  INDEX idx_persona_sets_created (created_at),
-  INDEX idx_persona_sets_count (persona_count),
-  CONSTRAINT fk_persona_sets_creator FOREIGN KEY (creator_user_id)
-    REFERENCES users(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS persona_set_personas (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  persona_set_id BIGINT NOT NULL,
-  persona_uid VARCHAR(64) NOT NULL,
-  display_name VARCHAR(255) NOT NULL,
-  source_mode VARCHAR(48) NOT NULL,
-  target_audience_cluster VARCHAR(191) NOT NULL,
-  location_context VARCHAR(255) NULL,
-  age_band VARCHAR(64) NOT NULL,
-  life_stage VARCHAR(64) NOT NULL,
-  profession_role VARCHAR(191) NOT NULL,
-  attitude_baseline VARCHAR(191) NOT NULL,
-  skepticism_level FLOAT NOT NULL,
-  conformity_level FLOAT NOT NULL,
-  stubbornness_level FLOAT NOT NULL,
-  innovation_openness FLOAT NOT NULL,
-  financial_sensitivity FLOAT NOT NULL,
-  speaking_style VARCHAR(191) NOT NULL,
-  main_concerns_json JSON NULL,
-  probable_motivations_json JSON NULL,
-  influence_weight FLOAT NOT NULL,
-  tags_json JSON NULL,
-  category_id VARCHAR(64) NULL,
-  template_id VARCHAR(64) NULL,
-  archetype_name VARCHAR(191) NULL,
-  summary TEXT NULL,
-  location VARCHAR(255) NULL,
-  opinion VARCHAR(16) NULL,
-  confidence FLOAT NULL,
-  traits_json JSON NULL,
-  biases_json JSON NULL,
-  opinion_score FLOAT NULL,
-  source_attribution_json JSON NULL,
-  evidence_signals_json JSON NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_persona_set_persona_uid (persona_set_id, persona_uid),
-  INDEX idx_persona_set_personas_set (persona_set_id),
-  INDEX idx_persona_set_personas_cluster (target_audience_cluster),
-  CONSTRAINT fk_persona_set_personas_set FOREIGN KEY (persona_set_id)
-    REFERENCES persona_sets(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS developer_suite_runs (
-  id VARCHAR(36) PRIMARY KEY,
-  user_id BIGINT NOT NULL,
-  status VARCHAR(16) NOT NULL DEFAULT 'running',
-  config_json JSON NULL,
-  result_json JSON NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  ended_at TIMESTAMP NULL,
-  INDEX idx_dev_suite_runs_user_created (user_id, created_at),
-  CONSTRAINT fk_dev_suite_runs_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS developer_suite_cases (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  suite_id VARCHAR(36) NOT NULL,
-  case_key VARCHAR(32) NOT NULL,
-  simulation_id VARCHAR(36) NULL,
-  expected_json JSON NULL,
-  actual_json JSON NULL,
-  status VARCHAR(16) NOT NULL DEFAULT 'pending',
-  pass TINYINT(1) NULL,
-  failure_reason TEXT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_dev_suite_case (suite_id, case_key),
-  INDEX idx_dev_suite_cases_suite (suite_id),
-  CONSTRAINT fk_dev_suite_cases_run FOREIGN KEY (suite_id)
-    REFERENCES developer_suite_runs(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- -------------------------
--- Research (Agent-style) optional tables
--- -------------------------
-CREATE TABLE IF NOT EXISTS research_sessions (
-  id VARCHAR(36) PRIMARY KEY,
-  user_id BIGINT NULL,
-  query TEXT NOT NULL,
-  location_text TEXT NULL,
-  result_payload JSON NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_research_user (user_id),
-  CONSTRAINT fk_research_user FOREIGN KEY (user_id)
-    REFERENCES users(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE IF NOT EXISTS research_steps (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  research_session_id VARCHAR(36) NOT NULL,
-  step_type VARCHAR(32) NOT NULL,
-  message TEXT NOT NULL,
-  payload JSON NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_rsteps_session (research_session_id),
-  CONSTRAINT fk_rsteps_session FOREIGN KEY (research_session_id)
-    REFERENCES research_sessions(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+SET FOREIGN_KEY_CHECKS = 1;

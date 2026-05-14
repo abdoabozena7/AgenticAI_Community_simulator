@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import json
 from datetime import datetime
-from io import StringIO
 from typing import Any, Dict, List, Optional
 
 from ..core import db as db_core
@@ -33,12 +31,11 @@ class SimulationRepository:
         )
 
     async def finalize_run(self, state: OrchestrationState) -> None:
-        ended_at = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
         await db_core.update_simulation(
             simulation_id=state.simulation_id,
             status=state.status,
             summary=state.summary,
-            ended_at=ended_at,
+            ended_at=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
             final_metrics=state.metrics,
         )
         await self.save_state(state)
@@ -53,21 +50,23 @@ class SimulationRepository:
             payload.setdefault("current_phase", checkpoint.get("current_phase_key"))
             payload.setdefault("event_seq", checkpoint.get("event_seq"))
             return hydrate_state(payload)
+
         snapshot = await db_core.fetch_simulation_snapshot(simulation_id)
         if not snapshot:
             return None
-        payload = {
-            "simulation_id": simulation_id,
-            "user_context": snapshot.get("user_context") or {},
-            "status": snapshot.get("status") or "running",
-            "status_reason": snapshot.get("status_reason") or "running",
-            "current_phase": snapshot.get("current_phase_key") or "idea_intake",
-            "metrics": snapshot.get("metrics") or {},
-            "summary": snapshot.get("summary") or "",
-            "summary_ready": bool(snapshot.get("summary_ready")),
-            "event_seq": int(snapshot.get("event_seq") or 0),
-        }
-        return hydrate_state(payload)
+        return hydrate_state(
+            {
+                "simulation_id": simulation_id,
+                "user_context": snapshot.get("user_context") or {},
+                "status": snapshot.get("status") or "running",
+                "status_reason": snapshot.get("status_reason") or "running",
+                "current_phase": snapshot.get("current_phase_key") or "idea_intake",
+                "metrics": snapshot.get("metrics") or {},
+                "summary": snapshot.get("summary") or "",
+                "summary_ready": bool(snapshot.get("summary_ready")),
+                "event_seq": int(snapshot.get("event_seq") or 0),
+            }
+        )
 
     async def persist_personas(self, simulation_id: str, agents: List[Dict[str, Any]]) -> None:
         await db_core.insert_agents(simulation_id, agents)
@@ -121,23 +120,7 @@ class SimulationRepository:
         await db_core.insert_reasoning_step(simulation_id, row)
 
     async def persist_research_event(self, simulation_id: str, event_seq: int, payload: Dict[str, Any]) -> None:
-        record = {
-            "event_seq": event_seq,
-            "cycle_id": payload.get("cycle_id"),
-            "url": payload.get("url"),
-            "domain": payload.get("domain"),
-            "favicon_url": payload.get("favicon_url"),
-            "action": payload.get("action") or payload.get("type"),
-            "status": payload.get("status") or "ok",
-            "title": payload.get("title"),
-            "http_status": payload.get("http_status"),
-            "content_chars": payload.get("content_chars"),
-            "relevance_score": payload.get("relevance_score"),
-            "snippet": payload.get("snippet"),
-            "error": payload.get("error"),
-            "meta_json": payload.get("meta") or {},
-        }
-        await db_core.insert_research_event(simulation_id, record)
+        del simulation_id, event_seq, payload
 
     async def persist_simulation_event(
         self,
@@ -150,23 +133,10 @@ class SimulationRepository:
         step_uid: Optional[str] = None,
         actor: Optional[str] = None,
     ) -> None:
-        await db_core.insert_simulation_event(
-            simulation_id,
-            {
-                "event_seq": event_seq,
-                "phase": phase,
-                "event_type": event_type,
-                "step_uid": step_uid,
-                "actor": actor,
-                "payload_json": payload,
-            },
-        )
+        del simulation_id, event_seq, phase, event_type, payload, step_uid, actor
 
     async def persist_metrics(self, simulation_id: str, metrics: Dict[str, Any]) -> None:
         await db_core.insert_metrics(simulation_id, metrics)
-
-    async def fetch_owner(self, simulation_id: str) -> Optional[int]:
-        return await db_core.get_simulation_owner(simulation_id)
 
     async def fetch_transcript(self, simulation_id: str) -> List[Dict[str, Any]]:
         return await db_core.fetch_transcript(simulation_id)
@@ -188,99 +158,6 @@ class SimulationRepository:
             page_size=page_size,
         )
 
-    async def fetch_research_events(self, simulation_id: str) -> List[Dict[str, Any]]:
-        return await db_core.fetch_research_events(simulation_id)
-
-    async def fetch_chat_events(self, simulation_id: str) -> List[Dict[str, Any]]:
-        return await db_core.fetch_chat_events(simulation_id)
-
-    async def fetch_event_log(
-        self,
-        simulation_id: str,
-        *,
-        phase: Optional[str] = None,
-        event_type: Optional[str] = None,
-        limit: int = 500,
-    ) -> List[Dict[str, Any]]:
-        return await db_core.fetch_simulation_events(
-            simulation_id,
-            phase=phase,
-            event_type=event_type,
-            limit=limit,
-        )
-
-    async def count_event_log(self, simulation_id: str) -> int:
-        return await db_core.count_simulation_events(simulation_id)
-
-    async def export_event_log(
-        self,
-        simulation_id: str,
-        *,
-        format: str = "json",
-        phase: Optional[str] = None,
-        event_type: Optional[str] = None,
-        limit: int = 5000,
-    ) -> str:
-        items = await self.fetch_event_log(
-            simulation_id,
-            phase=phase,
-            event_type=event_type,
-            limit=limit,
-        )
-        if str(format or "").strip().lower() == "ndjson":
-            buffer = StringIO()
-            for item in items:
-                buffer.write(json.dumps(item, ensure_ascii=False))
-                buffer.write("\n")
-            return buffer.getvalue()
-        return json.dumps(items, ensure_ascii=False, indent=2)
-
-    async def list_runs(
-        self,
-        *,
-        user_id: Optional[int],
-        include_all: bool,
-        limit: int,
-        offset: int,
-    ) -> List[Dict[str, Any]]:
-        rows = await db_core.fetch_simulations(
-            user_id=user_id,
-            include_all=include_all,
-            limit=limit,
-            offset=offset,
-        )
-        items: List[Dict[str, Any]] = []
-        for row in rows:
-            context = row.get("user_context") or {}
-            if isinstance(context, str):
-                try:
-                    context = json.loads(context)
-                except Exception:
-                    context = {}
-            metrics = row.get("final_metrics") or {}
-            if isinstance(metrics, str):
-                try:
-                    metrics = json.loads(metrics)
-                except Exception:
-                    metrics = {}
-            items.append(
-                {
-                    "simulation_id": row.get("simulation_id"),
-                    "status": row.get("status") or "running",
-                    "idea": context.get("idea") or "",
-                    "category": context.get("category") or "",
-                    "summary": row.get("summary") or "",
-                    "created_at": row.get("created_at"),
-                    "ended_at": row.get("ended_at"),
-                    "acceptance_rate": metrics.get("acceptance_rate"),
-                    "total_agents": metrics.get("total_agents"),
-                }
-            )
-        return items
-
-    async def count_runs(self, *, user_id: Optional[int], include_all: bool) -> int:
-        return await db_core.count_simulations(user_id=user_id, include_all=include_all)
-
     async def fetch_persona_library_record(
         self,
         *,
@@ -289,12 +166,8 @@ class SimulationRepository:
         audience_filters: Optional[List[str]] = None,
         source_mode: Optional[str] = None,
     ) -> Optional[Dict[str, Any]]:
-        return await db_core.fetch_persona_library_record(
-            user_id=user_id,
-            place_key=place_key,
-            audience_filters=audience_filters,
-            source_mode=source_mode,
-        )
+        del user_id, place_key, audience_filters, source_mode
+        return None
 
     async def upsert_persona_library_record(
         self,
@@ -317,25 +190,7 @@ class SimulationRepository:
         context_type: Optional[str] = None,
         shared_asset: bool = True,
     ) -> None:
-        await db_core.upsert_persona_library_record(
-            user_id=user_id,
-            place_key=place_key,
-            place_label=place_label,
-            scope=scope,
-            source_policy=source_policy,
-            payload=payload,
-            audience_filters=audience_filters,
-            source_summary=source_summary,
-            evidence_summary=evidence_summary,
-            generation_config=generation_config,
-            quality_score=quality_score,
-            confidence_score=confidence_score,
-            quality_meta=quality_meta,
-            validation_meta=validation_meta,
-            reusable_dataset_ref=reusable_dataset_ref,
-            context_type=context_type,
-            shared_asset=shared_asset,
-        )
+        del user_id, place_key, place_label, scope, source_policy, payload, audience_filters, source_summary, evidence_summary, generation_config, quality_score, confidence_score, quality_meta, validation_meta, reusable_dataset_ref, context_type, shared_asset
 
     async def list_persona_library_records(
         self,
@@ -349,16 +204,8 @@ class SimulationRepository:
         max_count: Optional[int] = None,
         limit: int = 10,
     ) -> List[Dict[str, Any]]:
-        return await db_core.list_persona_library_records(
-            user_id=user_id,
-            place_query=place_query,
-            audience=audience,
-            date_from=date_from,
-            date_to=date_to,
-            min_count=min_count,
-            max_count=max_count,
-            limit=limit,
-        )
+        del user_id, place_query, audience, date_from, date_to, min_count, max_count, limit
+        return []
 
     async def fetch_persona_library_record_by_set_key(
         self,
@@ -366,7 +213,5 @@ class SimulationRepository:
         user_id: Optional[int],
         set_key: str,
     ) -> Optional[Dict[str, Any]]:
-        return await db_core.fetch_persona_library_record_by_set_key(
-            user_id=user_id,
-            set_key=set_key,
-        )
+        del user_id, set_key
+        return None

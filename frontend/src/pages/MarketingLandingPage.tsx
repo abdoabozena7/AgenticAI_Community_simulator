@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState, type CSSProperties } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, type CSSProperties } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -14,7 +14,6 @@ import { FeaturesSection } from '@/components/landing/FeaturesSection';
 import { PricingSection } from '@/components/landing/PricingSection';
 import { CTASection } from '@/components/landing/CTASection';
 import { FooterSection } from '@/components/landing/FooterSection';
-import { AuthModal } from '@/components/landing/AuthModal';
 import { isLandingOnlyMode } from '@/lib/runtime';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -22,10 +21,8 @@ gsap.registerPlugin(ScrollTrigger);
 const MarketingLandingPage = () => {
   const { isRTL } = useLanguage();
   const { theme } = useTheme();
-  const location = useLocation();
   const navigate = useNavigate();
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('register');
+
   const scrollToPricing = () => {
     document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -90,37 +87,16 @@ const MarketingLandingPage = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (isLandingOnlyMode) return;
-    const params = new URLSearchParams(location.search);
-    const auth = params.get('auth');
-    if (auth === 'login' || auth === 'register') {
-      setAuthMode(auth);
-      setIsAuthOpen(true);
-      navigate(location.pathname, { replace: true });
-    }
-  }, [location.pathname, location.search, navigate]);
-
-  const handleOpenAuth = (mode: 'login' | 'register') => {
+  const handleProjectEntry = () => {
     if (isLandingOnlyMode) {
       scrollToPricing();
       return;
     }
-    setAuthMode(mode);
-    setIsAuthOpen(true);
+    navigate('/simulate');
   };
 
   const handleGetStarted = () => {
-    if (isLandingOnlyMode) {
-      scrollToPricing();
-      return;
-    }
-    try {
-      localStorage.setItem('postLoginRedirect', '/dashboard');
-    } catch {
-      // ignore
-    }
-    handleOpenAuth('register');
+    handleProjectEntry();
   };
 
   return (
@@ -130,7 +106,7 @@ const MarketingLandingPage = () => {
     >
       <div className="relative z-10">
         <Navbar
-          onLogin={() => handleOpenAuth('login')}
+          onLogin={handleProjectEntry}
           onRegister={handleGetStarted}
         />
 
@@ -151,14 +127,6 @@ const MarketingLandingPage = () => {
         <CTASection onGetStarted={handleGetStarted} />
 
         <FooterSection />
-
-        {!isLandingOnlyMode && (
-          <AuthModal
-            isOpen={isAuthOpen}
-            onClose={() => setIsAuthOpen(false)}
-            initialMode={authMode}
-          />
-        )}
       </div>
     </div>
   );

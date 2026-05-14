@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { TextDecoder } from 'node:util';
 
 const decoder = new TextDecoder('utf-8', { fatal: true });
@@ -15,7 +15,8 @@ function listFiles() {
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean)
-    .filter((path) => allowedExt.test(path));
+    .filter((path) => allowedExt.test(path))
+    .filter((path) => existsSync(`${process.cwd().endsWith('frontend') ? '..' : process.cwd()}/${path}`));
 }
 
 function main() {

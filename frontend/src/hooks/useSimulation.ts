@@ -1,6 +1,6 @@
 ﻿import { useState, useCallback, useEffect, useReducer, useRef } from 'react';
 import { websocketService, WebSocketEvent, MetricsEvent, ReasoningStepEvent, ReasoningDebugEvent, AgentsEvent } from '@/services/websocket';
-import { apiService, clearAuthTokens, getRealtimeBaseUrl, SimulationConfig, SimulationStateResponse } from '@/services/api';
+import { apiService, getRealtimeBaseUrl, SimulationConfig, SimulationStateResponse } from '@/services/api';
 import { Agent, ReasoningMessage, ReasoningDebug, SimulationMetrics, SimulationStatus, SimulationChatEvent, PendingClarification, PendingResearchReview, CoachIntervention, SimulationPipeline, SimulationPersonaSource } from '@/types/simulation';
 import type { SearchLiveEvent } from '@/lib/searchPanelModel';
 
@@ -814,39 +814,33 @@ export function useSimulation(options?: UseSimulationOptions) {
     clearPolling();
     websocketService.setSimulationSubscription(null);
     websocketService.disconnect();
-    clearAuthTokens();
     if (typeof window !== 'undefined') {
       window.localStorage.removeItem(ACTIVE_SIMULATION_KEY);
     }
     dispatch({ type: 'RESET' });
-    setError('Session expired. Please log in again.');
+    setError('Realtime connection was lost.');
     dispatch({ type: 'SET_STATUS', payload: 'error' });
     dispatch({ type: 'SET_STATUS_REASON', payload: 'error' });
     dispatch({
       type: 'SET_RESUME_META',
       payload: {
         canResume: false,
-        resumeReason: 'Session expired. Please log in again.',
+        resumeReason: 'Realtime connection was lost.',
       },
     });
   }, [clearPolling]);
 
   const ensureSocketConnection = useCallback(async () => {
     const wsBase = getRealtimeBaseUrl();
-    const token = await apiService.ensureAccessTokenFresh(45);
-    if (!token) {
-      handleUnauthorizedState();
-      throw new Error('Unauthorized');
-    }
     const wsUrl = wsBase
       .replace(/^http/, 'ws')
-      .replace(/\/$/, '') + `/ws/simulation${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+      .replace(/\/$/, '') + '/ws/simulation';
     if (!websocketService.isConnected()) {
       try {
         await websocketService.connect(wsUrl);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err || '');
-        if (/401|unauthorized|1008/i.test(message)) {
+        if (/1008/i.test(message)) {
           handleUnauthorizedState();
         }
         throw err;
@@ -855,17 +849,8 @@ export function useSimulation(options?: UseSimulationOptions) {
   }, [handleUnauthorizedState]);
 
   const fetchSimulationStateSafe = useCallback(async (simulationId: string) => {
-    try {
-      return await apiService.getSimulationState(simulationId);
-    } catch (err) {
-      const status = (err as Error & { status?: number }).status;
-      if (status === 401) {
-        handleUnauthorizedState();
-        return null;
-      }
-      throw err;
-    }
-  }, [handleUnauthorizedState]);
+    return await apiService.getSimulationState(simulationId);
+  }, []);
 
   const applyStateResponse = useCallback((stateResponse: SimulationStateResponse, options?: { appendReasoning?: boolean }) => {
     const responseSimulationId = typeof stateResponse.simulation_id === 'string'
@@ -1768,145 +1753,6 @@ export function useSimulation(options?: UseSimulationOptions) {
     return response;
   }, [applyStateResponse, clearPolling, fetchSimulationStateSafe, mapBackendStatus]);
 
-  const submitResearchAction = useCallback(async (payload: {
-    simulationId: string;
-    cycleId: string;
-    action: 'scrape_selected' | 'continue_search' | 'cancel_review';
-    selectedUrlIds?: string[];
-    addedUrls?: string[];
-    queryRefinement?: string;
-    researchGateVersion?: number;
-  }) => {
-    const simulationId = payload.simulationId?.trim();
-    if (!simulationId) return null;
-    const opEpoch = requestEpochRef.current + 1;
-    requestEpochRef.current = opEpoch;
-    setError(null);
-    dispatch({ type: 'SET_STATUS', payload: 'configuring' });
-    await ensureSocketConnection();
-    if (requestEpochRef.current !== opEpoch) return null;
-    websocketService.setSimulationSubscription(simulationId);
-    const response = await apiService.submitResearchAction({
-      simulation_id: simulationId,
-      cycle_id: payload.cycleId,
-      action: payload.action,
-      selected_url_ids: payload.selectedUrlIds,
-      added_urls: payload.addedUrls,
-      query_refinement: payload.queryRefinement,
-      research_gate_version: payload.researchGateVersion,
-    });
-    if (requestEpochRef.current !== opEpoch) return response;
-    const snapshot = await fetchSimulationStateSafe(simulationId).catch(() => null);
-    if (snapshot && (!snapshot.simulation_id || snapshot.simulation_id === simulationId)) {
-      applyStateResponse(snapshot);
-      if (snapshot.status === 'running') beginPolling(simulationId, opEpoch);
-      else clearPolling();
-    } else {
-      dispatch({ type: 'SET_STATUS', payload: mapBackendStatus(response.status) });
-      dispatch({ type: 'SET_STATUS_REASON', payload: response.status_reason ?? null });
-      if (response.status === 'running') beginPolling(simulationId, opEpoch);
-      else clearPolling();
-    }
-    return response;
-  }, [applyStateResponse, beginPolling, clearPolling, ensureSocketConnection, fetchSimulationStateSafe, mapBackendStatus]);
-
-  const submitClarificationAnswer = useCallback(async (payload: {
-    simulationId: string;
-    questionId: string;
-    selectedOptionId?: string;
-    customText?: string;
-  }) => {
-    const simulationId = payload.simulationId?.trim();
-    if (!simulationId) return null;
-    const opEpoch = requestEpochRef.current + 1;
-    requestEpochRef.current = opEpoch;
-    setError(null);
-    dispatch({ type: 'SET_STATUS', payload: 'configuring' });
-    const response = await apiService.submitClarificationAnswer({
-      simulation_id: simulationId,
-      question_id: payload.questionId,
-      selected_option_id: payload.selectedOptionId,
-      custom_text: payload.customText,
-    });
-    if (requestEpochRef.current !== opEpoch) return response;
-    dispatch({
-      type: 'SET_CLARIFICATION',
-      payload: {
-        pendingClarification: null,
-        canAnswerClarification: false,
-      },
-    });
-    dispatch({ type: 'SET_STATUS', payload: 'running' });
-    dispatch({ type: 'SET_STATUS_REASON', payload: 'running' });
-    await ensureSocketConnection();
-    if (requestEpochRef.current !== opEpoch) return response;
-    websocketService.setSimulationSubscription(simulationId);
-    const snapshot = await fetchSimulationStateSafe(simulationId).catch(() => null);
-    if (snapshot && (!snapshot.simulation_id || snapshot.simulation_id === simulationId)) {
-      applyStateResponse(snapshot);
-    }
-    beginPolling(simulationId, opEpoch);
-    return response;
-  }, [applyStateResponse, beginPolling, ensureSocketConnection, fetchSimulationStateSafe]);
-
-  const respondToCoachIntervention = useCallback(async (payload: {
-    simulationId: string;
-    interventionId: string;
-    action: 'apply_suggestion' | 'request_more_ideas' | 'continue_without_change' | 'custom_fix';
-    suggestionId?: string;
-    customText?: string;
-  }) => {
-    const simulationId = payload.simulationId?.trim();
-    if (!simulationId) return null;
-    const opEpoch = requestEpochRef.current + 1;
-    requestEpochRef.current = opEpoch;
-    setError(null);
-    if (payload.action === 'continue_without_change') {
-      dispatch({ type: 'SET_STATUS', payload: 'configuring' });
-    }
-    const response = await apiService.respondToCoachIntervention({
-      simulation_id: simulationId,
-      intervention_id: payload.interventionId,
-      action: payload.action,
-      suggestion_id: payload.suggestionId,
-      custom_text: payload.customText,
-    });
-    if (requestEpochRef.current !== opEpoch) return response;
-    if (payload.action === 'continue_without_change') {
-      await ensureSocketConnection();
-      if (requestEpochRef.current !== opEpoch) return response;
-      websocketService.setSimulationSubscription(simulationId);
-    }
-    const snapshot = await fetchSimulationStateSafe(simulationId).catch(() => null);
-    if (snapshot && (!snapshot.simulation_id || snapshot.simulation_id === simulationId)) {
-      applyStateResponse(snapshot);
-      if (snapshot.status === 'running') {
-        beginPolling(simulationId, opEpoch);
-      } else {
-        clearPolling();
-      }
-    } else if (response.coach_intervention) {
-      dispatch({
-        type: 'SET_COACH',
-        payload: {
-          coachIntervention: mapCoachIntervention(response.coach_intervention),
-          coachHistory: Array.isArray(response.coach_history)
-            ? response.coach_history.map((item) => ({
-                interventionId: typeof item?.intervention_id === 'string' ? item.intervention_id : undefined,
-                blockerTag: typeof item?.blocker_tag === 'string' ? item.blocker_tag : undefined,
-                blockerSummary: typeof item?.blocker_summary === 'string' ? item.blocker_summary : undefined,
-                resolution: typeof item?.resolution === 'string' ? item.resolution : null,
-                resolvedAt: typeof item?.resolved_at === 'number' ? item.resolved_at : null,
-              }))
-            : stateRef.current.coachHistory,
-        },
-      });
-      dispatch({ type: 'SET_STATUS', payload: payload.action === 'continue_without_change' ? 'running' : 'paused' });
-      dispatch({ type: 'SET_STATUS_REASON', payload: payload.action === 'continue_without_change' ? 'running' : 'paused_coach_intervention' });
-    }
-    return response;
-  }, [applyStateResponse, beginPolling, clearPolling, ensureSocketConnection, fetchSimulationStateSafe]);
-
   const stopSimulation = useCallback(() => {
     requestEpochRef.current += 1;
     clearPolling();
@@ -1988,9 +1834,6 @@ export function useSimulation(options?: UseSimulationOptions) {
     loadSimulation,
     resumeSimulation,
     pauseSimulation,
-    submitResearchAction,
-    submitClarificationAnswer,
-    respondToCoachIntervention,
     clearResearchSources,
     stopSimulation,
     activePulses: state.activePulses,

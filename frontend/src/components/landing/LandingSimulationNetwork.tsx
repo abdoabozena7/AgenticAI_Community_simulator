@@ -232,7 +232,7 @@ export function LandingSimulationNetwork({ isInView = false }: LandingSimulation
         if (mesh.geometry) {
           mesh.geometry.dispose();
         }
-        const mat: any = mesh.material;
+        const mat = mesh.material as THREE.Material | THREE.Material[] | undefined;
         if (Array.isArray(mat)) {
           mat.forEach((m: THREE.Material) => m.dispose());
         } else if (mat && typeof mat.dispose === 'function') {

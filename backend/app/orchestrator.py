@@ -11,6 +11,7 @@ from .agents.report_agent import ReportAgent
 from .agents.search_agent import SearchAgent
 from .agents.simulation_agent import SimulationAgent
 from .core.dataset_loader import Dataset
+from .core import db as db_core
 from .models.orchestration import (
     ChangeImpact,
     OrchestrationState,
@@ -191,19 +192,122 @@ class SimulationOrchestrator:
             await self.simulation_agent.handle_execution_followup_response(state, answers)
             await self.repository.save_state(state)
             return state
+
+        def _normalized(value: Any) -> str:
+            return " ".join(str(value or "").strip().lower().split())
+
+        async def _pending_court_payload() -> Dict[str, Any]:
+            checkpoint_row = await db_core.fetch_simulation_checkpoint(simulation_id)
+            checkpoint = checkpoint_row.get("checkpoint") if isinstance(checkpoint_row, dict) else {}
+            meta = checkpoint.get("meta") if isinstance(checkpoint, dict) else {}
+            pending = meta.get("pending_clarification") if isinstance(meta, dict) else {}
+            if isinstance(pending, dict):
+                return dict(pending)
+            return {}
+
+        def _resolve_court_option(
+            *,
+            options: List[Dict[str, Any]],
+            selected_option_id: str,
+            answer_text: str,
+        ) -> tuple[Optional[Dict[str, Any]], str]:
+            normalized_answer = _normalized(answer_text)
+            normalized_option_id = _normalized(selected_option_id)
+            for option in options:
+                option_id = str(option.get("id") or "").strip()
+                option_label = str(option.get("label") or "").strip()
+                if normalized_option_id and _normalized(option_id) == normalized_option_id:
+                    return option, "selected_option"
+                if normalized_answer and _normalized(option_id) == normalized_answer:
+                    return option, "selected_option"
+                if normalized_answer and _normalized(option_label) == normalized_answer:
+                    return option, "selected_option"
+            return None, "custom_text"
+
+        pending_court = await _pending_court_payload() if state.pending_input_kind == "clarification" else {}
+        is_pending_court = bool(
+            pending_court
+            and str(pending_court.get("mode") or "").strip().lower() == "court"
+        )
+        if is_pending_court:
+            state.schema["pending_clarification"] = dict(pending_court)
+
         questions_by_id = {question.question_id: question for question in state.clarification_questions}
         resolved_question_ids: List[str] = []
         for answer in answers:
             question_id = str(answer.get("question_id") or answer.get("questionId") or "").strip()
             text = str(answer.get("answer") or answer.get("text") or "").strip()
+            selected_option_id = str(answer.get("selected_option_id") or answer.get("selectedOptionId") or "").strip()
             if not question_id or not text:
                 continue
             question = questions_by_id.get(question_id)
-            if question is None:
+            question_matches_pending_court = bool(
+                is_pending_court
+                and str(pending_court.get("question_id") or "").strip() == question_id
+            )
+            if question is None and not question_matches_pending_court:
                 continue
-            state.clarification_answers[question_id] = text
-            state.user_context[question.field_name] = text
-            state.schema[question.field_name] = text
+            if question_matches_pending_court:
+                options = pending_court.get("options") if isinstance(pending_court.get("options"), list) else []
+                matched_option, ruling_source = _resolve_court_option(
+                    options=[item for item in options if isinstance(item, dict)],
+                    selected_option_id=selected_option_id,
+                    answer_text=text,
+                )
+                matched_option_id = str((matched_option or {}).get("id") or "").strip()
+                matched_option_label = str((matched_option or {}).get("label") or "").strip()
+                decision_axis = str(
+                    pending_court.get("decision_axis")
+                    or (question.field_name if question is not None else "")
+                ).strip()
+                case_type = str(
+                    pending_court.get("case_type")
+                    or pending_court.get("reason_tag")
+                    or ""
+                ).strip() or "evidence_gap"
+                canonical_ruling = matched_option_label or text
+                state.clarification_answers[question_id] = canonical_ruling
+                preflight_answers = state.user_context.get("preflight_answers")
+                if not isinstance(preflight_answers, dict):
+                    preflight_answers = {}
+                if decision_axis:
+                    preflight_answers[decision_axis] = canonical_ruling
+                else:
+                    preflight_answers[question_id] = canonical_ruling
+                state.user_context["preflight_answers"] = preflight_answers
+                court_resolutions = state.schema.get("court_resolutions")
+                if not isinstance(court_resolutions, dict):
+                    court_resolutions = {}
+                resolution_key = decision_axis or question_id
+                court_resolutions[resolution_key] = {
+                    "question_id": question_id,
+                    "mode": "court",
+                    "case_type": case_type,
+                    "decision_axis": decision_axis or None,
+                    "selected_option_id": matched_option_id or selected_option_id or None,
+                    "selected_option_label": matched_option_label or None,
+                    "canonical_ruling": canonical_ruling,
+                    "ruling_source": ruling_source,
+                    "supporting_snippets": [
+                        str(item).strip()
+                        for item in (pending_court.get("supporting_snippets") or [])
+                        if str(item).strip()
+                    ][:3],
+                    "confidence_snapshot": (
+                        dict(pending_court.get("confidence_snapshot") or {})
+                        if isinstance(pending_court.get("confidence_snapshot"), dict)
+                        else {}
+                    ),
+                    "resolved_at": state.updated_at,
+                }
+                state.schema["court_resolutions"] = court_resolutions
+                if question is not None:
+                    state.user_context[question.field_name] = canonical_ruling
+                    state.schema[question.field_name] = canonical_ruling
+            else:
+                state.clarification_answers[question_id] = text
+                state.user_context[question.field_name] = text
+                state.schema[question.field_name] = text
             resolved_question_ids.append(question_id)
         memory_provider = getattr(self, "memory_provider", None)
         if resolved_question_ids and memory_provider is not None:
